@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.5.33502.453
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SoundEffectVolumeBar", "Plugins\SoundEffectVolumeBar.csproj", "{3CB0E055-9386-447C-8A22-46150E8CBEA7}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DifficultyTweak", "DifficultyTweak\DifficultyTweak.csproj", "{BB777C09-8272-4222-A9E4-3A995F0074B2}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{3CB0E055-9386-447C-8A22-46150E8CBEA7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3CB0E055-9386-447C-8A22-46150E8CBEA7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3CB0E055-9386-447C-8A22-46150E8CBEA7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3CB0E055-9386-447C-8A22-46150E8CBEA7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BB777C09-8272-4222-A9E4-3A995F0074B2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BB777C09-8272-4222-A9E4-3A995F0074B2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BB777C09-8272-4222-A9E4-3A995F0074B2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BB777C09-8272-4222-A9E4-3A995F0074B2}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {73BEE407-F7F9-4672-B541-B439DC1D1CF1}
+	EndGlobalSection
+EndGlobal
