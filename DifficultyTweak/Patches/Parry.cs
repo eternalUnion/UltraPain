@@ -88,6 +88,7 @@ namespace DifficultyTweak.Patches
                         GrenadeParriedFlag fFlag = e.gameObject.AddComponent<GrenadeParriedFlag>();
                         fFlag.weapon = flag.weapon;
                         fFlag.grenadeType = GrenadeParriedFlag.GrenadeType.Rocket;
+                        break;
                     }
 
                     __instance.explosion = flag.temporaryExplosion;
@@ -125,6 +126,8 @@ namespace DifficultyTweak.Patches
     [HarmonyPatch("Collision")]
     class Grenade_Collision_Patch
     {
+        static float lastTime = 0;
+
         static bool Prefix(Grenade __instance, Collider __0)
         {
             GrenadeParriedFlag flag = __instance.GetComponent<GrenadeParriedFlag>();
@@ -136,8 +139,9 @@ namespace DifficultyTweak.Patches
                 EnemyIdentifierIdentifier enemyIdentifierIdentifier;
                 if ((__0.gameObject.layer == 11 || __0.gameObject.layer == 10) && __0.TryGetComponent<EnemyIdentifierIdentifier>(out enemyIdentifierIdentifier) && enemyIdentifierIdentifier.eid)
                 {
-                    if (enemyIdentifierIdentifier.eid.enemyType != EnemyType.MaliciousFace && flag.grenadeType == GrenadeParriedFlag.GrenadeType.Core)
+                    if (enemyIdentifierIdentifier.eid.enemyType != EnemyType.MaliciousFace && flag.grenadeType == GrenadeParriedFlag.GrenadeType.Core && (Time.time - lastTime >= 0.25f || lastTime < 0))
                     {
+                        lastTime = Time.time;
                         flag.bigExplosionOverride = true;
                         MonoSingleton<StyleHUD>.Instance.AddPoints(100, Plugin.StyleIDs.fistfulOfNades, MonoSingleton<GunControl>.Instance.currentWeapon, null);
                     }
@@ -152,21 +156,22 @@ namespace DifficultyTweak.Patches
     [HarmonyPatch("Collide")]
     class Explosion_Collide_Patch
     {
+        static float lastTime = 0;
+
         static bool Prefix(Explosion __instance, Collider __0)
         {
             GrenadeParriedFlag flag = __instance.gameObject.GetComponent<GrenadeParriedFlag>();
             if (flag == null || flag.registeredStyle)
                 return true;
 
-            
-
             if (!flag.registeredStyle && __0.gameObject.tag != "Player" && (__0.gameObject.layer == 10 || __0.gameObject.layer == 11)
                 && __instance.canHit != AffectedSubjects.PlayerOnly)
             {
                 EnemyIdentifierIdentifier componentInParent = __0.GetComponentInParent<EnemyIdentifierIdentifier>();
-                if(flag.grenadeType == GrenadeParriedFlag.GrenadeType.Rocket && componentInParent != null && componentInParent.eid != null && !componentInParent.eid.blessed && !componentInParent.eid.dead)
+                if(flag.grenadeType == GrenadeParriedFlag.GrenadeType.Rocket && componentInParent != null && componentInParent.eid != null && !componentInParent.eid.blessed && !componentInParent.eid.dead && (Time.time - lastTime >= 0.25f || lastTime < 0))
                 {
                     flag.registeredStyle = true;
+                    lastTime = Time.time;
                     MonoSingleton<StyleHUD>.Instance.AddPoints(25, Plugin.StyleIDs.rocketBoost, flag.weapon, null);
                 }
             }

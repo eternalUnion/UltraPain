@@ -28,6 +28,23 @@ namespace DifficultyTweak
     [BepInPlugin(PLUGIN_GUID, PLUGIN_NAME, PLUGIN_VERSION)]
     public class Plugin : BaseUnityPlugin
     {
+        public static string bundlePath = Path.Combine(Environment.CurrentDirectory, "ULTRAKILL_Data", "StreamingAssets", "Magenta", "Bundles");
+        public static AssetBundle GetAssetBundle(string name)
+        {
+            AssetManager manager = MonoSingleton<AssetManager>.Instance;
+            AssetBundle bundle = null;
+
+            manager?.loadedBundles.TryGetValue(name, out bundle);
+
+            if (bundle != null)
+                return bundle;
+
+            bundle = AssetBundle.LoadFromFile(Path.Combine(bundlePath, name));
+            MonoSingleton<AssetManager>.Instance?.loadedBundles.Add(name, bundle);
+
+            return bundle;
+        }
+
         public static Plugin instance;
 
         const string PLUGIN_GUID = "com.eternalUnion.ultraPain";
@@ -110,109 +127,39 @@ namespace DifficultyTweak
             }
         }
 
-        private bool DefaultBoolReturn(GameObject o)
-        {
-            return true;
-        }
-
-        List<Tuple<string, GameObjectReference, Func<GameObject, bool>>> _toLoad;
-        List<Tuple<string, GameObjectReference, Func<GameObject, bool>>> toLoad
-        {
-            get
-            {
-                if(_toLoad == null)
-                {
-                    _toLoad = new List<Tuple<string, GameObjectReference, Func<GameObject, bool>>>()
-                    {
-                        new Tuple<string, GameObjectReference, Func<GameObject, bool>>("ProjectileSpread", projectileSpread, DefaultBoolReturn),
-                        new Tuple<string, GameObjectReference, Func<GameObject, bool>>("ProjectileHoming", homingProjectile, DefaultBoolReturn),
-                        new Tuple<string, GameObjectReference, Func<GameObject, bool>>("ProjectileDecorative 2", decorativeProjectile2, DefaultBoolReturn),
-                        new Tuple<string, GameObjectReference, Func<GameObject, bool>>("Grenade", shotgunGrenade, (GameObject o) =>
-                        {
-                            /*CapsuleCollider col = o.GetComponent<CapsuleCollider>();
-                            col.direction = 1;
-                            col.height = 2f;
-                            col.radius = 1f;*/
-
-                            return true;
-                        }),
-                        new Tuple<string, GameObjectReference, Func<GameObject, bool>>("TurretBeam", turretBeam, DefaultBoolReturn),
-                        new Tuple<string, GameObjectReference, Func<GameObject, bool>>("MaliciousBeam", beam, DefaultBoolReturn),
-                        new Tuple<string, GameObjectReference, Func<GameObject, bool>>("LightningStrikeExplosive", lighningStrikeExplosive, DefaultBoolReturn),
-                        new Tuple<string, GameObjectReference, Func<GameObject, bool>>("LightningBoltWindupFollow Variant", lighningStrikeWindup, DefaultBoolReturn),
-
-                        new Tuple<string, GameObjectReference, Func<GameObject, bool>>("Spider", maliciousFace, DefaultBoolReturn),
-                        new Tuple<string, GameObjectReference, Func<GameObject, bool>>("Idol", idol, (GameObject o) =>
-                        {
-                            return o.GetComponent<Idol>() != null;
-                        }),
-                        new Tuple<string, GameObjectReference, Func<GameObject, bool>>("Ferryman", ferryman, (GameObject o) =>
-                        {
-                            return o.GetComponent<Ferryman>() != null;
-                        }),
-                    };
-                }
-
-                return _toLoad;
-            }
-        }
-
-        void OnLoad()
-        {
-            Logger.LogInfo("All prefabs loaded, processing...");
-
-            // Run when all prefabs are found
-        }
-
         public void LoadPrefabs()
         {
-            if (toLoad.Count == 0)
-                return;
+            AssetBundle bundle0 = GetAssetBundle("bundle-0");
+            AssetBundle bundle1 = GetAssetBundle("bundle-1");
+            AssetBundle uhbundle0 = GetAssetBundle("unhardened-bundle-0");
 
-            if (Universe.CurrentGlobalState != Universe.GlobalState.SetupCompleted)
-            {
-                Thread.Sleep(100);
-                Task.Run(LoadPrefabs);
-                return;
-            }
-
-            for (int i = 0; i < toLoad.Count; i++)
-                Resources.Load<GameObject>(toLoad[i].Item1);
-
-            foreach (GameObject o in RuntimeHelper.FindObjectsOfTypeAll<GameObject>())
-            {
-                if (!IsPersistent(o))
-                    continue;
-                for(int i = toLoad.Count - 1; i >= 0; i--)
-                {
-                    if (o.name == toLoad[i].Item1 && toLoad[i].Item3(o))
-                    {
-                        Logger.LogInfo($"Loaded new asset: {o.name}");
-
-                        toLoad[i].Item2.gameObject = o;
-                        toLoad.RemoveAt(i);
-                    }
-                }
-            }
-
-            if (toLoad.Count == 0)
-                OnLoad();
+            //[bundle-0][assets/prefabs/projectilespread.prefab]
+            projectileSpread.gameObject = bundle0.LoadAsset<GameObject>("assets/prefabs/projectilespread.prefab");
+            //[bundle-0][assets/prefabs/projectilehoming.prefab]
+            homingProjectile.gameObject = bundle0.LoadAsset<GameObject>("assets/prefabs/projectilehoming.prefab");
+            //[bundle-1][assets/prefabs/projectiledecorative 2.prefab]
+            decorativeProjectile2.gameObject = bundle1.LoadAsset<GameObject>("assets/prefabs/projectiledecorative 2.prefab");
+            //[bundle-0][assets/prefabs/grenade.prefab]
+            shotgunGrenade.gameObject = bundle0.LoadAsset<GameObject>("assets/prefabs/grenade.prefab");
+            //[bundle-0][assets/prefabs/turretbeam.prefab]
+            turretBeam.gameObject = bundle0.LoadAsset<GameObject>("assets/prefabs/turretbeam.prefab");
+            //[bundle-0][assets/prefabs/dronemaliciousbeam.prefab]
+            beam.gameObject = bundle0.LoadAsset<GameObject>("assets/prefabs/dronemaliciousbeam.prefab");
+            //[unhardened-bundle-0][assets/prefabs/lightningstrikeexplosive.prefab]
+            lighningStrikeExplosive.gameObject = uhbundle0.LoadAsset<GameObject>("assets/prefabs/lightningstrikeexplosive.prefab");
+            //[unhardened-bundle-0][assets/particles/lightningboltwindupfollow variant.prefab]
+            lighningStrikeWindup.gameObject = uhbundle0.LoadAsset<GameObject>("assets/particles/lightningboltwindupfollow variant.prefab");
+            //[bundle-0][assets/prefabs/enemies/spider.prefab]
+            maliciousFace.gameObject = bundle0.LoadAsset<GameObject>("assets/prefabs/enemies/spider.prefab");
+            //[bundle-0][assets/prefabs/enemies/idol.prefab]
+            idol.gameObject = bundle0.LoadAsset<GameObject>("assets/prefabs/enemies/idol.prefab");
+            //[bundle-0][assets/prefabs/enemies/ferryman.prefab]
+            ferryman.gameObject = bundle0.LoadAsset<GameObject>("assets/prefabs/enemies/ferryman.prefab");
         }
 
         public void OnSceneChange(Scene before, Scene after)
         {
-            Task.Run(LoadPrefabs);
             StyleIDs.RegisterIDs();
-
-            /*using (FileStream write = File.Open(@"C:\Users\ROG\Desktop\log.txt", FileMode.Append | FileMode.OpenOrCreate))
-            {
-                using (StreamWriter sWriter = new StreamWriter(write))
-                {
-                    foreach (AssetBundle b in AssetBundle.GetAllLoadedAssetBundles())
-                        foreach (string name in b.GetAllAssetNames())
-                            sWriter.WriteLine($"[{b.name}][{name}]");
-                }
-            }*/
         }
 
         public static class StyleIDs
@@ -235,6 +182,7 @@ namespace DifficultyTweak
         public void Awake()
         {
             instance = this;
+            LoadPrefabs();
 
             // Plugin startup logic 
             Logger.LogInfo($"Plugin {PluginInfo.PLUGIN_GUID} is loaded!");
