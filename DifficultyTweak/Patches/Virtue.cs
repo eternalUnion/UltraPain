@@ -5,6 +5,7 @@ using System.Reflection;
 using System.Runtime.InteropServices.ComTypes;
 using System.Text;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using UnityEngine.UIElements;
 
 namespace DifficultyTweak.Patches
@@ -18,10 +19,13 @@ namespace DifficultyTweak.Patches
             if (___eid.enemyType != EnemyType.Virtue)
                 return;
 
-            GameObject idol = GameObject.Instantiate(Plugin.idol.gameObject, __instance.transform.position, __instance.transform.rotation, __instance.transform);
-            idol.transform.localScale = new Vector3(0.1f, 0.1f, 0.1f);
-            idol.AddComponent<IdolFlag>();
-            idol.GetComponent<IdolFlag>().parent = __instance.gameObject;
+            if(!(SceneManager.GetActiveScene().name == "Level P-2" && __instance.transform.position == new Vector3(-102, 12.75f, 268)))
+            {
+                GameObject idol = GameObject.Instantiate(Plugin.idol.gameObject, __instance.transform.position, __instance.transform.rotation, __instance.transform);
+                idol.transform.localScale = new Vector3(0.1f, 0.1f, 0.1f);
+                idol.AddComponent<IdolFlag>();
+                idol.GetComponent<IdolFlag>().parent = __instance.gameObject;
+            }
 
             __instance.gameObject.AddComponent<VirtueFlag>();
         }
@@ -38,12 +42,12 @@ namespace DifficultyTweak.Patches
 
             __instance.GetComponent<VirtueFlag>().DestroyProjectiles();
 
-            GameObject idol = __instance.gameObject.GetComponentInChildren<Idol>().gameObject;
+            Idol idol = __instance.gameObject.GetComponentInChildren<Idol>();
             if (idol == null)
                 return true;
 
             idol.GetComponent<IdolFlag>().keepAlive = false;
-            idol.GetComponent<Idol>().Death();
+            idol.Death();
 
             return true;
         }

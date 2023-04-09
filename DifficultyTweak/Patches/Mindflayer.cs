@@ -33,7 +33,9 @@ namespace DifficultyTweak.Patches
                 return false;
             }
 
-            Projectile componentInChildren = GameObject.Instantiate(Plugin.homingProjectile.gameObject, __instance.transform.position, UnityEngine.Random.rotation).GetComponentInChildren<Projectile>();
+            Quaternion randomRotation = Quaternion.LookRotation(MonoSingleton<PlayerTracker>.Instance.GetTarget().position - __instance.transform.position);
+            randomRotation.eulerAngles += new Vector3(UnityEngine.Random.Range(-5.0f, 5.0f), UnityEngine.Random.Range(-5.0f, 5.0f), UnityEngine.Random.Range(-5.0f, 5.0f));
+            Projectile componentInChildren = GameObject.Instantiate(Plugin.homingProjectile.gameObject, __instance.transform.position + __instance.transform.forward, randomRotation).GetComponentInChildren<Projectile>();
 
             Vector3 randomPos = __instance.tentacles[UnityEngine.Random.RandomRangeInt(0, __instance.tentacles.Length)].position;
             if (!Physics.Raycast(__instance.transform.position, randomPos - __instance.transform.position, Vector3.Distance(randomPos, __instance.transform.position), ___environmentMask))
@@ -60,7 +62,7 @@ namespace DifficultyTweak.Patches
 
         static void Postfix(SwingCheck2 __instance, Collider __0)
         {
-            if (__0.gameObject.tag != "Player")
+            if (__0.gameObject.tag != "Player" || __0.gameObject.layer == 15)
                 return;
 
             if (__instance.transform.parent == null)

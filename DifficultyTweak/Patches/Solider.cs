@@ -87,17 +87,6 @@ namespace DifficultyTweak.Patches
         }
     }
 
-    [HarmonyPatch(typeof(Grenade))]
-    [HarmonyPatch(nameof(Grenade.Collision))]
-    class Grenade_Collision_Patch
-    {
-        static bool Prefix(Grenade __instance, Collider __0)
-        {
-            Debug.Log($"Collided with {__0.name}, enemy = {__instance.enemy}");
-            return true;
-        }
-    }
-
     class SoliderShootCounter : MonoBehaviour
     {
         public int remainingShots = 2;

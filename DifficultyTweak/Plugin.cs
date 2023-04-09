@@ -10,6 +10,8 @@ using System.Collections.Generic;
 using JetBrains.Annotations;
 using HarmonyLib;
 using System.Runtime.CompilerServices;
+using System.IO;
+using UnityEngine.Experimental.AssetBundlePatching;
 
 namespace DifficultyTweak
 {
@@ -28,8 +30,8 @@ namespace DifficultyTweak
     {
         public static Plugin instance;
 
-        const string PLUGIN_GUID = "com.eternalUnion.difficultyTweak";
-        const string PLUGIN_NAME = "Difficulty Tweak";
+        const string PLUGIN_GUID = "com.eternalUnion.ultraPain";
+        const string PLUGIN_NAME = "Ultra Pain";
         const string PLUGIN_VERSION = "1.0.0";
 
         public static Vector3 PredictPlayerPosition(Collider safeCollider, float speedMod)
@@ -73,6 +75,8 @@ namespace DifficultyTweak
 
         public static float SwordsMachineKnockdownTimeNormalized = 0.8f;
         public static float SwordsMachineCoreSpeed = 80f;
+
+        public static float MinGrenadeParryVelocity = 40f;
 
         private static GameObject _maliciousFaceBullet;
         public static GameObject maliciousFaceBullet
@@ -198,6 +202,34 @@ namespace DifficultyTweak
         public void OnSceneChange(Scene before, Scene after)
         {
             Task.Run(LoadPrefabs);
+            StyleIDs.RegisterIDs();
+
+            /*using (FileStream write = File.Open(@"C:\Users\ROG\Desktop\log.txt", FileMode.Append | FileMode.OpenOrCreate))
+            {
+                using (StreamWriter sWriter = new StreamWriter(write))
+                {
+                    foreach (AssetBundle b in AssetBundle.GetAllLoadedAssetBundles())
+                        foreach (string name in b.GetAllAssetNames())
+                            sWriter.WriteLine($"[{b.name}][{name}]");
+                }
+            }*/
+        }
+
+        public static class StyleIDs
+        {
+            public static string fistfulOfNades = "eternalUnion.fistfulOfNades";
+            public static string rocketBoost = "eternalUnion.rocketBoost";
+            
+            public static void RegisterIDs()
+            {
+                if (MonoSingleton<StyleHUD>.Instance == null)
+                    return;
+
+                MonoSingleton<StyleHUD>.Instance.RegisterStyleItem(StyleIDs.fistfulOfNades, "<color=cyan>FISTFUL OF 'NADE</color>");
+                MonoSingleton<StyleHUD>.Instance.RegisterStyleItem(StyleIDs.rocketBoost, "<color=lime>ROCKET BOOST</color>");
+
+                Debug.Log("Registered all style ids");
+            }
         }
 
         public void Awake()

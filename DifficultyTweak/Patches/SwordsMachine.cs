@@ -85,7 +85,6 @@ namespace DifficultyTweak.Patches
         static void Postfix(ThrownSword __instance)
         {
             __instance.gameObject.AddComponent<ThrownSwordCollisionDetector>();
-            __instance.gameObject.AddComponent<SwordsMachinePatch>();
         }
     }
 
@@ -103,15 +102,6 @@ namespace DifficultyTweak.Patches
                     explosion.enemy = true;
                 }
             }
-        }
-    }
-
-    class SwordsMachinePatch : MonoBehaviour
-    {
-        public void RestoreAnimationSpeed()
-        {
-            Animator anim = GetComponent<Animator>();
-            anim.speed = 1;
         }
     }
 

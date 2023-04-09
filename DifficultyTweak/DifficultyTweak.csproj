@@ -7,11 +7,11 @@
     <Version>1.0.0</Version>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <LangVersion>latest</LangVersion>
-    <BaseOutputPath>D:\Games\Ultrakill\ULTRAKILL\ULTRAKILL\BepInEx\plugins\DifficultyTweak</BaseOutputPath>
+    <BaseOutputPath>D:\Games\UltrakillPatch\ULTRAKILL\ULTRAKILL\BepInEx\plugins\UltraPain</BaseOutputPath>
 
 	<AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
 	<AppendRuntimeIdentifierToOutputPath>false</AppendRuntimeIdentifierToOutputPath>
-	<OutputPath>D:\Games\Ultrakill\ULTRAKILL\ULTRAKILL\BepInEx\plugins\DifficultyTweak</OutputPath>
+	<OutputPath>D:\Games\UltrakillPatch\ULTRAKILL\ULTRAKILL\BepInEx\plugins\UltraPain</OutputPath>
 	<ProduceReferenceAssembly>False</ProduceReferenceAssembly>
   </PropertyGroup>
 
@@ -39,6 +39,9 @@
   <ItemGroup>
     <Reference Include="Assembly-CSharp">
       <HintPath>Libs\Assembly-CSharp.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.AssetBundleModule">
+      <HintPath>Libs\UnityEngine.AssetBundleModule.dll</HintPath>
     </Reference>
     <Reference Include="UniverseLib.Mono">
       <HintPath>Libs\UniverseLib.Mono.dll</HintPath>
