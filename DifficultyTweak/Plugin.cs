@@ -15,16 +15,6 @@ using UnityEngine.Experimental.AssetBundlePatching;
 
 namespace DifficultyTweak
 {
-    public class GameObjectReference
-    {
-        public GameObject gameObject = null;
-
-        public bool isNull
-        {
-            get => gameObject == null;
-        }
-    }
-
     [BepInPlugin(PLUGIN_GUID, PLUGIN_NAME, PLUGIN_VERSION)]
     public class Plugin : BaseUnityPlugin
     {
@@ -69,18 +59,18 @@ namespace DifficultyTweak
             }
         }
 
-        public static GameObjectReference projectileSpread = new GameObjectReference();
-        public static GameObjectReference homingProjectile = new GameObjectReference();
-        public static GameObjectReference decorativeProjectile2 = new GameObjectReference();
-        public static GameObjectReference shotgunGrenade = new GameObjectReference();
-        public static GameObjectReference beam = new GameObjectReference();
-        public static GameObjectReference turretBeam = new GameObjectReference();
-        public static GameObjectReference lighningStrikeExplosive = new GameObjectReference();
-        public static GameObjectReference lighningStrikeWindup = new GameObjectReference();
+        public static GameObject projectileSpread;
+        public static GameObject homingProjectile;
+        public static GameObject decorativeProjectile2;
+        public static GameObject shotgunGrenade;
+        public static GameObject beam;
+        public static GameObject turretBeam;
+        public static GameObject lighningStrikeExplosive;
+        public static GameObject lighningStrikeWindup;
 
-        public static GameObjectReference maliciousFace = new GameObjectReference();
-        public static GameObjectReference idol = new GameObjectReference();
-        public static GameObjectReference ferryman = new GameObjectReference();
+        public static GameObject maliciousFace;
+        public static GameObject idol;
+        public static GameObject ferryman;
 
 
         // Singleton prefabs
@@ -134,27 +124,27 @@ namespace DifficultyTweak
             AssetBundle uhbundle0 = GetAssetBundle("unhardened-bundle-0");
 
             //[bundle-0][assets/prefabs/projectilespread.prefab]
-            projectileSpread.gameObject = bundle0.LoadAsset<GameObject>("assets/prefabs/projectilespread.prefab");
+            projectileSpread = bundle0.LoadAsset<GameObject>("assets/prefabs/projectilespread.prefab");
             //[bundle-0][assets/prefabs/projectilehoming.prefab]
-            homingProjectile.gameObject = bundle0.LoadAsset<GameObject>("assets/prefabs/projectilehoming.prefab");
+            homingProjectile = bundle0.LoadAsset<GameObject>("assets/prefabs/projectilehoming.prefab");
             //[bundle-1][assets/prefabs/projectiledecorative 2.prefab]
-            decorativeProjectile2.gameObject = bundle1.LoadAsset<GameObject>("assets/prefabs/projectiledecorative 2.prefab");
+            decorativeProjectile2 = bundle1.LoadAsset<GameObject>("assets/prefabs/projectiledecorative 2.prefab");
             //[bundle-0][assets/prefabs/grenade.prefab]
-            shotgunGrenade.gameObject = bundle0.LoadAsset<GameObject>("assets/prefabs/grenade.prefab");
+            shotgunGrenade = bundle0.LoadAsset<GameObject>("assets/prefabs/grenade.prefab");
             //[bundle-0][assets/prefabs/turretbeam.prefab]
-            turretBeam.gameObject = bundle0.LoadAsset<GameObject>("assets/prefabs/turretbeam.prefab");
+            turretBeam = bundle0.LoadAsset<GameObject>("assets/prefabs/turretbeam.prefab");
             //[bundle-0][assets/prefabs/dronemaliciousbeam.prefab]
-            beam.gameObject = bundle0.LoadAsset<GameObject>("assets/prefabs/dronemaliciousbeam.prefab");
+            beam = bundle0.LoadAsset<GameObject>("assets/prefabs/dronemaliciousbeam.prefab");
             //[unhardened-bundle-0][assets/prefabs/lightningstrikeexplosive.prefab]
-            lighningStrikeExplosive.gameObject = uhbundle0.LoadAsset<GameObject>("assets/prefabs/lightningstrikeexplosive.prefab");
+            lighningStrikeExplosive = uhbundle0.LoadAsset<GameObject>("assets/prefabs/lightningstrikeexplosive.prefab");
             //[unhardened-bundle-0][assets/particles/lightningboltwindupfollow variant.prefab]
-            lighningStrikeWindup.gameObject = uhbundle0.LoadAsset<GameObject>("assets/particles/lightningboltwindupfollow variant.prefab");
+            lighningStrikeWindup = uhbundle0.LoadAsset<GameObject>("assets/particles/lightningboltwindupfollow variant.prefab");
             //[bundle-0][assets/prefabs/enemies/spider.prefab]
-            maliciousFace.gameObject = bundle0.LoadAsset<GameObject>("assets/prefabs/enemies/spider.prefab");
+            maliciousFace = bundle0.LoadAsset<GameObject>("assets/prefabs/enemies/spider.prefab");
             //[bundle-0][assets/prefabs/enemies/idol.prefab]
-            idol.gameObject = bundle0.LoadAsset<GameObject>("assets/prefabs/enemies/idol.prefab");
+            idol = bundle0.LoadAsset<GameObject>("assets/prefabs/enemies/idol.prefab");
             //[bundle-0][assets/prefabs/enemies/ferryman.prefab]
-            ferryman.gameObject = bundle0.LoadAsset<GameObject>("assets/prefabs/enemies/ferryman.prefab");
+            ferryman = bundle0.LoadAsset<GameObject>("assets/prefabs/enemies/ferryman.prefab");
         }
 
         public void OnSceneChange(Scene before, Scene after)
@@ -189,11 +179,6 @@ namespace DifficultyTweak
 
             new Harmony(PLUGIN_GUID).PatchAll();
             SceneManager.activeSceneChanged += OnSceneChange;
-        }
-
-        public void Update()
-        {
-
         }
     }
 }

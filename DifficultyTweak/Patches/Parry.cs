@@ -12,6 +12,7 @@ namespace DifficultyTweak.Patches
         public bool registeredStyle = false;
         public bool bigExplosionOverride = false;
         public GameObject temporaryExplosion;
+        public GameObject temporaryBigExplosion;
         public GameObject weapon;
 
         public enum GrenadeType
@@ -70,19 +71,36 @@ namespace DifficultyTweak.Patches
     [HarmonyPatch("Explode")]
     class Grenade_Explode_Patch
     {
+        public static float rocketInitialStatOnParry = 0.2f;
+        public static float rocketExtraStatPerParry = 0.2f;
+
         static bool Prefix(Grenade __instance, ref bool __2, ref bool __1, ref bool ___exploded)
         {
             GrenadeParriedFlag flag = __instance.GetComponent<GrenadeParriedFlag>();
+            if (flag == null)
+                return true;
 
             if (__instance.rocket)
             {
                 bool rocketParried = flag != null;
                 bool rocketHitGround = __1;
 
+                float statMultiplier = 1f + rocketInitialStatOnParry + rocketExtraStatPerParry * (flag.parryCount - 1);
+                flag.temporaryBigExplosion = GameObject.Instantiate(__instance.superExplosion, new Vector3(1000000, 1000000, 1000000), Quaternion.identity);
+                __instance.superExplosion = flag.temporaryBigExplosion;
+                foreach (Explosion e in __instance.superExplosion.GetComponentsInChildren<Explosion>())
+                {
+                    e.speed *= statMultiplier;
+                    e.damage = (int)(e.damage * statMultiplier);
+                    e.maxSize *= statMultiplier;
+                }
+
+                flag.temporaryExplosion = GameObject.Instantiate(__instance.explosion, new Vector3(1000000, 1000000, 1000000), Quaternion.identity);
+                __instance.explosion = flag.temporaryExplosion;
                 if (rocketParried && rocketHitGround)
                 {
                     __1 = false;
-                    flag.temporaryExplosion = GameObject.Instantiate(__instance.explosion, Vector3.positiveInfinity, Quaternion.identity);
+
                     foreach(Explosion e in flag.temporaryExplosion.GetComponentsInChildren<Explosion>())
                     {
                         GrenadeParriedFlag fFlag = e.gameObject.AddComponent<GrenadeParriedFlag>();
@@ -90,8 +108,13 @@ namespace DifficultyTweak.Patches
                         fFlag.grenadeType = GrenadeParriedFlag.GrenadeType.Rocket;
                         break;
                     }
+                }
 
-                    __instance.explosion = flag.temporaryExplosion;
+                foreach (Explosion e in __instance.explosion.GetComponentsInChildren<Explosion>())
+                {
+                    e.speed *= statMultiplier;
+                    e.damage = (int)(e.damage * statMultiplier);
+                    e.maxSize *= statMultiplier;
                 }
             }
             else
@@ -111,12 +134,18 @@ namespace DifficultyTweak.Patches
             if (__instance.rocket)
             {
                 GrenadeParriedFlag flag = __instance.GetComponent<GrenadeParriedFlag>();
-                bool rocketParried = flag != null;
+                if (flag == null)
+                    return;
 
-                if (rocketParried && flag.temporaryExplosion != null)
+                if (flag.temporaryExplosion != null)
                 {
                     GameObject.Destroy(flag.temporaryExplosion);
                     flag.temporaryExplosion = null;
+                }
+                if (flag.temporaryBigExplosion != null)
+                {
+                    GameObject.Destroy(flag.temporaryBigExplosion);
+                    flag.temporaryBigExplosion = null;
                 }
             }
         }
