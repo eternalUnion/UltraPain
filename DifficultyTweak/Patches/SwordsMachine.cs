@@ -121,7 +121,6 @@ namespace DifficultyTweak.Patches
             }
 
             exploded = true;
-            Debug.Log("Sword exploded");
 
             GameObject explosionObj = GameObject.Instantiate(Plugin.shotgunGrenade.gameObject.GetComponent<Grenade>().explosion, transform.position, transform.rotation);
             foreach (Explosion explosion in explosionObj.GetComponentsInChildren<Explosion>())

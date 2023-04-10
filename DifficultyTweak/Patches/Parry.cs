@@ -124,7 +124,6 @@ namespace DifficultyTweak.Patches
                 if (flag != null && flag.bigExplosionOverride)
                 {
                     __2 = true;
-                    Debug.Log("Big explosion");
                 }
             }
 

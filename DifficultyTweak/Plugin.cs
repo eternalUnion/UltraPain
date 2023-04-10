@@ -12,6 +12,7 @@ using HarmonyLib;
 using System.Runtime.CompilerServices;
 using System.IO;
 using UnityEngine.Experimental.AssetBundlePatching;
+using DifficultyTweak.Patches;
 
 namespace DifficultyTweak
 {
@@ -61,6 +62,7 @@ namespace DifficultyTweak
 
         public static GameObject projectileSpread;
         public static GameObject homingProjectile;
+        public static GameObject hideousMassProjectile;
         public static GameObject decorativeProjectile2;
         public static GameObject shotgunGrenade;
         public static GameObject beam;
@@ -68,6 +70,7 @@ namespace DifficultyTweak
         public static GameObject lighningStrikeExplosive;
         public static GameObject lighningStrikeWindup;
         public static GameObject explosion;
+        public static GameObject virtueInsignia;
 
         public static GameObject maliciousFace;
         public static GameObject idol;
@@ -148,6 +151,12 @@ namespace DifficultyTweak
             ferryman = bundle0.LoadAsset<GameObject>("assets/prefabs/enemies/ferryman.prefab");
             //[bundle-0][assets/prefabs/explosion.prefab]
             explosion = bundle0.LoadAsset<GameObject>("assets/prefabs/explosion.prefab");
+            //[bundle-0][assets/prefabs/virtueinsignia.prefab]
+            virtueInsignia = bundle0.LoadAsset<GameObject>("assets/prefabs/virtueinsignia.prefab");
+            //[bundle-0][assets/prefabs/projectileexplosivehh.prefab]
+            hideousMassProjectile = bundle0.LoadAsset<GameObject>("assets/prefabs/projectileexplosivehh.prefab");
+
+            hideousMassProjectile.AddComponent<HideousMassProjectile>();
         }
 
         public void OnSceneChange(Scene before, Scene after)

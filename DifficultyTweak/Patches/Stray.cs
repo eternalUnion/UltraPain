@@ -1,16 +1,60 @@
 ﻿using HarmonyLib;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using UnityEngine;
+using UnityEngine.AI;
 
 namespace DifficultyTweak.Patches
 {
     public class StrayFlag : MonoBehaviour
     {
         //public int extraShotsRemaining = 6;
+        private Animator anim;
+        private EnemyIdentifier eid;
 
-        public bool throwingCore = false;
+        public GameObject standardProjectile;
+        public GameObject standardDecorativeProjectile;
+
+        public int comboRemaining = 3;
+        public bool inCombo = true;
+
+        public float lastSpeed = 1f;
+
+        public enum AttackMode
+        {
+            ProjectileCombo,
+            FastHoming
+        }
+
+        public AttackMode currentMode = AttackMode.ProjectileCombo;
+
+        public void Awake()
+        {
+            anim = GetComponent<Animator>();
+            eid = GetComponent<EnemyIdentifier>();
+        }
+
+        public void LateCombo()
+        {
+            anim.Play("ThrowProjectile", 0, ZombieProjectile_ThrowProjectile_Patch.normalizedTime);
+        }
+
+        public void Update()
+        {
+            if(eid.dead)
+            {
+                Destroy(this);
+                return;
+            }
+
+            if (inCombo)
+            {
+                anim.speed = ZombieProjectile_ThrowProjectile_Patch.animSpeed;
+                anim.SetFloat("Speed", ZombieProjectile_ThrowProjectile_Patch.animSpeed);
+            }
+        }
     }
 
     [HarmonyPatch(typeof(ZombieProjectiles), "Start")]
@@ -22,16 +66,19 @@ namespace DifficultyTweak.Patches
                 return;
 
             StrayFlag flag = __instance.gameObject.AddComponent<StrayFlag>();
-            flag.throwingCore = false;
-            __instance.projectile = Plugin.homingProjectile;
-            __instance.decProjectile = Plugin.decorativeProjectile2;
+            flag.standardProjectile = __instance.projectile;
+            flag.standardDecorativeProjectile = __instance.decProjectile;
+            flag.currentMode = StrayFlag.AttackMode.ProjectileCombo;
+            /*__instance.projectile = Plugin.homingProjectile;
+            __instance.decProjectile = Plugin.decorativeProjectile2;*/
         }
     }
 
     [HarmonyPatch(typeof(ZombieProjectiles), "ThrowProjectile")]
-    public class ZombieProjectile_DamageEnd_Patch
+    public class ZombieProjectile_ThrowProjectile_Patch
     {
-        //public static float deltaTime = 0.2f;
+        public static float normalizedTime = 0f;
+        public static float animSpeed = 25f;
 
         public static float projectileSpeed = 75;
         public static float turnSpeedMultiplier = 0.45f;
@@ -40,69 +87,9 @@ namespace DifficultyTweak.Patches
         public static int explosionDamage = 20;
         public static float coreSpeed = 110f;
 
-        public static Vector3 strayCoreOffset = new Vector3(0, 0, 3);
-
-        static bool Prefix(ZombieProjectiles __instance, ref EnemyIdentifier ___eid, ref GameObject ___currentProjectile, ref GameObject ___camObj)
+        static void Postfix(ZombieProjectiles __instance, ref EnemyIdentifier ___eid, ref Animator ___anim, ref GameObject ___currentProjectile
+            , ref NavMeshAgent ___nma, ref Zombie ___zmb)
         {
-            if (___eid.enemyType != EnemyType.Stray)
-                return true;
-
-            StrayFlag flag = __instance.gameObject.GetComponent<StrayFlag>();
-            if (flag == null)
-                return true;
-
-            if (flag.throwingCore)
-            {
-                ___currentProjectile = GameObject.Instantiate<GameObject>(Plugin.shotgunGrenade, __instance.shootPos.position + __instance.shootPos.forward, Quaternion.identity);
-                ___currentProjectile.transform.LookAt(___camObj.transform);
-                UnityUtils.PrintGameobject(___currentProjectile);
-
-                Grenade grn = ___currentProjectile.GetComponent<Grenade>();
-                if (grn != null)
-                {
-                    Debug.Log("Nade check");
-                    grn.rb.AddRelativeForce(Vector3.forward * coreSpeed, ForceMode.VelocityChange);
-                    grn.CanCollideWithPlayer(true);
-                    foreach (Explosion exp in grn.GetComponentsInChildren<Explosion>())
-                    {
-                        exp.enemy = true;
-                        exp.damage = explosionDamage;
-                        exp.maxSize /= 2;
-                        exp.speed /= 2;
-                        exp.toIgnore.Add(EnemyType.Stray);
-                    }
-                }
-
-                return false;
-            }
-
-            return true;
-        }
-
-        static void Postfix(ZombieProjectiles __instance, ref EnemyIdentifier ___eid, ref GameObject ___currentProjectile)
-        {
-            /*if (___eid.enemyType != EnemyType.Stray)
-                return true;
-
-            StrayFlag flag = __instance.gameObject.GetComponent<StrayFlag>();
-            if (flag == null)
-                return true;
-
-            if (flag.extraShotsRemaining > 0)
-            {
-                //__instance.SwingEnd();
-                ___coolDown = 0;
-                __instance.DamageStart();
-                ___anim.SetBool("Running", false);
-                ___anim.Play("ThrowProjectile", 0, (1.3333f - deltaTime) / 2.0833f);
-                flag.extraShotsRemaining -= 1;
-                return false;
-            }
-            else
-                flag.extraShotsRemaining = 6;
-
-            return true;*/
-
             if (___eid.enemyType != EnemyType.Stray)
                 return;
 
@@ -110,16 +97,11 @@ namespace DifficultyTweak.Patches
             if (flag == null)
                 return;
 
-            if (flag.throwingCore)
-            {
-                __instance.projectile = Plugin.homingProjectile;
-            }
-            else
+            if (flag.currentMode == StrayFlag.AttackMode.FastHoming)
             {
                 Projectile proj = ___currentProjectile.GetComponent<Projectile>();
-                if(proj != null)
+                if (proj != null)
                 {
-                    Debug.Log("Proj check");
                     proj.target = MonoSingleton<PlayerTracker>.Instance.GetTarget();
                     proj.speed = projectileSpeed;
                     proj.turningSpeedMultiplier = turnSpeedMultiplier;
@@ -127,10 +109,111 @@ namespace DifficultyTweak.Patches
                     proj.damage = projectileDamage;
                 }
 
-                __instance.projectile = Plugin.shotgunGrenade;
+                flag.currentMode = StrayFlag.AttackMode.ProjectileCombo;
+                __instance.projectile = flag.standardProjectile;
+                __instance.decProjectile = flag.standardDecorativeProjectile;
             }
+            else if(flag.currentMode == StrayFlag.AttackMode.ProjectileCombo)
+            {
+                flag.comboRemaining -= 1;
 
-            flag.throwingCore = !flag.throwingCore;
+                if (flag.comboRemaining == 0)
+                {
+                    flag.comboRemaining = 3;
+                    flag.currentMode = StrayFlag.AttackMode.FastHoming;
+                    flag.inCombo = false;
+                    ___anim.speed = flag.lastSpeed;
+                    ___anim.SetFloat("Speed", flag.lastSpeed);
+                    __instance.projectile = Plugin.homingProjectile;
+                    __instance.decProjectile = Plugin.decorativeProjectile2;
+                }
+                else
+                {
+                    flag.inCombo = true;
+                    __instance.swinging = true;
+                    __instance.seekingPlayer = false;
+                    ___nma.updateRotation = false;
+                    __instance.transform.LookAt(new Vector3(___zmb.target.position.x, __instance.transform.position.y, ___zmb.target.position.z));
+                    flag.lastSpeed = ___anim.speed;
+                    //___anim.Play("ThrowProjectile", 0, ZombieProjectile_ThrowProjectile_Patch.normalizedTime);
+                    ___anim.speed = animSpeed;
+                    ___anim.SetFloat("Speed", animSpeed);
+                    ___anim.SetTrigger("Swing");
+                    //___anim.SetFloat("AttackType", 0f);
+                    //___anim.StopPlayback();
+                    //flag.Invoke("LateCombo", 0.01f);
+                    //___anim.runtimeAnimatorController.animationClips.Where(clip => clip.name == "ThrowProjectile").First().
+                    //___anim.fireEvents = true;
+                }
+            }
+        }
+    }
+
+    [HarmonyPatch(typeof(ZombieProjectiles), nameof(ZombieProjectiles.SpawnProjectile))]
+    class Swing
+    {
+        static void Postfix(ZombieProjectiles __instance, ref EnemyIdentifier ___eid)
+        {
+            if (___eid.enemyType != EnemyType.Stray)
+                return;
+
+            ___eid.weakPoint = null;
+        }
+    }
+
+    /*[HarmonyPatch(typeof(ZombieProjectiles), "Swing")]
+    class Swing
+    {
+        static void Postfix()
+        {
+            Debug.Log("Swing()");
+        }
+    }*/
+
+    [HarmonyPatch(typeof(ZombieProjectiles), "SwingEnd")]
+    class SwingEnd
+    {
+        static bool Prefix(ZombieProjectiles __instance, ref EnemyIdentifier ___eid)
+        {
+            if (___eid.enemyType != EnemyType.Stray)
+                return true;
+
+            StrayFlag flag = __instance.gameObject.GetComponent<StrayFlag>();
+            if (flag == null)
+                return true;
+
+            if (flag.inCombo)
+                return false;
+
+            return true;
+        }
+    }
+
+    /*[HarmonyPatch(typeof(ZombieProjectiles), "DamageStart")]
+    class DamageStart
+    {
+        static void Postfix()
+        {
+            Debug.Log("DamageStart()");
+        }
+    }*/
+
+    [HarmonyPatch(typeof(ZombieProjectiles), "DamageEnd")]
+    class DamageEnd
+    {
+        static bool Prefix(ZombieProjectiles __instance, ref EnemyIdentifier ___eid)
+        {
+            if (___eid.enemyType != EnemyType.Stray)
+                return true;
+
+            StrayFlag flag = __instance.gameObject.GetComponent<StrayFlag>();
+            if (flag == null)
+                return true;
+
+            if (flag.inCombo)
+                return false;
+
+            return true;
         }
     }
 }

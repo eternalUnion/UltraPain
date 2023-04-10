@@ -31,7 +31,6 @@ namespace DifficultyTweak.Patches
                 MonoSingleton<NewMovement>.Instance.rb.velocity = (/*___hookPoint*/___caughtGrenade.transform.position - MonoSingleton<NewMovement>.Instance.transform.position).normalized * 60f;
                 if (MonoSingleton<NewMovement>.Instance.gc.onGround)
                     MonoSingleton<NewMovement>.Instance.rb.MovePosition(MonoSingleton<NewMovement>.Instance.transform.position + Vector3.up);
-                Debug.Log(MonoSingleton<NewMovement>.Instance.rb.velocity);
                 return false;
             }
 

@@ -98,8 +98,6 @@ namespace DifficultyTweak.Patches
 
             MindflayerPatch patch = mf.gameObject.GetComponent<MindflayerPatch>();
 
-            Debug.Log("Patch check");
-
             if (patch.swingComboLeft > 0)
             {
                 patch.swingComboLeft -= 1;

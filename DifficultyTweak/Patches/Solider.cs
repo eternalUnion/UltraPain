@@ -78,7 +78,6 @@ namespace DifficultyTweak.Patches
 
                     grenade.GetComponent<Grenade>().enemy = true;
                     grenade.GetComponent<Grenade>().CanCollideWithPlayer(true);
-                    Debug.Log($"{Physics.GetIgnoreLayerCollision(grenade.layer, GameObject.Find("Player").layer)}");
                 }
                 return;
             }
