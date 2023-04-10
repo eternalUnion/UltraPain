@@ -56,6 +56,7 @@ namespace DifficultyTweak.Patches
                 {
                     flag = grn.gameObject.AddComponent<GrenadeParriedFlag>();
                     flag.grenadeType = (grn.rocket) ? GrenadeParriedFlag.GrenadeType.Rocket : GrenadeParriedFlag.GrenadeType.Core;
+                    grn.rocketSpeed *= 1.5f;
                     flag.weapon = MonoSingleton<GunControl>.Instance.currentWeapon;
                 }
 
@@ -71,8 +72,8 @@ namespace DifficultyTweak.Patches
     [HarmonyPatch("Explode")]
     class Grenade_Explode_Patch
     {
-        public static float rocketInitialStatOnParry = 0.2f;
-        public static float rocketExtraStatPerParry = 0.2f;
+        public static float rocketInitialStatOnParry = 0.35f;
+        public static float rocketExtraStatPerParry = 0.35f;
 
         static bool Prefix(Grenade __instance, ref bool __2, ref bool __1, ref bool ___exploded)
         {

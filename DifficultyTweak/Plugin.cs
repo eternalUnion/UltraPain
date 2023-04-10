@@ -67,6 +67,7 @@ namespace DifficultyTweak
         public static GameObject turretBeam;
         public static GameObject lighningStrikeExplosive;
         public static GameObject lighningStrikeWindup;
+        public static GameObject explosion;
 
         public static GameObject maliciousFace;
         public static GameObject idol;
@@ -145,6 +146,8 @@ namespace DifficultyTweak
             idol = bundle0.LoadAsset<GameObject>("assets/prefabs/enemies/idol.prefab");
             //[bundle-0][assets/prefabs/enemies/ferryman.prefab]
             ferryman = bundle0.LoadAsset<GameObject>("assets/prefabs/enemies/ferryman.prefab");
+            //[bundle-0][assets/prefabs/explosion.prefab]
+            explosion = bundle0.LoadAsset<GameObject>("assets/prefabs/explosion.prefab");
         }
 
         public void OnSceneChange(Scene before, Scene after)
@@ -163,7 +166,7 @@ namespace DifficultyTweak
                     return;
 
                 MonoSingleton<StyleHUD>.Instance.RegisterStyleItem(StyleIDs.fistfulOfNades, "<color=cyan>FISTFUL OF 'NADE</color>");
-                MonoSingleton<StyleHUD>.Instance.RegisterStyleItem(StyleIDs.rocketBoost, "<color=lime>ROCKET BOOST</color>");
+                MonoSingleton<StyleHUD>.Instance.RegisterStyleItem(StyleIDs.rocketBoost, "<color=magenta>ABBYBOOST</color>");
 
                 Debug.Log("Registered all style ids");
             }
