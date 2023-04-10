@@ -98,7 +98,7 @@ namespace DifficultyTweak.Patches
 
                 flag.temporaryExplosion = GameObject.Instantiate(__instance.explosion, new Vector3(1000000, 1000000, 1000000), Quaternion.identity);
                 __instance.explosion = flag.temporaryExplosion;
-                if (rocketParried && rocketHitGround)
+                if (rocketParried/* && rocketHitGround*/)
                 {
                     __1 = false;
 
@@ -107,6 +107,7 @@ namespace DifficultyTweak.Patches
                         GrenadeParriedFlag fFlag = e.gameObject.AddComponent<GrenadeParriedFlag>();
                         fFlag.weapon = flag.weapon;
                         fFlag.grenadeType = GrenadeParriedFlag.GrenadeType.Rocket;
+                        fFlag.parryCount = flag.parryCount;
                         break;
                     }
                 }
@@ -202,7 +203,7 @@ namespace DifficultyTweak.Patches
                 {
                     flag.registeredStyle = true;
                     lastTime = Time.time;
-                    MonoSingleton<StyleHUD>.Instance.AddPoints(25, Plugin.StyleIDs.rocketBoost, flag.weapon, null);
+                    MonoSingleton<StyleHUD>.Instance.AddPoints(25, Plugin.StyleIDs.rocketBoost, flag.weapon, null, flag.parryCount);
                 }
             }
 

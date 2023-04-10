@@ -166,7 +166,8 @@ namespace DifficultyTweak
                     return;
 
                 MonoSingleton<StyleHUD>.Instance.RegisterStyleItem(StyleIDs.fistfulOfNades, "<color=cyan>FISTFUL OF 'NADE</color>");
-                MonoSingleton<StyleHUD>.Instance.RegisterStyleItem(StyleIDs.rocketBoost, "<color=magenta>ABBYBOOST</color>");
+                //"<color=magenta>ABBYBOOST</color>"
+                MonoSingleton<StyleHUD>.Instance.RegisterStyleItem(StyleIDs.rocketBoost, "<color=lime>ROCKET BOOST</color>");
 
                 Debug.Log("Registered all style ids");
             }

@@ -19,14 +19,6 @@ namespace DifficultyTweak.Patches
             if (___eid.enemyType != EnemyType.Virtue)
                 return;
 
-            if(!(SceneManager.GetActiveScene().name == "Level P-2" && __instance.transform.position == new Vector3(-102, 12.75f, 268)))
-            {
-                GameObject idol = GameObject.Instantiate(Plugin.idol.gameObject, __instance.transform.position, __instance.transform.rotation, __instance.transform);
-                idol.transform.localScale = new Vector3(0.1f, 0.1f, 0.1f);
-                idol.AddComponent<IdolFlag>();
-                idol.GetComponent<IdolFlag>().parent = __instance.gameObject;
-            }
-
             __instance.gameObject.AddComponent<VirtueFlag>();
         }
     }
@@ -41,14 +33,6 @@ namespace DifficultyTweak.Patches
                 return true;
 
             __instance.GetComponent<VirtueFlag>().DestroyProjectiles();
-
-            Idol idol = __instance.gameObject.GetComponentInChildren<Idol>();
-            if (idol == null)
-                return true;
-
-            idol.GetComponent<IdolFlag>().keepAlive = false;
-            idol.Death();
-
             return true;
         }
     }
@@ -90,10 +74,19 @@ namespace DifficultyTweak.Patches
     [HarmonyPatch("SpawnInsignia")]
     class Virtue_SpawnInsignia_Patch
     {
-        static bool Prefix(Drone __instance, ref EnemyIdentifier ___eid, ref int ___difficulty)
+        public static float horizontalInsigniaScale = 0.5f;
+
+        static bool Prefix(Drone __instance, ref EnemyIdentifier ___eid, ref int ___difficulty, out bool __state)
         {
-            if (___eid.enemyType != EnemyType.Virtue || !__instance.enraged)
+            __state = false;
+            if (___eid.enemyType != EnemyType.Virtue)
                 return true;
+
+            if (!__instance.enraged)
+            {
+                __state = true;
+                return true;
+            }
 
             Vector3 predictedPos;
             if (___difficulty <= 1)
@@ -131,100 +124,49 @@ namespace DifficultyTweak.Patches
             flag.Invoke("SpawnLightningBolt", 3.0f);
             return false;
         }
-    }
 
-    [HarmonyPatch(typeof(Idol))]
-    [HarmonyPatch("Start")]
-    class Idol_Start_Patch
-    {
-        static void Postfix(Idol __instance, ref EnemyIdentifier ___eid)
+        static void Postfix(Drone __instance, ref EnemyIdentifier ___eid, ref int ___difficulty, ref Transform ___target, bool __state)
         {
-            __instance.CancelInvoke("SlowUpdate");
-            __instance.Invoke("SlowUpdate", 0.2f);
-        }
-    }
+            if (!__state)
+                return;
 
-    [HarmonyPatch(typeof(Idol))]
-    [HarmonyPatch("Death")]
-    class Idol_Death_Patch
-    {
-        static bool Prefix(Idol __instance, ref EnemyIdentifier ___eid)
-        {
-            IdolFlag idolFlag = __instance.gameObject.GetComponent<IdolFlag>();
-            if (idolFlag != null && idolFlag.parent != null && idolFlag.keepAlive)
-                return false;
-
-            return true;
-        }
-    }
-
-    [HarmonyPatch(typeof(Idol))]
-    [HarmonyPatch("SlowUpdate")]
-    class Idol_SlowUpdate_Patch
-    {
-        static bool Prefix(Idol __instance)
-        {
-            IdolFlag idolFlag = __instance.gameObject.GetComponent<IdolFlag>();
-            if (idolFlag != null)
+            GameObject createInsignia(Drone __instance, ref EnemyIdentifier ___eid, ref int ___difficulty, ref Transform ___target)
             {
-                if (__instance.target != null && !__instance.target.dead)
+                GameObject gameObject = GameObject.Instantiate<GameObject>(__instance.projectile, ___target.transform.position, Quaternion.identity);
+                VirtueInsignia component = gameObject.GetComponent<VirtueInsignia>();
+                component.target = MonoSingleton<PlayerTracker>.Instance.GetPlayer();
+                component.parentDrone = __instance;
+                component.hadParent = true;
+                __instance.chargeParticle.Stop(false, ParticleSystemStopBehavior.StopEmittingAndClear);
+                if (__instance.enraged)
                 {
-                    if (__instance.target.enemyType == EnemyType.Virtue)
-                        typeof(Idol).GetMethod("ChangeTarget", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance).Invoke(__instance, new object[] { null });
-                    else
-                        return false;
+                    component.predictive = true;
                 }
-
-                List<EnemyIdentifier> currentEnemies = MonoSingleton<EnemyTracker>.Instance.GetCurrentEnemies();
-                if (currentEnemies != null && currentEnemies.Count > 0)
+                if (___difficulty == 1)
                 {
-                    bool flag = false;
-                    float num = float.PositiveInfinity;
-                    EnemyIdentifier newTarget = null;
-                    int num2 = 1;
-                    if (__instance.target && !__instance.target.dead)
-                    {
-                        num2 = Mathf.Max(MonoSingleton<EnemyTracker>.Instance.GetEnemyRank(__instance.target), 2);
-                    }
-                    for (int i = 6; i > num2; i--)
-                    {
-                        for (int j = 0; j < currentEnemies.Count; j++)
-                        {
-                            if (((!currentEnemies[j].blessed && currentEnemies[j].enemyType != EnemyType.Idol) || currentEnemies[j] == __instance.target) && (MonoSingleton<EnemyTracker>.Instance.GetEnemyRank(currentEnemies[j]) == i || (MonoSingleton<EnemyTracker>.Instance.GetEnemyRank(currentEnemies[j]) <= 2 && i == 2)))
-                            {
-                                if (currentEnemies[j].enemyType == EnemyType.Virtue)
-                                    continue;
-                                float num3 = Vector3.Distance(MonoSingleton<PlayerTracker>.Instance.GetPlayer().position, currentEnemies[j].transform.position);
-                                if (num3 < num)
-                                {
-                                    newTarget = currentEnemies[j];
-                                    flag = true;
-                                    num = num3;
-                                }
-                            }
-                        }
-                        if (flag)
-                        {
-                            typeof(Idol).GetMethod("ChangeTarget", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance).Invoke(__instance, new object[] { newTarget });
-                            break;
-                        }
-                    }
-
-                    if (!flag)
-                        typeof(Idol).GetMethod("ChangeTarget", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance).Invoke(__instance, new object[] { null });
+                    component.windUpSpeedMultiplier = 0.875f;
                 }
+                else if (___difficulty == 0)
+                {
+                    component.windUpSpeedMultiplier = 0.75f;
+                }
+                if (MonoSingleton<PlayerTracker>.Instance.playerType == PlayerType.Platformer)
+                {
+                    gameObject.transform.localScale *= 0.75f;
+                    component.windUpSpeedMultiplier *= 0.875f;
+                }
+                component.windUpSpeedMultiplier *= ___eid.totalSpeedModifier;
+                component.damage = Mathf.RoundToInt((float)component.damage * ___eid.totalDamageModifier);
 
-                __instance.Invoke("SlowUpdate", 0.2f);
-                return false;
+                return gameObject;
             }
 
-            return true;
+            GameObject xAxisInsignia = createInsignia(__instance, ref ___eid, ref ___difficulty, ref ___target);
+            xAxisInsignia.transform.Rotate(new Vector3(90, 0, 0));
+            xAxisInsignia.transform.localScale = new Vector3(xAxisInsignia.transform.localScale.x * horizontalInsigniaScale, xAxisInsignia.transform.localScale.y, xAxisInsignia.transform.localScale.z * horizontalInsigniaScale);
+            GameObject zAxisInsignia = createInsignia(__instance, ref ___eid, ref ___difficulty, ref ___target);
+            zAxisInsignia.transform.Rotate(new Vector3(0, 0, 90));
+            zAxisInsignia.transform.localScale = new Vector3(zAxisInsignia.transform.localScale.x * horizontalInsigniaScale, zAxisInsignia.transform.localScale.y, zAxisInsignia.transform.localScale.z * horizontalInsigniaScale);
         }
-    }
-
-    class IdolFlag : MonoBehaviour
-    {
-        public GameObject parent;
-        public bool keepAlive = true;
     }
 }
