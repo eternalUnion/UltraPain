@@ -15,6 +15,7 @@ namespace DifficultyTweak.Patches
     public class Projectile_Explode_Patch 
     {
         public static float windupSpeedMultiplier = 2.5f;
+        public static float beamSize = 2f;
 
         static void Postfix(Projectile __instance)
         {
@@ -23,7 +24,7 @@ namespace DifficultyTweak.Patches
                 return;
 
             GameObject insignia = GameObject.Instantiate(Plugin.virtueInsignia, __instance.transform.position, Quaternion.identity);
-            insignia.transform.localScale = new Vector3(0.8f, 1f, 0.8f);
+            insignia.transform.localScale = new Vector3(beamSize, 1f, beamSize);
             VirtueInsignia comp = insignia.GetComponent<VirtueInsignia>();
             comp.windUpSpeedMultiplier = windupSpeedMultiplier;
             comp.damage = 20;

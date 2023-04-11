@@ -76,6 +76,8 @@ namespace DifficultyTweak
         public static GameObject idol;
         public static GameObject ferryman;
 
+        public static GameObject enrageEffect;
+
 
         // Singleton prefabs
         private static GameObject _soliderBullet;
@@ -155,6 +157,8 @@ namespace DifficultyTweak
             virtueInsignia = bundle0.LoadAsset<GameObject>("assets/prefabs/virtueinsignia.prefab");
             //[bundle-0][assets/prefabs/projectileexplosivehh.prefab]
             hideousMassProjectile = bundle0.LoadAsset<GameObject>("assets/prefabs/projectileexplosivehh.prefab");
+            //[bundle-0][assets/particles/rageeffect.prefab]
+            enrageEffect = bundle0.LoadAsset<GameObject>("assets/particles/rageeffect.prefab");
 
             hideousMassProjectile.AddComponent<HideousMassProjectile>();
         }
