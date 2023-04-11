@@ -24,7 +24,7 @@ namespace DifficultyTweak.Patches
     {
         static bool Prefix(Mindflayer __instance, ref EnemyIdentifier ___eid, ref LayerMask ___environmentMask, ref bool ___enraged)
         {
-            for(int i = 0; i < 20; i++)
+            /*for(int i = 0; i < 20; i++)
             {
                 Quaternion randomRotation = Quaternion.LookRotation(MonoSingleton<PlayerTracker>.Instance.GetTarget().position - __instance.transform.position);
                 randomRotation.eulerAngles += new Vector3(UnityEngine.Random.Range(-15.0f, 15.0f), UnityEngine.Random.Range(-15.0f, 15.0f), UnityEngine.Random.Range(-15.0f, 15.0f));
@@ -40,13 +40,13 @@ namespace DifficultyTweak.Patches
                 componentInChildren.safeEnemyType = EnemyType.Mindflayer;
                 componentInChildren.damage *= ___eid.totalDamageModifier;
             }
-
+            
             __instance.chargeParticle.Stop(false, ParticleSystemStopBehavior.StopEmittingAndClear);
             __instance.cooldown = (float)UnityEngine.Random.Range(4, 5);
 
-            return false;
+            return false;*/
 
-            /*MindflayerPatch counter = __instance.GetComponent<MindflayerPatch>();
+            MindflayerPatch counter = __instance.GetComponent<MindflayerPatch>();
             if (counter.shotsLeft == 0)
             {
                 counter.shotsLeft = 20;
@@ -71,7 +71,7 @@ namespace DifficultyTweak.Patches
             counter.shotsLeft -= 1;
             __instance.Invoke("ShootProjectiles", 0.02f / ___eid.totalSpeedModifier);
 
-            return false;*/
+            return false;
         }
     }
 
@@ -96,9 +96,13 @@ namespace DifficultyTweak.Patches
             if (mf == null)
                 return;
 
-            MindflayerPatch patch = mf.gameObject.GetComponent<MindflayerPatch>();
+            //MindflayerPatch patch = mf.gameObject.GetComponent<MindflayerPatch>();
 
-            if (patch.swingComboLeft > 0)
+            __instance.DamageStop();
+            goForward.SetValue(mf, false);
+            meleeAttack.Invoke(mf, new object[] { });
+
+            /*if (patch.swingComboLeft > 0)
             {
                 patch.swingComboLeft -= 1;
                 __instance.DamageStop();
@@ -106,7 +110,7 @@ namespace DifficultyTweak.Patches
                 meleeAttack.Invoke(mf, new object[] { });
             }
             else
-                patch.swingComboLeft = 2;
+                patch.swingComboLeft = 2;*/
         }
     }
 

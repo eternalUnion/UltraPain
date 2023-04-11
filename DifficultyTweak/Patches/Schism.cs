@@ -15,15 +15,23 @@ namespace DifficultyTweak.Patches
 
         static void Postfix(ZombieProjectiles __instance, ref GameObject ___currentProjectile)
         {
-            Projectile proj = ___currentProjectile.GetComponent<Projectile>();
+            /*Projectile proj = ___currentProjectile.GetComponent<Projectile>();
             proj.target = MonoSingleton<PlayerTracker>.Instance.GetTarget();
             proj.speed *= speedMultiplier;
             proj.turningSpeedMultiplier = turningSpeedMultiplier;
-            proj.damage = damage;
+            proj.damage = damage;*/
+
+            GameObject leftProj = GameObject.Instantiate(___currentProjectile);
+            leftProj.transform.position += -leftProj.transform.right;
+            leftProj.transform.Rotate(new Vector3(0, -15, 0), Space.Self);
+
+            GameObject rightProj = GameObject.Instantiate(___currentProjectile);
+            rightProj.transform.position += leftProj.transform.right;
+            rightProj.transform.Rotate(new Vector3(0, 15, 0), Space.Self);
         }
     }
 
-    [HarmonyPatch(typeof(ZombieProjectiles), "Start")]
+    /*[HarmonyPatch(typeof(ZombieProjectiles), "Start")]
     class ZombieProjectile_Start_Patch
     {
         static void Postfix(ZombieProjectiles __instance, ref EnemyIdentifier ___eid)
@@ -34,5 +42,5 @@ namespace DifficultyTweak.Patches
             __instance.projectile = Plugin.homingProjectile;
             __instance.decProjectile = Plugin.decorativeProjectile2;
         }
-    }
+    }*/
 }

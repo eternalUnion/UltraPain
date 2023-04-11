@@ -44,7 +44,7 @@ namespace DifficultyTweak.Patches
         }
     }
 
-    [HarmonyPatch(typeof(SpiderBody))]
+    /*[HarmonyPatch(typeof(SpiderBody))]
     [HarmonyPatch("BeamChargeEnd")]
     class MaliciousFace_BeamChargeEnd_Patch
     {
@@ -54,9 +54,9 @@ namespace DifficultyTweak.Patches
                 return;
             ___parryable = false;
         }
-    }
+    }*/
 
-    [HarmonyPatch(typeof(HookArm))]
+    /*[HarmonyPatch(typeof(HookArm))]
     [HarmonyPatch("FixedUpdate")]
     class HookArm_FixedUpdate_MaliciousFacePatch
     {
@@ -72,5 +72,5 @@ namespace DifficultyTweak.Patches
                 __instance.StopThrow();
             }
         }
-    }
+    }*/
 }

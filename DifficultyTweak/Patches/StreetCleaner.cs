@@ -16,7 +16,7 @@ namespace DifficultyTweak.Patches
         }
     }
 
-    [HarmonyPatch(typeof(Streetcleaner))]
+    /*[HarmonyPatch(typeof(Streetcleaner))]
     [HarmonyPatch("StartFire")]
     class StreetCleaner_StartFire_Patch
     {
@@ -26,9 +26,9 @@ namespace DifficultyTweak.Patches
             __instance.CancelInvoke("StopFire");
             __instance.Invoke("StartDamaging", 0.1f);
         }
-    }
+    }*/
 
-    [HarmonyPatch(typeof(Streetcleaner))]
+    /*[HarmonyPatch(typeof(Streetcleaner))]
     [HarmonyPatch("Update")]
     class StreetCleaner_Update_Patch
     {
@@ -48,7 +48,7 @@ namespace DifficultyTweak.Patches
                 __instance.Invoke("StartFire", 0.1f);
             }
         }
-    }
+    }*/
 
     [HarmonyPatch(typeof(Streetcleaner))]
     [HarmonyPatch("Dodge")]

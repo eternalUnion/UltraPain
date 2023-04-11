@@ -18,7 +18,7 @@ namespace DifficultyTweak.Patches
         public GameObject standardDecorativeProjectile;
 
         public int comboRemaining = 3;
-        public bool inCombo = true;
+        public bool inCombo = false;
 
         public float lastSpeed = 1f;
 
@@ -78,7 +78,7 @@ namespace DifficultyTweak.Patches
     public class ZombieProjectile_ThrowProjectile_Patch
     {
         public static float normalizedTime = 0f;
-        public static float animSpeed = 25f;
+        public static float animSpeed = 20f;
 
         public static float projectileSpeed = 75;
         public static float turnSpeedMultiplier = 0.45f;
@@ -120,12 +120,12 @@ namespace DifficultyTweak.Patches
                 if (flag.comboRemaining == 0)
                 {
                     flag.comboRemaining = 3;
-                    flag.currentMode = StrayFlag.AttackMode.FastHoming;
+                    //flag.currentMode = StrayFlag.AttackMode.FastHoming;
                     flag.inCombo = false;
                     ___anim.speed = flag.lastSpeed;
                     ___anim.SetFloat("Speed", flag.lastSpeed);
-                    __instance.projectile = Plugin.homingProjectile;
-                    __instance.decProjectile = Plugin.decorativeProjectile2;
+                    //__instance.projectile = Plugin.homingProjectile;
+                    //__instance.decProjectile = Plugin.decorativeProjectile2;
                 }
                 else
                 {
