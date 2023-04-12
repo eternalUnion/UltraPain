@@ -17,8 +17,15 @@ using DifficultyTweak.Patches;
 namespace DifficultyTweak
 {
     [BepInPlugin(PLUGIN_GUID, PLUGIN_NAME, PLUGIN_VERSION)]
+    [BepInDependency("com.eternalUnion.pluginConfigurator")]
     public class Plugin : BaseUnityPlugin
     {
+        const string PLUGIN_GUID = "com.eternalUnion.ultraPain";
+        const string PLUGIN_NAME = "Ultra Pain";
+        const string PLUGIN_VERSION = "1.0.0";
+
+        public static Plugin instance;
+
         public static string bundlePath = Path.Combine(Environment.CurrentDirectory, "ULTRAKILL_Data", "StreamingAssets", "Magenta", "Bundles");
         public static AssetBundle GetAssetBundle(string name)
         {
@@ -35,12 +42,6 @@ namespace DifficultyTweak
 
             return bundle;
         }
-
-        public static Plugin instance;
-
-        const string PLUGIN_GUID = "com.eternalUnion.ultraPain";
-        const string PLUGIN_NAME = "Ultra Pain";
-        const string PLUGIN_VERSION = "1.0.0";
 
         public static Vector3 PredictPlayerPosition(Collider safeCollider, float speedMod)
         {   
