@@ -13,6 +13,8 @@ using System.Runtime.CompilerServices;
 using System.IO;
 using UnityEngine.Experimental.AssetBundlePatching;
 using DifficultyTweak.Patches;
+using System.Linq;
+using UnityEngine.UI;
 
 namespace DifficultyTweak
 {
@@ -164,9 +166,22 @@ namespace DifficultyTweak
             hideousMassProjectile.AddComponent<HideousMassProjectile>();
         }
 
+        public static bool ultrapainDifficulty = false;
+        public static string difficultyText = "ULTRAPAIN";
         public void OnSceneChange(Scene before, Scene after)
         {
             StyleIDs.RegisterIDs();
+
+            if(SceneManager.GetActiveScene().name == "Main Menu")
+            {
+                //Canvas/Difficulty Select (1)/Violent
+                Transform difficultySelect = SceneManager.GetActiveScene().GetRootGameObjects().Where(obj => obj.name == "Canvas").First().transform.Find("Difficulty Select (1)");
+                GameObject ultrapainButton = GameObject.Instantiate(difficultySelect.Find("Violent").gameObject, difficultySelect);
+
+                ultrapainButton.transform.Find("Name").GetComponent<Text>().text = difficultyText;
+                RectTransform ultrapainTrans = ultrapainButton.GetComponent<RectTransform>();
+                ultrapainTrans.anchoredPosition = new Vector2(20f, -104f);
+            }
         }
 
         public static class StyleIDs
