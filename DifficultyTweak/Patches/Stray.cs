@@ -17,7 +17,7 @@ namespace DifficultyTweak.Patches
         public GameObject standardProjectile;
         public GameObject standardDecorativeProjectile;
 
-        public int comboRemaining = 3;
+        public int comboRemaining = ConfigManager.strayShootCount.value;
         public bool inCombo = false;
 
         public float lastSpeed = 1f;
@@ -34,11 +34,6 @@ namespace DifficultyTweak.Patches
         {
             anim = GetComponent<Animator>();
             eid = GetComponent<EnemyIdentifier>();
-        }
-
-        public void LateCombo()
-        {
-            anim.Play("ThrowProjectile", 0, ZombieProjectile_ThrowProjectile_Patch.normalizedTime);
         }
 
         public void Update()
@@ -63,6 +58,9 @@ namespace DifficultyTweak.Patches
         static void Postfix(ZombieProjectiles __instance, ref EnemyIdentifier ___eid)
         {
             if (___eid.enemyType != EnemyType.Stray)
+                return;
+
+            if (!Plugin.ultrapainDifficulty || !ConfigManager.enemyTweakToggle.value || !ConfigManager.strayShootToggle.value)
                 return;
 
             StrayFlag flag = __instance.gameObject.AddComponent<StrayFlag>();
@@ -119,7 +117,7 @@ namespace DifficultyTweak.Patches
 
                 if (flag.comboRemaining == 0)
                 {
-                    flag.comboRemaining = 3;
+                    flag.comboRemaining = ConfigManager.strayShootCount.value;
                     //flag.currentMode = StrayFlag.AttackMode.FastHoming;
                     flag.inCombo = false;
                     ___anim.speed = flag.lastSpeed;
@@ -136,8 +134,8 @@ namespace DifficultyTweak.Patches
                     __instance.transform.LookAt(new Vector3(___zmb.target.position.x, __instance.transform.position.y, ___zmb.target.position.z));
                     flag.lastSpeed = ___anim.speed;
                     //___anim.Play("ThrowProjectile", 0, ZombieProjectile_ThrowProjectile_Patch.normalizedTime);
-                    ___anim.speed = animSpeed;
-                    ___anim.SetFloat("Speed", animSpeed);
+                    ___anim.speed = ConfigManager.strayShootSpeed.value;
+                    ___anim.SetFloat("Speed", ConfigManager.strayShootSpeed.value);
                     ___anim.SetTrigger("Swing");
                     //___anim.SetFloat("AttackType", 0f);
                     //___anim.StopPlayback();

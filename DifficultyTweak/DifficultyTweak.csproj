@@ -43,6 +43,9 @@
     <Reference Include="Facepunch.Steamworks.Win64">
       <HintPath>Libs\Facepunch.Steamworks.Win64.dll</HintPath>
     </Reference>
+    <Reference Include="PluginConfigurator">
+      <HintPath>D:\Games\UltrakillPatch\ULTRAKILL\ULTRAKILL\BepInEx\plugins\PluginConfigurator\PluginConfigurator.dll</HintPath>
+    </Reference>
     <Reference Include="UnityEngine.AssetBundleModule">
       <HintPath>Libs\UnityEngine.AssetBundleModule.dll</HintPath>
     </Reference>

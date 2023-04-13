@@ -12,6 +12,9 @@ namespace DifficultyTweak.Patches
     {
         static void Postfix(Streetcleaner __instance, ref EnemyIdentifier ___eid)
         {
+            if (!Plugin.ultrapainDifficulty || !ConfigManager.enemyTweakToggle.value || !ConfigManager.streetCleanerCoinsIgnoreWeakPointToggle.value)
+                return;
+
             ___eid.weakPoint = null;
         }
     }
@@ -50,7 +53,7 @@ namespace DifficultyTweak.Patches
         }
     }*/
 
-    [HarmonyPatch(typeof(Streetcleaner))]
+    /*[HarmonyPatch(typeof(Streetcleaner))]
     [HarmonyPatch("Dodge")]
     class StreetCleaner_Dodge_Patch
     {
@@ -67,7 +70,7 @@ namespace DifficultyTweak.Patches
             if(didDodge)
                 ___dodgeCooldown = UnityEngine.Random.Range(0f, 1f);
         }
-    }
+    }*/
 
     [HarmonyPatch(typeof(BulletCheck))]
     [HarmonyPatch("OnTriggerEnter")]
@@ -76,6 +79,9 @@ namespace DifficultyTweak.Patches
         static void Postfix(BulletCheck __instance, Collider __0)
         {
             if (!(__instance.type == CheckerType.Streetcleaner && __0.gameObject.layer == 14))
+                return;
+
+            if (!Plugin.ultrapainDifficulty || !ConfigManager.enemyTweakToggle.value || !ConfigManager.streetCleanerPredictiveDodgeToggle.value)
                 return;
 
             Grenade grn = __0.GetComponent<Grenade>();

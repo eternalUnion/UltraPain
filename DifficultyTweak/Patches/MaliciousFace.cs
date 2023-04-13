@@ -12,6 +12,9 @@ namespace DifficultyTweak.Patches
     {
         static void Postfix(SpiderBody __instance, ref GameObject ___proj)
         {
+            if (!Plugin.ultrapainDifficulty || !ConfigManager.enemyTweakToggle.value || !ConfigManager.maliciousFaceHomingProjectileToggle.value)
+                return;
+
             if (Plugin.homingProjectile.gameObject != null)
                 ___proj = Plugin.maliciousFaceBullet;
         }
@@ -23,10 +26,14 @@ namespace DifficultyTweak.Patches
     {
         static void Postfix(SpiderBody __instance, ref GameObject ___currentProj)
         {
+            if (!Plugin.ultrapainDifficulty || !ConfigManager.enemyTweakToggle.value || !ConfigManager.maliciousFaceHomingProjectileToggle.value)
+                return;
+
             Projectile proj = ___currentProj.GetComponent<Projectile>();
             proj.target = MonoSingleton<PlayerTracker>.Instance.GetTarget();
-            proj.speed = 20;
-            proj.turningSpeedMultiplier = 0.4f;
+            proj.speed = ConfigManager.maliciousFaceHomingProjectileSpeed.value;
+            proj.turningSpeedMultiplier = ConfigManager.maliciousFaceHomingProjectileTurnSpeed.value;
+            proj.damage = ConfigManager.maliciousFaceHomingProjectileDamage.value;
             ___currentProj.SetActive(true);
         }
     }
@@ -37,8 +44,12 @@ namespace DifficultyTweak.Patches
     {
         static void Postfix(SpiderBody __instance)
         {
+            if (!Plugin.ultrapainDifficulty || !ConfigManager.enemyTweakToggle.value || !ConfigManager.maliciousFaceRadianceOnEnrage.value)
+                return;
+
             EnemyIdentifier comp = __instance.GetComponent<EnemyIdentifier>();
-            comp.BuffAll();
+            for(int i = 0; i < ConfigManager.maliciousFaceRadianceAmount.value; i++)
+                comp.BuffAll();
 
             __instance.spark = new GameObject();
         }

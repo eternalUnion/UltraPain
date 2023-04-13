@@ -1,4 +1,5 @@
 ﻿using HarmonyLib;
+using PluginConfig.API;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -30,9 +31,17 @@ namespace DifficultyTweak.Patches
     {
         static bool Prefix(Punch __instance, Transform __0, ref bool __result, ref bool ___hitSomething)
         {
+            if (!Plugin.ultrapainDifficulty || !ConfigManager.playerTweakToggle.value)
+                return true;
+
             Grenade grn = __0.GetComponent<Grenade>();
             if(grn != null)
             {
+                if (grn.rocket && !ConfigManager.rocketBoostToggle.value)
+                    return true;
+                if (!ConfigManager.grenadeBoostToggle.value)
+                    return true;
+
                 MonoSingleton<TimeController>.Instance.ParryFlash();
                 ___hitSomething = true;
 
@@ -56,9 +65,10 @@ namespace DifficultyTweak.Patches
                 {
                     flag = grn.gameObject.AddComponent<GrenadeParriedFlag>();
                     flag.grenadeType = (grn.rocket) ? GrenadeParriedFlag.GrenadeType.Rocket : GrenadeParriedFlag.GrenadeType.Core;
-                    grn.rocketSpeed *= 1.5f;
                     flag.weapon = MonoSingleton<GunControl>.Instance.currentWeapon;
                 }
+
+                grn.rocketSpeed *= 1f + ConfigManager.rocketBoostSpeedMultiplierPerHit.value;
 
                 __result = true;
                 return false;
@@ -70,7 +80,7 @@ namespace DifficultyTweak.Patches
 
     [HarmonyPatch(typeof(Grenade))]
     [HarmonyPatch("Explode")]
-    class Grenade_Explode_Patch
+    class Grenade_Explode_Patch1
     {
         public static float rocketInitialStatOnParry = 0.35f;
         public static float rocketExtraStatPerParry = 0.35f;
@@ -86,21 +96,21 @@ namespace DifficultyTweak.Patches
                 bool rocketParried = flag != null;
                 bool rocketHitGround = __1;
 
-                float statMultiplier = 1f + rocketInitialStatOnParry + rocketExtraStatPerParry * (flag.parryCount - 1);
                 flag.temporaryBigExplosion = GameObject.Instantiate(__instance.superExplosion, new Vector3(1000000, 1000000, 1000000), Quaternion.identity);
                 __instance.superExplosion = flag.temporaryBigExplosion;
                 foreach (Explosion e in __instance.superExplosion.GetComponentsInChildren<Explosion>())
                 {
-                    e.speed *= statMultiplier;
-                    e.damage = (int)(e.damage * statMultiplier);
-                    e.maxSize *= statMultiplier;
+                    e.speed *= 1f + ConfigManager.rocketBoostSizeMultiplierPerHit.value * flag.parryCount;
+                    e.damage *= (int)(1f + ConfigManager.rocketBoostDamageMultiplierPerHit.value * flag.parryCount);
+                    e.maxSize *= 1f + ConfigManager.rocketBoostSizeMultiplierPerHit.value * flag.parryCount;
                 }
 
                 flag.temporaryExplosion = GameObject.Instantiate(__instance.explosion, new Vector3(1000000, 1000000, 1000000), Quaternion.identity);
                 __instance.explosion = flag.temporaryExplosion;
                 if (rocketParried/* && rocketHitGround*/)
                 {
-                    __1 = false;
+                    if(!rocketHitGround || ConfigManager.rocketBoostAlwaysExplodesToggle.value)
+                        __1 = false;
 
                     foreach(Explosion e in flag.temporaryExplosion.GetComponentsInChildren<Explosion>())
                     {
@@ -114,9 +124,9 @@ namespace DifficultyTweak.Patches
 
                 foreach (Explosion e in __instance.explosion.GetComponentsInChildren<Explosion>())
                 {
-                    e.speed *= statMultiplier;
-                    e.damage = (int)(e.damage * statMultiplier);
-                    e.maxSize *= statMultiplier;
+                    e.speed *= 1f + ConfigManager.rocketBoostSizeMultiplierPerHit.value * flag.parryCount;
+                    e.damage *= (int)(1f + ConfigManager.rocketBoostDamageMultiplierPerHit.value * flag.parryCount);
+                    e.maxSize *= 1f + ConfigManager.rocketBoostSizeMultiplierPerHit.value * flag.parryCount;
                 }
             }
             else
@@ -124,6 +134,15 @@ namespace DifficultyTweak.Patches
                 if (flag != null && flag.bigExplosionOverride)
                 {
                     __2 = true;
+                    GameObject explosion = GameObject.Instantiate(__instance.superExplosion);
+                    foreach(Explosion exp in explosion.GetComponentsInChildren<Explosion>())
+                    {
+                        exp.damage = (int)(exp.damage * ConfigManager.grenadeBoostDamageMultiplier.value);
+                        exp.maxSize *= ConfigManager.grenadeBoostSizeMultiplier.value;
+                        exp.speed *= ConfigManager.grenadeBoostSizeMultiplier.value;
+                    }
+                    __instance.superExplosion = explosion;
+                    flag.temporaryBigExplosion = explosion;
                 }
             }
 
@@ -132,17 +151,25 @@ namespace DifficultyTweak.Patches
 
         static void Postfix(Grenade __instance, ref bool ___exploded)
         {
+            GrenadeParriedFlag flag = __instance.GetComponent<GrenadeParriedFlag>();
+            if (flag == null)
+                return;
+
             if (__instance.rocket)
             {
-                GrenadeParriedFlag flag = __instance.GetComponent<GrenadeParriedFlag>();
-                if (flag == null)
-                    return;
-
                 if (flag.temporaryExplosion != null)
                 {
                     GameObject.Destroy(flag.temporaryExplosion);
                     flag.temporaryExplosion = null;
                 }
+                if (flag.temporaryBigExplosion != null)
+                {
+                    GameObject.Destroy(flag.temporaryBigExplosion);
+                    flag.temporaryBigExplosion = null;
+                }
+            }
+            else
+            {
                 if (flag.temporaryBigExplosion != null)
                 {
                     GameObject.Destroy(flag.temporaryBigExplosion);
@@ -164,6 +191,9 @@ namespace DifficultyTweak.Patches
             if (flag == null)
                 return true;
 
+            //if (!Plugin.ultrapainDifficulty || !ConfigManager.playerTweakToggle.value || !ConfigManager.grenadeBoostToggle.value)
+            //    return true;
+
             if (__0.gameObject.layer != 14 && __0.gameObject.layer != 20)
             {
                 EnemyIdentifierIdentifier enemyIdentifierIdentifier;
@@ -173,12 +203,20 @@ namespace DifficultyTweak.Patches
                     {
                         lastTime = Time.time;
                         flag.bigExplosionOverride = true;
-                        MonoSingleton<StyleHUD>.Instance.AddPoints(100, Plugin.StyleIDs.fistfulOfNades, MonoSingleton<GunControl>.Instance.currentWeapon, null);
+
+                        MonoSingleton<StyleHUD>.Instance.AddPoints(ConfigManager.grenadeBoostStylePoints.value, Plugin.StyleIDs.fistfulOfNades, MonoSingleton<GunControl>.Instance.currentWeapon, null);
                     }
                 }
             }
 
             return true;
+        }
+
+        static void Postfix(Grenade __instance)
+        {
+            GrenadeParriedFlag flag = __instance.GetComponent<GrenadeParriedFlag>();
+            if (flag == null)
+                return;
         }
     }
 
@@ -202,7 +240,7 @@ namespace DifficultyTweak.Patches
                 {
                     flag.registeredStyle = true;
                     lastTime = Time.time;
-                    MonoSingleton<StyleHUD>.Instance.AddPoints(25, Plugin.StyleIDs.rocketBoost, flag.weapon, null, flag.parryCount);
+                    MonoSingleton<StyleHUD>.Instance.AddPoints(ConfigManager.rocketBoostStylePoints.value, Plugin.StyleIDs.rocketBoost, flag.weapon, null, flag.parryCount);
                 }
             }
 

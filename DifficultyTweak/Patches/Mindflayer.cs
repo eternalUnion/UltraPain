@@ -46,10 +46,13 @@ namespace DifficultyTweak.Patches
 
             return false;*/
 
+            if (!Plugin.ultrapainDifficulty || !ConfigManager.enemyTweakToggle.value || !ConfigManager.mindflayerShootTweakToggle.value)
+                return true;
+
             MindflayerPatch counter = __instance.GetComponent<MindflayerPatch>();
             if (counter.shotsLeft == 0)
             {
-                counter.shotsLeft = 20;
+                counter.shotsLeft = ConfigManager.mindflayerShootAmount.value;
                 __instance.chargeParticle.Stop(false, ParticleSystemStopBehavior.StopEmittingAndClear);
                 __instance.cooldown = (float)UnityEngine.Random.Range(4, 5);
                 return false;
@@ -69,7 +72,7 @@ namespace DifficultyTweak.Patches
             componentInChildren.safeEnemyType = EnemyType.Mindflayer;
             componentInChildren.damage *= ___eid.totalDamageModifier;
             counter.shotsLeft -= 1;
-            __instance.Invoke("ShootProjectiles", 0.02f / ___eid.totalSpeedModifier);
+            __instance.Invoke("ShootProjectiles", ConfigManager.mindflayerShootDelay.value / ___eid.totalSpeedModifier);
 
             return false;
         }
@@ -94,6 +97,9 @@ namespace DifficultyTweak.Patches
             Mindflayer mf = parent.GetComponent<Mindflayer>();
 
             if (mf == null)
+                return;
+
+            if (!Plugin.ultrapainDifficulty || !ConfigManager.enemyTweakToggle.value || !ConfigManager.mindflayerTeleportComboToggle.value)
                 return;
 
             //MindflayerPatch patch = mf.gameObject.GetComponent<MindflayerPatch>();

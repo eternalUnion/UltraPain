@@ -11,8 +11,8 @@ namespace DifficultyTweak.Patches
     {
         static bool Prefix(DiscordController __instance, ref Activity ___cachedActivity)
         {
-            if(___cachedActivity.State != null && ___cachedActivity.State == "DIFFICULTY: VIOLENT")
-                ___cachedActivity.State = "DIFFICULTY: ULTRAKILL MUST DIE";
+            if(___cachedActivity.State != null && ___cachedActivity.State == "DIFFICULTY: VIOLENT" && Plugin.ultrapainDifficulty && ConfigManager.discordRichPresenceToggle.value)
+                ___cachedActivity.State = $"DIFFICULTY: {ConfigManager.pluginName.value}";
             return true;
         }
     }

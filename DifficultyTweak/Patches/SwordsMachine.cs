@@ -14,7 +14,10 @@ namespace DifficultyTweak.Patches
     {
         static bool Prefix(SwordsMachine __instance, bool __0, ref Animator ___anim)
         {
-            if(__0 == true)
+            if (!Plugin.ultrapainDifficulty || !ConfigManager.enemyTweakToggle.value || !ConfigManager.swordsMachineNoLightKnockbackToggle.value)
+                return true;
+
+            if (__0 == true)
             {
                 __instance.Enrage();
                 return false;
@@ -84,6 +87,9 @@ namespace DifficultyTweak.Patches
     {
         static void Postfix(ThrownSword __instance)
         {
+            if (!Plugin.ultrapainDifficulty || !ConfigManager.enemyTweakToggle.value || !ConfigManager.swordsMachineExplosiveSwordToggle.value)
+                return;
+
             __instance.gameObject.AddComponent<ThrownSwordCollisionDetector>();
         }
     }
@@ -94,6 +100,9 @@ namespace DifficultyTweak.Patches
     {
         static void Postfix(ThrownSword __instance, Collider __0)
         {
+            if (!Plugin.ultrapainDifficulty || !ConfigManager.enemyTweakToggle.value || !ConfigManager.swordsMachineExplosiveSwordToggle.value)
+                return;
+
             if (__0.gameObject.tag == "Player")
             {
                 GameObject explosionObj = GameObject.Instantiate(Plugin.shotgunGrenade.gameObject.GetComponent<Grenade>().explosion, __0.gameObject.transform.position, __0.gameObject.transform.rotation);
@@ -126,9 +135,9 @@ namespace DifficultyTweak.Patches
             foreach (Explosion explosion in explosionObj.GetComponentsInChildren<Explosion>())
             {
                 explosion.enemy = true;
-                explosion.damage /= 2;
-                explosion.maxSize /= 2;
-                explosion.speed /= 2;
+                explosion.damage = ConfigManager.swordsMachineExplosiveSwordDamage.value;
+                explosion.maxSize *= ConfigManager.swordsMachineExplosiveSwordSize.value;
+                explosion.speed *= ConfigManager.swordsMachineExplosiveSwordSize.value;
             }
 
             gameObject.GetComponent<ThrownSword>().Invoke("Return", 0.1f);

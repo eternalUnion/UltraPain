@@ -17,13 +17,15 @@ namespace DifficultyTweak.Patches
             if (___eid.enemyType != EnemyType.Soldier)
                 return;
 
+            if (!Plugin.ultrapainDifficulty || !ConfigManager.enemyTweakToggle.value || !ConfigManager.soliderShootTweakToggle.value)
+                return;
+
             /*___projectile = Plugin.soliderBullet;
 
             if (Plugin.decorativeProjectile2.gameObject != null)
                 ___decProjectile = Plugin.decorativeProjectile2.gameObject;*/
 
             __instance.gameObject.AddComponent<SoliderShootCounter>();
-            ___eid.weakPoint = null;
         }
     }
 
@@ -33,8 +35,16 @@ namespace DifficultyTweak.Patches
     {
         static void Postfix(ZombieProjectiles __instance, ref EnemyIdentifier ___eid, ref GameObject ___origWP)
         {
+            if (!Plugin.ultrapainDifficulty || !ConfigManager.enemyTweakToggle.value || !ConfigManager.soliderCoinsIgnoreWeakPointToggle.value)
+                return;
+
             ___eid.weakPoint = null;
         }
+    }
+
+    class SoliderGrenadeFlag : MonoBehaviour
+    {
+        public GameObject tempExplosion;
     }
 
     [HarmonyPatch(typeof(ZombieProjectiles))]
@@ -44,6 +54,9 @@ namespace DifficultyTweak.Patches
         static void Postfix(ZombieProjectiles __instance, ref GameObject ___currentProjectile, ref EnemyIdentifier ___eid, ref GameObject ___player, ref Animator ___anim, ref float ___coolDown)
         {
             if (___eid.enemyType != EnemyType.Soldier)
+                return;
+
+            if (!Plugin.ultrapainDifficulty || !ConfigManager.enemyTweakToggle.value || !ConfigManager.soliderShootTweakToggle.value)
                 return;
 
             ___currentProjectile.GetComponent<ProjectileSpread>().spreadAmount = 10;
@@ -60,7 +73,7 @@ namespace DifficultyTweak.Patches
 
                 ___coolDown = 0;
 
-                if(counter.remainingShots == 0)
+                if(counter.remainingShots == 0 && ConfigManager.soliderShootGrenadeToggle.value)
                 {
                     GameObject grenade = GameObject.Instantiate(Plugin.shotgunGrenade.gameObject, ___currentProjectile.transform.position, ___currentProjectile.transform.rotation);
                     grenade.transform.Translate(Vector3.forward * 0.5f);
@@ -78,16 +91,50 @@ namespace DifficultyTweak.Patches
 
                     grenade.GetComponent<Grenade>().enemy = true;
                     grenade.GetComponent<Grenade>().CanCollideWithPlayer(true);
+                    grenade.AddComponent<SoliderGrenadeFlag>();
                 }
                 return;
             }
 
-            counter.remainingShots = 2;
+            counter.remainingShots = ConfigManager.soliderShootCount.value;
+        }
+    }
+
+    [HarmonyPatch(typeof(Grenade), nameof(Grenade.Explode))]
+    class Grenade_Explode_Patch
+    {
+        static bool Prefix(Grenade __instance, out bool __state)
+        {
+            __state = false;
+            SoliderGrenadeFlag flag = __instance.GetComponent<SoliderGrenadeFlag>();
+            if (flag == null)
+                return true;
+
+            flag.tempExplosion = GameObject.Instantiate(__instance.explosion);
+            __state = true;
+            foreach(Explosion e in flag.tempExplosion.GetComponentsInChildren<Explosion>())
+            {
+                e.damage = ConfigManager.soliderGrenadeDamage.value;
+                e.maxSize *= ConfigManager.soliderGrenadeSize.value;
+                e.speed *= ConfigManager.soliderGrenadeSize.value;
+            }
+            __instance.explosion = flag.tempExplosion;
+
+            return true;
+        }
+
+        static void Postfix(Grenade __instance, bool __state)
+        {
+            if (!__state)
+                return;
+
+            SoliderGrenadeFlag flag = __instance.GetComponent<SoliderGrenadeFlag>();
+            GameObject.Destroy(flag.tempExplosion);
         }
     }
 
     class SoliderShootCounter : MonoBehaviour
     {
-        public int remainingShots = 2;
+        public int remainingShots = ConfigManager.soliderShootCount.value;
     }
 }

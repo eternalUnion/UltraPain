@@ -11,8 +11,11 @@ namespace DifficultyTweak.Patches
     {
         static void Postfix(DifficultyTitle __instance, ref Text ___txt)
         {
-            if(___txt.text == "-- VIOLENT --")
-                ___txt.text = "-- ULTRAKILL MUST DIE --";
+            if (___txt.text.Contains("VIOLENT") && Plugin.ultrapainDifficulty)
+                ___txt.text = ___txt.text.Replace("VIOLENT", ConfigManager.pluginName.value);
+
+            //if (___txt.text == "-- VIOLENT --" && Plugin.ultrapainDifficulty)
+            //    ___txt.text = "-- ULTRAPAIN --";
         }
     }
 }

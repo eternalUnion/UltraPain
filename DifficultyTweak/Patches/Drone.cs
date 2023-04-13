@@ -25,7 +25,7 @@ namespace DifficultyTweak.Patches
     {
         static bool Prefix(Drone __instance, ref EnemyIdentifier ___eid)
         {
-            if (___eid.enemyType != EnemyType.Drone)
+            if (___eid.enemyType != EnemyType.Drone || !Plugin.ultrapainDifficulty || !ConfigManager.enemyTweakToggle.value)
                 return true;
 
             DroneFlag flag = __instance.GetComponent<DroneFlag>();
@@ -36,6 +36,23 @@ namespace DifficultyTweak.Patches
             }
 
             DroneFlag.Firemode mode = flag.currentMode;
+
+            while (true)
+            {
+                if(mode == DroneFlag.Firemode.Explosive && !ConfigManager.droneExplosionBeamToggle.value)
+                {
+                    mode = DroneFlag.GetNextFireMode(mode);
+                    continue;
+                }
+                if(mode == DroneFlag.Firemode.TurretBeam && !ConfigManager.droneSentryBeamToggle.value)
+                {
+                    mode = DroneFlag.GetNextFireMode(mode);
+                    continue;
+                }
+
+                break;
+            }
+
             flag.currentMode = DroneFlag.GetNextFireMode(mode);
 
             if (mode == DroneFlag.Firemode.Projectile)
@@ -56,7 +73,7 @@ namespace DifficultyTweak.Patches
                 GameObject turretBeam = GameObject.Instantiate(Plugin.turretBeam.gameObject, __instance.transform.position + __instance.transform.forward * 2f, __instance.transform.rotation);
                 if (turretBeam.TryGetComponent<RevolverBeam>(out RevolverBeam revBeam))
                 {
-                    revBeam.damage = 2;
+                    revBeam.damage = ConfigManager.droneSentryBeamDamage.value;
                     revBeam.damage *= ___eid.totalDamageModifier;
                     revBeam.alternateStartPoint = __instance.transform.position + __instance.transform.forward;
                     revBeam.ignoreEnemyType = EnemyType.Drone;

@@ -9,10 +9,6 @@ namespace DifficultyTweak.Patches
     [HarmonyPatch(typeof(ZombieProjectiles), nameof(ZombieProjectiles.ShootProjectile))]
     class ZombieProjectile_ShootProjectile_Patch
     {
-        public static float speedMultiplier = 2;
-        public static float turningSpeedMultiplier = 1f;
-        public static int damage = 10;
-
         static void Postfix(ZombieProjectiles __instance, ref GameObject ___currentProjectile)
         {
             /*Projectile proj = ___currentProjectile.GetComponent<Projectile>();
@@ -21,13 +17,23 @@ namespace DifficultyTweak.Patches
             proj.turningSpeedMultiplier = turningSpeedMultiplier;
             proj.damage = damage;*/
 
-            GameObject leftProj = GameObject.Instantiate(___currentProjectile);
-            leftProj.transform.position += -leftProj.transform.right;
-            leftProj.transform.Rotate(new Vector3(0, -15, 0), Space.Self);
+            if (!Plugin.ultrapainDifficulty || !ConfigManager.enemyTweakToggle.value || !ConfigManager.schismSpreadAttackToggle.value)
+                return;
 
-            GameObject rightProj = GameObject.Instantiate(___currentProjectile);
-            rightProj.transform.position += leftProj.transform.right;
-            rightProj.transform.Rotate(new Vector3(0, 15, 0), Space.Self);
+            float degreePerIteration = ConfigManager.schismSpreadAttackAngle.value / ConfigManager.schismSpreadAttackCount.value;
+            float currentDegree = degreePerIteration;
+            for (int i = 0; i < ConfigManager.schismSpreadAttackCount.value; i++)
+            {
+                GameObject leftProj = GameObject.Instantiate(___currentProjectile);
+                leftProj.transform.position += -leftProj.transform.right;
+                leftProj.transform.Rotate(new Vector3(0, -currentDegree, 0), Space.Self);
+
+                GameObject rightProj = GameObject.Instantiate(___currentProjectile);
+                rightProj.transform.position += leftProj.transform.right;
+                rightProj.transform.Rotate(new Vector3(0, currentDegree, 0), Space.Self);
+
+                currentDegree += degreePerIteration;
+            }
         }
     }
 

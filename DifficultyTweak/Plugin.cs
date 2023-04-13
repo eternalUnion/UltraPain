@@ -16,15 +16,19 @@ using DifficultyTweak.Patches;
 using System.Linq;
 using UnityEngine.UI;
 
+using PluginConfig;
+using PluginConfig.API;
+using UnityEngine.EventSystems;
+
 namespace DifficultyTweak
 {
     [BepInPlugin(PLUGIN_GUID, PLUGIN_NAME, PLUGIN_VERSION)]
     [BepInDependency("com.eternalUnion.pluginConfigurator")]
     public class Plugin : BaseUnityPlugin
     {
-        const string PLUGIN_GUID = "com.eternalUnion.ultraPain";
-        const string PLUGIN_NAME = "Ultra Pain";
-        const string PLUGIN_VERSION = "1.0.0";
+        public const string PLUGIN_GUID = "com.eternalUnion.ultraPain";
+        public const string PLUGIN_NAME = "Ultra Pain";
+        public const string PLUGIN_VERSION = "1.0.0";
 
         public static Plugin instance;
 
@@ -167,7 +171,8 @@ namespace DifficultyTweak
         }
 
         public static bool ultrapainDifficulty = false;
-        public static string difficultyText = "ULTRAPAIN";
+        public static GameObject currentDifficultyButton;
+        public static GameObject currentDifficultyPanel;
         public void OnSceneChange(Scene before, Scene after)
         {
             StyleIDs.RegisterIDs();
@@ -177,10 +182,49 @@ namespace DifficultyTweak
                 //Canvas/Difficulty Select (1)/Violent
                 Transform difficultySelect = SceneManager.GetActiveScene().GetRootGameObjects().Where(obj => obj.name == "Canvas").First().transform.Find("Difficulty Select (1)");
                 GameObject ultrapainButton = GameObject.Instantiate(difficultySelect.Find("Violent").gameObject, difficultySelect);
+                currentDifficultyButton = ultrapainButton;
 
-                ultrapainButton.transform.Find("Name").GetComponent<Text>().text = difficultyText;
+                ultrapainButton.transform.Find("Name").GetComponent<Text>().text = ConfigManager.pluginName.value;
                 RectTransform ultrapainTrans = ultrapainButton.GetComponent<RectTransform>();
                 ultrapainTrans.anchoredPosition = new Vector2(20f, -104f);
+
+                //Canvas/Difficulty Select (1)/Violent Info
+                GameObject info = GameObject.Instantiate(difficultySelect.Find("Violent Info").gameObject, difficultySelect);
+                currentDifficultyPanel = info;
+                info.transform.Find("Text").GetComponent<Text>().text =
+                    """
+                    Fast and aggressive enemies with unique attack patterns.
+
+                    Quick thinking, mobility options, and a decent understanding of the vanilla game are essential.
+
+                    <color=red>Recommended for players who have gotten used to VIOLENT's changes and are looking to freshen up their gameplay with unique enemy mechanics.</color>
+                    """;
+                info.transform.Find("Title (1)").GetComponent<Text>().text = $"--{ConfigManager.pluginName.value}--";
+                info.SetActive(false);
+
+                EventTrigger evt = ultrapainButton.GetComponent<EventTrigger>();
+                evt.triggers.Clear();
+
+                /*EventTrigger.TriggerEvent activate = new EventTrigger.TriggerEvent();
+                activate.AddListener((BaseEventData data) => info.SetActive(true));
+                EventTrigger.TriggerEvent deactivate = new EventTrigger.TriggerEvent();
+                activate.AddListener((BaseEventData data) => info.SetActive(false));*/
+
+                EventTrigger.Entry trigger1 = new EventTrigger.Entry() { eventID = EventTriggerType.PointerEnter };
+                trigger1.callback.AddListener((BaseEventData data) => info.SetActive(true));
+                EventTrigger.Entry trigger2 = new EventTrigger.Entry() { eventID = EventTriggerType.PointerExit };
+                trigger2.callback.AddListener((BaseEventData data) => info.SetActive(false));
+
+                evt.triggers.Add(trigger1);
+                evt.triggers.Add(trigger2);
+
+                /*
+                 Fast and aggressive enemies and high damage. 
+
+Quick thinking, mobility options and situational awareness are essential.
+
+<color=red>Recommended for players who have already gotten used to the game's pace and mechanics.</color>
+                 */
             }
         }
 
@@ -194,13 +238,15 @@ namespace DifficultyTweak
                 if (MonoSingleton<StyleHUD>.Instance == null)
                     return;
 
-                MonoSingleton<StyleHUD>.Instance.RegisterStyleItem(StyleIDs.fistfulOfNades, "<color=cyan>FISTFUL OF 'NADE</color>");
+                MonoSingleton<StyleHUD>.Instance.RegisterStyleItem(StyleIDs.fistfulOfNades, ConfigManager.grenadeBoostStyleText.value);
                 //"<color=magenta>ABBYBOOST</color>"
-                MonoSingleton<StyleHUD>.Instance.RegisterStyleItem(StyleIDs.rocketBoost, "<color=lime>ROCKET BOOST</color>");
+                MonoSingleton<StyleHUD>.Instance.RegisterStyleItem(StyleIDs.rocketBoost, ConfigManager.rocketBoostStyleText.value);
 
                 Debug.Log("Registered all style ids");
             }
         }
+
+        public static Harmony harmony;
 
         public void Awake()
         {
@@ -210,7 +256,10 @@ namespace DifficultyTweak
             // Plugin startup logic 
             Logger.LogInfo($"Plugin {PluginInfo.PLUGIN_GUID} is loaded!");
 
-            new Harmony(PLUGIN_GUID).PatchAll();
+            harmony = new Harmony(PLUGIN_GUID);
+            harmony.PatchAll();
+            ConfigManager.Initialize();
+
             SceneManager.activeSceneChanged += OnSceneChange;
         }
     }

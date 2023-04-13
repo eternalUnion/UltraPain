@@ -8,7 +8,7 @@ namespace DifficultyTweak.Patches
 {
     class CerberusFlag : MonoBehaviour
     {
-        public int extraDashesRemaining = 2;
+        public int extraDashesRemaining = ConfigManager.cerberusTotalDashCount.value;
     }
 
     [HarmonyPatch(typeof(StatueBoss), "StopDash")]
@@ -19,6 +19,8 @@ namespace DifficultyTweak.Patches
             CerberusFlag flag = __instance.GetComponent<CerberusFlag>();
             if (flag == null)
                 return;
+            if (!Plugin.ultrapainDifficulty || !ConfigManager.cerberusDashToggle.value || !ConfigManager.enemyTweakToggle.value)
+                return;
 
             if (flag.extraDashesRemaining > 0)
             {
@@ -26,7 +28,7 @@ namespace DifficultyTweak.Patches
                 __instance.SendMessage("Tackle");
             }
             else
-                flag.extraDashesRemaining = 2;
+                flag.extraDashesRemaining = ConfigManager.cerberusTotalDashCount.value - 1;
         }
     }
 

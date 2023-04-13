@@ -19,7 +19,8 @@ namespace DifficultyTweak.Patches
             if (___eid.enemyType != EnemyType.Virtue)
                 return;
 
-            __instance.gameObject.AddComponent<VirtueFlag>();
+            VirtueFlag flag = __instance.gameObject.AddComponent<VirtueFlag>();
+            flag.virtue = __instance;
         }
     }
 
@@ -43,6 +44,7 @@ namespace DifficultyTweak.Patches
         public GameObject ligtningBoltAud;
         public Transform windupObj;
         private EnemyIdentifier eid;
+        public Drone virtue;
 
         public void Awake()
         {
@@ -55,7 +57,7 @@ namespace DifficultyTweak.Patches
         {
             LightningStrikeExplosive lightningStrikeExplosive = Instantiate(Plugin.lighningStrikeExplosive.gameObject, windupObj.transform.position, Quaternion.identity).GetComponent<LightningStrikeExplosive>();
             lightningStrikeExplosive.safeForPlayer = false;
-            lightningStrikeExplosive.damageMultiplier = eid.totalDamageModifier;
+            lightningStrikeExplosive.damageMultiplier = eid.totalDamageModifier * ((virtue.enraged)? ConfigManager.virtueEnragedLightningDamage.value : ConfigManager.virtueNormalLightningDamage.value);
 
             if(windupObj != null)
                 Destroy(windupObj.gameObject);
@@ -74,58 +76,131 @@ namespace DifficultyTweak.Patches
     [HarmonyPatch("SpawnInsignia")]
     class Virtue_SpawnInsignia_Patch
     {
-        public static float horizontalInsigniaScale = 0.5f;
-
-        static bool Prefix(Drone __instance, ref EnemyIdentifier ___eid, ref int ___difficulty, out bool __state)
+        static bool Prefix(Drone __instance, ref EnemyIdentifier ___eid, ref int ___difficulty, ref Transform ___target, ref int ___usedAttacks)
         {
-            __state = false;
             if (___eid.enemyType != EnemyType.Virtue)
                 return true;
 
-            if (!__instance.enraged)
+            GameObject createInsignia(Drone __instance, ref EnemyIdentifier ___eid, ref int ___difficulty, ref Transform ___target, int damage)
             {
-                __state = true;
-                return true;
-            }
-
-            Vector3 predictedPos;
-            if (___difficulty <= 1)
-                predictedPos = MonoSingleton<PlayerTracker>.Instance.GetPlayer().position;
-            else
-            {
-                Vector3 vector = new Vector3(MonoSingleton<PlayerTracker>.Instance.GetPlayerVelocity().x, 0f, MonoSingleton<PlayerTracker>.Instance.GetPlayerVelocity().z);
-                predictedPos = MonoSingleton<PlayerTracker>.Instance.GetPlayer().position + vector.normalized * Mathf.Min(vector.magnitude, 5.0f);
-            }
-
-            GameObject currentWindup = GameObject.Instantiate<GameObject>(Plugin.lighningStrikeWindup.gameObject, predictedPos, Quaternion.identity);
-            foreach (Follow follow in currentWindup.GetComponents<Follow>())
-            {
-                if (follow.speed != 0f)
+                GameObject gameObject = GameObject.Instantiate<GameObject>(__instance.projectile, ___target.transform.position, Quaternion.identity);
+                VirtueInsignia component = gameObject.GetComponent<VirtueInsignia>();
+                component.target = MonoSingleton<PlayerTracker>.Instance.GetPlayer();
+                component.parentDrone = __instance;
+                component.hadParent = true;
+                component.damage = damage;
+                __instance.chargeParticle.Stop(false, ParticleSystemStopBehavior.StopEmittingAndClear);
+                if (__instance.enraged)
                 {
-                    if (___difficulty >= 2)
-                    {
-                        follow.speed *= (float)___difficulty;
-                    }
-                    else if (___difficulty == 1)
-                    {
-                        follow.speed /= 2f;
-                    }
-                    else
-                    {
-                        follow.enabled = false;
-                    }
-                    follow.speed *= ___eid.totalSpeedModifier;
+                    component.predictive = true;
+                }
+                
+                /*if (___difficulty == 1)
+                {
+                    component.windUpSpeedMultiplier = 0.875f;
+                }
+                else if (___difficulty == 0)
+                {
+                    component.windUpSpeedMultiplier = 0.75f;
+                }*/
+
+                if (MonoSingleton<PlayerTracker>.Instance.playerType == PlayerType.Platformer)
+                {
+                    gameObject.transform.localScale *= 0.75f;
+                    component.windUpSpeedMultiplier *= 0.875f;
+                }
+                component.windUpSpeedMultiplier *= ___eid.totalSpeedModifier;
+                component.damage = Mathf.RoundToInt((float)component.damage * ___eid.totalDamageModifier);
+
+                return gameObject;
+            }
+
+            if (__instance.enraged && !ConfigManager.virtueTweakEnragedAttackToggle.value)
+                return true;
+            if (!__instance.enraged && !ConfigManager.virtueTweakNormalAttackToggle.value)
+                return true;
+
+            bool insignia = (__instance.enraged) ? ConfigManager.virtueEnragedAttackType.value == ConfigManager.VirtueAttackType.Insignia
+                : ConfigManager.virtueNormalAttackType.value == ConfigManager.VirtueAttackType.Insignia;
+
+            if (insignia)
+            {
+                bool xAxis = (__instance.enraged) ? ConfigManager.virtueEnragedInsigniaXtoggle.value : ConfigManager.virtueNormalInsigniaXtoggle.value;
+                bool yAxis = (__instance.enraged) ? ConfigManager.virtueEnragedInsigniaYtoggle.value : ConfigManager.virtueNormalInsigniaYtoggle.value;
+                bool zAxis = (__instance.enraged) ? ConfigManager.virtueEnragedInsigniaZtoggle.value : ConfigManager.virtueNormalInsigniaZtoggle.value;
+
+                if (xAxis)
+                {
+                    GameObject obj = createInsignia(__instance, ref ___eid, ref ___difficulty, ref ___target,
+                        (__instance.enraged) ? ConfigManager.virtueEnragedInsigniaXdamage.value : ConfigManager.virtueNormalInsigniaXdamage.value);
+                    float size = (__instance.enraged) ? ConfigManager.virtueEnragedInsigniaXsize.value : ConfigManager.virtueNormalInsigniaXsize.value;
+                    obj.transform.localScale = new Vector3(size, obj.transform.localScale.y, size);
+                    obj.transform.Rotate(new Vector3(90f, 0, 0));
+                }
+                if (yAxis)
+                {
+                    GameObject obj = createInsignia(__instance, ref ___eid, ref ___difficulty, ref ___target,
+                        (__instance.enraged) ? ConfigManager.virtueEnragedInsigniaYdamage.value : ConfigManager.virtueNormalInsigniaYdamage.value);
+                    float size = (__instance.enraged) ? ConfigManager.virtueEnragedInsigniaYsize.value : ConfigManager.virtueNormalInsigniaYsize.value;
+                    obj.transform.localScale = new Vector3(size, obj.transform.localScale.y, size);
+                }
+                if (zAxis)
+                {
+                    GameObject obj = createInsignia(__instance, ref ___eid, ref ___difficulty, ref ___target,
+                        (__instance.enraged) ? ConfigManager.virtueEnragedInsigniaZdamage.value : ConfigManager.virtueNormalInsigniaZdamage.value);
+                    float size = (__instance.enraged) ? ConfigManager.virtueEnragedInsigniaZsize.value : ConfigManager.virtueNormalInsigniaZsize.value;
+                    obj.transform.localScale = new Vector3(size, obj.transform.localScale.y, size);
+                    obj.transform.Rotate(new Vector3(0, 0, 90f));
                 }
             }
+            else
+            {
+                Vector3 predictedPos;
+                if (___difficulty <= 1)
+                    predictedPos = MonoSingleton<PlayerTracker>.Instance.GetPlayer().position;
+                else
+                {
+                    Vector3 vector = new Vector3(MonoSingleton<PlayerTracker>.Instance.GetPlayerVelocity().x, 0f, MonoSingleton<PlayerTracker>.Instance.GetPlayerVelocity().z);
+                    predictedPos = MonoSingleton<PlayerTracker>.Instance.GetPlayer().position + vector.normalized * Mathf.Min(vector.magnitude, 5.0f);
+                }
 
-            VirtueFlag flag = __instance.GetComponent<VirtueFlag>();
-            flag.lighningBoltSFX.Play();
-            flag.windupObj = currentWindup.transform;
-            flag.Invoke("SpawnLightningBolt", 3.0f);
+                GameObject currentWindup = GameObject.Instantiate<GameObject>(Plugin.lighningStrikeWindup.gameObject, predictedPos, Quaternion.identity);
+                foreach (Follow follow in currentWindup.GetComponents<Follow>())
+                {
+                    if (follow.speed != 0f)
+                    {
+                        if (___difficulty >= 2)
+                        {
+                            follow.speed *= (float)___difficulty;
+                        }
+                        else if (___difficulty == 1)
+                        {
+                            follow.speed /= 2f;
+                        }
+                        else
+                        {
+                            follow.enabled = false;
+                        }
+                        follow.speed *= ___eid.totalSpeedModifier;
+                    }
+                }
+
+                VirtueFlag flag = __instance.GetComponent<VirtueFlag>();
+                flag.lighningBoltSFX.Play();
+                flag.windupObj = currentWindup.transform;
+                flag.Invoke("SpawnLightningBolt", (__instance.enraged)? ConfigManager.virtueEnragedLightningDelay.value : ConfigManager.virtueNormalLightningDelay.value);
+            }
+
+            ___usedAttacks += 1;
+            if(___usedAttacks == 3)
+            {
+                __instance.Invoke("Enrage", 3f / ___eid.totalSpeedModifier);
+            }
+
             return false;
         }
 
-        static void Postfix(Drone __instance, ref EnemyIdentifier ___eid, ref int ___difficulty, ref Transform ___target, bool __state)
+        /*static void Postfix(Drone __instance, ref EnemyIdentifier ___eid, ref int ___difficulty, ref Transform ___target, bool __state)
         {
             if (!__state)
                 return;
@@ -167,6 +242,6 @@ namespace DifficultyTweak.Patches
             GameObject zAxisInsignia = createInsignia(__instance, ref ___eid, ref ___difficulty, ref ___target);
             zAxisInsignia.transform.Rotate(new Vector3(0, 0, 90));
             zAxisInsignia.transform.localScale = new Vector3(zAxisInsignia.transform.localScale.x * horizontalInsigniaScale, zAxisInsignia.transform.localScale.y, zAxisInsignia.transform.localScale.z * horizontalInsigniaScale);
-        }
+        }*/
     }
 }

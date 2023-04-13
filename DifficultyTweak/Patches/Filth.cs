@@ -9,8 +9,6 @@ namespace DifficultyTweak.Patches
     [HarmonyPatch(typeof(SwingCheck2), "CheckCollision")]
     class SwingCheck2_CheckCollision_Patch2
     {
-        public static int explosionDamage = 30;
-
         static bool Prefix(SwingCheck2 __instance, Collider __0)
         {
             if (__0.gameObject.tag != "Player")
@@ -23,14 +21,22 @@ namespace DifficultyTweak.Patches
             if (eid == null || eid.enemyType != EnemyType.Filth)
                 return true;
 
+            if (!Plugin.ultrapainDifficulty || !ConfigManager.enemyTweakToggle.value || !ConfigManager.filthExplodeToggle.value)
+                return true;
+
             GameObject expObj = GameObject.Instantiate(Plugin.explosion, eid.transform.position, Quaternion.identity);
             foreach(Explosion exp in expObj.GetComponentsInChildren<Explosion>())
             {
                 exp.enemy = true;
-                exp.damage = explosionDamage;
-                exp.maxSize /= 2;
-                exp.speed /= 2;
+                exp.damage = ConfigManager.filthExplosionDamage.value;
+                exp.maxSize *= ConfigManager.filthExplosionSize.value;
+                exp.speed *= ConfigManager.filthExplosionSize.value;
                 exp.toIgnore.Add(EnemyType.Filth);
+            }
+
+            if (ConfigManager.filthExplodeKills.value)
+            {
+                eid.Death();
             }
 
             return false;
