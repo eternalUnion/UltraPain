@@ -200,6 +200,9 @@ namespace DifficultyTweak
                     <color=red>Recommended for players who have gotten used to VIOLENT's changes and are looking to freshen up their gameplay with unique enemy mechanics.</color>
                     """;
                 info.transform.Find("Title (1)").GetComponent<Text>().text = $"--{ConfigManager.pluginName.value}--";
+                info.transform.Find("Title (1)").GetComponent<Text>().resizeTextForBestFit = true;
+                info.transform.Find("Title (1)").GetComponent<Text>().horizontalOverflow = HorizontalWrapMode.Wrap;
+                info.transform.Find("Title (1)").GetComponent<Text>().verticalOverflow = VerticalWrapMode.Truncate;
                 info.SetActive(false);
 
                 EventTrigger evt = ultrapainButton.GetComponent<EventTrigger>();
