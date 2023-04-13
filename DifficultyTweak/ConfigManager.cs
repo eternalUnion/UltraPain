@@ -54,6 +54,7 @@ namespace DifficultyTweak
         public static ConfigPanel streetCleanerPanel;
         public static ConfigPanel swordsMachinePanel;
         public static ConfigPanel virtuePanel;
+        public static ConfigPanel ferrymanPanel;
 
         // CERBERUS
         public static BoolField cerberusDashToggle;
@@ -166,6 +167,11 @@ namespace DifficultyTweak
         public static IntegerField swordsMachineExplosiveSwordDamage;
         public static FloatField swordsMachineExplosiveSwordSize;
 
+        // FERRYMAN
+        public static BoolField ferrymanComboToggle;
+        public static IntegerField ferrymanComboCount;
+        public static FloatField ferrymanAttackDelay;
+
         public static void Initialize()
         {
             if (config != null)
@@ -241,6 +247,7 @@ namespace DifficultyTweak
             streetCleanerPanel = new ConfigPanel(enemyPanel, "Street Cleaner", "streetCleanerPanel");
             swordsMachinePanel = new ConfigPanel(enemyPanel, "Swords Machine", "swordsMachinePanel");
             virtuePanel = new ConfigPanel(enemyPanel, "Virtue", "virtuePanel");
+            ferrymanPanel = new ConfigPanel(enemyPanel, "Ferryman", "ferrymanPanel");
 
             // CERBERUS
             cerberusDashToggle = new BoolField(cerberusPanel, "Extra dashes", "cerberusDashToggle", true);
@@ -476,6 +483,11 @@ namespace DifficultyTweak
             }
             virtueEnragedAttackType.onValueChange = OnVirtueEnragedAttackChange;
             OnVirtueEnragedAttackChange(new EnumValueChangeEvent<VirtueAttackType>() { value = virtueEnragedAttackType.value });
+
+            new ConfigHeader(ferrymanPanel, "Melee Combo");
+            ferrymanComboToggle = new BoolField(ferrymanPanel, "Enabled", "ferrymanComboToggle", true);
+            ferrymanComboCount = new IntegerField(ferrymanPanel, "Count", "ferrymanComboCount", 3);
+            ferrymanAttackDelay = new FloatField(ferrymanPanel, "Delay (0-1)", "ferrymanAttackDelay", 0.1f);
 
             config.Flush();
         }
