@@ -56,4 +56,29 @@ namespace DifficultyTweak.Patches
             }
         }
     }
+
+    [HarmonyPatch(typeof(Mass), "ShootExplosive")]
+    public static class HideousMassHoming
+    {
+        static bool Prefix(Mass __instance, out bool __state)
+        {
+            __state = false;
+            if (!Plugin.ultrapainDifficulty || !ConfigManager.enemyTweakToggle.value || !ConfigManager.hideousMassInsigniaToggle.value)
+                return true;
+
+            __instance.explosiveProjectile = GameObject.Instantiate(Plugin.hideousMassProjectile);
+            __instance.explosiveProjectile.AddComponent<HideousMassProjectile>();
+            __state = true;
+            return true;
+        }
+
+        static void Postfix(Mass __instance, bool __state)
+        {
+            if (!__state)
+                return;
+
+            GameObject.Destroy(__instance.homingProjectile);
+            __instance.explosiveProjectile = Plugin.hideousMassProjectile;
+        }
+    }
 }

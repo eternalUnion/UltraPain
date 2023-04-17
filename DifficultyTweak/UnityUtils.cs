@@ -64,5 +64,19 @@ namespace DifficultyTweak
 
             return default(T);
         }
+
+        public static Transform GetChildByNameRecursively(Transform parent, string name)
+        {
+            foreach(Transform t in parent)
+            {
+                if (t.name == name)
+                    return t;
+                Transform child = GetChildByNameRecursively(t, name);
+                if (child != null)
+                    return child;
+            }
+
+            return null;
+        }
     }
 }

@@ -14,30 +14,32 @@ namespace DifficultyTweak.Patches
             if (!Plugin.ultrapainDifficulty || !ConfigManager.playerTweakToggle.value || !ConfigManager.rocketGrabbingToggle.value)
                 return true;
 
-            if (__instance.state != HookState.Ready || ___caughtGrenade == null || !___caughtGrenade.rocket || ___caughtGrenade.playerRiding || !MonoSingleton<WeaponCharges>.Instance.rocketFrozen)
+            if (___caughtGrenade != null && ___caughtGrenade.rocket && !___caughtGrenade.playerRiding && MonoSingleton<WeaponCharges>.Instance.rocketFrozen)
             {
-                if(__instance.state != HookState.Throwing || ___caughtGrenade == null || !___caughtGrenade.rocket || ___caughtGrenade.playerRiding || !MonoSingleton<WeaponCharges>.Instance.rocketFrozen)
-                    return true;
-
-                if (!MonoSingleton<InputManager>.Instance.InputSource.Hook.IsPressed && (___cooldown <= 0.1f || ___caughtObjects.Count > 0))
+                if (__instance.state == HookState.Throwing)
                 {
-                    __instance.StopThrow(0f, false);
+                    if (!MonoSingleton<InputManager>.Instance.InputSource.Hook.IsPressed && (___cooldown <= 0.1f || ___caughtObjects.Count > 0))
+                    {
+                        __instance.StopThrow(0f, false);
+                    }
+
+                    return false;
                 }
+                else if (__instance.state == HookState.Ready)
+                {
+                    if (MonoSingleton<NewMovement>.Instance.boost || MonoSingleton<NewMovement>.Instance.sliding)
+                        return true;
 
-                return false;
+                    ___hookPoint = ___caughtGrenade.transform.position + ___caughtPoint; //__instance.caughtTransform.position + __instance.caughtPoint;
+                    __instance.beingPulled = true;
+                    MonoSingleton<NewMovement>.Instance.rb.velocity = (/*___hookPoint*/___caughtGrenade.transform.position - MonoSingleton<NewMovement>.Instance.transform.position).normalized * 60f;
+                    if (MonoSingleton<NewMovement>.Instance.gc.onGround)
+                        MonoSingleton<NewMovement>.Instance.rb.MovePosition(MonoSingleton<NewMovement>.Instance.transform.position + Vector3.up);
+                    return false;
+                }
             }
 
-            ___hookPoint = ___caughtGrenade.transform.position + ___caughtPoint; //__instance.caughtTransform.position + __instance.caughtPoint;
-            __instance.beingPulled = true;
-            if (!MonoSingleton<NewMovement>.Instance.boost || MonoSingleton<NewMovement>.Instance.sliding)
-            {
-                MonoSingleton<NewMovement>.Instance.rb.velocity = (/*___hookPoint*/___caughtGrenade.transform.position - MonoSingleton<NewMovement>.Instance.transform.position).normalized * 60f;
-                if (MonoSingleton<NewMovement>.Instance.gc.onGround)
-                    MonoSingleton<NewMovement>.Instance.rb.MovePosition(MonoSingleton<NewMovement>.Instance.transform.position + Vector3.up);
-                return false;
-            }
-
-            return false;
+            return true;
         }
     }
 }

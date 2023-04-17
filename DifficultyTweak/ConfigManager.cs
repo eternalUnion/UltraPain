@@ -30,7 +30,7 @@ namespace DifficultyTweak
         public static FloatField rocketBoostSizeMultiplierPerHit;
         public static FloatField rocketBoostSpeedMultiplierPerHit;
         public static StringField rocketBoostStyleText;
-        public static IntegerField rocketBoostStylePoints;
+        public static IntField rocketBoostStylePoints;
 
         public static BoolField rocketGrabbingToggle;
 
@@ -38,7 +38,7 @@ namespace DifficultyTweak
         public static FloatField grenadeBoostDamageMultiplier;
         public static FloatField grenadeBoostSizeMultiplier;
         public static StringField  grenadeBoostStyleText;
-        public static IntegerField grenadeBoostStylePoints;
+        public static IntField grenadeBoostStylePoints;
 
         // ENEMY PANEL
         public static ConfigPanel cerberusPanel;
@@ -55,10 +55,13 @@ namespace DifficultyTweak
         public static ConfigPanel swordsMachinePanel;
         public static ConfigPanel virtuePanel;
         public static ConfigPanel ferrymanPanel;
+        public static ConfigPanel turretPanel;
+        public static ConfigPanel fleshPrisonPanel;
+        public static ConfigPanel minosPrimePanel;
 
         // CERBERUS
         public static BoolField cerberusDashToggle;
-        public static IntegerField cerberusTotalDashCount;
+        public static IntField cerberusTotalDashCount;
 
         // DRONE
         public static BoolField droneExplosionBeamToggle;
@@ -68,7 +71,7 @@ namespace DifficultyTweak
         // FILTH
         public static BoolField filthExplodeToggle;
         public static BoolField filthExplodeKills;
-        public static IntegerField filthExplosionDamage;
+        public static IntField filthExplosionDamage;
         public static FloatField filthExplosionSize;
 
         // HIDEOUS MASS
@@ -76,13 +79,13 @@ namespace DifficultyTweak
         public static FloatField hideousMassInsigniaSpeed;
         public static BoolField hideousMassInsigniaYtoggle;
         public static FloatField hideousMassInsigniaYsize;
-        public static IntegerField hideousMassInsigniaYdamage;
+        public static IntField hideousMassInsigniaYdamage;
         public static BoolField hideousMassInsigniaZtoggle;
         public static FloatField hideousMassInsigniaZsize;
-        public static IntegerField hideousMassInsigniaZdamage;
+        public static IntField hideousMassInsigniaZdamage;
         public static BoolField hideousMassInsigniaXtoggle;
         public static FloatField hideousMassInsigniaXsize;
-        public static IntegerField hideousMassInsigniaXdamage;
+        public static IntField hideousMassInsigniaXdamage;
 
         // VIRTUE
         public enum VirtueAttackType
@@ -95,13 +98,13 @@ namespace DifficultyTweak
 
         public static BoolField virtueNormalInsigniaXtoggle;
         public static FloatField virtueNormalInsigniaXsize;
-        public static IntegerField virtueNormalInsigniaXdamage;
+        public static IntField virtueNormalInsigniaXdamage;
         public static BoolField virtueNormalInsigniaYtoggle;
         public static FloatField virtueNormalInsigniaYsize;
-        public static IntegerField virtueNormalInsigniaYdamage;
+        public static IntField virtueNormalInsigniaYdamage;
         public static BoolField virtueNormalInsigniaZtoggle;
         public static FloatField virtueNormalInsigniaZsize;
-        public static IntegerField virtueNormalInsigniaZdamage;
+        public static IntField virtueNormalInsigniaZdamage;
 
         public static FloatField virtueNormalLightningDamage;
         public static FloatField virtueNormalLightningDelay;
@@ -111,42 +114,42 @@ namespace DifficultyTweak
 
         public static BoolField virtueEnragedInsigniaXtoggle;
         public static FloatField virtueEnragedInsigniaXsize;
-        public static IntegerField virtueEnragedInsigniaXdamage;
+        public static IntField virtueEnragedInsigniaXdamage;
         public static BoolField virtueEnragedInsigniaYtoggle;
         public static FloatField virtueEnragedInsigniaYsize;
-        public static IntegerField virtueEnragedInsigniaYdamage;
+        public static IntField virtueEnragedInsigniaYdamage;
         public static BoolField virtueEnragedInsigniaZtoggle;
         public static FloatField virtueEnragedInsigniaZsize;
-        public static IntegerField virtueEnragedInsigniaZdamage;
+        public static IntField virtueEnragedInsigniaZdamage;
 
         public static FloatField virtueEnragedLightningDamage;
         public static FloatField virtueEnragedLightningDelay;
 
         // MALICIOUS FACE
         public static BoolField maliciousFaceRadianceOnEnrage;
-        public static IntegerField maliciousFaceRadianceAmount;
+        public static IntField maliciousFaceRadianceAmount;
         public static BoolField maliciousFaceHomingProjectileToggle;
-        public static IntegerField maliciousFaceHomingProjectileDamage;
+        public static IntField maliciousFaceHomingProjectileDamage;
         public static FloatField maliciousFaceHomingProjectileTurnSpeed;
         public static FloatField maliciousFaceHomingProjectileSpeed;
 
         // MINDFLAYER
         public static BoolField mindflayerShootTweakToggle;
-        public static IntegerField mindflayerShootAmount;
+        public static IntField mindflayerShootAmount;
         public static FloatField mindflayerShootDelay;
         public static BoolField mindflayerTeleportComboToggle;
 
         // SCHISM
         public static BoolField schismSpreadAttackToggle;
         public static FloatField schismSpreadAttackAngle;
-        public static IntegerField schismSpreadAttackCount;
+        public static IntField schismSpreadAttackCount;
 
         // SOLIDER
         public static BoolField soliderCoinsIgnoreWeakPointToggle;
         public static BoolField soliderShootTweakToggle;
-        public static IntegerField soliderShootCount;
+        public static IntField soliderShootCount;
         public static BoolField soliderShootGrenadeToggle;
-        public static IntegerField soliderGrenadeDamage;
+        public static IntField soliderGrenadeDamage;
         public static FloatField soliderGrenadeSize;
 
         // STALKER
@@ -154,7 +157,7 @@ namespace DifficultyTweak
 
         // STRAY
         public static BoolField strayShootToggle;
-        public static IntegerField strayShootCount;
+        public static IntField strayShootCount;
         public static FloatField strayShootSpeed;
 
         // STREET CLEANER
@@ -164,13 +167,32 @@ namespace DifficultyTweak
         // SWORDS MACHINE
         public static BoolField swordsMachineNoLightKnockbackToggle;
         public static BoolField swordsMachineExplosiveSwordToggle;
-        public static IntegerField swordsMachineExplosiveSwordDamage;
+        public static IntField swordsMachineExplosiveSwordDamage;
         public static FloatField swordsMachineExplosiveSwordSize;
 
         // FERRYMAN
         public static BoolField ferrymanComboToggle;
-        public static IntegerField ferrymanComboCount;
+        public static IntField ferrymanComboCount;
         public static FloatField ferrymanAttackDelay;
+
+        // TURRET
+        public static BoolField turretBurstFireToggle;
+        public static IntField turretBurstFireCount;
+        public static FloatField turretBurstFireDelay;
+
+        // FLESH PRISON
+        public static BoolField fleshPrisonSpinAttackToggle;
+        public static IntField fleshPrisonSpinAttackCount;
+        public static FloatField fleshPrisonSpinAttackTurnSpeed;
+        public static FloatField fleshPrisonSpinAttackActivateSpeed;
+        public static FloatField fleshPrisonSpinAttackSize;
+        public static IntField fleshPrisonSpinAttackDamage;
+        public static FloatField fleshPrisonSpinAttackDistance;
+
+        // MINOS PRIME
+        public static BoolField minosPrimeRandomTeleportToggle;
+        public static FloatField minosPrimeRandomTeleportMinDistance;
+        public static FloatField minosPrimeRandomTeleportMaxDistance;
 
         public static void Initialize()
         {
@@ -183,7 +205,7 @@ namespace DifficultyTweak
             new ConfigHeader(config.rootPanel, "Enemy Tweaks");
             enemyTweakToggle = new BoolField(config.rootPanel, "Enabled", "enemyTweakToggle", true);
             enemyPanel = new ConfigPanel(config.rootPanel, "Enemy Tweaks", "enemyTweakPanel");
-            enemyTweakToggle.onValueChange = (BoolField.BoolValueChangeEvent data) =>
+            enemyTweakToggle.onValueChange += (BoolField.BoolValueChangeEvent data) =>
             {
                 enemyPanel.interactable = data.value;
             };
@@ -192,7 +214,7 @@ namespace DifficultyTweak
             new ConfigHeader(config.rootPanel, "Player Tweaks");
             playerTweakToggle = new BoolField(config.rootPanel, "Enabled", "playerTweakToggle", true);
             playerPanel = new ConfigPanel(config.rootPanel, "Player Tweaks", "enemyTweakPanel");
-            playerTweakToggle.onValueChange = (BoolField.BoolValueChangeEvent data) =>
+            playerTweakToggle.onValueChange += (BoolField.BoolValueChangeEvent data) =>
             {
                 playerPanel.interactable = data.value;
             };
@@ -204,7 +226,7 @@ namespace DifficultyTweak
 
             new ConfigHeader(config.rootPanel, "Plugin Difficulty Name");
             pluginName = new StringField(config.rootPanel, "Difficulty name", "pluginName", "ULTRAPAIN");
-            pluginName.onValueChange = (StringField.StringValueChangeEvent data) =>
+            pluginName.onValueChange += (StringField.StringValueChangeEvent data) =>
             {
                 if (Plugin.currentDifficultyButton != null)
                     Plugin.currentDifficultyButton.transform.Find("Name").GetComponent<Text>().text = data.value;
@@ -221,7 +243,7 @@ namespace DifficultyTweak
             rocketBoostSizeMultiplierPerHit = new FloatField(playerPanel, "Size multiplier per hit", "rocketBoostSizeMultiplier", 0.35f);
             rocketBoostSpeedMultiplierPerHit = new FloatField(playerPanel, "Speed multiplier per hit", "rocketBoostSpeedMultiplierPerHit", 0.35f);
             rocketBoostStyleText = new StringField(playerPanel, "Style text", "rocketBoostStyleText", "<color=lime>ROCKET BOOST</color>");
-            rocketBoostStylePoints = new IntegerField(playerPanel, "Style points", "rocketBoostStylePoints", 10);
+            rocketBoostStylePoints = new IntField(playerPanel, "Style points", "rocketBoostStylePoints", 10);
 
             new ConfigHeader(playerPanel, "Rocket Grabbing\r\n<size=16>(Can pull yourself to frozen rockets)</size>");
             rocketGrabbingToggle = new BoolField(playerPanel, "Enabled", "rocketGrabbingTabble", true);
@@ -231,27 +253,34 @@ namespace DifficultyTweak
             grenadeBoostDamageMultiplier = new FloatField(playerPanel, "Damage multiplier", "grenadeBoostDamageMultiplier", 1f);
             grenadeBoostSizeMultiplier = new FloatField(playerPanel, "Size multiplier", "grenadeBoostSizeMultiplier", 1f);
             grenadeBoostStyleText = new StringField(playerPanel, "Style text", "grenadeBoostStyleText", "<color=cyan>FISTFUL OF 'NADE</color>");
-            grenadeBoostStylePoints = new IntegerField(playerPanel, "Style points", "grenadeBoostStylePoints", 10);
+            grenadeBoostStylePoints = new IntField(playerPanel, "Style points", "grenadeBoostStylePoints", 10);
 
             // ENEMY PANEL
-            cerberusPanel = new ConfigPanel(enemyPanel, "Cerberus", "cerberusPanel");
-            dronePanel = new ConfigPanel(enemyPanel, "Drone", "dronePanel");
+            new ConfigHeader(enemyPanel, "Common Enemies");
             filthPanel = new ConfigPanel(enemyPanel, "Filth", "filthPanel");
-            hideousMassPanel = new ConfigPanel(enemyPanel, "Hideous Mass", "hideousMassPanel");
-            maliciousFacePanel = new ConfigPanel(enemyPanel, "Malicious Face", "maliciousFacePanel");
-            mindflayerPanel = new ConfigPanel(enemyPanel, "Mindflayer", "mindflayerPanel");
+            strayPanel = new ConfigPanel(enemyPanel, "Stray", "strayPanel");
             schismPanel = new ConfigPanel(enemyPanel, "Schism", "schismPanel");
             soliderPanel = new ConfigPanel(enemyPanel, "Soldier", "soliderPanel");
-            stalkerPanel = new ConfigPanel(enemyPanel, "Stalker", "stalkerPanel");
-            strayPanel = new ConfigPanel(enemyPanel, "Stray", "strayPanel");
+            dronePanel = new ConfigPanel(enemyPanel, "Drone", "dronePanel");
             streetCleanerPanel = new ConfigPanel(enemyPanel, "Street Cleaner", "streetCleanerPanel");
-            swordsMachinePanel = new ConfigPanel(enemyPanel, "Swords Machine", "swordsMachinePanel");
             virtuePanel = new ConfigPanel(enemyPanel, "Virtue", "virtuePanel");
+            stalkerPanel = new ConfigPanel(enemyPanel, "Stalker", "stalkerPanel");
+            new ConfigHeader(enemyPanel, "Mini Bosses");
+            cerberusPanel = new ConfigPanel(enemyPanel, "Cerberus", "cerberusPanel");
+            maliciousFacePanel = new ConfigPanel(enemyPanel, "Malicious Face", "maliciousFacePanel");
+            mindflayerPanel = new ConfigPanel(enemyPanel, "Mindflayer", "mindflayerPanel");
+            swordsMachinePanel = new ConfigPanel(enemyPanel, "Swords Machine", "swordsMachinePanel");
+            hideousMassPanel = new ConfigPanel(enemyPanel, "Hideous Mass", "hideousMassPanel");
             ferrymanPanel = new ConfigPanel(enemyPanel, "Ferryman", "ferrymanPanel");
+            turretPanel = new ConfigPanel(enemyPanel, "Sentry", "turretPanel");
+            new ConfigHeader(enemyPanel, "Prime Prisons");
+            fleshPrisonPanel = new ConfigPanel(enemyPanel, "Flesh Prison", "fleshPrisonPanel");
+            new ConfigHeader(enemyPanel, "Prime Bosses");
+            minosPrimePanel = new ConfigPanel(enemyPanel, "Minos Prime", "minosPrimePanel");
 
             // CERBERUS
             cerberusDashToggle = new BoolField(cerberusPanel, "Extra dashes", "cerberusDashToggle", true);
-            cerberusTotalDashCount = new IntegerField(cerberusPanel, "Total dash count", "cerberusTotalDashCount", 3);
+            cerberusTotalDashCount = new IntField(cerberusPanel, "Total dash count", "cerberusTotalDashCount", 3);
 
             // DRONE
             droneExplosionBeamToggle = new BoolField(dronePanel, "Can shoot explosions", "droneExplosionBeamToggle", true);
@@ -262,7 +291,7 @@ namespace DifficultyTweak
             new ConfigHeader(filthPanel, "Explode On Hit");
             filthExplodeToggle = new BoolField(filthPanel, "Enabled", "filthExplodeOnHit", true);
             filthExplodeKills = new BoolField(filthPanel, "Explosion kills the filth", "filthExplosionKills", false);
-            filthExplosionDamage = new IntegerField(filthPanel, "Explosion damage", "filthExplosionDamage", 30);
+            filthExplosionDamage = new IntField(filthPanel, "Explosion damage", "filthExplosionDamage", 30);
             filthExplosionSize = new FloatField(filthPanel, "Explosion size", "filthExplosionSize", 0.5f);
 
             // HIDEOUS MASS
@@ -271,31 +300,31 @@ namespace DifficultyTweak
             hideousMassInsigniaSpeed = new FloatField(hideousMassPanel, "Insignia speed multiplier", "hideousMassInsigniaSpeed", 2.5f);
             new ConfigHeader(hideousMassPanel, "Vertical Insignia", 12);
             hideousMassInsigniaYtoggle = new BoolField(hideousMassPanel, "Enabled", "hideousMassInsigniaYtoggle", true);
-            hideousMassInsigniaYdamage = new IntegerField(hideousMassPanel, "Damage", "hideousMassInsigniaYdamage", 20);
+            hideousMassInsigniaYdamage = new IntField(hideousMassPanel, "Damage", "hideousMassInsigniaYdamage", 20);
             hideousMassInsigniaYsize = new FloatField(hideousMassPanel, "Size", "hideousMassInsigniaYsize", 2f);
             new ConfigHeader(hideousMassPanel, "Forward Insignia", 12);
             hideousMassInsigniaZtoggle = new BoolField(hideousMassPanel, "Enabled", "hideousMassInsigniaZtoggle", false);
-            hideousMassInsigniaZdamage = new IntegerField(hideousMassPanel, "Damage", "hideousMassInsigniaZdamage", 20);
+            hideousMassInsigniaZdamage = new IntField(hideousMassPanel, "Damage", "hideousMassInsigniaZdamage", 20);
             hideousMassInsigniaZsize = new FloatField(hideousMassPanel, "Size", "hideousMassInsigniaZsize", 2f);
             new ConfigHeader(hideousMassPanel, "Side Insignia", 12);
             hideousMassInsigniaXtoggle = new BoolField(hideousMassPanel, "Enabled", "hideousMassInsigniaXtoggle", false);
-            hideousMassInsigniaXdamage = new IntegerField(hideousMassPanel, "Damage", "hideousMassInsigniaXdamage", 20);
+            hideousMassInsigniaXdamage = new IntField(hideousMassPanel, "Damage", "hideousMassInsigniaXdamage", 20);
             hideousMassInsigniaXsize = new FloatField(hideousMassPanel, "Size", "hideousMassInsigniaXsize", 2f);
 
             // MALICIOUS FACE
             new ConfigHeader(maliciousFacePanel, "Radiance When Enraged");
             maliciousFaceRadianceOnEnrage = new BoolField(maliciousFacePanel, "Enabled", "maliciousFaceRadianceWhenEnraged", true);
-            maliciousFaceRadianceAmount = new IntegerField(maliciousFacePanel, "Radiance level", "maliciousFaceRadianceAmount", 1);
+            maliciousFaceRadianceAmount = new IntField(maliciousFacePanel, "Radiance level", "maliciousFaceRadianceAmount", 1);
             new ConfigHeader(maliciousFacePanel, "Homing Projectile");
             maliciousFaceHomingProjectileToggle = new BoolField(maliciousFacePanel, "Enabled", "maliciousFaceHomingProjectileToggle", true);
-            maliciousFaceHomingProjectileDamage = new IntegerField(maliciousFacePanel, "Projectile damage", "maliciousFaceHomingProjectileDamage", 25);
+            maliciousFaceHomingProjectileDamage = new IntField(maliciousFacePanel, "Projectile damage", "maliciousFaceHomingProjectileDamage", 25);
             maliciousFaceHomingProjectileSpeed = new FloatField(maliciousFacePanel, "Projectile speed", "maliciousFaceHomingProjectileSpeed", 20f);
             maliciousFaceHomingProjectileTurnSpeed = new FloatField(maliciousFacePanel, "Projectile turn speed", "maliciousFaceHomingProjectileTurnSpeed", 0.4f);
 
             // MINDFLAYER
             new ConfigHeader(mindflayerPanel, "Shoot Tweak");
             mindflayerShootTweakToggle = new BoolField(mindflayerPanel, "Enabled", "mindflayerShootTweakToggle", true);
-            mindflayerShootAmount = new IntegerField(mindflayerPanel, "Projectile amount", "mindflayerShootProjectileAmount", 20);
+            mindflayerShootAmount = new IntField(mindflayerPanel, "Projectile amount", "mindflayerShootProjectileAmount", 20);
             mindflayerShootDelay = new FloatField(mindflayerPanel, "Delay between shots", "mindflayerShootProjectileDelay", 0.02f);
             new ConfigHeader(mindflayerPanel, "Melee Combo");
             mindflayerTeleportComboToggle = new BoolField(mindflayerPanel, "Enabled", "mindflayerMeleeCombo", true);
@@ -304,17 +333,17 @@ namespace DifficultyTweak
             new ConfigHeader(schismPanel, "Spread Attack");
             schismSpreadAttackToggle = new BoolField(schismPanel, "Enabled", "schismSpreadAttackToggle", true);
             schismSpreadAttackAngle = new FloatField(schismPanel, "Angular spread", "schismSpreadAttackAngle", 15f);
-            schismSpreadAttackCount = new IntegerField(schismPanel, "Projectile count per side", "schismSpreadAttackCount", 1);
+            schismSpreadAttackCount = new IntField(schismPanel, "Projectile count per side", "schismSpreadAttackCount", 1);
 
             // SOLIDER
             new ConfigHeader(soliderPanel, "Coins Ignore Weak Point");
             soliderCoinsIgnoreWeakPointToggle = new BoolField(soliderPanel, "Enabled", "soliderCoinsIgnoreWeakPoint", true);
             new ConfigHeader(soliderPanel, "Shoot Tweak");
             soliderShootTweakToggle = new BoolField(soliderPanel, "Enabled", "soliderShootTweakToggle", true);
-            soliderShootCount = new IntegerField(soliderPanel, "Shoot count", "soliderShootCount", 3);
+            soliderShootCount = new IntField(soliderPanel, "Shoot count", "soliderShootCount", 3);
             new ConfigHeader(soliderPanel, "Shoot Grenade");
             soliderShootGrenadeToggle = new BoolField(soliderPanel, "Enabled", "soliderShootGrenade", true);
-            soliderGrenadeDamage = new IntegerField(soliderPanel, "Explosion damage", "soliderGrenadeDamage", 10);
+            soliderGrenadeDamage = new IntField(soliderPanel, "Explosion damage", "soliderGrenadeDamage", 10);
             soliderGrenadeSize = new FloatField(soliderPanel, "Explosion size multiplier", "soliderGrenadeSize", 0.75f);
 
             // STALKER
@@ -324,7 +353,7 @@ namespace DifficultyTweak
             // STRAY
             new ConfigHeader(strayPanel, "Shoot Tweak");
             strayShootToggle = new BoolField(strayPanel, "Enabled", "strayShootToggle", true);
-            strayShootCount = new IntegerField(strayPanel, "Extra projectile count", "strayShootCount", 2);
+            strayShootCount = new IntField(strayPanel, "Extra projectile count", "strayShootCount", 2);
             strayShootSpeed = new FloatField(strayPanel, "Shoot speed", "strayShootSpeed", 20f);
 
             // STREET CLEANER
@@ -338,7 +367,7 @@ namespace DifficultyTweak
             swordsMachineNoLightKnockbackToggle = new BoolField(swordsMachinePanel, "Enabled", "swordsMachineNoLightKnockbackToggle", true);
             new ConfigHeader(swordsMachinePanel, "Explosive Sword Throw");
             swordsMachineExplosiveSwordToggle = new BoolField(swordsMachinePanel, "Enabled", "swordsMachineExplosiveSwordToggle", true);
-            swordsMachineExplosiveSwordDamage = new IntegerField(swordsMachinePanel, "Explosion damage", "swordsMachineExplosiveSwordDamage", 20);
+            swordsMachineExplosiveSwordDamage = new IntField(swordsMachinePanel, "Explosion damage", "swordsMachineExplosiveSwordDamage", 20);
             swordsMachineExplosiveSwordSize = new FloatField(swordsMachinePanel, "Explosion size multiplier", "swordsMachineExplosiveSwordSize", 0.5f);
 
             // VIRTUE
@@ -348,24 +377,24 @@ namespace DifficultyTweak
             
             ConfigHeader virtueNormalYInsigniaHeader = new ConfigHeader(virtuePanel, "Vertical Insignia", 12);
             virtueNormalInsigniaYtoggle = new BoolField(virtuePanel, "Enabled", "virtueNormalInsigniaYtoggle", true);
-            virtueNormalInsigniaYdamage = new IntegerField(virtuePanel, "Damage", "virtueNormalInsigniaYdamage", 30);
+            virtueNormalInsigniaYdamage = new IntField(virtuePanel, "Damage", "virtueNormalInsigniaYdamage", 30);
             virtueNormalInsigniaYsize = new FloatField(virtuePanel, "Size", "virtueNormalInsigniaYsize", 2f);
 
             ConfigHeader virtueNormalZInsigniaHeader = new ConfigHeader(virtuePanel, "Forward Insignia", 12);
             virtueNormalInsigniaZtoggle = new BoolField(virtuePanel, "Enabled", "virtueNormalInsigniaZtoggle", false);
-            virtueNormalInsigniaZdamage = new IntegerField(virtuePanel, "Damage", "virtueNormalInsigniaZdamage", 15);
+            virtueNormalInsigniaZdamage = new IntField(virtuePanel, "Damage", "virtueNormalInsigniaZdamage", 15);
             virtueNormalInsigniaZsize = new FloatField(virtuePanel, "Size", "virtueNormalInsigniaZsize", 2f);
 
             ConfigHeader virtueNormalXInsigniaHeader = new ConfigHeader(virtuePanel, "Side Insignia", 12);
             virtueNormalInsigniaXtoggle = new BoolField(virtuePanel, "Enabled", "virtueNormalInsigniaXtoggle", false);
-            virtueNormalInsigniaXdamage = new IntegerField(virtuePanel, "Damage", "virtueNormalInsigniaXdamage", 15);
+            virtueNormalInsigniaXdamage = new IntField(virtuePanel, "Damage", "virtueNormalInsigniaXdamage", 15);
             virtueNormalInsigniaXsize = new FloatField(virtuePanel, "Size", "virtueNormalInsigniaXsize", 2f);
 
             virtueNormalLightningDamage = new FloatField(virtuePanel, "Damage multiplier", "virtueNormalLightningDamage", 1f);
             //virtueNormalLightningSize = new FloatField(virtuePanel, "Size multiplier", "virtueNormalLightningSize", 1f);
             virtueNormalLightningDelay = new FloatField(virtuePanel, "Lighning delay", "virtueNormalLightningDelay", 3f);
 
-            void OnVirtueNormalAttackChange(EnumValueChangeEvent<VirtueAttackType> newType)
+            void OnVirtueNormalAttackChange(EnumField<VirtueAttackType>.EnumValueChangeEvent newType)
             {
                 if(newType.value == VirtueAttackType.Insignia)
                 {
@@ -410,8 +439,8 @@ namespace DifficultyTweak
                     virtueNormalInsigniaXsize.hidden = true;
                 }
             }
-            virtueNormalAttackType.onValueChange = OnVirtueNormalAttackChange;
-            OnVirtueNormalAttackChange(new EnumValueChangeEvent<VirtueAttackType>() { value = virtueNormalAttackType.value });
+            virtueNormalAttackType.onValueChange += OnVirtueNormalAttackChange;
+            OnVirtueNormalAttackChange(new EnumField<VirtueAttackType>.EnumValueChangeEvent() { value = virtueNormalAttackType.value });
 
             new ConfigHeader(virtuePanel, "Tweak Enraged Attack");
             virtueTweakEnragedAttackToggle = new BoolField(virtuePanel, "Enabled", "virtueTweakEnragedAttackToggle", true);
@@ -419,24 +448,24 @@ namespace DifficultyTweak
 
             ConfigHeader virtueEnragedYInsigniaHeader = new ConfigHeader(virtuePanel, "Vertical Insignia", 12);
             virtueEnragedInsigniaYtoggle = new BoolField(virtuePanel, "Enabled", "virtueEnragedInsigniaYtoggle", true);
-            virtueEnragedInsigniaYdamage = new IntegerField(virtuePanel, "Damage", "virtueEnragedInsigniaYdamage", 30);
+            virtueEnragedInsigniaYdamage = new IntField(virtuePanel, "Damage", "virtueEnragedInsigniaYdamage", 30);
             virtueEnragedInsigniaYsize = new FloatField(virtuePanel, "Size", "virtueEnragedInsigniaYsize", 2f);
 
             ConfigHeader virtueEnragedZInsigniaHeader = new ConfigHeader(virtuePanel, "Forward Insignia", 12);
             virtueEnragedInsigniaZtoggle = new BoolField(virtuePanel, "Enabled", "virtueEnragedInsigniaZtoggle", true);
-            virtueEnragedInsigniaZdamage = new IntegerField(virtuePanel, "Damage", "virtueEnragedInsigniaZdamage", 15);
+            virtueEnragedInsigniaZdamage = new IntField(virtuePanel, "Damage", "virtueEnragedInsigniaZdamage", 15);
             virtueEnragedInsigniaZsize = new FloatField(virtuePanel, "Size", "virtueEnragedInsigniaZsize", 2f);
 
             ConfigHeader virtueEnragedXInsigniaHeader = new ConfigHeader(virtuePanel, "Side Insignia", 12);
             virtueEnragedInsigniaXtoggle = new BoolField(virtuePanel, "Enabled", "virtueEnragedInsigniaXtoggle", true);
-            virtueEnragedInsigniaXdamage = new IntegerField(virtuePanel, "Damage", "virtueEnragedInsigniaXdamage", 15);
+            virtueEnragedInsigniaXdamage = new IntField(virtuePanel, "Damage", "virtueEnragedInsigniaXdamage", 15);
             virtueEnragedInsigniaXsize = new FloatField(virtuePanel, "Size", "virtueEnragedInsigniaXsize", 2f);
 
             virtueEnragedLightningDamage = new FloatField(virtuePanel, "Damage multiplier", "virtueEnragedLightningDamage", 1f);
             //virtueEnragedLightningSize = new FloatField(virtuePanel, "Size multiplier", "virtueEnragedLightningSize", 1f);
             virtueEnragedLightningDelay = new FloatField(virtuePanel, "Lighning delay", "virtueEnragedLightningDelay", 2f);
 
-            void OnVirtueEnragedAttackChange(EnumValueChangeEvent<VirtueAttackType> newType)
+            void OnVirtueEnragedAttackChange(EnumField<VirtueAttackType>.EnumValueChangeEvent newType)
             {
                 if (newType.value == VirtueAttackType.Insignia)
                 {
@@ -481,13 +510,32 @@ namespace DifficultyTweak
                     virtueEnragedInsigniaXsize.hidden = true;
                 }
             }
-            virtueEnragedAttackType.onValueChange = OnVirtueEnragedAttackChange;
-            OnVirtueEnragedAttackChange(new EnumValueChangeEvent<VirtueAttackType>() { value = virtueEnragedAttackType.value });
+            virtueEnragedAttackType.onValueChange += OnVirtueEnragedAttackChange;
+            OnVirtueEnragedAttackChange(new EnumField<VirtueAttackType>.EnumValueChangeEvent() { value = virtueEnragedAttackType.value });
 
             new ConfigHeader(ferrymanPanel, "Melee Combo");
             ferrymanComboToggle = new BoolField(ferrymanPanel, "Enabled", "ferrymanComboToggle", true);
-            ferrymanComboCount = new IntegerField(ferrymanPanel, "Count", "ferrymanComboCount", 3);
+            ferrymanComboCount = new IntField(ferrymanPanel, "Count", "ferrymanComboCount", 3);
             ferrymanAttackDelay = new FloatField(ferrymanPanel, "Delay (0-1)", "ferrymanAttackDelay", 0.1f);
+
+            new ConfigHeader(turretPanel, "Burst Fire");
+            turretBurstFireToggle = new BoolField(turretPanel, "Enabled", "turretBurstFireToggle", true);
+            turretBurstFireCount = new IntField(turretPanel, "Extra shots", "turretBurstFireCount", 1);
+            turretBurstFireDelay = new FloatField(turretPanel, "Delay between shots", "turretBurstFireDelay", 1f);
+
+            new ConfigHeader(fleshPrisonPanel, "Spin Insignia");
+            fleshPrisonSpinAttackToggle = new BoolField(fleshPrisonPanel, "Enabled", "fleshPrisonSpinAttackToggle", true);
+            fleshPrisonSpinAttackCount = new IntField(fleshPrisonPanel, "Insignia count", "fleshPrisonSpinAttackCount", 5);
+            fleshPrisonSpinAttackDamage = new IntField(fleshPrisonPanel, "Insignia damage", "fleshPrisonSpinAttackDamage", 10);
+            fleshPrisonSpinAttackSize = new FloatField(fleshPrisonPanel, "Insignia size", "fleshPrisonSpinAttackSize", 2f);
+            fleshPrisonSpinAttackDistance = new FloatField(fleshPrisonPanel, "Circle radius", "fleshPrisonSpinAttackDistance", 30f);
+            fleshPrisonSpinAttackTurnSpeed = new FloatField(fleshPrisonPanel, "Turn speed", "fleshPrisonSpinAttackTurnSpeed", 30f);
+            fleshPrisonSpinAttackActivateSpeed = new FloatField(fleshPrisonPanel, "Activasion speed", "fleshPrisonSpinAttackActivateSpeed", 0.5f);
+
+            new ConfigHeader(minosPrimePanel, "Random Teleport Before Shoot");
+            minosPrimeRandomTeleportToggle = new BoolField(minosPrimePanel, "Enabled", "minosPrimeRandomTeleportToggle", true);
+            minosPrimeRandomTeleportMinDistance = new FloatField(minosPrimePanel, "Minimum distance", "minosPrimeRandomTeleportMinDistance", 20f);
+            minosPrimeRandomTeleportMaxDistance = new FloatField(minosPrimePanel, "Maximum distance", "minosPrimeRandomTeleportMaxDistance", 50f);
 
             config.Flush();
         }

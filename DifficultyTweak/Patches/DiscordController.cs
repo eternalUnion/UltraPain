@@ -13,6 +13,8 @@ namespace DifficultyTweak.Patches
         {
             if(___cachedActivity.State != null && ___cachedActivity.State == "DIFFICULTY: VIOLENT" && Plugin.ultrapainDifficulty && ConfigManager.discordRichPresenceToggle.value)
                 ___cachedActivity.State = $"DIFFICULTY: {ConfigManager.pluginName.value}";
+            else if (___cachedActivity.State != null && ___cachedActivity.State == "DIFFICULTY: UKMD" && Plugin.ultrapainDifficulty && ConfigManager.discordRichPresenceToggle.value)
+                ___cachedActivity.State = $"DIFFICULTY: {ConfigManager.pluginName.value}";
             return true;
         }
     }

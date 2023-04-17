@@ -78,13 +78,14 @@ namespace DifficultyTweak
         public static GameObject lighningStrikeWindup;
         public static GameObject explosion;
         public static GameObject virtueInsignia;
+        public static GameObject rocket;
+        public static GameObject revolverBullet;
 
-        public static GameObject maliciousFace;
         public static GameObject idol;
         public static GameObject ferryman;
 
         public static GameObject enrageEffect;
-
+        public static GameObject v2flashUnparryable;
 
         // Singleton prefabs
         private static GameObject _soliderBullet;
@@ -130,8 +131,13 @@ namespace DifficultyTweak
             }
         }
 
+        private static bool loadedPrefabs = false;
         public void LoadPrefabs()
         {
+            if (loadedPrefabs)
+                return;
+            loadedPrefabs = true;
+
             AssetBundle bundle0 = GetAssetBundle("bundle-0");
             AssetBundle bundle1 = GetAssetBundle("bundle-1");
             AssetBundle uhbundle0 = GetAssetBundle("unhardened-bundle-0");
@@ -152,8 +158,6 @@ namespace DifficultyTweak
             lighningStrikeExplosive = uhbundle0.LoadAsset<GameObject>("assets/prefabs/lightningstrikeexplosive.prefab");
             //[unhardened-bundle-0][assets/particles/lightningboltwindupfollow variant.prefab]
             lighningStrikeWindup = uhbundle0.LoadAsset<GameObject>("assets/particles/lightningboltwindupfollow variant.prefab");
-            //[bundle-0][assets/prefabs/enemies/spider.prefab]
-            maliciousFace = bundle0.LoadAsset<GameObject>("assets/prefabs/enemies/spider.prefab");
             //[bundle-0][assets/prefabs/enemies/idol.prefab]
             idol = bundle0.LoadAsset<GameObject>("assets/prefabs/enemies/idol.prefab");
             //[bundle-0][assets/prefabs/enemies/ferryman.prefab]
@@ -166,8 +170,14 @@ namespace DifficultyTweak
             hideousMassProjectile = bundle0.LoadAsset<GameObject>("assets/prefabs/projectileexplosivehh.prefab");
             //[bundle-0][assets/particles/rageeffect.prefab]
             enrageEffect = bundle0.LoadAsset<GameObject>("assets/particles/rageeffect.prefab");
+            //[bundle-0][assets/particles/v2flashunparriable.prefab]
+            v2flashUnparryable = bundle0.LoadAsset<GameObject>("assets/particles/v2flashunparriable.prefab");
+            //[bundle-0][assets/prefabs/rocket.prefab]
+            rocket = bundle0.LoadAsset<GameObject>("assets/prefabs/rocket.prefab");
+            //[bundle-0][assets/prefabs/revolverbullet.prefab]
+            revolverBullet = bundle0.LoadAsset<GameObject>("assets/prefabs/revolverbullet.prefab");
 
-            hideousMassProjectile.AddComponent<HideousMassProjectile>();
+            // hideousMassProjectile.AddComponent<HideousMassProjectile>();
         }
 
         public static bool ultrapainDifficulty = false;
@@ -179,12 +189,15 @@ namespace DifficultyTweak
 
             if(SceneManager.GetActiveScene().name == "Main Menu")
             {
+                LoadPrefabs();
+
                 //Canvas/Difficulty Select (1)/Violent
                 Transform difficultySelect = SceneManager.GetActiveScene().GetRootGameObjects().Where(obj => obj.name == "Canvas").First().transform.Find("Difficulty Select (1)");
                 GameObject ultrapainButton = GameObject.Instantiate(difficultySelect.Find("Violent").gameObject, difficultySelect);
                 currentDifficultyButton = ultrapainButton;
 
                 ultrapainButton.transform.Find("Name").GetComponent<Text>().text = ConfigManager.pluginName.value;
+                ultrapainButton.GetComponent<DifficultySelectButton>().difficulty = 5;
                 RectTransform ultrapainTrans = ultrapainButton.GetComponent<RectTransform>();
                 ultrapainTrans.anchoredPosition = new Vector2(20f, -104f);
 

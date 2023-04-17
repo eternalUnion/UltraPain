@@ -14,7 +14,7 @@ namespace DifficultyTweak.Patches
             if (__0 != "difficulty" || !Plugin.ultrapainDifficulty || !ConfigManager.steamRichPresenceToggle.value)
                 return true;
 
-            if (__1.ToLower() != "violent")
+            if (__1.ToLower() != "violent" && __1.ToLower() != "ukmd")
                 return true;
 
             __1 = ConfigManager.pluginName.value;

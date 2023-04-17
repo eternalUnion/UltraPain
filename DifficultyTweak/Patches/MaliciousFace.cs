@@ -16,7 +16,7 @@ namespace DifficultyTweak.Patches
                 return;
 
             if (Plugin.homingProjectile.gameObject != null)
-                ___proj = Plugin.maliciousFaceBullet;
+                ___proj = Plugin.homingProjectile;
         }
     }
 
@@ -24,6 +24,11 @@ namespace DifficultyTweak.Patches
     [HarmonyPatch("ShootProj")]
     class MaliciousFace_ShootProj_Patch
     {
+        /*static bool Prefix(SpiderBody __instance, ref GameObject ___proj)
+        {
+            return true;
+        }*/
+
         static void Postfix(SpiderBody __instance, ref GameObject ___currentProj)
         {
             if (!Plugin.ultrapainDifficulty || !ConfigManager.enemyTweakToggle.value || !ConfigManager.maliciousFaceHomingProjectileToggle.value)
@@ -50,8 +55,9 @@ namespace DifficultyTweak.Patches
             EnemyIdentifier comp = __instance.GetComponent<EnemyIdentifier>();
             for(int i = 0; i < ConfigManager.maliciousFaceRadianceAmount.value; i++)
                 comp.BuffAll();
+            comp.UpdateBuffs(false);
 
-            __instance.spark = new GameObject();
+            //__instance.spark = new GameObject();
         }
     }
 

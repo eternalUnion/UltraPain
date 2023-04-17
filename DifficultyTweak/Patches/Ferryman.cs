@@ -20,7 +20,7 @@ namespace DifficultyTweak.Patches
         void Start()
         {
             int attackCount = 3;
-            int allocationPerAttack = 3;
+            int allocationPerAttack = 1;
 
             for (int attack = 0; attack < attackCount; attack++)
                 for (int i = 0; i < allocationPerAttack; i++)
