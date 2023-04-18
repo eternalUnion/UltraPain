@@ -78,7 +78,7 @@ namespace DifficultyTweak.Patches
     {
         static bool Prefix(string __0, ref int __result)
         {
-            if (__0 == "difficulty" && Plugin.ultrapainDifficulty && ConfigManager.globalDifficultySwitch.value)
+            if (__0 == "difficulty" && Plugin.realUltrapainDifficulty)
             {
                 __result = 5;
                 return false;

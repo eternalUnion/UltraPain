@@ -13,6 +13,7 @@ namespace DifficultyTweak
         {
             string difficultyName = __instance.transform.Find("Name").GetComponent<Text>().text;
             Plugin.ultrapainDifficulty = difficultyName == ConfigManager.pluginName.value || ConfigManager.globalDifficultySwitch.value;
+            Plugin.realUltrapainDifficulty = difficultyName == ConfigManager.pluginName.value;
         }
     }
 }

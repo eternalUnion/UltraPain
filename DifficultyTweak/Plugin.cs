@@ -162,6 +162,7 @@ namespace DifficultyTweak
         }
 
         public static bool ultrapainDifficulty = false;
+        public static bool realUltrapainDifficulty = false;
         public static GameObject currentDifficultyButton;
         public static GameObject currentDifficultyPanel;
         public void OnSceneChange(Scene before, Scene after)

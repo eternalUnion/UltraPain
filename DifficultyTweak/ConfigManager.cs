@@ -380,69 +380,39 @@ namespace DifficultyTweak
             new ConfigHeader(virtuePanel, "Tweak Normal Attack");
             virtueTweakNormalAttackToggle = new BoolField(virtuePanel, "Enabled", "virtueTweakNormalAttackToggle", true);
             virtueNormalAttackType = new EnumField<VirtueAttackType>(virtuePanel, "Attack type", "virtueNormalAttackType", VirtueAttackType.Insignia);
-            
-            ConfigHeader virtueNormalYInsigniaHeader = new ConfigHeader(virtuePanel, "Vertical Insignia", 12);
-            virtueNormalInsigniaYtoggle = new BoolField(virtuePanel, "Enabled", "virtueNormalInsigniaYtoggle", true);
-            virtueNormalInsigniaYdamage = new IntField(virtuePanel, "Damage", "virtueNormalInsigniaYdamage", 30);
-            virtueNormalInsigniaYsize = new FloatField(virtuePanel, "Size", "virtueNormalInsigniaYsize", 2f);
 
-            ConfigHeader virtueNormalZInsigniaHeader = new ConfigHeader(virtuePanel, "Forward Insignia", 12);
-            virtueNormalInsigniaZtoggle = new BoolField(virtuePanel, "Enabled", "virtueNormalInsigniaZtoggle", false);
-            virtueNormalInsigniaZdamage = new IntField(virtuePanel, "Damage", "virtueNormalInsigniaZdamage", 15);
-            virtueNormalInsigniaZsize = new FloatField(virtuePanel, "Size", "virtueNormalInsigniaZsize", 2f);
+            ConfigDivision virtueNormalInsigniaDiv = new ConfigDivision(virtuePanel, "virtueNormalInsigniaDiv");
+            ConfigHeader virtueNormalYInsigniaHeader = new ConfigHeader(virtueNormalInsigniaDiv, "Vertical Insignia", 12);
+            virtueNormalInsigniaYtoggle = new BoolField(virtueNormalInsigniaDiv, "Enabled", "virtueNormalInsigniaYtoggle", true);
+            virtueNormalInsigniaYdamage = new IntField(virtueNormalInsigniaDiv, "Damage", "virtueNormalInsigniaYdamage", 30);
+            virtueNormalInsigniaYsize = new FloatField(virtueNormalInsigniaDiv, "Size", "virtueNormalInsigniaYsize", 2f);
 
-            ConfigHeader virtueNormalXInsigniaHeader = new ConfigHeader(virtuePanel, "Side Insignia", 12);
-            virtueNormalInsigniaXtoggle = new BoolField(virtuePanel, "Enabled", "virtueNormalInsigniaXtoggle", false);
-            virtueNormalInsigniaXdamage = new IntField(virtuePanel, "Damage", "virtueNormalInsigniaXdamage", 15);
-            virtueNormalInsigniaXsize = new FloatField(virtuePanel, "Size", "virtueNormalInsigniaXsize", 2f);
+            ConfigHeader virtueNormalZInsigniaHeader = new ConfigHeader(virtueNormalInsigniaDiv, "Forward Insignia", 12);
+            virtueNormalInsigniaZtoggle = new BoolField(virtueNormalInsigniaDiv, "Enabled", "virtueNormalInsigniaZtoggle", false);
+            virtueNormalInsigniaZdamage = new IntField(virtueNormalInsigniaDiv, "Damage", "virtueNormalInsigniaZdamage", 15);
+            virtueNormalInsigniaZsize = new FloatField(virtueNormalInsigniaDiv, "Size", "virtueNormalInsigniaZsize", 2f);
 
-            virtueNormalLightningDamage = new FloatField(virtuePanel, "Damage multiplier", "virtueNormalLightningDamage", 1f);
+            ConfigHeader virtueNormalXInsigniaHeader = new ConfigHeader(virtueNormalInsigniaDiv, "Side Insignia", 12);
+            virtueNormalInsigniaXtoggle = new BoolField(virtueNormalInsigniaDiv, "Enabled", "virtueNormalInsigniaXtoggle", false);
+            virtueNormalInsigniaXdamage = new IntField(virtueNormalInsigniaDiv, "Damage", "virtueNormalInsigniaXdamage", 15);
+            virtueNormalInsigniaXsize = new FloatField(virtueNormalInsigniaDiv, "Size", "virtueNormalInsigniaXsize", 2f);
+
+            ConfigDivision virtueNormalLigthningDiv = new ConfigDivision(virtuePanel, "virtueNormalLigthningDiv");
+            virtueNormalLightningDamage = new FloatField(virtueNormalLigthningDiv, "Damage multiplier", "virtueNormalLightningDamage", 1f);
             //virtueNormalLightningSize = new FloatField(virtuePanel, "Size multiplier", "virtueNormalLightningSize", 1f);
-            virtueNormalLightningDelay = new FloatField(virtuePanel, "Lighning delay", "virtueNormalLightningDelay", 3f);
+            virtueNormalLightningDelay = new FloatField(virtueNormalLigthningDiv, "Lighning delay", "virtueNormalLightningDelay", 3f);
 
             void OnVirtueNormalAttackChange(EnumField<VirtueAttackType>.EnumValueChangeEvent newType)
             {
                 if(newType.value == VirtueAttackType.Insignia)
                 {
-                    virtueNormalLightningDamage.hidden = true;
-                    virtueNormalLightningDelay.hidden = true;
-                    //virtueNormalLightningSize.hidden = true;
-
-                    virtueNormalYInsigniaHeader.hidden = false;
-                    virtueNormalInsigniaYtoggle.hidden = false;
-                    virtueNormalInsigniaYdamage.hidden = false;
-                    virtueNormalInsigniaYsize.hidden = false;
-
-                    virtueNormalZInsigniaHeader.hidden = false;
-                    virtueNormalInsigniaZtoggle.hidden = false;
-                    virtueNormalInsigniaZdamage.hidden = false;
-                    virtueNormalInsigniaZsize.hidden = false;
-
-                    virtueNormalXInsigniaHeader.hidden = false;
-                    virtueNormalInsigniaXtoggle.hidden = false;
-                    virtueNormalInsigniaXdamage.hidden = false;
-                    virtueNormalInsigniaXsize.hidden = false;
+                    virtueNormalInsigniaDiv.hidden = false;
+                    virtueNormalLigthningDiv.hidden = true;
                 }
                 else
                 {
-                    virtueNormalLightningDamage.hidden = false;
-                    virtueNormalLightningDelay.hidden = false;
-                    //virtueNormalLightningSize.hidden = false;
-
-                    virtueNormalYInsigniaHeader.hidden = true;
-                    virtueNormalInsigniaYtoggle.hidden = true;
-                    virtueNormalInsigniaYdamage.hidden = true;
-                    virtueNormalInsigniaYsize.hidden = true;
-
-                    virtueNormalZInsigniaHeader.hidden = true;
-                    virtueNormalInsigniaZtoggle.hidden = true;
-                    virtueNormalInsigniaZdamage.hidden = true;
-                    virtueNormalInsigniaZsize.hidden = true;
-
-                    virtueNormalXInsigniaHeader.hidden = true;
-                    virtueNormalInsigniaXtoggle.hidden = true;
-                    virtueNormalInsigniaXdamage.hidden = true;
-                    virtueNormalInsigniaXsize.hidden = true;
+                    virtueNormalInsigniaDiv.hidden = true;
+                    virtueNormalLigthningDiv.hidden = false;
                 }
             }
             virtueNormalAttackType.onValueChange += OnVirtueNormalAttackChange;
@@ -452,68 +422,38 @@ namespace DifficultyTweak
             virtueTweakEnragedAttackToggle = new BoolField(virtuePanel, "Enabled", "virtueTweakEnragedAttackToggle", true);
             virtueEnragedAttackType = new EnumField<VirtueAttackType>(virtuePanel, "Attack type", "virtueEnragedAttackType", VirtueAttackType.Insignia);
 
-            ConfigHeader virtueEnragedYInsigniaHeader = new ConfigHeader(virtuePanel, "Vertical Insignia", 12);
-            virtueEnragedInsigniaYtoggle = new BoolField(virtuePanel, "Enabled", "virtueEnragedInsigniaYtoggle", true);
-            virtueEnragedInsigniaYdamage = new IntField(virtuePanel, "Damage", "virtueEnragedInsigniaYdamage", 30);
-            virtueEnragedInsigniaYsize = new FloatField(virtuePanel, "Size", "virtueEnragedInsigniaYsize", 2f);
+            ConfigDivision virtueEnragedInsigniaDiv = new ConfigDivision(virtuePanel, "virtueEnragedInsigniaDiv");
+            ConfigHeader virtueEnragedYInsigniaHeader = new ConfigHeader(virtueEnragedInsigniaDiv, "Vertical Insignia", 12);
+            virtueEnragedInsigniaYtoggle = new BoolField(virtueEnragedInsigniaDiv, "Enabled", "virtueEnragedInsigniaYtoggle", true);
+            virtueEnragedInsigniaYdamage = new IntField(virtueEnragedInsigniaDiv, "Damage", "virtueEnragedInsigniaYdamage", 30);
+            virtueEnragedInsigniaYsize = new FloatField(virtueEnragedInsigniaDiv, "Size", "virtueEnragedInsigniaYsize", 2f);
 
-            ConfigHeader virtueEnragedZInsigniaHeader = new ConfigHeader(virtuePanel, "Forward Insignia", 12);
-            virtueEnragedInsigniaZtoggle = new BoolField(virtuePanel, "Enabled", "virtueEnragedInsigniaZtoggle", true);
-            virtueEnragedInsigniaZdamage = new IntField(virtuePanel, "Damage", "virtueEnragedInsigniaZdamage", 15);
-            virtueEnragedInsigniaZsize = new FloatField(virtuePanel, "Size", "virtueEnragedInsigniaZsize", 2f);
+            ConfigHeader virtueEnragedZInsigniaHeader = new ConfigHeader(virtueEnragedInsigniaDiv, "Forward Insignia", 12);
+            virtueEnragedInsigniaZtoggle = new BoolField(virtueEnragedInsigniaDiv, "Enabled", "virtueEnragedInsigniaZtoggle", true);
+            virtueEnragedInsigniaZdamage = new IntField(virtueEnragedInsigniaDiv, "Damage", "virtueEnragedInsigniaZdamage", 15);
+            virtueEnragedInsigniaZsize = new FloatField(virtueEnragedInsigniaDiv, "Size", "virtueEnragedInsigniaZsize", 2f);
 
-            ConfigHeader virtueEnragedXInsigniaHeader = new ConfigHeader(virtuePanel, "Side Insignia", 12);
-            virtueEnragedInsigniaXtoggle = new BoolField(virtuePanel, "Enabled", "virtueEnragedInsigniaXtoggle", true);
-            virtueEnragedInsigniaXdamage = new IntField(virtuePanel, "Damage", "virtueEnragedInsigniaXdamage", 15);
-            virtueEnragedInsigniaXsize = new FloatField(virtuePanel, "Size", "virtueEnragedInsigniaXsize", 2f);
+            ConfigHeader virtueEnragedXInsigniaHeader = new ConfigHeader(virtueEnragedInsigniaDiv, "Side Insignia", 12);
+            virtueEnragedInsigniaXtoggle = new BoolField(virtueEnragedInsigniaDiv, "Enabled", "virtueEnragedInsigniaXtoggle", true);
+            virtueEnragedInsigniaXdamage = new IntField(virtueEnragedInsigniaDiv, "Damage", "virtueEnragedInsigniaXdamage", 15);
+            virtueEnragedInsigniaXsize = new FloatField(virtueEnragedInsigniaDiv, "Size", "virtueEnragedInsigniaXsize", 2f);
 
-            virtueEnragedLightningDamage = new FloatField(virtuePanel, "Damage multiplier", "virtueEnragedLightningDamage", 1f);
+            ConfigDivision virtueEnragedLigthningDiv = new ConfigDivision(virtuePanel, "virtueEnragedLigthningDiv");
+            virtueEnragedLightningDamage = new FloatField(virtueEnragedLigthningDiv, "Damage multiplier", "virtueEnragedLightningDamage", 1f);
             //virtueEnragedLightningSize = new FloatField(virtuePanel, "Size multiplier", "virtueEnragedLightningSize", 1f);
-            virtueEnragedLightningDelay = new FloatField(virtuePanel, "Lighning delay", "virtueEnragedLightningDelay", 2f);
+            virtueEnragedLightningDelay = new FloatField(virtueEnragedLigthningDiv, "Lighning delay", "virtueEnragedLightningDelay", 2f);
 
             void OnVirtueEnragedAttackChange(EnumField<VirtueAttackType>.EnumValueChangeEvent newType)
             {
                 if (newType.value == VirtueAttackType.Insignia)
                 {
-                    virtueEnragedLightningDamage.hidden = true;
-                    virtueEnragedLightningDelay.hidden = true;
-                    //virtueEnragedLightningSize.hidden = true;
-
-                    virtueEnragedYInsigniaHeader.hidden = false;
-                    virtueEnragedInsigniaYtoggle.hidden = false;
-                    virtueEnragedInsigniaYdamage.hidden = false;
-                    virtueEnragedInsigniaYsize.hidden = false;
-
-                    virtueEnragedZInsigniaHeader.hidden = false;
-                    virtueEnragedInsigniaZtoggle.hidden = false;
-                    virtueEnragedInsigniaZdamage.hidden = false;
-                    virtueEnragedInsigniaZsize.hidden = false;
-
-                    virtueEnragedXInsigniaHeader.hidden = false;
-                    virtueEnragedInsigniaXtoggle.hidden = false;
-                    virtueEnragedInsigniaXdamage.hidden = false;
-                    virtueEnragedInsigniaXsize.hidden = false;
+                    virtueEnragedInsigniaDiv.hidden = false;
+                    virtueEnragedLigthningDiv.hidden = true;
                 }
                 else
                 {
-                    virtueEnragedLightningDamage.hidden = false;
-                    virtueEnragedLightningDelay.hidden = false;
-                    //virtueEnragedLightningSize.hidden = false;
-
-                    virtueEnragedYInsigniaHeader.hidden = true;
-                    virtueEnragedInsigniaYtoggle.hidden = true;
-                    virtueEnragedInsigniaYdamage.hidden = true;
-                    virtueEnragedInsigniaYsize.hidden = true;
-
-                    virtueEnragedZInsigniaHeader.hidden = true;
-                    virtueEnragedInsigniaZtoggle.hidden = true;
-                    virtueEnragedInsigniaZdamage.hidden = true;
-                    virtueEnragedInsigniaZsize.hidden = true;
-
-                    virtueEnragedXInsigniaHeader.hidden = true;
-                    virtueEnragedInsigniaXtoggle.hidden = true;
-                    virtueEnragedInsigniaXdamage.hidden = true;
-                    virtueEnragedInsigniaXsize.hidden = true;
+                    virtueEnragedInsigniaDiv.hidden = true;
+                    virtueEnragedLigthningDiv.hidden = false;
                 }
             }
             virtueEnragedAttackType.onValueChange += OnVirtueEnragedAttackChange;
