@@ -20,12 +20,6 @@ namespace DifficultyTweak.Patches
             if (flag == null)
                 return;
 
-            if (!Plugin.ultrapainDifficulty || !ConfigManager.enemyTweakToggle.value)
-                return;
-
-            if (!ConfigManager.hideousMassInsigniaToggle.value)
-                return;
-
             GameObject createInsignia(float size, int damage)
             {
                 GameObject insignia = GameObject.Instantiate(Plugin.virtueInsignia, __instance.transform.position, Quaternion.identity);
@@ -58,25 +52,17 @@ namespace DifficultyTweak.Patches
     }
 
     [HarmonyPatch(typeof(Mass), "ShootExplosive")]
-    public static class HideousMassHoming
+    public class HideousMassHoming
     {
-        static bool Prefix(Mass __instance, out bool __state)
+        static bool Prefix(Mass __instance)
         {
-            __state = false;
-            if (!Plugin.ultrapainDifficulty || !ConfigManager.enemyTweakToggle.value || !ConfigManager.hideousMassInsigniaToggle.value)
-                return true;
-
             __instance.explosiveProjectile = GameObject.Instantiate(Plugin.hideousMassProjectile);
             __instance.explosiveProjectile.AddComponent<HideousMassProjectile>();
-            __state = true;
             return true;
         }
 
-        static void Postfix(Mass __instance, bool __state)
+        static void Postfix(Mass __instance)
         {
-            if (!__state)
-                return;
-
             GameObject.Destroy(__instance.explosiveProjectile);
             __instance.explosiveProjectile = Plugin.hideousMassProjectile;
         }

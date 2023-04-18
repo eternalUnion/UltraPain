@@ -16,9 +16,6 @@ namespace DifficultyTweak.Patches
     {
         static void Postfix(Drone __instance, ref EnemyIdentifier ___eid)
         {
-            if (___eid.enemyType != EnemyType.Virtue)
-                return;
-
             VirtueFlag flag = __instance.gameObject.AddComponent<VirtueFlag>();
             flag.virtue = __instance;
         }

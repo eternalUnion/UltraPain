@@ -49,7 +49,7 @@ namespace DifficultyTweak.Patches
     }
 
     [HarmonyPatch(typeof(Ferryman), /*"StopAction"*/"StopMoving")]
-    class FerrymanStopAction
+    class FerrymanStopMoving
     {
         public static MethodInfo SnapToGround = typeof(Ferryman).GetMethod("SnapToGround", BindingFlags.Instance | BindingFlags.NonPublic);
 
@@ -58,9 +58,6 @@ namespace DifficultyTweak.Patches
         {
             FerrymanFlag flag = __instance.gameObject.GetComponent<FerrymanFlag>();
             if (flag == null)
-                return;
-
-            if (!Plugin.ultrapainDifficulty || !ConfigManager.enemyTweakToggle.value || !ConfigManager.ferrymanComboToggle.value)
                 return;
 
             string clipName = ___anim.GetCurrentAnimatorClipInfo(0)[0].clip.name;
@@ -79,13 +76,11 @@ namespace DifficultyTweak.Patches
             if(flag.remainingCombo <= 0)
             {
                 flag.remainingCombo = ConfigManager.ferrymanComboCount.value;
-                Debug.Log("===========");
                 return;
             }
 
             int attackType = flag.GetNextCombo();
-            Debug.Log(attackType);
-
+            
             if (attackType == 0)
             {
                 // time = 0.8347

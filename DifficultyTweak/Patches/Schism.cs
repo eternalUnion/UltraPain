@@ -17,9 +17,6 @@ namespace DifficultyTweak.Patches
             proj.turningSpeedMultiplier = turningSpeedMultiplier;
             proj.damage = damage;*/
 
-            if (!Plugin.ultrapainDifficulty || !ConfigManager.enemyTweakToggle.value || !ConfigManager.schismSpreadAttackToggle.value)
-                return;
-
             float degreePerIteration = ConfigManager.schismSpreadAttackAngle.value / ConfigManager.schismSpreadAttackCount.value;
             float currentDegree = degreePerIteration;
             for (int i = 0; i < ConfigManager.schismSpreadAttackCount.value; i++)

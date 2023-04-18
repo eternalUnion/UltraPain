@@ -11,9 +11,6 @@ namespace DifficultyTweak.Patches
     {
         static bool Prefix(HookArm __instance, ref Grenade ___caughtGrenade, ref Vector3 ___caughtPoint, ref Vector3 ___hookPoint, ref float ___cooldown, ref List<Rigidbody> ___caughtObjects)
         {
-            if (!Plugin.ultrapainDifficulty || !ConfigManager.playerTweakToggle.value || !ConfigManager.rocketGrabbingToggle.value)
-                return true;
-
             if (___caughtGrenade != null && ___caughtGrenade.rocket && !___caughtGrenade.playerRiding && MonoSingleton<WeaponCharges>.Instance.rocketFrozen)
             {
                 if (__instance.state == HookState.Throwing)

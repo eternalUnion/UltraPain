@@ -31,9 +31,6 @@ namespace DifficultyTweak.Patches
     {
         static bool Prefix(Punch __instance, Transform __0, ref bool __result, ref bool ___hitSomething)
         {
-            if (!Plugin.ultrapainDifficulty || !ConfigManager.playerTweakToggle.value)
-                return true;
-
             Grenade grn = __0.GetComponent<Grenade>();
             if(grn != null)
             {
@@ -82,9 +79,6 @@ namespace DifficultyTweak.Patches
     [HarmonyPatch("Explode")]
     class Grenade_Explode_Patch1
     {
-        public static float rocketInitialStatOnParry = 0.35f;
-        public static float rocketExtraStatPerParry = 0.35f;
-
         static bool Prefix(Grenade __instance, ref bool __2, ref bool __1, ref bool ___exploded)
         {
             GrenadeParriedFlag flag = __instance.GetComponent<GrenadeParriedFlag>();
@@ -210,13 +204,6 @@ namespace DifficultyTweak.Patches
             }
 
             return true;
-        }
-
-        static void Postfix(Grenade __instance)
-        {
-            GrenadeParriedFlag flag = __instance.GetComponent<GrenadeParriedFlag>();
-            if (flag == null)
-                return;
         }
     }
 

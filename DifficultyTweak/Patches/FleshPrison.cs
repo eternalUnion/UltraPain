@@ -104,9 +104,6 @@ namespace DifficultyTweak.Patches
             if (__instance.altVersion)
                 return;
 
-            if (!Plugin.ultrapainDifficulty || !ConfigManager.enemyTweakToggle.value || !ConfigManager.fleshPrisonSpinAttackToggle.value)
-                return;
-
             GameObject obj = new GameObject();
             obj.transform.position = __instance.transform.position + Vector3.up;
             FleshPrisonRotatingInsignia flag = obj.AddComponent<FleshPrisonRotatingInsignia>();

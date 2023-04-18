@@ -46,10 +46,10 @@ namespace DifficultyTweak.Patches
 
             return false;*/
 
-            if (!Plugin.ultrapainDifficulty || !ConfigManager.enemyTweakToggle.value || !ConfigManager.mindflayerShootTweakToggle.value)
+            MindflayerPatch counter = __instance.GetComponent<MindflayerPatch>();
+            if (counter == null)
                 return true;
 
-            MindflayerPatch counter = __instance.GetComponent<MindflayerPatch>();
             if (counter.shotsLeft == 0)
             {
                 counter.shotsLeft = ConfigManager.mindflayerShootAmount.value;
@@ -97,9 +97,6 @@ namespace DifficultyTweak.Patches
             Mindflayer mf = parent.GetComponent<Mindflayer>();
 
             if (mf == null)
-                return;
-
-            if (!Plugin.ultrapainDifficulty || !ConfigManager.enemyTweakToggle.value || !ConfigManager.mindflayerTeleportComboToggle.value)
                 return;
 
             //MindflayerPatch patch = mf.gameObject.GetComponent<MindflayerPatch>();

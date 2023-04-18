@@ -17,9 +17,6 @@ namespace DifficultyTweak.Patches
             if (___eid.enemyType != EnemyType.Soldier)
                 return;
 
-            if (!Plugin.ultrapainDifficulty || !ConfigManager.enemyTweakToggle.value || !ConfigManager.soliderShootTweakToggle.value)
-                return;
-
             /*___projectile = Plugin.soliderBullet;
 
             if (Plugin.decorativeProjectile2.gameObject != null)
@@ -35,7 +32,7 @@ namespace DifficultyTweak.Patches
     {
         static void Postfix(ZombieProjectiles __instance, ref EnemyIdentifier ___eid, ref GameObject ___origWP)
         {
-            if (!Plugin.ultrapainDifficulty || !ConfigManager.enemyTweakToggle.value || !ConfigManager.soliderCoinsIgnoreWeakPointToggle.value)
+            if (___eid.enemyType != EnemyType.Soldier)
                 return;
 
             ___eid.weakPoint = null;
@@ -54,9 +51,6 @@ namespace DifficultyTweak.Patches
         static void Postfix(ZombieProjectiles __instance, ref GameObject ___currentProjectile, ref EnemyIdentifier ___eid, ref GameObject ___player, ref Animator ___anim, ref float ___coolDown)
         {
             if (___eid.enemyType != EnemyType.Soldier)
-                return;
-
-            if (!Plugin.ultrapainDifficulty || !ConfigManager.enemyTweakToggle.value || !ConfigManager.soliderShootTweakToggle.value)
                 return;
 
             ___currentProjectile.GetComponent<ProjectileSpread>().spreadAmount = 10;

@@ -14,9 +14,6 @@ namespace DifficultyTweak.Patches
     {
         static bool Prefix(SwordsMachine __instance, bool __0, ref Animator ___anim)
         {
-            if (!Plugin.ultrapainDifficulty || !ConfigManager.enemyTweakToggle.value || !ConfigManager.swordsMachineNoLightKnockbackToggle.value)
-                return true;
-
             if (__0 == true)
             {
                 __instance.Enrage();
@@ -87,9 +84,6 @@ namespace DifficultyTweak.Patches
     {
         static void Postfix(ThrownSword __instance)
         {
-            if (!Plugin.ultrapainDifficulty || !ConfigManager.enemyTweakToggle.value || !ConfigManager.swordsMachineExplosiveSwordToggle.value)
-                return;
-
             __instance.gameObject.AddComponent<ThrownSwordCollisionDetector>();
         }
     }
@@ -100,9 +94,6 @@ namespace DifficultyTweak.Patches
     {
         static void Postfix(ThrownSword __instance, Collider __0)
         {
-            if (!Plugin.ultrapainDifficulty || !ConfigManager.enemyTweakToggle.value || !ConfigManager.swordsMachineExplosiveSwordToggle.value)
-                return;
-
             if (__0.gameObject.tag == "Player")
             {
                 GameObject explosionObj = GameObject.Instantiate(Plugin.shotgunGrenade.gameObject.GetComponent<Grenade>().explosion, __0.gameObject.transform.position, __0.gameObject.transform.rotation);

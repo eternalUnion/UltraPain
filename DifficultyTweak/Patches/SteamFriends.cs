@@ -11,10 +11,7 @@ namespace DifficultyTweak.Patches
     {
         static bool Prefix(string __0, ref string __1)
         {
-            if (__0 != "difficulty" || !Plugin.realUltrapainDifficulty || !ConfigManager.steamRichPresenceToggle.value)
-                return true;
-
-            if (__1.ToLower() != "violent" && __1.ToLower() != "ukmd")
+            if (__1.ToLower() != "ukmd")
                 return true;
 
             __1 = ConfigManager.pluginName.value;

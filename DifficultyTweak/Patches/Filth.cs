@@ -21,9 +21,6 @@ namespace DifficultyTweak.Patches
             if (eid == null || eid.enemyType != EnemyType.Filth)
                 return true;
 
-            if (!Plugin.ultrapainDifficulty || !ConfigManager.enemyTweakToggle.value || !ConfigManager.filthExplodeToggle.value)
-                return true;
-
             GameObject expObj = GameObject.Instantiate(Plugin.explosion, eid.transform.position, Quaternion.identity);
             foreach(Explosion exp in expObj.GetComponentsInChildren<Explosion>())
             {

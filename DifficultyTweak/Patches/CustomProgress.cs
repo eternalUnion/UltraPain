@@ -73,7 +73,7 @@ namespace DifficultyTweak.Patches
         }
     }*/
 
-    [HarmonyPatch(typeof(PrefsManager), "GetInt")]
+    /*[HarmonyPatch(typeof(PrefsManager), "GetInt")]
     class StatsManager_DifficultyOverride
     {
         static bool Prefix(string __0, ref int __result)
@@ -85,6 +85,14 @@ namespace DifficultyTweak.Patches
             }
 
             return true;
+        }
+    }*/
+
+    class PrefsManager_Ctor
+    {
+        static void Postfix(ref Dictionary<string, Func<object, object>> ___propertyValidators)
+        {
+            ___propertyValidators.Clear();
         }
     }
 }

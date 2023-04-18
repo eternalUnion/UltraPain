@@ -25,15 +25,9 @@ namespace DifficultyTweak.Patches
     {
         static bool Prefix(Drone __instance, ref EnemyIdentifier ___eid)
         {
-            if (___eid.enemyType != EnemyType.Drone || !Plugin.ultrapainDifficulty || !ConfigManager.enemyTweakToggle.value)
-                return true;
-
             DroneFlag flag = __instance.GetComponent<DroneFlag>();
             if(flag == null)
-            {
-                Debug.LogError("Component drone flag not found during Drone.Shoot()");
                 return true;
-            }
 
             DroneFlag.Firemode mode = flag.currentMode;
 

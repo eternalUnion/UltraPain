@@ -161,6 +161,7 @@ namespace DifficultyTweak
         public static BoolField strayShootToggle;
         public static IntField strayShootCount;
         public static FloatField strayShootSpeed;
+        public static BoolField strayCoinsIgnoreWeakPointToggle;
 
         // STREET CLEANER
         public static BoolField streetCleanerPredictiveDodgeToggle;
@@ -202,6 +203,10 @@ namespace DifficultyTweak
                 return;
 
             config = PluginConfigurator.Create("ULTRAPAIN", Plugin.PLUGIN_GUID);
+            config.postConfigChange += () =>
+            {
+                Plugin.PatchAll();
+            };
 
             // ROOT PANEL
             new ConfigHeader(config.rootPanel, "Enemy Tweaks");
@@ -278,9 +283,8 @@ namespace DifficultyTweak
             hideousMassPanel = new ConfigPanel(enemyPanel, "Hideous Mass", "hideousMassPanel");
             ferrymanPanel = new ConfigPanel(enemyPanel, "Ferryman", "ferrymanPanel");
             turretPanel = new ConfigPanel(enemyPanel, "Sentry", "turretPanel");
-            new ConfigHeader(enemyPanel, "Prime Prisons");
-            fleshPrisonPanel = new ConfigPanel(enemyPanel, "Flesh Prison", "fleshPrisonPanel");
             new ConfigHeader(enemyPanel, "Prime Bosses");
+            fleshPrisonPanel = new ConfigPanel(enemyPanel, "Flesh Prison", "fleshPrisonPanel");
             minosPrimePanel = new ConfigPanel(enemyPanel, "Minos Prime", "minosPrimePanel");
 
             // CERBERUS
@@ -361,6 +365,8 @@ namespace DifficultyTweak
             strayShootToggle = new BoolField(strayPanel, "Enabled", "strayShootToggle", true);
             strayShootCount = new IntField(strayPanel, "Extra projectile count", "strayShootCount", 2);
             strayShootSpeed = new FloatField(strayPanel, "Shoot speed", "strayShootSpeed", 20f);
+            new ConfigHeader(strayPanel, "Coins Ignore Weak Point");
+            strayCoinsIgnoreWeakPointToggle = new BoolField(strayPanel, "Enabled", "strayCoinsIgnoreWeakPointToggle", true);
 
             // STREET CLEANER
             new ConfigHeader(streetCleanerPanel, "Predictive Dodge");

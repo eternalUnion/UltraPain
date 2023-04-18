@@ -60,9 +60,6 @@ namespace DifficultyTweak.Patches
             if (___eid.enemyType != EnemyType.Stray)
                 return;
 
-            if (!Plugin.ultrapainDifficulty || !ConfigManager.enemyTweakToggle.value || !ConfigManager.strayShootToggle.value)
-                return;
-
             StrayFlag flag = __instance.gameObject.AddComponent<StrayFlag>();
             flag.standardProjectile = __instance.projectile;
             flag.standardDecorativeProjectile = __instance.decProjectile;

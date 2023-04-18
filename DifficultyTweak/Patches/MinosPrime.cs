@@ -11,9 +11,6 @@ namespace DifficultyTweak.Patches
     {
         static void Postfix(MinosPrime __instance)
         {
-            if (!Plugin.ultrapainDifficulty || !ConfigManager.enemyTweakToggle.value || !ConfigManager.minosPrimeRandomTeleportToggle.value)
-                return;
-
             Transform player = MonoSingleton<PlayerTracker>.Instance.GetPlayer();
 
             float min = ConfigManager.minosPrimeRandomTeleportMinDistance.value;
@@ -24,8 +21,10 @@ namespace DifficultyTweak.Patches
             float distance = UnityEngine.Random.Range(min, max);
 
             Ray ray = new Ray(player.position, unitSphere);
-            
-            if(Physics.Raycast(ray, out RaycastHit hit, max, 8, QueryTriggerInteraction.Ignore))
+
+            LayerMask mask = new LayerMask();
+            mask.value |= 256 | 16777216;
+            if (Physics.Raycast(ray, out RaycastHit hit, max, mask, QueryTriggerInteraction.Ignore))
             {
                 if (hit.distance < min)
                     return;
