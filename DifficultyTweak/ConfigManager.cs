@@ -22,6 +22,7 @@ namespace DifficultyTweak
         public static BoolField discordRichPresenceToggle;
         public static BoolField steamRichPresenceToggle;
         public static StringField pluginName;
+        public static BoolField globalDifficultySwitch; // TEMPORARY
 
         // PLAYER PANEL
         public static BoolField rocketBoostToggle;
@@ -129,6 +130,7 @@ namespace DifficultyTweak
         public static BoolField maliciousFaceRadianceOnEnrage;
         public static IntField maliciousFaceRadianceAmount;
         public static BoolField maliciousFaceHomingProjectileToggle;
+        public static IntField maliciousFaceHomingProjectileCount;
         public static IntField maliciousFaceHomingProjectileDamage;
         public static FloatField maliciousFaceHomingProjectileTurnSpeed;
         public static FloatField maliciousFaceHomingProjectileSpeed;
@@ -235,6 +237,9 @@ namespace DifficultyTweak
                     Plugin.currentDifficultyPanel.transform.Find("Title (1)").GetComponent<Text>().text = $"--{data.value}--";
             };
 
+            new ConfigHeader(config.rootPanel, "Global Difficulty");
+            globalDifficultySwitch = new BoolField(config.rootPanel, "Enabled", "globalDifficultySwitch", false);
+
             // PLAYER PANEL
             new ConfigHeader(playerPanel, "Rocket Boosting");
             rocketBoostToggle = new BoolField(playerPanel, "Enabled", "rocketBoostToggle", true);
@@ -316,6 +321,7 @@ namespace DifficultyTweak
             maliciousFaceRadianceOnEnrage = new BoolField(maliciousFacePanel, "Enabled", "maliciousFaceRadianceWhenEnraged", true);
             maliciousFaceRadianceAmount = new IntField(maliciousFacePanel, "Radiance level", "maliciousFaceRadianceAmount", 1);
             new ConfigHeader(maliciousFacePanel, "Homing Projectile");
+            maliciousFaceHomingProjectileCount = new IntField(maliciousFacePanel, "Projectile count", "maliciousFaceHomingProjectileCount", 5);
             maliciousFaceHomingProjectileToggle = new BoolField(maliciousFacePanel, "Enabled", "maliciousFaceHomingProjectileToggle", true);
             maliciousFaceHomingProjectileDamage = new IntField(maliciousFacePanel, "Projectile damage", "maliciousFaceHomingProjectileDamage", 25);
             maliciousFaceHomingProjectileSpeed = new FloatField(maliciousFacePanel, "Projectile speed", "maliciousFaceHomingProjectileSpeed", 20f);

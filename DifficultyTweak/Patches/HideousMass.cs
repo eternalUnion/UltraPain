@@ -77,7 +77,7 @@ namespace DifficultyTweak.Patches
             if (!__state)
                 return;
 
-            GameObject.Destroy(__instance.homingProjectile);
+            GameObject.Destroy(__instance.explosiveProjectile);
             __instance.explosiveProjectile = Plugin.hideousMassProjectile;
         }
     }

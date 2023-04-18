@@ -10,13 +10,15 @@ namespace DifficultyTweak.Patches
     [HarmonyPatch("Start")]
     class MaliciousFace_Start_Patch
     {
-        static void Postfix(SpiderBody __instance, ref GameObject ___proj)
+        static void Postfix(SpiderBody __instance, ref GameObject ___proj, ref int ___maxBurst)
         {
             if (!Plugin.ultrapainDifficulty || !ConfigManager.enemyTweakToggle.value || !ConfigManager.maliciousFaceHomingProjectileToggle.value)
                 return;
 
             if (Plugin.homingProjectile.gameObject != null)
                 ___proj = Plugin.homingProjectile;
+
+            ___maxBurst = Math.Max(0, ConfigManager.maliciousFaceHomingProjectileCount.value - 1);
         }
     }
 
@@ -24,13 +26,22 @@ namespace DifficultyTweak.Patches
     [HarmonyPatch("ShootProj")]
     class MaliciousFace_ShootProj_Patch
     {
-        /*static bool Prefix(SpiderBody __instance, ref GameObject ___proj)
+        /*static bool Prefix(SpiderBody __instance, ref GameObject ___proj, out bool __state)
         {
+            __state = false;
+            if (!Plugin.ultrapainDifficulty || !ConfigManager.enemyTweakToggle.value || !ConfigManager.maliciousFaceHomingProjectileToggle.value)
+                return true;
+
+            ___proj = Plugin.homingProjectile;
+            __state = true;
+
             return true;
         }*/
 
-        static void Postfix(SpiderBody __instance, ref GameObject ___currentProj)
+        static void Postfix(SpiderBody __instance, ref GameObject ___currentProj/*, bool __state*/)
         {
+            /*if (!__state)
+                return;*/
             if (!Plugin.ultrapainDifficulty || !ConfigManager.enemyTweakToggle.value || !ConfigManager.maliciousFaceHomingProjectileToggle.value)
                 return;
 

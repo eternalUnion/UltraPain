@@ -80,15 +80,14 @@ namespace DifficultyTweak
         public static GameObject virtueInsignia;
         public static GameObject rocket;
         public static GameObject revolverBullet;
+        public static GameObject maliciousCannonBeam;
+        public static GameObject lightningBoltSFX;
 
         public static GameObject idol;
         public static GameObject ferryman;
 
         public static GameObject enrageEffect;
         public static GameObject v2flashUnparryable;
-
-        // Singleton prefabs
-        private static GameObject _soliderBullet;
 
         // Variables
         public static float SoliderShootAnimationStart = 1.2f;
@@ -99,32 +98,12 @@ namespace DifficultyTweak
 
         public static float MinGrenadeParryVelocity = 40f;
 
-        private static GameObject _maliciousFaceBullet;
-        public static GameObject maliciousFaceBullet
-        {
-            get
-            {
-                if (_maliciousFaceBullet == null)
-                {
-                    _maliciousFaceBullet = GameObject.Instantiate(Plugin.homingProjectile.gameObject);
-                    _maliciousFaceBullet.SetActive(false);
-
-                    Projectile proj = _maliciousFaceBullet.GetComponent<Projectile>();
-                    proj.safeEnemyType = EnemyType.MaliciousFace;
-                    proj.turningSpeedMultiplier = 0.2f;
-                    proj.speed = 20;
-                }
-
-                return _maliciousFaceBullet;
-            }
-        }
-
         public static GameObject _lighningBoltSFX;
         public static GameObject lighningBoltSFX
         {
             get
             {
-                if(_lighningBoltSFX == null)
+                if (_lighningBoltSFX == null)
                     _lighningBoltSFX = ferryman.gameObject.transform.Find("LightningBoltChimes").gameObject;
 
                 return _lighningBoltSFX;
@@ -176,6 +155,8 @@ namespace DifficultyTweak
             rocket = bundle0.LoadAsset<GameObject>("assets/prefabs/rocket.prefab");
             //[bundle-0][assets/prefabs/revolverbullet.prefab]
             revolverBullet = bundle0.LoadAsset<GameObject>("assets/prefabs/revolverbullet.prefab");
+            //[bundle-0][assets/prefabs/railcannonbeammalicious.prefab]
+            maliciousCannonBeam = bundle0.LoadAsset<GameObject>("assets/prefabs/railcannonbeammalicious.prefab");
 
             // hideousMassProjectile.AddComponent<HideousMassProjectile>();
         }
@@ -233,14 +214,6 @@ namespace DifficultyTweak
 
                 evt.triggers.Add(trigger1);
                 evt.triggers.Add(trigger2);
-
-                /*
-                 Fast and aggressive enemies and high damage. 
-
-Quick thinking, mobility options and situational awareness are essential.
-
-<color=red>Recommended for players who have already gotten used to the game's pace and mechanics.</color>
-                 */
             }
         }
 
@@ -255,7 +228,6 @@ Quick thinking, mobility options and situational awareness are essential.
                     return;
 
                 MonoSingleton<StyleHUD>.Instance.RegisterStyleItem(StyleIDs.fistfulOfNades, ConfigManager.grenadeBoostStyleText.value);
-                //"<color=magenta>ABBYBOOST</color>"
                 MonoSingleton<StyleHUD>.Instance.RegisterStyleItem(StyleIDs.rocketBoost, ConfigManager.rocketBoostStyleText.value);
 
                 Debug.Log("Registered all style ids");
@@ -267,7 +239,6 @@ Quick thinking, mobility options and situational awareness are essential.
         public void Awake()
         {
             instance = this;
-            LoadPrefabs();
 
             // Plugin startup logic 
             Logger.LogInfo($"Plugin {PluginInfo.PLUGIN_GUID} is loaded!");
@@ -279,4 +250,65 @@ Quick thinking, mobility options and situational awareness are essential.
             SceneManager.activeSceneChanged += OnSceneChange;
         }
     }
+
+    // Asset destroyer tracker
+    /*[HarmonyPatch(typeof(UnityEngine.Object), nameof(UnityEngine.Object.Destroy), new Type[] { typeof(UnityEngine.Object) })]
+    public class TempClass1
+    {
+        static void Postfix(UnityEngine.Object __0)
+        {
+            if (__0 != null && __0 == Plugin.homingProjectile)
+            {
+                System.Diagnostics.StackTrace t = new System.Diagnostics.StackTrace();
+                Debug.LogError("Projectile destroyed");
+                Debug.LogError(t.ToString());
+                throw new Exception("Attempted to destroy proj");
+            }
+        }
+    }
+
+    [HarmonyPatch(typeof(UnityEngine.Object), nameof(UnityEngine.Object.Destroy), new Type[] { typeof(UnityEngine.Object), typeof(float) })]
+    public class TempClass2
+    {
+        static void Postfix(UnityEngine.Object __0)
+        {
+            if (__0 != null && __0 == Plugin.homingProjectile)
+            {
+                System.Diagnostics.StackTrace t = new System.Diagnostics.StackTrace();
+                Debug.LogError("Projectile destroyed");
+                Debug.LogError(t.ToString());
+                throw new Exception("Attempted to destroy proj");
+            }
+        }
+    }
+
+    [HarmonyPatch(typeof(UnityEngine.Object), nameof(UnityEngine.Object.DestroyImmediate), new Type[] { typeof(UnityEngine.Object) })]
+    public class TempClass3
+    {
+        static void Postfix(UnityEngine.Object __0)
+        {
+            if (__0 != null && __0 == Plugin.homingProjectile)
+            {
+                System.Diagnostics.StackTrace t = new System.Diagnostics.StackTrace();
+                Debug.LogError("Projectile destroyed");
+                Debug.LogError(t.ToString());
+                throw new Exception("Attempted to destroy proj");
+            }
+        }
+    }
+
+    [HarmonyPatch(typeof(UnityEngine.Object), nameof(UnityEngine.Object.DestroyImmediate), new Type[] { typeof(UnityEngine.Object), typeof(bool) })]
+    public class TempClass4
+    {
+        static void Postfix(UnityEngine.Object __0)
+        {
+            if (__0 != null && __0 == Plugin.homingProjectile)
+            {
+                System.Diagnostics.StackTrace t = new System.Diagnostics.StackTrace();
+                Debug.LogError("Projectile destroyed");
+                Debug.LogError(t.ToString());
+                throw new Exception("Attempted to destroy proj");
+            }
+        }
+    }*/
 }
