@@ -59,6 +59,8 @@ namespace DifficultyTweak
         public static ConfigPanel turretPanel;
         public static ConfigPanel fleshPrisonPanel;
         public static ConfigPanel minosPrimePanel;
+        public static ConfigPanel v2FirstPanel;
+        public static ConfigPanel v2SecondPanel;
 
         // CERBERUS
         public static BoolField cerberusDashToggle;
@@ -198,12 +200,31 @@ namespace DifficultyTweak
         public static FloatField minosPrimeRandomTeleportMaxDistance;
 
         // V2 - FIRST
-        public static BoolField v2FirstMalCannonSnipeToggle;
-        public static FloatField v2FirstMalCannonSnipeMaxDistToPlayer;
-        public static FloatField v2FirstMalCannonSnipeMinDistToV2;
+        public static BoolField v2FirstKnuckleBlasterToggle;
+        public static BoolField v2FirstKnuckleBlasterHitPlayerToggle;
+        public static FloatField v2FirstKnuckleBlasterHitPlayerMinDistance;
+        public static IntField v2FirstKnuckleBlasterHitDamage;
+        public static BoolField v2FirstKnuckleBlasterDeflectShotgunToggle;
+        public static FloatField v2FirstKnuckleBlasterCooldown;
+        public static IntField v2FirstKnuckleBlasterExplosionDamage;
+        public static FloatField v2FirstKnuckleBlasterSize;
+        public static FloatField v2FirstKnuckleBlasterSpeed;
 
         public static BoolField v2FirstCoreSnipeToggle;
-        public static FloatField v2FirstCoreSnipe;
+        public static FloatField v2FirstCoreSnipeMaxDistanceToPlayer;
+        public static FloatField v2FirstCoreSnipeMinDistanceToV2;
+
+        // V2 - SECOND
+        public static BoolField v2SecondRocketLauncherToggle;
+
+        public static BoolField v2SecondMalCannonSnipeToggle;
+        public static FloatField v2SecondMalCannonSnipeCooldown;
+        public static FloatField v2SecondMalCannonSnipeMaxDistanceToPlayer;
+        public static FloatField v2SecondMalCannonSnipeMinDistanceToV2;
+
+        public static BoolField v2SecondCoreSnipeToggle;
+        public static FloatField v2SecondCoreSnipeMaxDistanceToPlayer;
+        public static FloatField v2SecondCoreSnipeMinDistanceToV2;
 
         private static bool dirtyField = false;
         public static void Initialize()
@@ -328,6 +349,9 @@ namespace DifficultyTweak
             hideousMassPanel = new ConfigPanel(enemyPanel, "Hideous Mass", "hideousMassPanel");
             ferrymanPanel = new ConfigPanel(enemyPanel, "Ferryman", "ferrymanPanel");
             turretPanel = new ConfigPanel(enemyPanel, "Sentry", "turretPanel");
+            new ConfigHeader(enemyPanel, "Bosses");
+            v2FirstPanel = new ConfigPanel(enemyPanel, "V2 - First", "v2FirstPanel");
+            v2SecondPanel = new ConfigPanel(enemyPanel, "V2 - Second", "v2SecondPanel");
             new ConfigHeader(enemyPanel, "Prime Bosses");
             fleshPrisonPanel = new ConfigPanel(enemyPanel, "Flesh Prison", "fleshPrisonPanel");
             minosPrimePanel = new ConfigPanel(enemyPanel, "Minos Prime", "minosPrimePanel");
@@ -751,6 +775,48 @@ namespace DifficultyTweak
             minosPrimeRandomTeleportToggle.TriggerValueChangeEvent();
             minosPrimeRandomTeleportMinDistance = new FloatField(minosPrimeRandomTeleportDiv, "Minimum distance", "minosPrimeRandomTeleportMinDistance", 20f);
             minosPrimeRandomTeleportMaxDistance = new FloatField(minosPrimeRandomTeleportDiv, "Maximum distance", "minosPrimeRandomTeleportMaxDistance", 50f);
+
+            // V2 - FIRST
+            new ConfigHeader(v2FirstPanel, "Knuckleblaster");
+            ConfigDivision v2FirstKnuckleBlasterDiv = new ConfigDivision(v2FirstPanel, "v2FirstKnuckleBlasterDiv");
+            v2FirstKnuckleBlasterToggle = new BoolField(v2FirstPanel, "Enabled", "v2FirstKnuckleBlasterToggle", true);
+            v2FirstKnuckleBlasterToggle.onValueChange += (BoolField.BoolValueChangeEvent e) =>
+            {
+                v2FirstKnuckleBlasterDiv.interactable = e.value;
+                dirtyField = true;
+            };
+            v2FirstKnuckleBlasterToggle.TriggerValueChangeEvent();
+            v2FirstKnuckleBlasterCooldown = new FloatField(v2FirstKnuckleBlasterDiv, "Cooldown", "v2FirstKnuckleBlasterCooldown", 3f, 0f, float.MaxValue);
+            ConfigDivision v2FirstKnuckleBlasterHitPlayerDiv = new ConfigDivision(v2FirstKnuckleBlasterDiv, "v2FirstKnuckleBlasterHitPlayerDiv");
+            v2FirstKnuckleBlasterHitPlayerToggle = new BoolField(v2FirstKnuckleBlasterDiv, "Hit player", "v2FirstKnuckleBlasterHitPlayerToggle", true);
+            v2FirstKnuckleBlasterHitPlayerToggle.onValueChange += (BoolField.BoolValueChangeEvent e) =>
+            {
+                v2FirstKnuckleBlasterHitPlayerDiv.interactable = e.value;
+                dirtyField = true;
+            };
+            v2FirstKnuckleBlasterHitPlayerToggle.TriggerValueChangeEvent();
+            v2FirstKnuckleBlasterHitPlayerMinDistance = new FloatField(v2FirstKnuckleBlasterHitPlayerDiv, "Minimum distance to player", "v2FirstKnuckleBlasterHitPlayerMinDistance", 5f);
+            v2FirstKnuckleBlasterHitDamage = new IntField(v2FirstKnuckleBlasterHitPlayerDiv, "Hit damage", "v2FirstKnuckleBlasterHitDamage", 5);
+            v2FirstKnuckleBlasterDeflectShotgunToggle = new BoolField(v2FirstKnuckleBlasterDiv, "Deflect shotgun pellets", "v2FirstKnuckleBlasterDeflectShotgunToggle", true);
+            v2FirstKnuckleBlasterDeflectShotgunToggle.onValueChange += (BoolField.BoolValueChangeEvent e) =>
+            {
+                dirtyField = true;
+            };
+            v2FirstKnuckleBlasterExplosionDamage = new IntField(v2FirstKnuckleBlasterDiv, "Explosion damage", "v2FirstKnuckleBlasterExplosionDamage", 10);
+            v2FirstKnuckleBlasterSize = new FloatField(v2FirstKnuckleBlasterDiv, "Explosion size", "v2FirstKnuckleBlasterSize", 15);
+            v2FirstKnuckleBlasterSpeed = new FloatField(v2FirstKnuckleBlasterDiv, "Explosion speed", "v2FirstKnuckleBlasterSpeed", 15f / 2);
+
+            new ConfigHeader(v2FirstPanel, "Core Snipe");
+            ConfigDivision v2FirstCoreSnipeDiv = new ConfigDivision(v2FirstPanel, "v2FirstCoreSnipeDiv");
+            v2FirstCoreSnipeToggle = new BoolField(v2FirstPanel, "Enabled", "v2FirstCoreSnipeToggle", true);
+            v2FirstCoreSnipeToggle.onValueChange += (BoolField.BoolValueChangeEvent e) =>
+            {
+                v2FirstCoreSnipeDiv.interactable = e.value;
+                dirtyField = true;
+            };
+            v2FirstCoreSnipeToggle.TriggerValueChangeEvent();
+            v2FirstCoreSnipeMaxDistanceToPlayer = new FloatField(v2FirstCoreSnipeDiv, "Max distance to player", "v2FirstCoreSnipeMaxDistanceToPlayer", 10f);
+            v2FirstCoreSnipeMinDistanceToV2 = new FloatField(v2FirstCoreSnipeDiv, "Min distance to V2", "v2FirstCoreSnipeMinDistanceToV2", 20f);
 
             config.Flush();
         }
