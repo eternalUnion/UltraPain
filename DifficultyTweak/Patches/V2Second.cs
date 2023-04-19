@@ -6,6 +6,7 @@ using System.Reflection;
 using System.Text;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using UniverseLib;
 
 namespace DifficultyTweak.Patches
 {
@@ -97,7 +98,7 @@ namespace DifficultyTweak.Patches
 
         void Fire()
         {
-            cooldown = 15f;
+            cooldown = ConfigManager.v2SecondMalCannonSnipeCooldown.value;
 
             Grenade target = V2Utils.GetClosestGrenade();
             Vector3 targetPosition = Vector3.zero;
@@ -163,16 +164,21 @@ namespace DifficultyTweak.Patches
                 flag.maliciousCannon.cooldown = Mathf.MoveTowards(flag.maliciousCannon.cooldown, 0, Time.deltaTime);
 
             Grenade target = V2Utils.GetClosestGrenade();
-            if (target != null && Vector3.Distance(target.transform.position, PlayerTracker.Instance.GetTarget().transform.position) < 20f
-                && Vector3.Distance(target.transform.position, __instance.transform.position) > 10f && ___shootCooldown <= 0.9f && !___aboutToShoot && flag.maliciousCannon.cooldown == 0f)
+            if (ConfigManager.v2SecondMalCannonSnipeToggle.value && target != null
+                && ___shootCooldown <= 0.9f && !___aboutToShoot && flag.maliciousCannon.cooldown == 0f)
             {
-                V2SecondSwitchWeapon.SwitchWeapon.Invoke(__instance, new object[1] { 4 });
+                float distanceToPlayer = Vector3.Distance(target.transform.position, PlayerTracker.Instance.GetTarget().transform.position);
+                float distanceToV2 = Vector3.Distance(target.transform.position, flag.v2collider.bounds.center);
+                if (distanceToPlayer <= ConfigManager.v2SecondMalCannonSnipeMaxDistanceToPlayer.value && distanceToV2 >= ConfigManager.v2SecondMalCannonSnipeMinDistanceToV2.value)
+                {
+                    V2SecondSwitchWeapon.SwitchWeapon.Invoke(__instance, new object[1] { 4 });
 
-                ___shootCooldown = 1f;
-                ___aboutToShoot = true;
-                __instance.CancelInvoke("ShootWeapon");
-                __instance.CancelInvoke("AltShootWeapon");
-                __instance.Invoke("ShootWeapon", 0.2f / ___eid.totalSpeedModifier);
+                    ___shootCooldown = 1f;
+                    ___aboutToShoot = true;
+                    __instance.CancelInvoke("ShootWeapon");
+                    __instance.CancelInvoke("AltShootWeapon");
+                    __instance.Invoke("ShootWeapon", ConfigManager.v2SecondMalCannonSnipeReactTime.value / ___eid.totalSpeedModifier);
+                }
             }
 
             return true;
@@ -193,11 +199,11 @@ namespace DifficultyTweak.Patches
             if (___currentWeapon == 0)
             {
                 Grenade closestGrenade = V2Utils.GetClosestGrenade();
-                if (closestGrenade != null)
+                if (closestGrenade != null && ConfigManager.v2SecondCoreSnipeToggle.value)
                 {
                     float distanceToPlayer = Vector3.Distance(closestGrenade.transform.position, PlayerTracker.Instance.GetTarget().position);
                     float distanceToV2 = Vector3.Distance(closestGrenade.transform.position, flag.v2collider.bounds.center);
-                    if (distanceToPlayer <= ConfigManager.v2FirstCoreSnipeMaxDistanceToPlayer.value && distanceToV2 >= ConfigManager.v2FirstCoreSnipeMinDistanceToV2.value)
+                    if (distanceToPlayer <= ConfigManager.v2SecondCoreSnipeMaxDistanceToPlayer.value && distanceToV2 >= ConfigManager.v2SecondCoreSnipeMinDistanceToV2.value)
                     {
                         Debug.Log("Attempting to shoot the grenade");
                         GameObject revolverBeam = GameObject.Instantiate(Plugin.revolverBeam, __instance.transform.position + __instance.transform.forward, Quaternion.identity);
@@ -234,13 +240,14 @@ namespace DifficultyTweak.Patches
 
         static bool Prefix(V2 __instance, ref int __0)
         {
-            if (__instance.secondEncounter)
+            if (!__instance.secondEncounter || !ConfigManager.v2SecondRocketLauncherToggle.value)
                 return true;
 
             if (__0 != 1)
                 return true;
 
-            int weapon = UnityEngine.Random.RandomRangeInt(1, 4);
+            int[] weapons = new int[] { 1, 3 };
+            int weapon = weapons[UnityEngine.Random.RandomRangeInt(0, 2)];
             __0 = weapon;
 
             return true;

@@ -215,10 +215,15 @@ namespace DifficultyTweak
         public static FloatField v2FirstCoreSnipeMinDistanceToV2;
 
         // V2 - SECOND
+        public static BoolField v2SecondStartEnraged;
         public static BoolField v2SecondRocketLauncherToggle;
+        public static BoolField v2SecondFastCoin;
+        public static BoolField v2SecondCoinRailcannon;
+        public static FloatField v2SecondCoinRailcannonCooldown;
 
         public static BoolField v2SecondMalCannonSnipeToggle;
         public static FloatField v2SecondMalCannonSnipeCooldown;
+        public static FloatField v2SecondMalCannonSnipeReactTime;
         public static FloatField v2SecondMalCannonSnipeMaxDistanceToPlayer;
         public static FloatField v2SecondMalCannonSnipeMinDistanceToV2;
 
@@ -806,7 +811,7 @@ namespace DifficultyTweak
             v2FirstKnuckleBlasterSize = new FloatField(v2FirstKnuckleBlasterDiv, "Explosion size", "v2FirstKnuckleBlasterSize", 15);
             v2FirstKnuckleBlasterSpeed = new FloatField(v2FirstKnuckleBlasterDiv, "Explosion speed", "v2FirstKnuckleBlasterSpeed", 15f / 2);
 
-            new ConfigHeader(v2FirstPanel, "Core Snipe");
+            new ConfigHeader(v2FirstPanel, "Grenade Snipe");
             ConfigDivision v2FirstCoreSnipeDiv = new ConfigDivision(v2FirstPanel, "v2FirstCoreSnipeDiv");
             v2FirstCoreSnipeToggle = new BoolField(v2FirstPanel, "Enabled", "v2FirstCoreSnipeToggle", true);
             v2FirstCoreSnipeToggle.onValueChange += (BoolField.BoolValueChangeEvent e) =>
@@ -817,6 +822,40 @@ namespace DifficultyTweak
             v2FirstCoreSnipeToggle.TriggerValueChangeEvent();
             v2FirstCoreSnipeMaxDistanceToPlayer = new FloatField(v2FirstCoreSnipeDiv, "Max distance to player", "v2FirstCoreSnipeMaxDistanceToPlayer", 10f);
             v2FirstCoreSnipeMinDistanceToV2 = new FloatField(v2FirstCoreSnipeDiv, "Min distance to V2", "v2FirstCoreSnipeMinDistanceToV2", 20f);
+
+            // V2 - SECOND
+            v2SecondStartEnraged = new BoolField(v2SecondPanel, "Start enraged", "v2SecondStartEnraged", true);
+            v2SecondRocketLauncherToggle = new BoolField(v2SecondPanel, "Use rocket launcher", "v2SecondRocketLauncherToggle", true);
+            v2SecondFastCoin = new BoolField(v2SecondPanel, "Shoot coins separately", "v2SecondFastCoin", true);
+            v2SecondCoinRailcannon = new BoolField(v2SecondPanel, "Electric railcannon chargeback", "v2SecondCoinRailcannon", true);
+            v2SecondCoinRailcannon.onValueChange += (BoolField.BoolValueChangeEvent e) =>
+            {
+                v2SecondCoinRailcannonCooldown.interactable = e.value;
+            };
+            v2SecondCoinRailcannonCooldown = new FloatField(v2SecondPanel, "Electric railcannon cooldown", "v2SecondCoinRailcannonCooldown", 15f);
+            v2SecondCoinRailcannon.TriggerValueChangeEvent();
+            ConfigDivision v2SecondMalCannonDiv = new ConfigDivision(v2SecondPanel, "v2SecondMalCannonDiv");
+            new ConfigHeader(v2SecondPanel, "Malicious Cannon Snipe");
+            v2SecondMalCannonSnipeToggle = new BoolField(v2SecondPanel, "Enabled", "v2SecondMalCannonSnipeToggle", true);
+            v2SecondMalCannonSnipeToggle.onValueChange += (BoolField.BoolValueChangeEvent e) =>
+            {
+                v2SecondMalCannonDiv.interactable = e.value;
+            };
+            v2SecondMalCannonSnipeToggle.TriggerValueChangeEvent();
+            v2SecondMalCannonSnipeCooldown = new FloatField(v2SecondMalCannonDiv, "Cooldown", "v2SecondMalCannonSnipeCooldown", 15f);
+            v2SecondMalCannonSnipeReactTime = new FloatField(v2SecondMalCannonDiv, "React time", "v2SecondMalCannonSnipeReactTime", 0.2f);
+            v2SecondMalCannonSnipeMaxDistanceToPlayer = new FloatField(v2SecondMalCannonDiv, "Max distance to player", "v2SecondMalCannonSnipeMaxDistanceToPlayer", 20f);
+            v2SecondMalCannonSnipeMinDistanceToV2 = new FloatField(v2SecondMalCannonDiv, "Min distance to V2", "v2SecondMalCannonSnipeMinDistanceToV2", 30f);
+            ConfigDivision v2SecondSnipeDiv = new ConfigDivision(v2SecondPanel, "v2SecondSnipeDiv");
+            new ConfigHeader(v2SecondPanel, "Grenade Snipe");
+            v2SecondCoreSnipeToggle = new BoolField(v2SecondPanel, "Enabled", "v2SecondCoreSnipeToggle", true);
+            v2SecondCoreSnipeToggle.onValueChange += (BoolField.BoolValueChangeEvent e) =>
+            {
+                v2SecondSnipeDiv.interactable = e.value;
+            };
+            v2SecondCoreSnipeToggle.TriggerValueChangeEvent();
+            v2SecondCoreSnipeMaxDistanceToPlayer = new FloatField(v2SecondSnipeDiv, "Max distance to player", "v2SecondCoreSnipeMaxDistanceToPlayer", 10f);
+            v2SecondCoreSnipeMinDistanceToV2 = new FloatField(v2SecondSnipeDiv, "Min distance to V2", "v2SecondCoreSnipeMinDistanceToV2", 20f);
 
             config.Flush();
         }
