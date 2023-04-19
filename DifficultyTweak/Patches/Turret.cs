@@ -27,9 +27,6 @@ namespace DifficultyTweak.Patches
         static bool Prefix(Turret __instance, ref EnemyIdentifier ___eid, ref RevolverBeam ___beam, ref Transform ___shootPoint,
             ref float ___aimTime, ref float ___maxAimTime, ref float ___nextBeepTime, ref float ___flashTime)
         {
-            if (!Plugin.ultrapainDifficulty || !ConfigManager.enemyTweakToggle.value || !ConfigManager.droneSentryBeamToggle.value)
-                return true;
-
             TurretFlag flag = __instance.GetComponent<TurretFlag>();
             if (flag == null)
                 return true;

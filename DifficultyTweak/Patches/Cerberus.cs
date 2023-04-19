@@ -8,7 +8,7 @@ namespace DifficultyTweak.Patches
 {
     class CerberusFlag : MonoBehaviour
     {
-        public int extraDashesRemaining = ConfigManager.cerberusTotalDashCount.value;
+        public int extraDashesRemaining = ConfigManager.cerberusTotalDashCount.value - 1;
     }
 
     class StatueBoss_StopDash_Patch

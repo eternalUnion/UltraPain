@@ -38,7 +38,7 @@ namespace DifficultyTweak
         public static BoolField grenadeBoostToggle;
         public static FloatField grenadeBoostDamageMultiplier;
         public static FloatField grenadeBoostSizeMultiplier;
-        public static StringField  grenadeBoostStyleText;
+        public static StringField grenadeBoostStyleText;
         public static IntField grenadeBoostStylePoints;
 
         // ENEMY PANEL
@@ -197,6 +197,7 @@ namespace DifficultyTweak
         public static FloatField minosPrimeRandomTeleportMinDistance;
         public static FloatField minosPrimeRandomTeleportMaxDistance;
 
+        private static bool dirtyField = false;
         public static void Initialize()
         {
             if (config != null)
@@ -205,7 +206,11 @@ namespace DifficultyTweak
             config = PluginConfigurator.Create("ULTRAPAIN", Plugin.PLUGIN_GUID);
             config.postConfigChange += () =>
             {
-                Plugin.PatchAll();
+                if (dirtyField)
+                {
+                    Plugin.PatchAll();
+                    dirtyField = false;
+                }
             };
 
             // ROOT PANEL
@@ -215,8 +220,9 @@ namespace DifficultyTweak
             enemyTweakToggle.onValueChange += (BoolField.BoolValueChangeEvent data) =>
             {
                 enemyPanel.interactable = data.value;
+                dirtyField = true;
             };
-            enemyPanel.interactable = enemyTweakToggle.value;
+            enemyTweakToggle.TriggerValueChangeEvent();
 
             new ConfigHeader(config.rootPanel, "Player Tweaks");
             playerTweakToggle = new BoolField(config.rootPanel, "Enabled", "playerTweakToggle", true);
@@ -224,12 +230,21 @@ namespace DifficultyTweak
             playerTweakToggle.onValueChange += (BoolField.BoolValueChangeEvent data) =>
             {
                 playerPanel.interactable = data.value;
+                dirtyField = true;
             };
-            playerPanel.interactable = playerTweakToggle.value;
+            playerTweakToggle.TriggerValueChangeEvent();
 
             new ConfigHeader(config.rootPanel, "Difficulty Rich Presence Override", 20);
             discordRichPresenceToggle = new BoolField(config.rootPanel, "Discord rich presence", "discordRichPresenceToggle", false);
+            discordRichPresenceToggle.onValueChange += (BoolField.BoolValueChangeEvent e) =>
+            {
+                dirtyField = true;
+            };
             steamRichPresenceToggle = new BoolField(config.rootPanel, "Steam rich presence", "steamRichPresenceToggle", false);
+            steamRichPresenceToggle.onValueChange += (BoolField.BoolValueChangeEvent e) =>
+            {
+                dirtyField = true;
+            };
 
             new ConfigHeader(config.rootPanel, "Plugin Difficulty Name");
             pluginName = new StringField(config.rootPanel, "Difficulty name", "pluginName", "ULTRAPAIN");
@@ -238,32 +253,54 @@ namespace DifficultyTweak
                 if (Plugin.currentDifficultyButton != null)
                     Plugin.currentDifficultyButton.transform.Find("Name").GetComponent<Text>().text = data.value;
 
-                if(Plugin.currentDifficultyPanel != null)
+                if (Plugin.currentDifficultyPanel != null)
                     Plugin.currentDifficultyPanel.transform.Find("Title (1)").GetComponent<Text>().text = $"--{data.value}--";
             };
 
             new ConfigHeader(config.rootPanel, "Global Difficulty");
             globalDifficultySwitch = new BoolField(config.rootPanel, "Enabled", "globalDifficultySwitch", false);
+            globalDifficultySwitch.onValueChange += (BoolField.BoolValueChangeEvent e) =>
+            {
+                dirtyField = true;
+            };
 
             // PLAYER PANEL
             new ConfigHeader(playerPanel, "Rocket Boosting");
+            ConfigDivision rocketBoostDiv = new ConfigDivision(playerPanel, "rocketBoostDiv");
             rocketBoostToggle = new BoolField(playerPanel, "Enabled", "rocketBoostToggle", true);
-            rocketBoostAlwaysExplodesToggle = new BoolField(playerPanel, "Always explode", "rocketBoostAlwaysExplodes", true);
-            rocketBoostDamageMultiplierPerHit = new FloatField(playerPanel, "Damage multiplier per hit", "rocketBoostDamageMultiplier", 0.35f);
-            rocketBoostSizeMultiplierPerHit = new FloatField(playerPanel, "Size multiplier per hit", "rocketBoostSizeMultiplier", 0.35f);
-            rocketBoostSpeedMultiplierPerHit = new FloatField(playerPanel, "Speed multiplier per hit", "rocketBoostSpeedMultiplierPerHit", 0.35f);
-            rocketBoostStyleText = new StringField(playerPanel, "Style text", "rocketBoostStyleText", "<color=lime>ROCKET BOOST</color>");
-            rocketBoostStylePoints = new IntField(playerPanel, "Style points", "rocketBoostStylePoints", 10);
+            rocketBoostToggle.onValueChange += (BoolField.BoolValueChangeEvent e) =>
+            {
+                rocketBoostDiv.interactable = e.value;
+                dirtyField = true;
+            };
+            rocketBoostToggle.TriggerValueChangeEvent();
+            rocketBoostAlwaysExplodesToggle = new BoolField(rocketBoostDiv, "Always explode", "rocketBoostAlwaysExplodes", true);
+            rocketBoostDamageMultiplierPerHit = new FloatField(rocketBoostDiv, "Damage multiplier per hit", "rocketBoostDamageMultiplier", 0.35f);
+            rocketBoostSizeMultiplierPerHit = new FloatField(rocketBoostDiv, "Size multiplier per hit", "rocketBoostSizeMultiplier", 0.35f);
+            rocketBoostSpeedMultiplierPerHit = new FloatField(rocketBoostDiv, "Speed multiplier per hit", "rocketBoostSpeedMultiplierPerHit", 0.35f);
+            rocketBoostStyleText = new StringField(rocketBoostDiv, "Style text", "rocketBoostStyleText", "<color=lime>ROCKET BOOST</color>");
+            rocketBoostStylePoints = new IntField(rocketBoostDiv, "Style points", "rocketBoostStylePoints", 10);
 
             new ConfigHeader(playerPanel, "Rocket Grabbing\r\n<size=16>(Can pull yourself to frozen rockets)</size>");
             rocketGrabbingToggle = new BoolField(playerPanel, "Enabled", "rocketGrabbingTabble", true);
+            rocketGrabbingToggle.onValueChange += (BoolField.BoolValueChangeEvent e) =>
+            {
+                dirtyField = true;
+            };
 
             new ConfigHeader(playerPanel, "Grenade Boosting");
+            ConfigDivision grenadeBoostDiv = new ConfigDivision(playerPanel, "grenadeBoostDiv");
             grenadeBoostToggle = new BoolField(playerPanel, "Enabled", "grenadeBoostToggle", true);
-            grenadeBoostDamageMultiplier = new FloatField(playerPanel, "Damage multiplier", "grenadeBoostDamageMultiplier", 1f);
-            grenadeBoostSizeMultiplier = new FloatField(playerPanel, "Size multiplier", "grenadeBoostSizeMultiplier", 1f);
-            grenadeBoostStyleText = new StringField(playerPanel, "Style text", "grenadeBoostStyleText", "<color=cyan>FISTFUL OF 'NADE</color>");
-            grenadeBoostStylePoints = new IntField(playerPanel, "Style points", "grenadeBoostStylePoints", 10);
+            grenadeBoostToggle.onValueChange += (BoolField.BoolValueChangeEvent e) =>
+            {
+                grenadeBoostDiv.interactable = e.value;
+                dirtyField = true;
+            };
+            grenadeBoostToggle.TriggerValueChangeEvent();
+            grenadeBoostDamageMultiplier = new FloatField(grenadeBoostDiv, "Damage multiplier", "grenadeBoostDamageMultiplier", 1f);
+            grenadeBoostSizeMultiplier = new FloatField(grenadeBoostDiv, "Size multiplier", "grenadeBoostSizeMultiplier", 1f);
+            grenadeBoostStyleText = new StringField(grenadeBoostDiv, "Style text", "grenadeBoostStyleText", "<color=cyan>FISTFUL OF 'NADE</color>");
+            grenadeBoostStylePoints = new IntField(grenadeBoostDiv, "Style points", "grenadeBoostStylePoints", 10);
 
             // ENEMY PANEL
             new ConfigHeader(enemyPanel, "Common Enemies");
@@ -288,129 +325,289 @@ namespace DifficultyTweak
             minosPrimePanel = new ConfigPanel(enemyPanel, "Minos Prime", "minosPrimePanel");
 
             // CERBERUS
-            cerberusDashToggle = new BoolField(cerberusPanel, "Extra dashes", "cerberusDashToggle", true);
-            cerberusTotalDashCount = new IntField(cerberusPanel, "Total dash count", "cerberusTotalDashCount", 3);
+            new ConfigHeader(cerberusPanel, "Extra Dashes");
+            ConfigDivision cerebusExtraDashDiv = new ConfigDivision(cerberusPanel, "cerberusExtraDashDiv");
+            cerberusDashToggle = new BoolField(cerberusPanel, "Enabled", "cerberusDashToggle", true);
+            cerberusDashToggle.onValueChange += (BoolField.BoolValueChangeEvent e) =>
+            {
+                cerebusExtraDashDiv.interactable = e.value;
+                dirtyField = true;
+            };
+            cerberusDashToggle.TriggerValueChangeEvent();
+            cerberusTotalDashCount = new IntField(cerebusExtraDashDiv, "Total dash count", "cerberusTotalDashCount", 3, 1, int.MaxValue);
 
             // DRONE
             droneExplosionBeamToggle = new BoolField(dronePanel, "Can shoot explosions", "droneExplosionBeamToggle", true);
+            droneExplosionBeamToggle.onValueChange += (BoolField.BoolValueChangeEvent e) =>
+            {
+                dirtyField = true;
+            };
+            ConfigDivision droneSentryBeamDiv = new ConfigDivision(dronePanel, "droneSentryBeamDiv");
             droneSentryBeamToggle = new BoolField(dronePanel, "Can shoot sentry beam", "droneSentryBeamToggle", true);
-            droneSentryBeamDamage = new FloatField(dronePanel, "Sentry beam damage", "droneSentryBeamDamage", 2f);
+            droneSentryBeamToggle.onValueChange += (BoolField.BoolValueChangeEvent e) =>
+            {
+                droneSentryBeamDiv.interactable = e.value;
+                dirtyField = true;
+            };
+            droneSentryBeamToggle.TriggerValueChangeEvent();
+            droneSentryBeamDamage = new FloatField(droneSentryBeamDiv, "Sentry beam damage", "droneSentryBeamDamage", 2f, 0f, float.MaxValue);
 
             // FILTH
             new ConfigHeader(filthPanel, "Explode On Hit");
+            ConfigDivision filthExplosionDiv = new ConfigDivision(filthPanel, "filthExplosionDiv");
             filthExplodeToggle = new BoolField(filthPanel, "Enabled", "filthExplodeOnHit", true);
-            filthExplodeKills = new BoolField(filthPanel, "Explosion kills the filth", "filthExplosionKills", false);
-            filthExplosionDamage = new IntField(filthPanel, "Explosion damage", "filthExplosionDamage", 30);
-            filthExplosionSize = new FloatField(filthPanel, "Explosion size", "filthExplosionSize", 0.5f);
+            filthExplodeToggle.onValueChange += (BoolField.BoolValueChangeEvent e) =>
+            {
+                filthExplosionDiv.interactable = e.value;
+                dirtyField = true;
+            };
+            filthExplodeToggle.TriggerValueChangeEvent();
+            filthExplodeKills = new BoolField(filthExplosionDiv, "Explosion kills the filth", "filthExplosionKills", false);
+            filthExplosionDamage = new IntField(filthExplosionDiv, "Explosion damage", "filthExplosionDamage", 30);
+            filthExplosionSize = new FloatField(filthExplosionDiv, "Explosion size", "filthExplosionSize", 0.5f);
 
             // HIDEOUS MASS
             new ConfigHeader(hideousMassPanel, "Insignia On Projectile Hit");
+            ConfigDivision hideousMassInsigniaDiv = new ConfigDivision(hideousMassPanel, "hideousMassInsigniaDiv");
             hideousMassInsigniaToggle = new BoolField(hideousMassPanel, "Enabled", "hideousMassInsigniaToggle", true);
-            hideousMassInsigniaSpeed = new FloatField(hideousMassPanel, "Insignia speed multiplier", "hideousMassInsigniaSpeed", 2.5f);
-            new ConfigHeader(hideousMassPanel, "Vertical Insignia", 12);
-            hideousMassInsigniaYtoggle = new BoolField(hideousMassPanel, "Enabled", "hideousMassInsigniaYtoggle", true);
-            hideousMassInsigniaYdamage = new IntField(hideousMassPanel, "Damage", "hideousMassInsigniaYdamage", 20);
-            hideousMassInsigniaYsize = new FloatField(hideousMassPanel, "Size", "hideousMassInsigniaYsize", 2f);
-            new ConfigHeader(hideousMassPanel, "Forward Insignia", 12);
-            hideousMassInsigniaZtoggle = new BoolField(hideousMassPanel, "Enabled", "hideousMassInsigniaZtoggle", false);
-            hideousMassInsigniaZdamage = new IntField(hideousMassPanel, "Damage", "hideousMassInsigniaZdamage", 20);
-            hideousMassInsigniaZsize = new FloatField(hideousMassPanel, "Size", "hideousMassInsigniaZsize", 2f);
-            new ConfigHeader(hideousMassPanel, "Side Insignia", 12);
-            hideousMassInsigniaXtoggle = new BoolField(hideousMassPanel, "Enabled", "hideousMassInsigniaXtoggle", false);
-            hideousMassInsigniaXdamage = new IntField(hideousMassPanel, "Damage", "hideousMassInsigniaXdamage", 20);
-            hideousMassInsigniaXsize = new FloatField(hideousMassPanel, "Size", "hideousMassInsigniaXsize", 2f);
+            hideousMassInsigniaToggle.onValueChange += (BoolField.BoolValueChangeEvent e) =>
+            {
+                hideousMassInsigniaDiv.interactable = e.value;
+                dirtyField = true;
+            };
+            hideousMassInsigniaToggle.TriggerValueChangeEvent();
+            hideousMassInsigniaSpeed = new FloatField(hideousMassInsigniaDiv, "Insignia speed multiplier", "hideousMassInsigniaSpeed", 2.5f);
+            new ConfigHeader(hideousMassInsigniaDiv, "Vertical Insignia", 12);
+            ConfigDivision hideousMassInsigniaYdiv = new ConfigDivision(hideousMassInsigniaDiv, "hideousMassInsigniaYdiv");
+            hideousMassInsigniaYtoggle = new BoolField(hideousMassInsigniaDiv, "Enabled", "hideousMassInsigniaYtoggle", true);
+            hideousMassInsigniaYtoggle.onValueChange += (BoolField.BoolValueChangeEvent e) =>
+            {
+                hideousMassInsigniaYdiv.interactable = e.value;
+            };
+            hideousMassInsigniaYtoggle.TriggerValueChangeEvent();
+            hideousMassInsigniaYdamage = new IntField(hideousMassInsigniaYdiv, "Damage", "hideousMassInsigniaYdamage", 20);
+            hideousMassInsigniaYsize = new FloatField(hideousMassInsigniaYdiv, "Size", "hideousMassInsigniaYsize", 2f);
+            new ConfigHeader(hideousMassInsigniaDiv, "Forward Insignia", 12);
+            ConfigDivision hideousMassInsigniaZdiv = new ConfigDivision(hideousMassInsigniaDiv, "hideousMassInsigniaZdiv");
+            hideousMassInsigniaZtoggle = new BoolField(hideousMassInsigniaDiv, "Enabled", "hideousMassInsigniaZtoggle", false);
+            hideousMassInsigniaZtoggle.onValueChange += (BoolField.BoolValueChangeEvent e) =>
+            {
+                hideousMassInsigniaZdiv.interactable = e.value;
+            };
+            hideousMassInsigniaZtoggle.TriggerValueChangeEvent();
+            hideousMassInsigniaZdamage = new IntField(hideousMassInsigniaZdiv, "Damage", "hideousMassInsigniaZdamage", 20);
+            hideousMassInsigniaZsize = new FloatField(hideousMassInsigniaZdiv, "Size", "hideousMassInsigniaZsize", 2f);
+            new ConfigHeader(hideousMassInsigniaDiv, "Side Insignia", 12);
+            ConfigDivision hideousMassInsigniaXdiv = new ConfigDivision(hideousMassInsigniaDiv, "hideousMassInsigniaXdiv");
+            hideousMassInsigniaXtoggle = new BoolField(hideousMassInsigniaDiv, "Enabled", "hideousMassInsigniaXtoggle", false);
+            hideousMassInsigniaXtoggle.onValueChange += (BoolField.BoolValueChangeEvent e) =>
+            {
+                hideousMassInsigniaXdiv.interactable = e.value;
+            };
+            hideousMassInsigniaXtoggle.TriggerValueChangeEvent();
+            hideousMassInsigniaXdamage = new IntField(hideousMassInsigniaXdiv, "Damage", "hideousMassInsigniaXdamage", 20);
+            hideousMassInsigniaXsize = new FloatField(hideousMassInsigniaXdiv, "Size", "hideousMassInsigniaXsize", 2f);
 
             // MALICIOUS FACE
             new ConfigHeader(maliciousFacePanel, "Radiance When Enraged");
+            ConfigDivision maliciousFaceRadianceOnEnrageDiv = new ConfigDivision(maliciousFacePanel, "maliciousFaceRadianceOnEnrageDiv");
             maliciousFaceRadianceOnEnrage = new BoolField(maliciousFacePanel, "Enabled", "maliciousFaceRadianceWhenEnraged", true);
-            maliciousFaceRadianceAmount = new IntField(maliciousFacePanel, "Radiance level", "maliciousFaceRadianceAmount", 1);
+            maliciousFaceRadianceOnEnrage.onValueChange += (BoolField.BoolValueChangeEvent e) =>
+            {
+                maliciousFaceRadianceOnEnrageDiv.interactable = e.value;
+                dirtyField = true;
+            };
+            maliciousFaceRadianceOnEnrage.TriggerValueChangeEvent();
+            maliciousFaceRadianceAmount = new IntField(maliciousFaceRadianceOnEnrageDiv, "Radiance level", "maliciousFaceRadianceAmount", 1);
             new ConfigHeader(maliciousFacePanel, "Homing Projectile");
-            maliciousFaceHomingProjectileCount = new IntField(maliciousFacePanel, "Projectile count", "maliciousFaceHomingProjectileCount", 5);
+            ConfigDivision maliciousFaceHomingProjecileDiv = new ConfigDivision(maliciousFacePanel, "maliciousFaceHomingProjecileDiv");
             maliciousFaceHomingProjectileToggle = new BoolField(maliciousFacePanel, "Enabled", "maliciousFaceHomingProjectileToggle", true);
-            maliciousFaceHomingProjectileDamage = new IntField(maliciousFacePanel, "Projectile damage", "maliciousFaceHomingProjectileDamage", 25);
-            maliciousFaceHomingProjectileSpeed = new FloatField(maliciousFacePanel, "Projectile speed", "maliciousFaceHomingProjectileSpeed", 20f);
-            maliciousFaceHomingProjectileTurnSpeed = new FloatField(maliciousFacePanel, "Projectile turn speed", "maliciousFaceHomingProjectileTurnSpeed", 0.4f);
+            maliciousFaceHomingProjectileToggle.onValueChange += (BoolField.BoolValueChangeEvent e) =>
+            {
+                maliciousFaceHomingProjecileDiv.interactable = e.value;
+                dirtyField = true;
+            };
+            maliciousFaceHomingProjectileToggle.TriggerValueChangeEvent();
+            maliciousFaceHomingProjectileCount = new IntField(maliciousFaceHomingProjecileDiv, "Projectile count", "maliciousFaceHomingProjectileCount", 5);
+            maliciousFaceHomingProjectileDamage = new IntField(maliciousFaceHomingProjecileDiv, "Projectile damage", "maliciousFaceHomingProjectileDamage", 25);
+            maliciousFaceHomingProjectileSpeed = new FloatField(maliciousFaceHomingProjecileDiv, "Projectile speed", "maliciousFaceHomingProjectileSpeed", 20f);
+            maliciousFaceHomingProjectileTurnSpeed = new FloatField(maliciousFaceHomingProjecileDiv, "Projectile turn speed", "maliciousFaceHomingProjectileTurnSpeed", 0.4f);
 
             // MINDFLAYER
             new ConfigHeader(mindflayerPanel, "Shoot Tweak");
+            ConfigDivision mindflayerShootTweakDiv = new ConfigDivision(mindflayerPanel, "mindflayerShootTweakDiv");
             mindflayerShootTweakToggle = new BoolField(mindflayerPanel, "Enabled", "mindflayerShootTweakToggle", true);
-            mindflayerShootAmount = new IntField(mindflayerPanel, "Projectile amount", "mindflayerShootProjectileAmount", 20);
-            mindflayerShootDelay = new FloatField(mindflayerPanel, "Delay between shots", "mindflayerShootProjectileDelay", 0.02f);
+            mindflayerShootTweakToggle.onValueChange += (BoolField.BoolValueChangeEvent e) =>
+            {
+                mindflayerShootTweakDiv.interactable = e.value;
+                dirtyField = true;
+            };
+            mindflayerShootTweakToggle.TriggerValueChangeEvent();
+            mindflayerShootAmount = new IntField(mindflayerShootTweakDiv, "Projectile amount", "mindflayerShootProjectileAmount", 20);
+            mindflayerShootDelay = new FloatField(mindflayerShootTweakDiv, "Delay between shots", "mindflayerShootProjectileDelay", 0.02f);
             new ConfigHeader(mindflayerPanel, "Melee Combo");
+            ConfigDivision mindflayerMeleeDiv = new ConfigDivision(mindflayerPanel, "mindflayerMeleeDiv");
             mindflayerTeleportComboToggle = new BoolField(mindflayerPanel, "Enabled", "mindflayerMeleeCombo", true);
+            mindflayerTeleportComboToggle.onValueChange += (BoolField.BoolValueChangeEvent e) =>
+            {
+                dirtyField = true;
+            };
 
             // SHCISM
             new ConfigHeader(schismPanel, "Spread Attack");
+            ConfigDivision schismSpreadAttackDiv = new ConfigDivision(schismPanel, "schismSpreadAttackDiv");
             schismSpreadAttackToggle = new BoolField(schismPanel, "Enabled", "schismSpreadAttackToggle", true);
-            schismSpreadAttackAngle = new FloatField(schismPanel, "Angular spread", "schismSpreadAttackAngle", 15f);
-            schismSpreadAttackCount = new IntField(schismPanel, "Projectile count per side", "schismSpreadAttackCount", 1);
+            schismSpreadAttackToggle.onValueChange += (BoolField.BoolValueChangeEvent e) =>
+            {
+                schismSpreadAttackDiv.interactable = e.value;
+                dirtyField = true;
+            };
+            schismSpreadAttackToggle.TriggerValueChangeEvent();
+            schismSpreadAttackAngle = new FloatField(schismSpreadAttackDiv, "Angular spread", "schismSpreadAttackAngle", 15f);
+            schismSpreadAttackCount = new IntField(schismSpreadAttackDiv, "Projectile count per side", "schismSpreadAttackCount", 1);
 
             // SOLIDER
             new ConfigHeader(soliderPanel, "Coins Ignore Weak Point");
             soliderCoinsIgnoreWeakPointToggle = new BoolField(soliderPanel, "Enabled", "soliderCoinsIgnoreWeakPoint", true);
+            soliderCoinsIgnoreWeakPointToggle.onValueChange += (BoolField.BoolValueChangeEvent e) =>
+            {
+                dirtyField = true;
+            };
             new ConfigHeader(soliderPanel, "Shoot Tweak");
+            ConfigDivision soliderShootTweakDiv = new ConfigDivision(soliderPanel, "soliderShootTweakDiv");
             soliderShootTweakToggle = new BoolField(soliderPanel, "Enabled", "soliderShootTweakToggle", true);
-            soliderShootCount = new IntField(soliderPanel, "Shoot count", "soliderShootCount", 3);
+            soliderShootTweakToggle.onValueChange += (BoolField.BoolValueChangeEvent e) =>
+            {
+                soliderShootTweakDiv.interactable = e.value;
+                dirtyField = true;
+            };
+            soliderShootTweakToggle.TriggerValueChangeEvent();
+            soliderShootCount = new IntField(soliderShootTweakDiv, "Shoot count", "soliderShootCount", 3);
             new ConfigHeader(soliderPanel, "Shoot Grenade");
+            ConfigDivision soliderShootGrenadeDiv = new ConfigDivision(soliderPanel, "soliderShootGrenadeDiv");
             soliderShootGrenadeToggle = new BoolField(soliderPanel, "Enabled", "soliderShootGrenade", true);
-            soliderGrenadeDamage = new IntField(soliderPanel, "Explosion damage", "soliderGrenadeDamage", 10);
-            soliderGrenadeSize = new FloatField(soliderPanel, "Explosion size multiplier", "soliderGrenadeSize", 0.75f);
+            soliderShootGrenadeToggle.onValueChange += (BoolField.BoolValueChangeEvent e) =>
+            {
+                soliderShootGrenadeDiv.interactable = e.value;
+                dirtyField = true;
+            };
+            soliderGrenadeDamage = new IntField(soliderShootGrenadeDiv, "Explosion damage", "soliderGrenadeDamage", 10);
+            soliderGrenadeSize = new FloatField(soliderShootGrenadeDiv, "Explosion size multiplier", "soliderGrenadeSize", 0.75f);
 
             // STALKER
             new ConfigHeader(stalkerPanel, "Survive Explosion");
             stalkerSurviveExplosion = new BoolField(stalkerPanel, "Enabled", "stalkerSurviveExplosion", true);
+            stalkerSurviveExplosion.onValueChange += (BoolField.BoolValueChangeEvent e) =>
+            {
+                dirtyField = true;
+            };
 
             // STRAY
             new ConfigHeader(strayPanel, "Shoot Tweak");
+            ConfigDivision strayShootDiv = new ConfigDivision(strayPanel, "strayShootDiv");
             strayShootToggle = new BoolField(strayPanel, "Enabled", "strayShootToggle", true);
-            strayShootCount = new IntField(strayPanel, "Extra projectile count", "strayShootCount", 2);
-            strayShootSpeed = new FloatField(strayPanel, "Shoot speed", "strayShootSpeed", 20f);
+            strayShootToggle.onValueChange += (BoolField.BoolValueChangeEvent e) =>
+            {
+                strayShootDiv.interactable = e.value;
+                dirtyField = true;
+            };
+            strayShootToggle.TriggerValueChangeEvent();
+            strayShootCount = new IntField(strayShootDiv, "Extra projectile count", "strayShootCount", 2);
+            strayShootSpeed = new FloatField(strayShootDiv, "Shoot speed", "strayShootSpeed", 20f);
             new ConfigHeader(strayPanel, "Coins Ignore Weak Point");
             strayCoinsIgnoreWeakPointToggle = new BoolField(strayPanel, "Enabled", "strayCoinsIgnoreWeakPointToggle", true);
+            strayCoinsIgnoreWeakPointToggle.onValueChange += (BoolField.BoolValueChangeEvent e) =>
+            {
+                dirtyField = true;
+            };
 
             // STREET CLEANER
             new ConfigHeader(streetCleanerPanel, "Predictive Dodge");
             streetCleanerPredictiveDodgeToggle = new BoolField(streetCleanerPanel, "Enabled", "streetCleanerPredictiveDodgeToggle", true);
+            streetCleanerPredictiveDodgeToggle.onValueChange += (BoolField.BoolValueChangeEvent e) =>
+            {
+                dirtyField = true;
+            };
             new ConfigHeader(streetCleanerPanel, "Coins Ignore Weak Point");
             streetCleanerCoinsIgnoreWeakPointToggle = new BoolField(streetCleanerPanel, "Enabled", "streetCleanerCoinsIgnoreWeakPointToggle", true);
+            streetCleanerCoinsIgnoreWeakPointToggle.onValueChange += (BoolField.BoolValueChangeEvent e) =>
+            {
+                dirtyField = true;
+            };
 
             // SWORDS MACHINE
             new ConfigHeader(swordsMachinePanel, "No Light Knockback");
             swordsMachineNoLightKnockbackToggle = new BoolField(swordsMachinePanel, "Enabled", "swordsMachineNoLightKnockbackToggle", true);
+            swordsMachineNoLightKnockbackToggle.onValueChange += (BoolField.BoolValueChangeEvent e) =>
+            {
+                dirtyField = true;
+            };
             new ConfigHeader(swordsMachinePanel, "Explosive Sword Throw");
+            ConfigDivision swordsMachineExplosiveSwordDiv = new ConfigDivision(swordsMachinePanel, "swordsMachineExplosiveSwordDiv");
             swordsMachineExplosiveSwordToggle = new BoolField(swordsMachinePanel, "Enabled", "swordsMachineExplosiveSwordToggle", true);
-            swordsMachineExplosiveSwordDamage = new IntField(swordsMachinePanel, "Explosion damage", "swordsMachineExplosiveSwordDamage", 20);
-            swordsMachineExplosiveSwordSize = new FloatField(swordsMachinePanel, "Explosion size multiplier", "swordsMachineExplosiveSwordSize", 0.5f);
+            swordsMachineExplosiveSwordToggle.onValueChange += (BoolField.BoolValueChangeEvent e) =>
+            {
+                swordsMachineExplosiveSwordDiv.interactable = e.value;
+                dirtyField = true;
+            };
+            swordsMachineExplosiveSwordToggle.TriggerValueChangeEvent();
+            swordsMachineExplosiveSwordDamage = new IntField(swordsMachineExplosiveSwordDiv, "Explosion damage", "swordsMachineExplosiveSwordDamage", 20);
+            swordsMachineExplosiveSwordSize = new FloatField(swordsMachineExplosiveSwordDiv, "Explosion size multiplier", "swordsMachineExplosiveSwordSize", 0.5f);
 
             // VIRTUE
             new ConfigHeader(virtuePanel, "Tweak Normal Attack");
+            ConfigDivision virtueTweakNormalAttackDiv = new ConfigDivision(virtuePanel, "virtueTweakNormalAttackDiv");
             virtueTweakNormalAttackToggle = new BoolField(virtuePanel, "Enabled", "virtueTweakNormalAttackToggle", true);
-            virtueNormalAttackType = new EnumField<VirtueAttackType>(virtuePanel, "Attack type", "virtueNormalAttackType", VirtueAttackType.Insignia);
+            virtueTweakNormalAttackToggle.onValueChange += (BoolField.BoolValueChangeEvent e) =>
+            {
+                virtueTweakNormalAttackDiv.interactable = e.value;
+                dirtyField = true;
+            };
+            virtueTweakNormalAttackToggle.TriggerValueChangeEvent();
+            virtueNormalAttackType = new EnumField<VirtueAttackType>(virtueTweakNormalAttackDiv, "Attack type", "virtueNormalAttackType", VirtueAttackType.Insignia);
 
-            ConfigDivision virtueNormalInsigniaDiv = new ConfigDivision(virtuePanel, "virtueNormalInsigniaDiv");
-            ConfigHeader virtueNormalYInsigniaHeader = new ConfigHeader(virtueNormalInsigniaDiv, "Vertical Insignia", 12);
+            ConfigDivision virtueNormalInsigniaDiv = new ConfigDivision(virtueTweakNormalAttackDiv, "virtueNormalInsigniaDiv");
+            ConfigDivision virtueNormalYInsigniaDiv = new ConfigDivision(virtueNormalInsigniaDiv, "virtueNormalYInsigniaDiv");
+            new ConfigHeader(virtueNormalInsigniaDiv, "Vertical Insignia", 12);
             virtueNormalInsigniaYtoggle = new BoolField(virtueNormalInsigniaDiv, "Enabled", "virtueNormalInsigniaYtoggle", true);
-            virtueNormalInsigniaYdamage = new IntField(virtueNormalInsigniaDiv, "Damage", "virtueNormalInsigniaYdamage", 30);
-            virtueNormalInsigniaYsize = new FloatField(virtueNormalInsigniaDiv, "Size", "virtueNormalInsigniaYsize", 2f);
+            virtueNormalInsigniaYtoggle.onValueChange += (BoolField.BoolValueChangeEvent e) =>
+            {
+                virtueNormalYInsigniaDiv.interactable = e.value;
+            };
+            virtueNormalInsigniaYtoggle.TriggerValueChangeEvent();
+            virtueNormalInsigniaYdamage = new IntField(virtueNormalYInsigniaDiv, "Damage", "virtueNormalInsigniaYdamage", 30);
+            virtueNormalInsigniaYsize = new FloatField(virtueNormalYInsigniaDiv, "Size", "virtueNormalInsigniaYsize", 2f);
 
-            ConfigHeader virtueNormalZInsigniaHeader = new ConfigHeader(virtueNormalInsigniaDiv, "Forward Insignia", 12);
+            ConfigDivision virtueNormalZInsigniaDiv = new ConfigDivision(virtueNormalInsigniaDiv, "virtueNormalZInsigniaDiv");
+            new ConfigHeader(virtueNormalInsigniaDiv, "Forward Insignia", 12);
             virtueNormalInsigniaZtoggle = new BoolField(virtueNormalInsigniaDiv, "Enabled", "virtueNormalInsigniaZtoggle", false);
-            virtueNormalInsigniaZdamage = new IntField(virtueNormalInsigniaDiv, "Damage", "virtueNormalInsigniaZdamage", 15);
-            virtueNormalInsigniaZsize = new FloatField(virtueNormalInsigniaDiv, "Size", "virtueNormalInsigniaZsize", 2f);
+            virtueNormalInsigniaZtoggle.onValueChange += (BoolField.BoolValueChangeEvent e) =>
+            {
+                virtueNormalZInsigniaDiv.interactable = e.value;
+            };
+            virtueNormalInsigniaZtoggle.TriggerValueChangeEvent();
+            virtueNormalInsigniaZdamage = new IntField(virtueNormalZInsigniaDiv, "Damage", "virtueNormalInsigniaZdamage", 15);
+            virtueNormalInsigniaZsize = new FloatField(virtueNormalZInsigniaDiv, "Size", "virtueNormalInsigniaZsize", 2f);
 
-            ConfigHeader virtueNormalXInsigniaHeader = new ConfigHeader(virtueNormalInsigniaDiv, "Side Insignia", 12);
+            ConfigDivision virtueNormalXInsigniaDiv = new ConfigDivision(virtueNormalInsigniaDiv, "virtueNormalXInsigniaDiv");
+            new ConfigHeader(virtueNormalInsigniaDiv, "Side Insignia", 12);
             virtueNormalInsigniaXtoggle = new BoolField(virtueNormalInsigniaDiv, "Enabled", "virtueNormalInsigniaXtoggle", false);
-            virtueNormalInsigniaXdamage = new IntField(virtueNormalInsigniaDiv, "Damage", "virtueNormalInsigniaXdamage", 15);
-            virtueNormalInsigniaXsize = new FloatField(virtueNormalInsigniaDiv, "Size", "virtueNormalInsigniaXsize", 2f);
+            virtueNormalInsigniaXtoggle.onValueChange += (BoolField.BoolValueChangeEvent e) =>
+            {
+                virtueNormalXInsigniaDiv.interactable = e.value;
+            };
+            virtueNormalInsigniaXtoggle.TriggerValueChangeEvent();
+            virtueNormalInsigniaXdamage = new IntField(virtueNormalXInsigniaDiv, "Damage", "virtueNormalInsigniaXdamage", 15);
+            virtueNormalInsigniaXsize = new FloatField(virtueNormalXInsigniaDiv, "Size", "virtueNormalInsigniaXsize", 2f);
 
-            ConfigDivision virtueNormalLigthningDiv = new ConfigDivision(virtuePanel, "virtueNormalLigthningDiv");
+            ConfigDivision virtueNormalLigthningDiv = new ConfigDivision(virtueTweakNormalAttackDiv, "virtueNormalLigthningDiv");
             virtueNormalLightningDamage = new FloatField(virtueNormalLigthningDiv, "Damage multiplier", "virtueNormalLightningDamage", 1f);
             //virtueNormalLightningSize = new FloatField(virtuePanel, "Size multiplier", "virtueNormalLightningSize", 1f);
             virtueNormalLightningDelay = new FloatField(virtueNormalLigthningDiv, "Lighning delay", "virtueNormalLightningDelay", 3f);
 
-            void OnVirtueNormalAttackChange(EnumField<VirtueAttackType>.EnumValueChangeEvent newType)
+            virtueNormalAttackType.onValueChange += (EnumField<VirtueAttackType>.EnumValueChangeEvent newType) =>
             {
-                if(newType.value == VirtueAttackType.Insignia)
+                if (newType.value == VirtueAttackType.Insignia)
                 {
                     virtueNormalInsigniaDiv.hidden = false;
                     virtueNormalLigthningDiv.hidden = true;
@@ -420,36 +617,63 @@ namespace DifficultyTweak
                     virtueNormalInsigniaDiv.hidden = true;
                     virtueNormalLigthningDiv.hidden = false;
                 }
-            }
-            virtueNormalAttackType.onValueChange += OnVirtueNormalAttackChange;
-            OnVirtueNormalAttackChange(new EnumField<VirtueAttackType>.EnumValueChangeEvent() { value = virtueNormalAttackType.value });
+            };
+            virtueNormalAttackType.TriggerValueChangeEvent();
 
             new ConfigHeader(virtuePanel, "Tweak Enraged Attack");
+            ConfigDivision virtueTweakEnragedAttackDiv = new ConfigDivision(virtuePanel, "virtueTweakEnragedAttackDiv");
             virtueTweakEnragedAttackToggle = new BoolField(virtuePanel, "Enabled", "virtueTweakEnragedAttackToggle", true);
-            virtueEnragedAttackType = new EnumField<VirtueAttackType>(virtuePanel, "Attack type", "virtueEnragedAttackType", VirtueAttackType.Insignia);
+            virtueTweakEnragedAttackToggle.onValueChange += (BoolField.BoolValueChangeEvent e) =>
+            {
+                virtueTweakEnragedAttackDiv.interactable = e.value;
+                dirtyField = true;
+            };
+            virtueTweakEnragedAttackToggle.TriggerValueChangeEvent();
+            virtueEnragedAttackType = new EnumField<VirtueAttackType>(virtueTweakEnragedAttackDiv, "Attack type", "virtueEnragedAttackType", VirtueAttackType.Insignia);
 
-            ConfigDivision virtueEnragedInsigniaDiv = new ConfigDivision(virtuePanel, "virtueEnragedInsigniaDiv");
+            ConfigDivision virtueEnragedInsigniaDiv = new ConfigDivision(virtueTweakEnragedAttackDiv, "virtueEnragedInsigniaDiv");
             ConfigHeader virtueEnragedYInsigniaHeader = new ConfigHeader(virtueEnragedInsigniaDiv, "Vertical Insignia", 12);
+            ConfigDivision virtueEnragedYInsigniaDiv = new ConfigDivision(virtueEnragedInsigniaDiv, "virtueEnragedYInsigniaDiv");
             virtueEnragedInsigniaYtoggle = new BoolField(virtueEnragedInsigniaDiv, "Enabled", "virtueEnragedInsigniaYtoggle", true);
-            virtueEnragedInsigniaYdamage = new IntField(virtueEnragedInsigniaDiv, "Damage", "virtueEnragedInsigniaYdamage", 30);
-            virtueEnragedInsigniaYsize = new FloatField(virtueEnragedInsigniaDiv, "Size", "virtueEnragedInsigniaYsize", 2f);
+            virtueEnragedInsigniaYtoggle.onValueChange += (BoolField.BoolValueChangeEvent e) =>
+            {
+                virtueEnragedYInsigniaDiv.interactable = e.value;
+                dirtyField = true;
+            };
+            virtueEnragedInsigniaYtoggle.TriggerValueChangeEvent();
+            virtueEnragedInsigniaYdamage = new IntField(virtueEnragedYInsigniaDiv, "Damage", "virtueEnragedInsigniaYdamage", 30);
+            virtueEnragedInsigniaYsize = new FloatField(virtueEnragedYInsigniaDiv, "Size", "virtueEnragedInsigniaYsize", 2f);
 
             ConfigHeader virtueEnragedZInsigniaHeader = new ConfigHeader(virtueEnragedInsigniaDiv, "Forward Insignia", 12);
+            ConfigDivision virtueEnragedZInsigniaDiv = new ConfigDivision(virtueEnragedInsigniaDiv, "virtueEnragedZInsigniaDiv");
             virtueEnragedInsigniaZtoggle = new BoolField(virtueEnragedInsigniaDiv, "Enabled", "virtueEnragedInsigniaZtoggle", true);
-            virtueEnragedInsigniaZdamage = new IntField(virtueEnragedInsigniaDiv, "Damage", "virtueEnragedInsigniaZdamage", 15);
-            virtueEnragedInsigniaZsize = new FloatField(virtueEnragedInsigniaDiv, "Size", "virtueEnragedInsigniaZsize", 2f);
+            virtueEnragedInsigniaZtoggle.onValueChange += (BoolField.BoolValueChangeEvent e) =>
+            {
+                virtueEnragedZInsigniaDiv.interactable = e.value;
+                dirtyField = true;
+            };
+            virtueEnragedInsigniaZtoggle.TriggerValueChangeEvent();
+            virtueEnragedInsigniaZdamage = new IntField(virtueEnragedZInsigniaDiv, "Damage", "virtueEnragedInsigniaZdamage", 15);
+            virtueEnragedInsigniaZsize = new FloatField(virtueEnragedZInsigniaDiv, "Size", "virtueEnragedInsigniaZsize", 2f);
 
             ConfigHeader virtueEnragedXInsigniaHeader = new ConfigHeader(virtueEnragedInsigniaDiv, "Side Insignia", 12);
+            ConfigDivision virtueEnragedXInsigniaDiv = new ConfigDivision(virtueEnragedInsigniaDiv, "virtueEnragedXInsigniaDiv");
             virtueEnragedInsigniaXtoggle = new BoolField(virtueEnragedInsigniaDiv, "Enabled", "virtueEnragedInsigniaXtoggle", true);
-            virtueEnragedInsigniaXdamage = new IntField(virtueEnragedInsigniaDiv, "Damage", "virtueEnragedInsigniaXdamage", 15);
-            virtueEnragedInsigniaXsize = new FloatField(virtueEnragedInsigniaDiv, "Size", "virtueEnragedInsigniaXsize", 2f);
+            virtueEnragedInsigniaXtoggle.onValueChange += (BoolField.BoolValueChangeEvent e) =>
+            {
+                virtueEnragedXInsigniaDiv.interactable = e.value;
+                dirtyField = true;
+            };
+            virtueEnragedInsigniaXtoggle.TriggerValueChangeEvent();
+            virtueEnragedInsigniaXdamage = new IntField(virtueEnragedXInsigniaDiv, "Damage", "virtueEnragedInsigniaXdamage", 15);
+            virtueEnragedInsigniaXsize = new FloatField(virtueEnragedXInsigniaDiv, "Size", "virtueEnragedInsigniaXsize", 2f);
 
-            ConfigDivision virtueEnragedLigthningDiv = new ConfigDivision(virtuePanel, "virtueEnragedLigthningDiv");
+            ConfigDivision virtueEnragedLigthningDiv = new ConfigDivision(virtueTweakEnragedAttackDiv, "virtueEnragedLigthningDiv");
             virtueEnragedLightningDamage = new FloatField(virtueEnragedLigthningDiv, "Damage multiplier", "virtueEnragedLightningDamage", 1f);
             //virtueEnragedLightningSize = new FloatField(virtuePanel, "Size multiplier", "virtueEnragedLightningSize", 1f);
             virtueEnragedLightningDelay = new FloatField(virtueEnragedLigthningDiv, "Lighning delay", "virtueEnragedLightningDelay", 2f);
 
-            void OnVirtueEnragedAttackChange(EnumField<VirtueAttackType>.EnumValueChangeEvent newType)
+            virtueEnragedAttackType.onValueChange += (EnumField<VirtueAttackType>.EnumValueChangeEvent newType) =>
             {
                 if (newType.value == VirtueAttackType.Insignia)
                 {
@@ -461,33 +685,64 @@ namespace DifficultyTweak
                     virtueEnragedInsigniaDiv.hidden = true;
                     virtueEnragedLigthningDiv.hidden = false;
                 }
-            }
-            virtueEnragedAttackType.onValueChange += OnVirtueEnragedAttackChange;
-            OnVirtueEnragedAttackChange(new EnumField<VirtueAttackType>.EnumValueChangeEvent() { value = virtueEnragedAttackType.value });
+            };
+            virtueEnragedAttackType.TriggerValueChangeEvent();
 
+            // FERRYMAN
             new ConfigHeader(ferrymanPanel, "Melee Combo");
+            ConfigDivision ferrymanComboDiv = new ConfigDivision(ferrymanPanel, "ferrymanComboDiv");
             ferrymanComboToggle = new BoolField(ferrymanPanel, "Enabled", "ferrymanComboToggle", true);
-            ferrymanComboCount = new IntField(ferrymanPanel, "Count", "ferrymanComboCount", 3);
-            ferrymanAttackDelay = new FloatField(ferrymanPanel, "Delay (0-1)", "ferrymanAttackDelay", 0.1f);
+            ferrymanComboToggle.onValueChange += (BoolField.BoolValueChangeEvent e) =>
+            {
+                ferrymanComboDiv.interactable = e.value;
+                dirtyField = true;
+            };
+            ferrymanComboToggle.TriggerValueChangeEvent();
+            ferrymanComboCount = new IntField(ferrymanComboDiv, "Count", "ferrymanComboCount", 3);
+            ferrymanAttackDelay = new FloatField(ferrymanComboDiv, "Delay (0-1)", "ferrymanAttackDelay", 0.1f);
 
+            // SENTRY
             new ConfigHeader(turretPanel, "Burst Fire");
+            ConfigDivision turretBurstFireDiv = new ConfigDivision(turretPanel, "turretBurstFireDiv");
             turretBurstFireToggle = new BoolField(turretPanel, "Enabled", "turretBurstFireToggle", true);
-            turretBurstFireCount = new IntField(turretPanel, "Extra shots", "turretBurstFireCount", 1);
-            turretBurstFireDelay = new FloatField(turretPanel, "Delay between shots", "turretBurstFireDelay", 1f);
+            turretBurstFireToggle.onValueChange += (BoolField.BoolValueChangeEvent e) =>
+            {
+                turretBurstFireDiv.interactable = e.value;
+                dirtyField = true;
+            };
+            turretBurstFireToggle.TriggerValueChangeEvent();
+            turretBurstFireCount = new IntField(turretBurstFireDiv, "Extra shots", "turretBurstFireCount", 1);
+            turretBurstFireDelay = new FloatField(turretBurstFireDiv, "Delay between shots", "turretBurstFireDelay", 1f);
 
+            // FLESH PRISON
             new ConfigHeader(fleshPrisonPanel, "Spin Insignia");
+            ConfigDivision fleshPrionSpinAttackDiv = new ConfigDivision(fleshPrisonPanel, "fleshPrionSpinAttackDiv");
             fleshPrisonSpinAttackToggle = new BoolField(fleshPrisonPanel, "Enabled", "fleshPrisonSpinAttackToggle", true);
-            fleshPrisonSpinAttackCount = new IntField(fleshPrisonPanel, "Insignia count", "fleshPrisonSpinAttackCount", 5);
-            fleshPrisonSpinAttackDamage = new IntField(fleshPrisonPanel, "Insignia damage", "fleshPrisonSpinAttackDamage", 10);
-            fleshPrisonSpinAttackSize = new FloatField(fleshPrisonPanel, "Insignia size", "fleshPrisonSpinAttackSize", 2f);
-            fleshPrisonSpinAttackDistance = new FloatField(fleshPrisonPanel, "Circle radius", "fleshPrisonSpinAttackDistance", 30f);
-            fleshPrisonSpinAttackTurnSpeed = new FloatField(fleshPrisonPanel, "Turn speed", "fleshPrisonSpinAttackTurnSpeed", 30f);
-            fleshPrisonSpinAttackActivateSpeed = new FloatField(fleshPrisonPanel, "Activasion speed", "fleshPrisonSpinAttackActivateSpeed", 0.5f);
+            fleshPrisonSpinAttackToggle.onValueChange += (BoolField.BoolValueChangeEvent e) =>
+            {
+                fleshPrionSpinAttackDiv.interactable = e.value;
+                dirtyField = true;
+            };
+            fleshPrisonSpinAttackToggle.TriggerValueChangeEvent();
+            fleshPrisonSpinAttackCount = new IntField(fleshPrionSpinAttackDiv, "Insignia count", "fleshPrisonSpinAttackCount", 5);
+            fleshPrisonSpinAttackDamage = new IntField(fleshPrionSpinAttackDiv, "Insignia damage", "fleshPrisonSpinAttackDamage", 10);
+            fleshPrisonSpinAttackSize = new FloatField(fleshPrionSpinAttackDiv, "Insignia size", "fleshPrisonSpinAttackSize", 2f);
+            fleshPrisonSpinAttackDistance = new FloatField(fleshPrionSpinAttackDiv, "Circle radius", "fleshPrisonSpinAttackDistance", 30f);
+            fleshPrisonSpinAttackTurnSpeed = new FloatField(fleshPrionSpinAttackDiv, "Turn speed", "fleshPrisonSpinAttackTurnSpeed", 30f);
+            fleshPrisonSpinAttackActivateSpeed = new FloatField(fleshPrionSpinAttackDiv, "Activasion speed", "fleshPrisonSpinAttackActivateSpeed", 0.5f);
 
+            // MINOS PRIME
             new ConfigHeader(minosPrimePanel, "Random Teleport Before Shoot");
+            ConfigDivision minosPrimeRandomTeleportDiv = new ConfigDivision(minosPrimePanel, "minosPrimeRandomTeleportDiv");
             minosPrimeRandomTeleportToggle = new BoolField(minosPrimePanel, "Enabled", "minosPrimeRandomTeleportToggle", true);
-            minosPrimeRandomTeleportMinDistance = new FloatField(minosPrimePanel, "Minimum distance", "minosPrimeRandomTeleportMinDistance", 20f);
-            minosPrimeRandomTeleportMaxDistance = new FloatField(minosPrimePanel, "Maximum distance", "minosPrimeRandomTeleportMaxDistance", 50f);
+            minosPrimeRandomTeleportToggle.onValueChange += (BoolField.BoolValueChangeEvent e) =>
+            {
+                minosPrimeRandomTeleportDiv.interactable = e.value;
+                dirtyField = true;
+            };
+            minosPrimeRandomTeleportToggle.TriggerValueChangeEvent();
+            minosPrimeRandomTeleportMinDistance = new FloatField(minosPrimeRandomTeleportDiv, "Minimum distance", "minosPrimeRandomTeleportMinDistance", 20f);
+            minosPrimeRandomTeleportMaxDistance = new FloatField(minosPrimeRandomTeleportDiv, "Maximum distance", "minosPrimeRandomTeleportMaxDistance", 50f);
 
             config.Flush();
         }

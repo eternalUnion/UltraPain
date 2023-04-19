@@ -356,6 +356,9 @@ namespace DifficultyTweak
 
         private static void PatchAllPlayers()
         {
+            if (!ConfigManager.playerTweakToggle.value)
+                return;
+
             harmonyTweaks.Patch(GetMethod<Punch>("CheckForProjectile"), prefix: new HarmonyMethod(GetMethod<Punch_CheckForProjectile_Patch>("Prefix")));
             harmonyTweaks.Patch(GetMethod<Grenade>("Explode"), prefix: new HarmonyMethod(GetMethod<Grenade_Explode_Patch1>("Prefix")));
             harmonyTweaks.Patch(GetMethod<Grenade>("Collision"), prefix: new HarmonyMethod(GetMethod<Grenade_Collision_Patch>("Prefix")));

@@ -86,9 +86,6 @@ namespace DifficultyTweak.Patches
             if (__instance.altVersion)
                 return;
 
-            if (!Plugin.ultrapainDifficulty || !ConfigManager.enemyTweakToggle.value)
-                return;
-
             //__instance.homingProjectile = GameObject.Instantiate(Plugin.hideousMassProjectile, Vector3.positiveInfinity, Quaternion.identity);
             //__instance.homingProjectile.hideFlags = HideFlags.HideAndDontSave;
             //SceneManager.MoveGameObjectToScene(__instance.homingProjectile, SceneManager.GetSceneByName(""));
