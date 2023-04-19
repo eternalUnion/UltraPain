@@ -197,6 +197,14 @@ namespace DifficultyTweak
         public static FloatField minosPrimeRandomTeleportMinDistance;
         public static FloatField minosPrimeRandomTeleportMaxDistance;
 
+        // V2 - FIRST
+        public static BoolField v2FirstMalCannonSnipeToggle;
+        public static FloatField v2FirstMalCannonSnipeMaxDistToPlayer;
+        public static FloatField v2FirstMalCannonSnipeMinDistToV2;
+
+        public static BoolField v2FirstCoreSnipeToggle;
+        public static FloatField v2FirstCoreSnipe;
+
         private static bool dirtyField = false;
         public static void Initialize()
         {

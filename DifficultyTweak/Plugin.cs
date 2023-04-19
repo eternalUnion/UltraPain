@@ -85,6 +85,8 @@ namespace DifficultyTweak
         public static GameObject revolverBullet;
         public static GameObject maliciousCannonBeam;
         public static GameObject lightningBoltSFX;
+        public static GameObject revolverBeam;
+        public static GameObject blastwave;
 
         public static GameObject idol;
         public static GameObject ferryman;
@@ -160,6 +162,10 @@ namespace DifficultyTweak
             revolverBullet = bundle0.LoadAsset<GameObject>("assets/prefabs/revolverbullet.prefab");
             //[bundle-0][assets/prefabs/railcannonbeammalicious.prefab]
             maliciousCannonBeam = bundle0.LoadAsset<GameObject>("assets/prefabs/railcannonbeammalicious.prefab");
+            //[bundle-0][assets/prefabs/revolverbeam.prefab]
+            revolverBeam = bundle0.LoadAsset<GameObject>("assets/prefabs/revolverbeam.prefab");
+            //[bundle-1][assets/prefabs/explosionwaveenemy.prefab]
+            blastwave = bundle1.LoadAsset<GameObject>("assets/prefabs/explosionwaveenemy.prefab");
 
             // hideousMassProjectile.AddComponent<HideousMassProjectile>();
         }
@@ -396,6 +402,7 @@ namespace DifficultyTweak
             harmonyBase.Patch(GetMethod<DifficultySelectButton>("SetDifficulty"), postfix: new HarmonyMethod(GetMethod<DifficultySelectPatch>("Postfix")));
             harmonyBase.Patch(GetMethod<DifficultyTitle>("Check"), postfix: new HarmonyMethod(GetMethod<DifficultyTitle_Check_Patch>("Postfix")));
             harmonyBase.Patch(typeof(PrefsManager).GetConstructor(new Type[0]), postfix: new HarmonyMethod(GetMethod<PrefsManager_Ctor>("Postfix")));
+            harmonyBase.Patch(GetMethod<PrefsManager>("EnsureValid"), prefix: new HarmonyMethod(GetMethod<PrefsManager_EnsureValid>("Prefix")));
             ConfigManager.Initialize();
 
             SceneManager.activeSceneChanged += OnSceneChange;

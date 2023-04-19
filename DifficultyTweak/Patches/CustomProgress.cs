@@ -95,4 +95,13 @@ namespace DifficultyTweak.Patches
             ___propertyValidators.Clear();
         }
     }
+
+    class PrefsManager_EnsureValid
+    {
+        static bool Prefix(string __0, object __1, ref object __result)
+        {
+            __result = __1;
+            return false;
+        }
+    }
 }
