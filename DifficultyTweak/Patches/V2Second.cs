@@ -6,6 +6,7 @@ using System.Reflection;
 using System.Text;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using UnityEngine.UI;
 using UniverseLib;
 
 namespace DifficultyTweak.Patches
@@ -131,6 +132,7 @@ namespace DifficultyTweak.Patches
             {
                 comp.alternateStartPoint = shootPoint.transform.position;
                 comp.ignoreEnemyType = EnemyType.V2;
+                comp.sourceWeapon = gameObject;
                 //comp.beamType = BeamType.Enemy;
                 //maliciousIgnorePlayer.SetValue(comp, false);
             }
@@ -211,11 +213,17 @@ namespace DifficultyTweak.Patches
                         if (revolverBeam.TryGetComponent<RevolverBeam>(out RevolverBeam comp))
                         {
                             comp.beamType = BeamType.Enemy;
+                            comp.sourceWeapon = __instance.weapons[0];
                         }
 
+                        __instance.ForceDodge(V2Utils.GetDirectionAwayFromTarget(flag.v2collider.bounds.center, closestGrenade.transform.position));
                         return false;
                     }
                 }
+            }
+            else if(___currentWeapon == 4)
+            {
+                __instance.ForceDodge(V2Utils.GetDirectionAwayFromTarget(flag.v2collider.bounds.center, PlayerTracker.Instance.GetTarget().position));
             }
 
             return true;
@@ -251,6 +259,16 @@ namespace DifficultyTweak.Patches
             __0 = weapon;
 
             return true;
+        }
+    }
+
+    class V2SecondEnrage
+    {
+        static void Postfix(BossHealthBar __instance, ref EnemyIdentifier ___eid, ref int ___currentHpSlider)
+        {
+            V2 v2 = __instance.GetComponent<V2>();
+            if (v2 != null && v2.secondEncounter && ___currentHpSlider == 1)
+                v2.Invoke("Enrage", 0.01f);
         }
     }
 

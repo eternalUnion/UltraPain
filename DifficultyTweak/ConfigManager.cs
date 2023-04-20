@@ -825,6 +825,10 @@ namespace DifficultyTweak
 
             // V2 - SECOND
             v2SecondStartEnraged = new BoolField(v2SecondPanel, "Start enraged", "v2SecondStartEnraged", true);
+            v2SecondStartEnraged.onValueChange += (BoolField.BoolValueChangeEvent e) =>
+            {
+                dirtyField = true;
+            };
             v2SecondRocketLauncherToggle = new BoolField(v2SecondPanel, "Use rocket launcher", "v2SecondRocketLauncherToggle", true);
             v2SecondFastCoin = new BoolField(v2SecondPanel, "Shoot coins separately", "v2SecondFastCoin", true);
             v2SecondCoinRailcannon = new BoolField(v2SecondPanel, "Electric railcannon chargeback", "v2SecondCoinRailcannon", true);

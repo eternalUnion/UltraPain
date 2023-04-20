@@ -44,21 +44,6 @@ namespace DifficultyTweak.Patches
         }
     }
 
-
-    static class V2Utils
-    {
-        public static Grenade GetClosestGrenade()
-        {
-            return GrenadeList.Instance.grenadeList.OrderBy((Grenade g) => Vector3.Distance(g.transform.position, PlayerTracker.Instance.GetTarget().position)).FirstOrDefault();
-        }
-
-        /*public static Cannonball GetClosestCannonball()
-        {
-            return Cannon
-            return null;
-        }*/
-    }
-
     [HarmonyPatch(typeof(V2), "Update")]
     class V2FirstUpdate
     {
@@ -151,6 +136,7 @@ namespace DifficultyTweak.Patches
                             comp.beamType = BeamType.Enemy;
                         }
 
+                        __instance.ForceDodge(V2Utils.GetDirectionAwayFromTarget(flag.v2collider.bounds.center, closestGrenade.transform.position));
                         return false;
                     }
                 }
