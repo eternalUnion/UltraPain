@@ -114,16 +114,16 @@ namespace DifficultyTweak.Patches
             // PISTOL
             if (___currentWeapon == 0 && ConfigManager.v2FirstCoreSnipeToggle.value)
             {
-                Grenade closestGrenade = V2Utils.GetClosestGrenade();
+                Transform closestGrenade = V2Utils.GetClosestGrenade();
                 if (closestGrenade != null)
                 {
-                    float distanceToPlayer = Vector3.Distance(closestGrenade.transform.position, PlayerTracker.Instance.GetTarget().position);
-                    float distanceToV2 = Vector3.Distance(closestGrenade.transform.position, flag.v2collider.bounds.center);
+                    float distanceToPlayer = Vector3.Distance(closestGrenade.position, PlayerTracker.Instance.GetTarget().position);
+                    float distanceToV2 = Vector3.Distance(closestGrenade.position, flag.v2collider.bounds.center);
                     if (distanceToPlayer <= ConfigManager.v2FirstCoreSnipeMaxDistanceToPlayer.value && distanceToV2 >= ConfigManager.v2FirstCoreSnipeMinDistanceToV2.value)
                     {
                         Debug.Log("Attempting to shoot the grenade");
                         GameObject revolverBeam = GameObject.Instantiate(Plugin.revolverBeam, __instance.transform.position + __instance.transform.forward, Quaternion.identity);
-                        revolverBeam.transform.LookAt(closestGrenade.transform.position);
+                        revolverBeam.transform.LookAt(closestGrenade.position);
                         if (revolverBeam.TryGetComponent<RevolverBeam>(out RevolverBeam comp))
                         {
                             comp.beamType = BeamType.Enemy;

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -18,6 +19,39 @@ namespace DifficultyTweak.Patches
     {
         public Transform shootPoint;
         public Collider v2collider;
+        AudioSource aud;
+
+        float altFireCharge = 0f;
+        bool altFireCharging = false;
+
+        void Awake()
+        {
+            aud = GetComponent<AudioSource>();
+            if (aud == null)
+                aud = gameObject.AddComponent<AudioSource>();
+
+            aud.playOnAwake = false;
+            aud.clip = Plugin.cannonBallChargeAudio;
+        }
+
+        void Update()
+        {
+            if (altFireCharging)
+            {
+                if (!aud.isPlaying)
+                {
+                    aud.pitch = Mathf.Min(1f, altFireCharge) + 0.5f;
+                    aud.Play();
+                }
+
+                altFireCharge += Time.deltaTime;
+            }
+        }
+
+        void OnDisable()
+        {
+            altFireCharging = false;
+        }
 
         void PrepareFire()
         {
@@ -64,12 +98,54 @@ namespace DifficultyTweak.Patches
 
         void PrepareAltFire()
         {
-
+            altFireCharging = true;
         }
 
         void AltFire()
         {
+            altFireCharging = false;
+            altFireCharge = 0;
+            GameObject cannonBall = Instantiate(Plugin.cannonBall, shootPoint.transform.position, shootPoint.transform.rotation);
+            cannonBall.transform.position = new Vector3(cannonBall.transform.position.x, v2collider.bounds.center.y, cannonBall.transform.position.z);
+            cannonBall.transform.LookAt(PlayerTracker.Instance.GetTarget());
+            cannonBall.transform.position += cannonBall.transform.forward * 2f;
 
+            if(cannonBall.TryGetComponent<Cannonball>(out Cannonball comp))
+            {
+                comp.sourceWeapon = this.gameObject;
+            }
+
+            if(cannonBall.TryGetComponent<Rigidbody>(out Rigidbody rb))
+            {
+                rb.velocity = rb.transform.forward * 150f;
+            }
+        }
+
+        static MethodInfo bounce = typeof(Cannonball).GetMethod("Bounce", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
+        public static bool CannonBallTriggerPrefix(Cannonball __instance, Collider __0)
+        {
+            if(__instance.sourceWeapon != null && __instance.sourceWeapon.GetComponent<V2RocketLauncher>() != null)
+            {
+                if (__0.gameObject.tag == "Player")
+                {
+                    if (!__instance.hasBounced)
+                    {
+                        bounce.Invoke(__instance, new object[0]);
+                        NewMovement.Instance.GetHurt((int)__instance.damage, true, 1, false, false);
+                        return false;
+                    }
+                }
+                else
+                {
+                    EnemyIdentifierIdentifier eii = __0.gameObject.GetComponent<EnemyIdentifierIdentifier>();
+                    if (!__instance.launched && eii != null && (eii.eid.enemyType == EnemyType.V2 || eii.eid.enemyType == EnemyType.V2Second))
+                        return false;
+                }
+
+                return true;
+            }
+
+            return true;
         }
     }
 
@@ -97,13 +173,13 @@ namespace DifficultyTweak.Patches
         {
             cooldown = ConfigManager.v2SecondMalCannonSnipeCooldown.value;
 
-            Grenade target = V2Utils.GetClosestGrenade();
+            Transform target = V2Utils.GetClosestGrenade();
             Vector3 targetPosition = Vector3.zero;
 
             if (target != null)
             {
                 Debug.Log($"{debugTag} Targeted grenade");
-                targetPosition = target.transform.position;
+                targetPosition = target.position;
             }
             else
             {
@@ -161,12 +237,12 @@ namespace DifficultyTweak.Patches
             if (flag.maliciousCannon.cooldown > 0)
                 flag.maliciousCannon.cooldown = Mathf.MoveTowards(flag.maliciousCannon.cooldown, 0, Time.deltaTime);
 
-            Grenade target = V2Utils.GetClosestGrenade();
+            Transform target = V2Utils.GetClosestGrenade();
             if (ConfigManager.v2SecondMalCannonSnipeToggle.value && target != null
                 && ___shootCooldown <= 0.9f && !___aboutToShoot && flag.maliciousCannon.cooldown == 0f)
             {
-                float distanceToPlayer = Vector3.Distance(target.transform.position, PlayerTracker.Instance.GetTarget().transform.position);
-                float distanceToV2 = Vector3.Distance(target.transform.position, flag.v2collider.bounds.center);
+                float distanceToPlayer = Vector3.Distance(target.position, PlayerTracker.Instance.GetTarget().transform.position);
+                float distanceToV2 = Vector3.Distance(target.position, flag.v2collider.bounds.center);
                 if (distanceToPlayer <= ConfigManager.v2SecondMalCannonSnipeMaxDistanceToPlayer.value && distanceToV2 >= ConfigManager.v2SecondMalCannonSnipeMinDistanceToV2.value)
                 {
                     V2SecondSwitchWeapon.SwitchWeapon.Invoke(__instance, new object[1] { 4 });
@@ -196,16 +272,16 @@ namespace DifficultyTweak.Patches
 
             if (___currentWeapon == 0)
             {
-                Grenade closestGrenade = V2Utils.GetClosestGrenade();
+                Transform closestGrenade = V2Utils.GetClosestGrenade();
                 if (closestGrenade != null && ConfigManager.v2SecondCoreSnipeToggle.value)
                 {
-                    float distanceToPlayer = Vector3.Distance(closestGrenade.transform.position, PlayerTracker.Instance.GetTarget().position);
-                    float distanceToV2 = Vector3.Distance(closestGrenade.transform.position, flag.v2collider.bounds.center);
+                    float distanceToPlayer = Vector3.Distance(closestGrenade.position, PlayerTracker.Instance.GetTarget().position);
+                    float distanceToV2 = Vector3.Distance(closestGrenade.position, flag.v2collider.bounds.center);
                     if (distanceToPlayer <= ConfigManager.v2SecondCoreSnipeMaxDistanceToPlayer.value && distanceToV2 >= ConfigManager.v2SecondCoreSnipeMinDistanceToV2.value)
                     {
                         Debug.Log("Attempting to shoot the grenade");
                         GameObject revolverBeam = GameObject.Instantiate(Plugin.revolverBeam, __instance.transform.position + __instance.transform.forward, Quaternion.identity);
-                        revolverBeam.transform.LookAt(closestGrenade.transform.position);
+                        revolverBeam.transform.LookAt(closestGrenade.position);
                         if (revolverBeam.TryGetComponent<RevolverBeam>(out RevolverBeam comp))
                         {
                             comp.beamType = BeamType.Enemy;

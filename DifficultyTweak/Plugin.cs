@@ -75,6 +75,7 @@ namespace DifficultyTweak
         public static GameObject lightningBoltSFX;
         public static GameObject revolverBeam;
         public static GameObject blastwave;
+        public static GameObject cannonBall;
 
         public static GameObject idol;
         public static GameObject ferryman;
@@ -82,6 +83,8 @@ namespace DifficultyTweak
 
         public static GameObject enrageEffect;
         public static GameObject v2flashUnparryable;
+
+        public static AudioClip cannonBallChargeAudio;
 
         // Variables
         public static float SoliderShootAnimationStart = 1.2f;
@@ -114,6 +117,7 @@ namespace DifficultyTweak
             AssetBundle bundle0 = GetAssetBundle("bundle-0");
             AssetBundle bundle1 = GetAssetBundle("bundle-1");
             AssetBundle uhbundle0 = GetAssetBundle("unhardened-bundle-0");
+            AssetBundle uhbundle1 = GetAssetBundle("unhardened-bundle-1");
 
             //[bundle-0][assets/prefabs/projectilespread.prefab]
             projectileSpread = bundle0.LoadAsset<GameObject>("assets/prefabs/projectilespread.prefab");
@@ -157,6 +161,10 @@ namespace DifficultyTweak
             blastwave = bundle1.LoadAsset<GameObject>("assets/prefabs/explosionwaveenemy.prefab");
             //[bundle-0][assets/prefabs/enemies/minosprime.prefab]
             minosPrime = bundle0.LoadAsset<GameObject>("assets/prefabs/enemies/minosprime.prefab");
+            //[unhardened-bundle-1][assets/prefabs/cannonball.prefab]
+            cannonBall = uhbundle1.LoadAsset<GameObject>("assets/prefabs/cannonball.prefab");
+            //[unhardened-bundle-1][assets/sounds/other weapons/machinepumploop.wav]
+            cannonBallChargeAudio = uhbundle1.LoadAsset<AudioClip>("assets/sounds/other weapons/machinepumploop.wav");
 
             // hideousMassProjectile.AddComponent<HideousMassProjectile>();
         }
@@ -359,6 +367,7 @@ namespace DifficultyTweak
             harmonyTweaks.Patch(GetMethod<V2>("ShootWeapon"), prefix: new HarmonyMethod(GetMethod<V2SecondShootWeapon>("Prefix")), postfix: new HarmonyMethod(GetMethod<V2SecondShootWeapon>("Postfix")));
             if(ConfigManager.v2SecondFastCoinToggle.value)
                 harmonyTweaks.Patch(GetMethod<V2>("ThrowCoins"), prefix: new HarmonyMethod(GetMethod<V2SecondFastCoin>("Prefix")));
+            harmonyTweaks.Patch(GetMethod<Cannonball>("OnTriggerEnter"), prefix: new HarmonyMethod(GetMethod<V2RocketLauncher>("CannonBallTriggerPrefix")));
 
             harmonyTweaks.Patch(GetMethod<Drone>("Start"), postfix: new HarmonyMethod(GetMethod<Virtue_Start_Patch>("Postfix")));
             harmonyTweaks.Patch(GetMethod<Drone>("SpawnInsignia"), prefix: new HarmonyMethod(GetMethod<Virtue_SpawnInsignia_Patch>("Prefix")));
