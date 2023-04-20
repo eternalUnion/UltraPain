@@ -323,11 +323,11 @@ namespace DifficultyTweak.Patches
             if (!__instance.secondEncounter || !ConfigManager.v2SecondRocketLauncherToggle.value)
                 return true;
 
-            if (__0 != 1)
+            if (__0 != 1 && __0 != 2)
                 return true;
 
-            int[] weapons = new int[] { 1, 3 };
-            int weapon = weapons[UnityEngine.Random.RandomRangeInt(0, 2)];
+            int[] weapons = new int[] { 1, 2, 3 };
+            int weapon = weapons[UnityEngine.Random.RandomRangeInt(0, weapons.Length)];
             __0 = weapon;
 
             return true;

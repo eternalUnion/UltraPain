@@ -1,4 +1,6 @@
 ﻿using HarmonyLib;
+using System;
+using System.Linq;
 using System.Reflection;
 using UnityEngine;
 
@@ -59,11 +61,14 @@ namespace DifficultyTweak.Patches
                 Debug.Log("V2: Trying to punch");
                 flag.punchCooldown = ConfigManager.v2FirstKnuckleBlasterCooldown.value;
                 NewMovement.Instance.GetHurt(ConfigManager.v2FirstKnuckleBlasterHitDamage.value, true, 1, false, false);
-                flag.Invoke("PunchShockwave", 1f);
+                flag.Invoke("PunchShockwave", 0.5f);
             }
 
             if (ConfigManager.v2FirstKnuckleBlasterDeflectShotgunToggle.value && flag.punchCooldown == 0)
-                foreach (Collider col in Physics.OverlapSphere(flag.v2collider.bounds.center, 10f, 1 << 14, QueryTriggerInteraction.Collide))
+            {
+                Collider[] valid = Physics.OverlapSphere(flag.v2collider.bounds.center, 60f, 1 << 14, QueryTriggerInteraction.Collide);
+                Collider[] invalid = Physics.OverlapSphere(flag.v2collider.bounds.center, 50f, 1 << 14, QueryTriggerInteraction.Collide);
+                foreach (Collider col in valid.Where(col => Array.IndexOf(invalid, col) == -1))
                 {
                     Projectile proj = col.gameObject.GetComponent<Projectile>();
                     if (proj == null)
@@ -71,33 +76,22 @@ namespace DifficultyTweak.Patches
 
                     if (proj.playerBullet)
                     {
-                        Debug.Log("V2: Trying to deflect projectiles");
-                        flag.PunchShockwave();
-                        flag.punchCooldown = ConfigManager.v2FirstKnuckleBlasterCooldown.value;
-                        break;
+                        Vector3 v1 = flag.v2collider.bounds.center - proj.transform.position;
+                        Vector3 v2 = proj.transform.forward;
+                        if (Vector3.Angle(v1, v2) <= 45f)
+                        {
+                            Debug.Log("V2: Trying to deflect projectiles");
+                            flag.Invoke("PunchShockwave", 0.5f);
+                            flag.punchCooldown = ConfigManager.v2FirstKnuckleBlasterCooldown.value;
+                            break;
+                        }
                     }
                 }
+            }
 
             return true;
         }
     }
-
-    /*[HarmonyPatch(typeof(V2), "AltShootWeapon")]
-    class V2AltShootWeapon
-    {
-        static void Postfix(V2 __instance, ref int ___currentWeapon)
-        {
-            if (__instance.secondEncounter)
-                return;
-
-            // Threw a core
-            if(___currentWeapon == 1)
-            {
-                V2SwitchWeapon.SwitchWeapon.Invoke(__instance, new object[1] {3});
-                //Grenade target = GrenadeList.Instance.grenadeList.OrderBy((Grenade g) => Vector3.Distance(g.transform.position, __instance.transform.position)).First();
-            }
-        }
-    }*/
 
     [HarmonyPatch(typeof(V2), "ShootWeapon")]
     class V2FirstShootWeapon
