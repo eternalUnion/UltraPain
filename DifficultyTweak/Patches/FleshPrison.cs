@@ -1,11 +1,7 @@
 ﻿using HarmonyLib;
-using System;
 using System.Collections.Generic;
-using System.Dynamic;
 using System.Reflection;
-using System.Text;
 using UnityEngine;
-using UnityEngine.SceneManagement;
 
 namespace DifficultyTweak.Patches
 {

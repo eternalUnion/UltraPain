@@ -1,13 +1,9 @@
 ﻿using HarmonyLib;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using System.Text;
 using UnityEngine;
 using UnityEngine.SceneManagement;
-using UnityEngine.UI;
-using UniverseLib;
 
 namespace DifficultyTweak.Patches
 {
@@ -259,6 +255,51 @@ namespace DifficultyTweak.Patches
             __0 = weapon;
 
             return true;
+        }
+    }
+
+    class V2SecondFastCoin
+    {
+        static MethodInfo switchWeapon = typeof(V2).GetMethod("SwitchWeapon", BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public);
+
+        static bool Prefix(V2 __instance, ref int ___coinsToThrow, ref bool ___aboutToShoot, ref Transform ___overrideTarget, ref Rigidbody ___overrideTargetRb,
+            ref Transform ___target, Animator ___anim, ref bool ___shootingForCoin, ref int ___currentWeapon, ref float ___shootCooldown, ref bool ___aiming)
+        {
+            if (___coinsToThrow == 0)
+            {
+                return false;
+            }
+            GameObject gameObject = GameObject.Instantiate<GameObject>(__instance.coin, __instance.transform.position, __instance.transform.rotation);
+            Rigidbody rigidbody;
+            if (gameObject.TryGetComponent<Rigidbody>(out rigidbody))
+            {
+                rigidbody.AddForce((___target.transform.position - ___anim.transform.position).normalized * 20f + Vector3.up * 30f, ForceMode.VelocityChange);
+            }
+            Coin coin;
+            if (gameObject.TryGetComponent<Coin>(out coin))
+            {
+                GameObject gameObject2 = GameObject.Instantiate<GameObject>(coin.flash, coin.transform.position, MonoSingleton<CameraController>.Instance.transform.rotation);
+                gameObject2.transform.localScale *= 2f;
+                gameObject2.transform.SetParent(gameObject.transform, true);
+            }
+            ___coinsToThrow--;
+
+            ___aboutToShoot = true;
+            ___shootingForCoin = true;
+            switchWeapon.Invoke(__instance, new object[1] { 0 });
+            __instance.CancelInvoke("ShootWeapon");
+            __instance.Invoke("ShootWeapon", ConfigManager.v2SecondFastCoinShootDelay.value);
+
+            ___overrideTarget = coin.transform;
+            ___overrideTargetRb = coin.GetComponent<Rigidbody>();
+            __instance.CancelInvoke("AltShootWeapon");
+            __instance.weapons[___currentWeapon].transform.GetChild(0).SendMessage("CancelAltCharge", SendMessageOptions.DontRequireReceiver);
+            ___shootCooldown = 1f;
+
+            __instance.CancelInvoke("ThrowCoins");
+            __instance.Invoke("ThrowCoins", ConfigManager.v2SecondFastCoinThrowDelay.value);
+
+            return false;
         }
     }
 

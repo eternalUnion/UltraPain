@@ -1,12 +1,5 @@
 ﻿using HarmonyLib;
-using System;
-using System.Collections.Generic;
-using System.Reflection;
-using System.Runtime.InteropServices.ComTypes;
-using System.Text;
 using UnityEngine;
-using UnityEngine.SceneManagement;
-using UnityEngine.UIElements;
 
 namespace DifficultyTweak.Patches
 {

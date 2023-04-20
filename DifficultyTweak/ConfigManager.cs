@@ -1,11 +1,6 @@
 ﻿using PluginConfig.API;
 using PluginConfig.API.Fields;
 using PluginConfig.API.Decorators;
-
-using System;
-using System.Collections.Generic;
-using System.Text;
-using Steamworks.Data;
 using UnityEngine.UI;
 
 namespace DifficultyTweak
@@ -198,6 +193,7 @@ namespace DifficultyTweak
         public static BoolField minosPrimeRandomTeleportToggle;
         public static FloatField minosPrimeRandomTeleportMinDistance;
         public static FloatField minosPrimeRandomTeleportMaxDistance;
+        public static BoolField minosPrimeTeleportTrail;
 
         // V2 - FIRST
         public static BoolField v2FirstKnuckleBlasterToggle;
@@ -217,7 +213,9 @@ namespace DifficultyTweak
         // V2 - SECOND
         public static BoolField v2SecondStartEnraged;
         public static BoolField v2SecondRocketLauncherToggle;
-        public static BoolField v2SecondFastCoin;
+        public static BoolField v2SecondFastCoinToggle;
+        public static FloatField v2SecondFastCoinShootDelay;
+        public static FloatField v2SecondFastCoinThrowDelay;
         public static BoolField v2SecondCoinRailcannon;
         public static FloatField v2SecondCoinRailcannonCooldown;
 
@@ -780,6 +778,12 @@ namespace DifficultyTweak
             minosPrimeRandomTeleportToggle.TriggerValueChangeEvent();
             minosPrimeRandomTeleportMinDistance = new FloatField(minosPrimeRandomTeleportDiv, "Minimum distance", "minosPrimeRandomTeleportMinDistance", 20f);
             minosPrimeRandomTeleportMaxDistance = new FloatField(minosPrimeRandomTeleportDiv, "Maximum distance", "minosPrimeRandomTeleportMaxDistance", 50f);
+            new ConfigHeader(minosPrimePanel, "Teleport Trail");
+            minosPrimeTeleportTrail = new BoolField(minosPrimePanel, "Enabled", "minosPrimeTeleportTrail", true);
+            minosPrimeTeleportTrail.onValueChange += (BoolField.BoolValueChangeEvent e) =>
+            {
+                dirtyField = true;
+            };
 
             // V2 - FIRST
             new ConfigHeader(v2FirstPanel, "Knuckleblaster");
@@ -830,7 +834,7 @@ namespace DifficultyTweak
                 dirtyField = true;
             };
             v2SecondRocketLauncherToggle = new BoolField(v2SecondPanel, "Use rocket launcher", "v2SecondRocketLauncherToggle", true);
-            v2SecondFastCoin = new BoolField(v2SecondPanel, "Shoot coins separately", "v2SecondFastCoin", true);
+            
             v2SecondCoinRailcannon = new BoolField(v2SecondPanel, "Electric railcannon chargeback", "v2SecondCoinRailcannon", true);
             v2SecondCoinRailcannon.onValueChange += (BoolField.BoolValueChangeEvent e) =>
             {
@@ -838,6 +842,19 @@ namespace DifficultyTweak
             };
             v2SecondCoinRailcannonCooldown = new FloatField(v2SecondPanel, "Electric railcannon cooldown", "v2SecondCoinRailcannonCooldown", 15f);
             v2SecondCoinRailcannon.TriggerValueChangeEvent();
+
+            ConfigDivision v2SecondFastCoinDiv = new ConfigDivision(v2SecondPanel, "v2SecondFastCoinDiv");
+            new ConfigHeader(v2SecondPanel, "Shoot Coins Separately");
+            v2SecondFastCoinToggle = new BoolField(v2SecondPanel, "Enabled", "v2SecondFastCoin", true);
+            v2SecondFastCoinToggle.onValueChange += (BoolField.BoolValueChangeEvent e) =>
+            {
+                v2SecondFastCoinDiv.interactable = e.value;
+                dirtyField = true;
+            };
+            v2SecondFastCoinToggle.TriggerValueChangeEvent();
+            v2SecondFastCoinThrowDelay = new FloatField(v2SecondFastCoinDiv, "Throw next coin delay", "v2SecondFastCoinThrowDelay", 0.6f, 0f, float.MaxValue);
+            v2SecondFastCoinShootDelay = new FloatField(v2SecondFastCoinDiv, "Shoot coin delay", "v2SecondFastCoinShootDelay", 0.3f, 0f, float.MaxValue);
+
             ConfigDivision v2SecondMalCannonDiv = new ConfigDivision(v2SecondPanel, "v2SecondMalCannonDiv");
             new ConfigHeader(v2SecondPanel, "Malicious Cannon Snipe");
             v2SecondMalCannonSnipeToggle = new BoolField(v2SecondPanel, "Enabled", "v2SecondMalCannonSnipeToggle", true);

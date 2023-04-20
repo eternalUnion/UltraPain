@@ -1,26 +1,14 @@
 ﻿using BepInEx;
 using UnityEngine;
 using UnityEngine.SceneManagement;
-using UniverseLib;
-using UniverseLib.Runtime;
-using System.Threading.Tasks;
-using System.Threading;
 using System;
-using System.Collections.Generic;
-using JetBrains.Annotations;
 using HarmonyLib;
-using System.Runtime.CompilerServices;
 using System.IO;
-using UnityEngine.Experimental.AssetBundlePatching;
 using DifficultyTweak.Patches;
 using System.Linq;
 using UnityEngine.UI;
-
-using PluginConfig;
-using PluginConfig.API;
 using UnityEngine.EventSystems;
 using System.Reflection;
-using UnityEngine.UIElements;
 using Steamworks;
 
 namespace DifficultyTweak
@@ -90,6 +78,7 @@ namespace DifficultyTweak
 
         public static GameObject idol;
         public static GameObject ferryman;
+        public static GameObject minosPrime;
 
         public static GameObject enrageEffect;
         public static GameObject v2flashUnparryable;
@@ -166,6 +155,8 @@ namespace DifficultyTweak
             revolverBeam = bundle0.LoadAsset<GameObject>("assets/prefabs/revolverbeam.prefab");
             //[bundle-1][assets/prefabs/explosionwaveenemy.prefab]
             blastwave = bundle1.LoadAsset<GameObject>("assets/prefabs/explosionwaveenemy.prefab");
+            //[bundle-0][assets/prefabs/enemies/minosprime.prefab]
+            minosPrime = bundle0.LoadAsset<GameObject>("assets/prefabs/enemies/minosprime.prefab");
 
             // hideousMassProjectile.AddComponent<HideousMassProjectile>();
         }
@@ -179,7 +170,9 @@ namespace DifficultyTweak
             StyleIDs.RegisterIDs();
             PatchAll();
 
-            if(SceneManager.GetActiveScene().name == "Main Menu")
+            MinosPrimeCharge.CreateDecoy();
+
+            if (SceneManager.GetActiveScene().name == "Main Menu")
             {
                 LoadPrefabs();
 
@@ -298,10 +291,12 @@ namespace DifficultyTweak
                 harmonyTweaks.Patch(GetMethod<SwingCheck2>("DamageStop"), postfix: new HarmonyMethod(GetMethod<SwingCheck2_DamageStop_Patch>("Postfix")));
             }
 
-            if(ConfigManager.minosPrimeRandomTeleportToggle.value)
+            if (ConfigManager.minosPrimeRandomTeleportToggle.value)
                 harmonyTweaks.Patch(GetMethod<MinosPrime>("ProjectileCharge"), postfix: new HarmonyMethod(GetMethod<MinosPrimeCharge>("Postfix")));
+            if (ConfigManager.minosPrimeTeleportTrail.value)
+                harmonyTweaks.Patch(GetMethod<MinosPrime>("Teleport"), postfix: new HarmonyMethod(GetMethod<MinosPrimeCharge>("TeleportPostfix")));
 
-            if(ConfigManager.schismSpreadAttackToggle.value)
+            if (ConfigManager.schismSpreadAttackToggle.value)
                 harmonyTweaks.Patch(GetMethod<ZombieProjectiles>("ShootProjectile"), postfix: new HarmonyMethod(GetMethod<ZombieProjectile_ShootProjectile_Patch>("Postfix")));
 
             if (ConfigManager.soliderShootTweakToggle.value)
@@ -362,6 +357,8 @@ namespace DifficultyTweak
             //harmonyTweaks.Patch(GetMethod<V2>("AltShootWeapon"), postfix: new HarmonyMethod(GetMethod<V2AltShootWeapon>("Postfix")));
             harmonyTweaks.Patch(GetMethod<V2>("SwitchWeapon"), prefix: new HarmonyMethod(GetMethod<V2SecondSwitchWeapon>("Prefix")));
             harmonyTweaks.Patch(GetMethod<V2>("ShootWeapon"), prefix: new HarmonyMethod(GetMethod<V2SecondShootWeapon>("Prefix")), postfix: new HarmonyMethod(GetMethod<V2SecondShootWeapon>("Postfix")));
+            if(ConfigManager.v2SecondFastCoinToggle.value)
+                harmonyTweaks.Patch(GetMethod<V2>("ThrowCoins"), prefix: new HarmonyMethod(GetMethod<V2SecondFastCoin>("Prefix")));
 
             harmonyTweaks.Patch(GetMethod<Drone>("Start"), postfix: new HarmonyMethod(GetMethod<Virtue_Start_Patch>("Postfix")));
             harmonyTweaks.Patch(GetMethod<Drone>("SpawnInsignia"), prefix: new HarmonyMethod(GetMethod<Virtue_SpawnInsignia_Patch>("Prefix")));

@@ -1,8 +1,4 @@
 ﻿using HarmonyLib;
-using PluginConfig.API;
-using System;
-using System.Collections.Generic;
-using System.Text;
 using UnityEngine;
 
 namespace DifficultyTweak.Patches

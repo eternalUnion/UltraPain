@@ -1,8 +1,5 @@
 ﻿using HarmonyLib;
 using Steamworks;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace DifficultyTweak.Patches
 {
