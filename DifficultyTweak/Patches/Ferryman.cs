@@ -65,8 +65,8 @@ namespace DifficultyTweak.Patches
             if (___anim.GetCurrentAnimatorStateInfo(0).normalizedTime < time / clip.length)
                 return;
 
-            if (flag.remainingCombo == ConfigManager.ferrymanComboCount.value && clipName == "KickCombo")
-                flag.remainingCombo -= 1;
+            //if (flag.remainingCombo == ConfigManager.ferrymanComboCount.value && clipName == "KickCombo")
+            //    flag.remainingCombo -= 1;
 
             flag.remainingCombo -= 1;
             if(flag.remainingCombo <= 0)
@@ -117,9 +117,9 @@ namespace DifficultyTweak.Patches
             }
             else
             {
-                // time = 0.6524
+                // time = 0.4129
                 // total = 1.3
-                ___anim.Play("Stinger", 0, (0.6524f * (1f - ConfigManager.ferrymanAttackDelay.value)) / 1.3f);
+                ___anim.Play("Stinger", 0, 0);
 
                 SnapToGround.Invoke(__instance, new object[0]);
                 ___inAction = true;
