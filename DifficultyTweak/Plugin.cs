@@ -76,6 +76,10 @@ namespace DifficultyTweak
         public static GameObject revolverBeam;
         public static GameObject blastwave;
         public static GameObject cannonBall;
+        public static GameObject shockwave;
+        public static GameObject sisyphiusExplosion;
+        public static GameObject sisyphiusPrimeExplosion;
+        public static GameObject explosionWaveKnuckleblaster;
 
         public static GameObject idol;
         public static GameObject ferryman;
@@ -165,6 +169,14 @@ namespace DifficultyTweak
             cannonBall = uhbundle1.LoadAsset<GameObject>("assets/prefabs/cannonball.prefab");
             //[unhardened-bundle-1][assets/sounds/other weapons/machinepumploop.wav]
             cannonBallChargeAudio = uhbundle1.LoadAsset<AudioClip>("assets/sounds/other weapons/machinepumploop.wav");
+            //[bundle-0][assets/prefabs/physicalshockwave.prefab]
+            shockwave = bundle0.LoadAsset<GameObject>("assets/prefabs/physicalshockwave.prefab");
+            //[bundle-0][assets/prefabs/explosionwavesisyphus.prefab]
+            sisyphiusExplosion = bundle0.LoadAsset<GameObject>("assets/prefabs/explosionwavesisyphus.prefab");
+            //[unhardened-bundle-0][assets/prefabs/explosionprimesisy.prefab]
+            sisyphiusPrimeExplosion = uhbundle0.LoadAsset<GameObject>("assets/prefabs/explosionprimesisy.prefab");
+            //[bundle-0][assets/prefabs/explosionwave.prefab]
+            explosionWaveKnuckleblaster = bundle0.LoadAsset<GameObject>("assets/prefabs/explosionwave.prefab");
 
             // hideousMassProjectile.AddComponent<HideousMassProjectile>();
         }
@@ -177,8 +189,6 @@ namespace DifficultyTweak
         {
             StyleIDs.RegisterIDs();
             PatchAll();
-
-            MinosPrimeCharge.CreateDecoy();
 
             if (SceneManager.GetActiveScene().name == "Main Menu")
             {
@@ -227,6 +237,10 @@ namespace DifficultyTweak
                 evt.triggers.Add(trigger1);
                 evt.triggers.Add(trigger2);
             }
+
+            // LOAD CUSTOM PREFABS HERE TO AVOID MID GAME LAG
+            MinosPrimeCharge.CreateDecoy();
+            GameObject shockwaveSisyphus = SisyphusInstructionist_Start.shockwave;
         }
 
         public static class StyleIDs
@@ -371,6 +385,11 @@ namespace DifficultyTweak
 
             harmonyTweaks.Patch(GetMethod<Drone>("Start"), postfix: new HarmonyMethod(GetMethod<Virtue_Start_Patch>("Postfix")));
             harmonyTweaks.Patch(GetMethod<Drone>("SpawnInsignia"), prefix: new HarmonyMethod(GetMethod<Virtue_SpawnInsignia_Patch>("Prefix")));
+
+            // ADDME
+            harmonyTweaks.Patch(GetMethod<Sisyphus>("Start"), postfix: new HarmonyMethod(GetMethod<SisyphusInstructionist_Start>("Postfix")));
+            harmonyTweaks.Patch(GetMethod<Sisyphus>("SetupExplosion"), prefix: new HarmonyMethod(GetMethod<SisyphusInstructionist_SetupExplosion>("Prefix")));
+            harmonyTweaks.Patch(GetMethod<Sisyphus>("StompExplosion"), prefix: new HarmonyMethod(GetMethod<SisyphusInstructionist_StompExplosion>("Prefix")));
         }
 
         private static void PatchAllPlayers()
@@ -384,6 +403,14 @@ namespace DifficultyTweak
 
             if(ConfigManager.rocketGrabbingToggle.value)
                 harmonyTweaks.Patch(GetMethod<HookArm>("FixedUpdate"), prefix: new HarmonyMethod(GetMethod<HookArm_FixedUpdate_Patch>("Prefix")));
+
+            // ADD ME TOO
+            harmonyTweaks.Patch(GetMethod<Punch>("BlastCheck"), prefix: new HarmonyMethod(GetMethod<Punch_BlastCheck>("Prefix")), postfix: new HarmonyMethod(GetMethod<Punch_BlastCheck>("Postfix")));
+            harmonyTweaks.Patch(GetMethod<Explosion>("Collide"), prefix: new HarmonyMethod(GetMethod<Explosion_Collide>("Prefix")));
+            harmonyTweaks.Patch(GetMethod<Coin>("DelayedReflectRevolver"), postfix: new HarmonyMethod(GetMethod<Coin_DelayedReflectRevolver>("Postfix")));
+            harmonyTweaks.Patch(GetMethod<Coin>("ReflectRevolver"), postfix: new HarmonyMethod(GetMethod<Coin_ReflectRevolver>("Postfix")), prefix: new HarmonyMethod(GetMethod<Coin_ReflectRevolver>("Prefix")));
+            harmonyTweaks.Patch(GetMethod<Grenade>("Explode"), prefix: new HarmonyMethod(GetMethod<Grenade_Explode>("Prefix")));
+            harmonyTweaks.Patch(GetMethod<EnemyIdentifier>("DeliverDamage"), prefix: new HarmonyMethod(GetMethod<EnemyIdentifier_DeliverDamage>("Prefix")));
         }
 
         public static void PatchAll()
