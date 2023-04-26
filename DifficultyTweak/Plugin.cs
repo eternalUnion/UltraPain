@@ -65,7 +65,8 @@ namespace DifficultyTweak
         public static GameObject shotgunGrenade;
         public static GameObject beam;
         public static GameObject turretBeam;
-        public static GameObject lighningStrikeExplosive;
+        public static GameObject lightningStrikeExplosiveSetup;
+        public static GameObject lightningStrikeExplosive;
         public static GameObject lighningStrikeWindup;
         public static GameObject explosion;
         public static GameObject virtueInsignia;
@@ -136,7 +137,7 @@ namespace DifficultyTweak
             //[bundle-0][assets/prefabs/dronemaliciousbeam.prefab]
             beam = bundle0.LoadAsset<GameObject>("assets/prefabs/dronemaliciousbeam.prefab");
             //[unhardened-bundle-0][assets/prefabs/lightningstrikeexplosive.prefab]
-            lighningStrikeExplosive = uhbundle0.LoadAsset<GameObject>("assets/prefabs/lightningstrikeexplosive.prefab");
+            lightningStrikeExplosiveSetup = uhbundle0.LoadAsset<GameObject>("assets/prefabs/lightningstrikeexplosive.prefab");
             //[unhardened-bundle-0][assets/particles/lightningboltwindupfollow variant.prefab]
             lighningStrikeWindup = uhbundle0.LoadAsset<GameObject>("assets/particles/lightningboltwindupfollow variant.prefab");
             //[bundle-0][assets/prefabs/enemies/idol.prefab]
@@ -177,6 +178,8 @@ namespace DifficultyTweak
             sisyphiusPrimeExplosion = uhbundle0.LoadAsset<GameObject>("assets/prefabs/explosionprimesisy.prefab");
             //[bundle-0][assets/prefabs/explosionwave.prefab]
             explosionWaveKnuckleblaster = bundle0.LoadAsset<GameObject>("assets/prefabs/explosionwave.prefab");
+            //[bundle-0][assets/prefabs/explosionlightning variant.prefab]
+            lightningStrikeExplosive = bundle0.LoadAsset<GameObject>("assets/prefabs/explosionlightning variant.prefab");
 
             // hideousMassProjectile.AddComponent<HideousMassProjectile>();
         }
@@ -214,6 +217,8 @@ namespace DifficultyTweak
                     Quick thinking, mobility options, and a decent understanding of the vanilla game are essential.
 
                     <color=red>Recommended for players who have gotten used to VIOLENT's changes and are looking to freshen up their gameplay with unique enemy mechanics.</color>
+                    
+                    <color=orange>This difficulty uses UKMD difficulty and slot. To use the mod on another difficulty, enable global difficulty from settings.</color>
                     """;
                 info.transform.Find("Title (1)").GetComponent<Text>().text = $"--{ConfigManager.pluginName.value}--";
                 info.transform.Find("Title (1)").GetComponent<Text>().resizeTextForBestFit = true;
@@ -418,7 +423,12 @@ namespace DifficultyTweak
                 harmonyTweaks.Patch(GetMethod<Coin>("ReflectRevolver"), postfix: new HarmonyMethod(GetMethod<Coin_ReflectRevolver>("Postfix")), prefix: new HarmonyMethod(GetMethod<Coin_ReflectRevolver>("Prefix")));
                 harmonyTweaks.Patch(GetMethod<Grenade>("Explode"), prefix: new HarmonyMethod(GetMethod<Grenade_Explode>("Prefix")), postfix: new HarmonyMethod(GetMethod<Grenade_Explode>("Postfix")));
                 if(ConfigManager.orbStrikeRevolverExplosion.value)
+                {
                     harmonyTweaks.Patch(GetMethod<EnemyIdentifier>("DeliverDamage"), prefix: new HarmonyMethod(GetMethod<EnemyIdentifier_DeliverDamage>("Prefix")));
+                    harmonyTweaks.Patch(GetMethod<RevolverBeam>("ExecuteHits"), postfix: new HarmonyMethod(GetMethod<RevolverBeam_ExecuteHits>("Postfix")), prefix: new HarmonyMethod(GetMethod<RevolverBeam_ExecuteHits>("Prefix")));
+                    harmonyTweaks.Patch(GetMethod<RevolverBeam>("HitSomething"), postfix: new HarmonyMethod(GetMethod<RevolverBeam_HitSomething>("Postfix")), prefix: new HarmonyMethod(GetMethod<RevolverBeam_HitSomething>("Prefix")));
+                    harmonyTweaks.Patch(GetMethod<RevolverBeam>("Start"), prefix: new HarmonyMethod(GetMethod<RevolverBeam_Start>("Prefix")));
+                }
                 harmonyTweaks.Patch(GetMethod<Explosion>("Collide"), prefix: new HarmonyMethod(GetMethod<Explosion_CollideOrbital>("Prefix")));
             }
         }

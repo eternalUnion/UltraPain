@@ -1,14 +1,18 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Linq;
 using System.Text;
 using UnityEngine;
+using UniverseLib;
 
 namespace DifficultyTweak.Patches
 {
     public class OrbitalStrikeFlag : MonoBehaviour
     {
         public CoinChainList chainList;
+        public bool isOrbitalRay = false;
+        public bool exploded = false;
     }
 
     public class CoinChainList : MonoBehaviour
@@ -60,20 +64,21 @@ namespace DifficultyTweak.Patches
         static void Postfix(Coin __instance, GameObject ___altBeam)
         {
             CoinChainList flag = null;
+            OrbitalStrikeFlag orbitalBeamFlag = null;
 
             if (___altBeam != null)
             {
-                OrbitalStrikeFlag orbitalFlag = ___altBeam.GetComponent<OrbitalStrikeFlag>();
-                if (orbitalFlag == null)
+                orbitalBeamFlag = ___altBeam.GetComponent<OrbitalStrikeFlag>();
+                if (orbitalBeamFlag == null)
                 {
-                    orbitalFlag = ___altBeam.AddComponent<OrbitalStrikeFlag>();
+                    orbitalBeamFlag = ___altBeam.AddComponent<OrbitalStrikeFlag>();
                     GameObject obj = new GameObject();
                     obj.AddComponent<RemoveOnTime>().time = 5f;
                     flag = obj.AddComponent<CoinChainList>();
-                    orbitalFlag.chainList = flag;
+                    orbitalBeamFlag.chainList = flag;
                 }
                 else
-                    flag = orbitalFlag.chainList;
+                    flag = orbitalBeamFlag.chainList;
             }
             else
             {
@@ -99,6 +104,8 @@ namespace DifficultyTweak.Patches
                 if (distance >= 20f)
                 {
                     flag.isOrbitalStrike = true;
+                    if (orbitalBeamFlag != null)
+                        orbitalBeamFlag.isOrbitalRay = true;
                     Debug.Log("Coin valid for orbital strike");
                 }
             }
@@ -128,6 +135,46 @@ namespace DifficultyTweak.Patches
         static void Postfix(Coin __instance)
         {
             coinIsShooting = false;
+        }
+    }
+
+    class RevolverBeam_Start
+    {
+        static bool Prefix(RevolverBeam __instance)
+        {
+            OrbitalStrikeFlag flag = __instance.GetComponent<OrbitalStrikeFlag>();
+            if (flag != null && flag.isOrbitalRay)
+            {
+                RevolverBeam_ExecuteHits.orbitalBeam = __instance;
+                RevolverBeam_ExecuteHits.orbitalBeamFlag = flag;
+            }
+
+            return true;
+        }
+    }
+
+    class RevolverBeam_ExecuteHits
+    {
+        public static bool isOrbitalRay = false;
+        public static RevolverBeam orbitalBeam = null;
+        public static OrbitalStrikeFlag orbitalBeamFlag = null;
+
+        static bool Prefix(RevolverBeam __instance)
+        {
+            OrbitalStrikeFlag flag = __instance.GetComponent<OrbitalStrikeFlag>();
+            if (flag != null && flag.isOrbitalRay)
+            {
+                isOrbitalRay = true;
+                orbitalBeam = __instance;
+                orbitalBeamFlag = flag;
+            }
+
+            return true;
+        }
+
+        static void Postfix()
+        {
+            isOrbitalRay = false;
         }
     }
 
@@ -186,22 +233,25 @@ namespace DifficultyTweak.Patches
                     OrbitalExplosionInfo info = __state.templateExplosion.AddComponent<OrbitalExplosionInfo>();
 
                     __state.state = true;
-                    if(Coin_ReflectRevolver.shootingAltBeam == null)
+                    // REVOLVER NORMAL
+                    if (Coin_ReflectRevolver.shootingAltBeam == null)
                     {
                         __3 += ConfigManager.orbStrikeRevolverExtraSize.value;
                         info.id = ConfigManager.orbStrikeRevolverStyleText.guid;
                         info.points = ConfigManager.orbStrikeRevolverStylePoint.value;
                     }
-                    else if(Coin_ReflectRevolver.shootingAltBeam.TryGetComponent(out RevolverBeam beam))
+                    else if (Coin_ReflectRevolver.shootingAltBeam.TryGetComponent(out RevolverBeam beam))
                     {
                         if (beam.beamType == BeamType.Revolver)
                         {
-                            if (beam.strongAlt)
+                            // REVOLVER CHARGED (NORMAL + ALT. IF DISTINCTION IS NEEDED, USE beam.strongAlt FOR ALT)
+                            if (beam.ultraRicocheter)
                             {
                                 __3 += ConfigManager.orbStrikeRevolverChargedExtraSize.value;
                                 info.id = ConfigManager.orbStrikeRevolverChargedStyleText.guid;
                                 info.points = ConfigManager.orbStrikeRevolverChargedStylePoint.value;
                             }
+                            // REVOLVER ALT
                             else
                             {
                                 __3 += ConfigManager.orbStrikeRevolverExtraSize.value;
@@ -209,12 +259,14 @@ namespace DifficultyTweak.Patches
                                 info.points = ConfigManager.orbStrikeRevolverStylePoint.value;
                             }
                         }
+                        // ELECTRIC RAILCANNON
                         else if (beam.beamType == BeamType.Railgun && beam.hitAmount > 500)
                         {
                             __3 += ConfigManager.orbStrikeElectricCannonExtraSize.value;
                             info.id = ConfigManager.orbStrikeElectricCannonStyleText.guid;
                             info.points = ConfigManager.orbStrikeElectricCannonStylePoint.value;
                         }
+                        // MALICIOUS RAILCANNON
                         else if (beam.beamType == BeamType.Railgun)
                         {
                             __3 += ConfigManager.orbStrikeMaliciousCannonExtraSize.value;
@@ -224,6 +276,8 @@ namespace DifficultyTweak.Patches
                         else
                             __state.state = false;
                     }
+                    else
+                        __state.state = false;
 
                     Debug.Log("Applied orbital strike bonus");
                 }
@@ -288,6 +342,8 @@ namespace DifficultyTweak.Patches
             //if (Coin_ReflectRevolver.shootingCoin == lastExplosiveCoin)
             //    return true;
 
+            bool causeExplosion = false;
+
             if ((Coin_ReflectRevolver.coinIsShooting && Coin_ReflectRevolver.shootingCoin != null)/* || (Time.time - Coin_ReflectRevolver.lastCoinTime <= 0.1f)*/)
             {
                 CoinChainList list = null;
@@ -302,18 +358,146 @@ namespace DifficultyTweak.Patches
 
                 if (list != null && list.isOrbitalStrike)
                 {
-                    lastExplosiveCoin = Coin_ReflectRevolver.shootingCoin;
+                    causeExplosion = true;
+                }
+            }
+            else if(RevolverBeam_ExecuteHits.isOrbitalRay && RevolverBeam_ExecuteHits.orbitalBeam != null)
+            {
+                if(RevolverBeam_ExecuteHits.orbitalBeamFlag != null && !RevolverBeam_ExecuteHits.orbitalBeamFlag.exploded)
+                    causeExplosion = true;
+            }
+
+            if(causeExplosion)
+            {
+                // REVOLVER NORMAL
+                if (Coin_ReflectRevolver.shootingAltBeam == null)
+                {
                     GameObject explosion = GameObject.Instantiate(Plugin.explosion, __instance.gameObject.transform.position, Quaternion.identity);
-                    foreach(Explosion exp in explosion.GetComponentsInChildren<Explosion>())
+                    foreach (Explosion exp in explosion.GetComponentsInChildren<Explosion>())
                     {
                         exp.enemy = false;
                         exp.hitterWeapon = "";
                     }
-                    Debug.Log("Applied orbital strike explosion");
                 }
+                else if (Coin_ReflectRevolver.shootingAltBeam.TryGetComponent(out RevolverBeam beam))
+                {
+                    if (beam.beamType == BeamType.Revolver)
+                    {
+                        // REVOLVER CHARGED (NORMAL + ALT. IF DISTINCTION IS NEEDED, USE beam.strongAlt FOR ALT)
+                        if (beam.ultraRicocheter)
+                        {
+                            /*GameObject lighning = GameObject.Instantiate(Plugin.lightningStrikeExplosive, __instance.gameObject.transform.position, Quaternion.identity);
+                            foreach (Explosion exp in lighning.GetComponentsInChildren<Explosion>())
+                            {
+                                exp.enemy = false;
+                                exp.hitterWeapon = "";
+
+                                if (exp.damage == 0)
+                                    exp.maxSize /= 2;
+                                else
+                                    exp.damage = 10;
+
+                                exp.canHit = AffectedSubjects.All;
+                                exp.damage /= 2;
+                                exp.maxSize /= 2;
+                                exp.speed /= 2;
+                            }*/
+
+                            GameObject insignia = GameObject.Instantiate(Plugin.virtueInsignia, __instance.transform.position, Quaternion.identity);
+                            insignia.transform.localScale = new Vector3(insignia.transform.localScale.x * 1.5f, insignia.transform.localScale.y, insignia.transform.localScale.z * 1.5f);
+                            VirtueInsignia comp = insignia.GetComponent<VirtueInsignia>();
+                            comp.windUpSpeedMultiplier = 2;
+                            comp.damage = 5;
+                            comp.predictive = false;
+                            comp.hadParent = false;
+                            comp.noTracking = true;
+                        }
+                        // REVOLVER ALT
+                        else
+                        {
+                            GameObject explosion = GameObject.Instantiate(Plugin.explosion, __instance.gameObject.transform.position, Quaternion.identity);
+                            foreach (Explosion exp in explosion.GetComponentsInChildren<Explosion>())
+                            {
+                                exp.enemy = false;
+                                exp.hitterWeapon = "";
+                            }
+                        }
+                    }
+                    // ELECTRIC RAILCANNON
+                    else if (beam.beamType == BeamType.Railgun && beam.hitAmount > 500)
+                    {
+                        GameObject lighning = GameObject.Instantiate(Plugin.lightningStrikeExplosive, __instance.gameObject.transform.position, Quaternion.identity);
+                        foreach (Explosion exp in lighning.GetComponentsInChildren<Explosion>())
+                        {
+                            exp.enemy = false;
+                            exp.hitterWeapon = "";
+
+                            if (exp.damage == 0)
+                                exp.maxSize /= 2;
+                            else
+                                exp.damage = 10;
+
+                            exp.canHit = AffectedSubjects.All;
+                        }
+                    }
+                    // MALICIOUS RAILCANNON
+                    else if (beam.beamType == BeamType.Railgun)
+                    {
+                        // UNUSED
+                        causeExplosion = false;
+                    }
+                }
+
+                if (causeExplosion && RevolverBeam_ExecuteHits.orbitalBeamFlag != null)
+                    RevolverBeam_ExecuteHits.orbitalBeamFlag.exploded = true;
+
+                Debug.Log("Applied orbital strike explosion");
             }
 
             return true;
+        }
+    }
+
+    class RevolverBeam_HitSomething
+    {
+        static bool Prefix(RevolverBeam __instance, out GameObject __state)
+        {
+            __state = null;
+
+            if (RevolverBeam_ExecuteHits.orbitalBeam == null)
+                return true;
+            if (__instance.beamType != BeamType.Railgun)
+                return true;
+            if (__instance.hitAmount != 1)
+                return true;
+
+            if (RevolverBeam_ExecuteHits.orbitalBeam.GetInstanceID() == __instance.GetInstanceID())
+            {
+                if (!RevolverBeam_ExecuteHits.orbitalBeamFlag.exploded)
+                {
+                    Debug.Log("MALICIOUS EXPLOSION EXTRA SIZE");
+
+                    GameObject tempExp = GameObject.Instantiate(__instance.hitParticle, new Vector3(1000000, 1000000, 1000000), Quaternion.identity);
+                    foreach (Explosion exp in tempExp.GetComponentsInChildren<Explosion>())
+                    {
+                        exp.maxSize *= 1.2f;
+                        exp.speed *= 1.2f;
+                    }
+                    __instance.hitParticle = tempExp;
+                    RevolverBeam_ExecuteHits.orbitalBeamFlag.exploded = true;
+                }
+                Debug.Log("Already exploded");
+            }
+            else
+                Debug.Log("Not the same instance");
+
+            return true;
+        }
+
+        static void Postfix(RevolverBeam __instance, GameObject __state)
+        {
+            if (__state != null)
+                GameObject.Destroy(__state);
         }
     }
 }

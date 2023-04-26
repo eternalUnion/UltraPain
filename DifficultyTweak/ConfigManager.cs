@@ -924,6 +924,8 @@ namespace DifficultyTweak
             v2SecondCoreSnipeMinDistanceToV2 = new FloatField(v2SecondSnipeDiv, "Min distance to V2", "v2SecondCoreSnipeMinDistanceToV2", 20f);
 
             config.Flush();
+            Plugin.PatchAll();
+            dirtyField = false;
         }
     }
 }
