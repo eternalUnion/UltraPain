@@ -14,7 +14,7 @@ using Steamworks;
 namespace DifficultyTweak
 {
     [BepInPlugin(PLUGIN_GUID, PLUGIN_NAME, PLUGIN_VERSION)]
-    [BepInDependency("com.eternalUnion.pluginConfigurator", "1.0.0")]
+    [BepInDependency("com.eternalUnion.pluginConfigurator", "1.1.0")]
     public class Plugin : BaseUnityPlugin
     {
         public const string PLUGIN_GUID = "com.eternalUnion.ultraPain";

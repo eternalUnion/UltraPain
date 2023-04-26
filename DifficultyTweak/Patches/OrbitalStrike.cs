@@ -236,7 +236,7 @@ namespace DifficultyTweak.Patches
                     // REVOLVER NORMAL
                     if (Coin_ReflectRevolver.shootingAltBeam == null)
                     {
-                        __3 += ConfigManager.orbStrikeRevolverExtraSize.value;
+                        __3 += ConfigManager.orbStrikeRevolverGrenadeExtraSize.value;
                         info.id = ConfigManager.orbStrikeRevolverStyleText.guid;
                         info.points = ConfigManager.orbStrikeRevolverStylePoint.value;
                     }
@@ -247,14 +247,14 @@ namespace DifficultyTweak.Patches
                             // REVOLVER CHARGED (NORMAL + ALT. IF DISTINCTION IS NEEDED, USE beam.strongAlt FOR ALT)
                             if (beam.ultraRicocheter)
                             {
-                                __3 += ConfigManager.orbStrikeRevolverChargedExtraSize.value;
+                                __3 += ConfigManager.orbStrikeRevolverChargedGrenadeExtraSize.value;
                                 info.id = ConfigManager.orbStrikeRevolverChargedStyleText.guid;
                                 info.points = ConfigManager.orbStrikeRevolverChargedStylePoint.value;
                             }
                             // REVOLVER ALT
                             else
                             {
-                                __3 += ConfigManager.orbStrikeRevolverExtraSize.value;
+                                __3 += ConfigManager.orbStrikeRevolverGrenadeExtraSize.value;
                                 info.id = ConfigManager.orbStrikeRevolverStyleText.guid;
                                 info.points = ConfigManager.orbStrikeRevolverStylePoint.value;
                             }
@@ -262,14 +262,14 @@ namespace DifficultyTweak.Patches
                         // ELECTRIC RAILCANNON
                         else if (beam.beamType == BeamType.Railgun && beam.hitAmount > 500)
                         {
-                            __3 += ConfigManager.orbStrikeElectricCannonExtraSize.value;
+                            __3 += ConfigManager.orbStrikeElectricCannonGrenadeExtraSize.value;
                             info.id = ConfigManager.orbStrikeElectricCannonStyleText.guid;
                             info.points = ConfigManager.orbStrikeElectricCannonStylePoint.value;
                         }
                         // MALICIOUS RAILCANNON
                         else if (beam.beamType == BeamType.Railgun)
                         {
-                            __3 += ConfigManager.orbStrikeMaliciousCannonExtraSize.value;
+                            __3 += ConfigManager.orbStrikeMaliciousCannonGrenadeExtraSize.value;
                             info.id = ConfigManager.orbStrikeMaliciousCannonStyleText.guid;
                             info.points = ConfigManager.orbStrikeMaliciousCannonStylePoint.value;
                         }

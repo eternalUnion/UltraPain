@@ -38,22 +38,46 @@ namespace DifficultyTweak
 
         public static BoolField orbStrikeToggle;
 
+        // REVOLVER BEAM ORBITAL
         public static StringField orbStrikeRevolverStyleText;
         public static IntField orbStrikeRevolverStylePoint;
-        public static FloatField orbStrikeRevolverExtraSize;
+        public static BoolField orbStrikeRevolverGrenade;
+        public static FloatField orbStrikeRevolverGrenadeExtraSize;
+        public static FloatField orbStrikeRevolverGrenadeExtraDamage;
         public static BoolField orbStrikeRevolverExplosion;
+        public static FloatField orbStrikeRevolverExplosionDamage;
+        public static FloatField orbStrikeRevolverExplosionSize;
 
+        // CHARGED BEAM ORBITAL
         public static StringField orbStrikeRevolverChargedStyleText;
         public static IntField orbStrikeRevolverChargedStylePoint;
-        public static FloatField orbStrikeRevolverChargedExtraSize;
+        public static BoolField orbStrikeRevolverChargedGrenade;
+        public static FloatField orbStrikeRevolverChargedGrenadeExtraSize;
+        public static FloatField orbStrikeRevolverChargedGrenadeExtraDamage;
+        public static BoolField orbStrikeRevolverChargedInsignia;
+        public static FloatField orbStrikeRevolverChargedInsigniaDelayBoost;
+        public static IntField orbStrikeRevolverChargedInsigniaDamage;
+        public static FloatField orbStrikeRevolverChargedInsigniaSize;
 
+        // ELECTRIC RAIL CANNON
         public static StringField orbStrikeElectricCannonStyleText;
         public static IntField orbStrikeElectricCannonStylePoint;
-        public static FloatField orbStrikeElectricCannonExtraSize;
+        public static BoolField orbStrikeElectricCannonGrenade;
+        public static FloatField orbStrikeElectricCannonGrenadeExtraSize;
+        public static FloatField orbStrikeElectricCannonGrenadeExtraDamage;
+        public static BoolField orbStrikeElectricCannonExplosion;
+        public static FloatField orbStrikeElectricCannonExplosionDamage;
+        public static FloatField orbStrikeElectricCannonExplosionSize;
 
+        // MALICIOUS CANNON
         public static StringField orbStrikeMaliciousCannonStyleText;
         public static IntField orbStrikeMaliciousCannonStylePoint;
-        public static FloatField orbStrikeMaliciousCannonExtraSize;
+        public static BoolField orbStrikeMaliciousCannonGrenade;
+        public static FloatField orbStrikeMaliciousCannonGrenadeExtraSize;
+        public static FloatField orbStrikeMaliciousCannonGrenadeExtraDamage;
+        public static BoolField orbStrikeMaliciousCannonExplosion;
+        public static FloatField orbStrikeMaliciousCannonExplosionDamageMultiplier;
+        public static FloatField orbStrikeMaliciousCannonExplosionSizeMultiplier;
 
         // ENEMY PANEL
         public static ConfigPanel cerberusPanel;
@@ -353,7 +377,8 @@ namespace DifficultyTweak
             grenadeBoostStyleText = new StringField(grenadeBoostDiv, "Style text", "grenadeBoostStyleText", "<color=cyan>FISTFUL OF 'NADE</color>");
             grenadeBoostStylePoints = new IntField(grenadeBoostDiv, "Style points", "grenadeBoostStylePoints", 10);
 
-            new ConfigHeader(playerPanel, "Orbital Strike\r\n<size=16>(Style bonuses for coin-knuckleblaster)</size>");
+            new ConfigHeader(playerPanel, "Orbital Strike");
+            new ConfigHeader(playerPanel, "(Tweaks for coin-knuckleblaster)", 16);
             ConfigDivision orbStrikeDiv = new ConfigDivision(playerPanel, "orbStrikeDiv");
             orbStrikeToggle = new BoolField(playerPanel, "Enabled", "orbStrikeToggle", true);
             orbStrikeToggle.onValueChange += (BoolField.BoolValueChangeEvent e) =>
@@ -361,23 +386,104 @@ namespace DifficultyTweak
                 orbStrikeDiv.interactable = e.value;
             };
             orbStrikeToggle.TriggerValueChangeEvent();
-            new ConfigHeader(orbStrikeDiv, "Revolver", 18);
+
+            new ConfigHeader(orbStrikeDiv, "Revolver Beam", 18);
             orbStrikeRevolverStyleText = new StringField(orbStrikeDiv, "Style text", "orbStrikeRevolverStyleText", "<color=maroon>ORBITALSTRIKE</color>");
             orbStrikeRevolverStylePoint = new IntField(orbStrikeDiv, "Style point", "orbStrikeRevolverStylePoint", 20);
-            orbStrikeRevolverExtraSize = new FloatField(orbStrikeDiv, "Size bonus percent", "orbStrikeRevolverExtraSize", 0.2f);
-            orbStrikeRevolverExplosion = new BoolField(orbStrikeDiv, "Explosion on enemy hit", "orbStrikeRevolverExplosion", true);
-            new ConfigHeader(orbStrikeDiv, "Charged Revolver", 18);
+            new ConfigHeader(orbStrikeDiv, "--Grenade Explosion Boost--", 12);
+            ConfigDivision orbStrikeRevolverGrenadeDiv = new ConfigDivision(orbStrikeDiv, "orbStrikeRevolverGrenadeDiv");
+            orbStrikeRevolverGrenade = new BoolField(orbStrikeDiv, "Enabled", "orbStrikeRevolverGrenade", true);
+            orbStrikeRevolverGrenade.onValueChange += (BoolField.BoolValueChangeEvent e) =>
+            {
+                orbStrikeRevolverGrenadeDiv.interactable = e.value;
+            };
+            orbStrikeRevolverGrenade.TriggerValueChangeEvent();
+            orbStrikeRevolverGrenadeExtraSize = new FloatField(orbStrikeRevolverGrenadeDiv, "Size bonus percent", "orbStrikeRevolverExtraSize", 0.2f);
+            orbStrikeRevolverGrenadeExtraDamage = new FloatField(orbStrikeRevolverGrenadeDiv, "Damage bonus percent", "orbStrikeRevolverGrenadeExtraDamage", 0f);
+            new ConfigHeader(orbStrikeDiv, "--Explosion On Enemy Hit--", 12);
+            ConfigDivision orbStrikeRevolverExplosionDiv = new ConfigDivision(orbStrikeDiv, "orbStrikeRevolverExplosionDiv");
+            orbStrikeRevolverExplosion = new BoolField(orbStrikeDiv, "Enabled", "orbStrikeRevolverExplosion", true);
+            orbStrikeRevolverExplosion.onValueChange += (BoolField.BoolValueChangeEvent e) =>
+            {
+                orbStrikeRevolverExplosionDiv.interactable = e.value;
+            };
+            orbStrikeRevolverExplosion.TriggerValueChangeEvent();
+            orbStrikeRevolverExplosionDamage = new FloatField(orbStrikeRevolverExplosionDiv, "Damage multiplier", "orbStrikeRevolverExplosionDamage", 1f);
+            orbStrikeRevolverExplosionSize = new FloatField(orbStrikeRevolverExplosionDiv, "Size multiplier", "orbStrikeRevolverExplosionSize", 1f);
+
+            new ConfigHeader(orbStrikeDiv, "Charged Revolver Beam", 18);
             orbStrikeRevolverChargedStyleText = new StringField(orbStrikeDiv, "Style text", "orbStrikeRevolverChargedStyleText", "<color=maroon>ORBITAL</color><color=cyan>ZAP</color>");
             orbStrikeRevolverChargedStylePoint = new IntField(orbStrikeDiv, "Style point", "orbStrikeRevolverChargedStylePoint", 30);
-            orbStrikeRevolverChargedExtraSize = new FloatField(orbStrikeDiv, "Size bonus percent", "orbStrikeRevolverChargedExtraSize", 0.25f);
+            new ConfigHeader(orbStrikeDiv, "--Grenade Explosion Boost--", 12);
+            ConfigDivision orbStrikeRevolverChargedGrenadeDiv = new ConfigDivision(orbStrikeDiv, "orbStrikeRevolverGrenadeDiv");
+            orbStrikeRevolverChargedGrenade = new BoolField(orbStrikeDiv, "Enabled", "orbStrikeRevolverChargedGrenade", true);
+            orbStrikeRevolverChargedGrenade.onValueChange += (BoolField.BoolValueChangeEvent e) =>
+            {
+                orbStrikeRevolverChargedGrenadeDiv.interactable = e.value;
+            };
+            orbStrikeRevolverChargedGrenade.TriggerValueChangeEvent();
+            orbStrikeRevolverChargedGrenadeExtraSize = new FloatField(orbStrikeRevolverChargedGrenadeDiv, "Size bonus percent", "orbStrikeRevolverChargedGrenadeExtraSize", 0.25f);
+            orbStrikeRevolverChargedGrenadeExtraDamage = new FloatField(orbStrikeRevolverChargedGrenadeDiv, "Damage bonus percent", "orbStrikeRevolverChargedGrenadeExtraDamage", 0f);
+            new ConfigHeader(orbStrikeDiv, "--Insignia On Enemy Hit--", 12);
+            ConfigDivision orbStrikeRevolverChargedInsigniaDiv = new ConfigDivision(orbStrikeDiv, "orbStrikeRevolverChargedInsigniaDiv");
+            orbStrikeRevolverChargedInsignia = new BoolField(orbStrikeDiv, "Enabled", "orbStrikeRevolverChargedInsignia", true);
+            orbStrikeRevolverChargedInsignia.onValueChange += (BoolField.BoolValueChangeEvent e) =>
+            {
+                orbStrikeRevolverChargedInsigniaDiv.interactable = e.value;
+            };
+            orbStrikeRevolverChargedInsignia.TriggerValueChangeEvent();
+            orbStrikeRevolverChargedInsigniaDamage = new IntField(orbStrikeRevolverChargedInsigniaDiv, "Damage", "orbStrikeRevolverChargedInsigniaDamage", 10);
+            orbStrikeRevolverChargedInsigniaSize = new FloatField(orbStrikeRevolverChargedInsigniaDiv, "Size", "orbStrikeRevolverChargedInsigniaSize", 2f);
+            orbStrikeRevolverChargedInsigniaDelayBoost = new FloatField(orbStrikeRevolverChargedInsigniaDiv, "Windup speed multiplier", "orbStrikeRevolverChargedInsigniaDelayBoost", 2f);
+
             new ConfigHeader(orbStrikeDiv, "Electric Cannon", 18);
             orbStrikeElectricCannonStyleText = new StringField(orbStrikeDiv, "Style text", "orbStrikeElectricCannonStyleText", "<color=orange>ULTRA</color><color=maroon>ORBITAL</color><color=cyan>ZAP</color>");
             orbStrikeElectricCannonStylePoint = new IntField(orbStrikeDiv, "Style point", "orbStrikeElectricCannonStylePoint", 50);
-            orbStrikeElectricCannonExtraSize = new FloatField(orbStrikeDiv, "Size bonus percent", "orbStrikeElectricCannonExtraSize", 0.3f);
+            new ConfigHeader(orbStrikeDiv, "--Grenade Explosion Boost--", 12);
+            ConfigDivision orbStrikeElectricCannonGrenadeDiv = new ConfigDivision(orbStrikeDiv, "orbStrikeRevolverGrenadeDiv");
+            orbStrikeElectricCannonGrenade = new BoolField(orbStrikeDiv, "Enabled", "orbStrikeElectricCannonGrenade", true);
+            orbStrikeElectricCannonGrenade.onValueChange += (BoolField.BoolValueChangeEvent e) =>
+            {
+                orbStrikeElectricCannonGrenadeDiv.interactable = e.value;
+            };
+            orbStrikeElectricCannonGrenade.TriggerValueChangeEvent();
+            orbStrikeElectricCannonGrenadeExtraSize = new FloatField(orbStrikeElectricCannonGrenadeDiv, "Size bonus percent", "orbStrikeElectricCannonGrenadeExtraSize", 0.3f);
+            orbStrikeElectricCannonGrenadeExtraDamage = new FloatField(orbStrikeElectricCannonGrenadeDiv, "Damage bonus percent", "orbStrikeElectricCannonGrenadeExtraDamage", 0f);
+            new ConfigHeader(orbStrikeDiv, "--Lightning Bolt On Enemy Hit--", 12);
+            ConfigDivision orbStrikeElectricCannonExplosionDiv = new ConfigDivision(orbStrikeDiv, "orbStrikeRevolverGrenadeDiv");
+            orbStrikeElectricCannonExplosion = new BoolField(orbStrikeDiv, "Enabled", "orbStrikeElectricCannonExplosion", true);
+            orbStrikeElectricCannonExplosion.onValueChange += (BoolField.BoolValueChangeEvent e) =>
+            {
+                orbStrikeElectricCannonExplosionDiv.interactable = e.value;
+            };
+            orbStrikeElectricCannonExplosion.TriggerValueChangeEvent();
+            orbStrikeElectricCannonExplosionDamage = new FloatField(orbStrikeElectricCannonExplosionDiv, "Damage multiplier", "orbStrikeElectricCannonExplosionDamage", 1f);
+            orbStrikeElectricCannonExplosionSize = new FloatField(orbStrikeElectricCannonExplosionDiv, "Size multiplier", "orbStrikeElectricCannonExplosionSize", 1f);
+
+
             new ConfigHeader(orbStrikeDiv, "Malicious Cannon", 18);
             orbStrikeMaliciousCannonStyleText = new StringField(orbStrikeDiv, "Style text", "orbStrikeMaliciousCannonStyleText", "<color=maroon>ORBITAL</color><color=red>NUKE</color>");
             orbStrikeMaliciousCannonStylePoint = new IntField(orbStrikeDiv, "Style point", "orbStrikeMaliciousCannonStylePoint", 70);
-            orbStrikeMaliciousCannonExtraSize = new FloatField(orbStrikeDiv, "Size bonus percent", "orbStrikeMaliciousCannonExtraSize", 0.4f);
+            new ConfigHeader(orbStrikeDiv, "--Grenade Explosion Boost--", 12);
+            ConfigDivision orbStrikeMaliciousCannonGrenadeDiv = new ConfigDivision(orbStrikeDiv, "orbStrikeMaliciousCannonGrenadeDiv");
+            orbStrikeMaliciousCannonGrenade = new BoolField(orbStrikeDiv, "Enabled", "orbStrikeMaliciousCannonGrenade", true);
+            orbStrikeMaliciousCannonGrenade.onValueChange += (BoolField.BoolValueChangeEvent e) =>
+            {
+                orbStrikeMaliciousCannonGrenadeDiv.interactable = e.value;
+            };
+            orbStrikeMaliciousCannonGrenade.TriggerValueChangeEvent();
+            orbStrikeMaliciousCannonGrenadeExtraSize = new FloatField(orbStrikeMaliciousCannonGrenadeDiv, "Size bonus percent", "orbStrikeMaliciousCannonGrenadeExtraSize", 0.4f);
+            orbStrikeMaliciousCannonGrenadeExtraDamage = new FloatField(orbStrikeMaliciousCannonGrenadeDiv, "Damage bonus percent", "orbStrikeMaliciousCannonGrenadeExtraDamage", 0f);
+            new ConfigHeader(orbStrikeDiv, "--Stronger Malicious Explosion--", 12);
+            ConfigDivision orbStrikeMaliciousCannonExplosionDiv = new ConfigDivision(orbStrikeDiv, "orbStrikeMaliciousCannonExplosionDiv");
+            orbStrikeMaliciousCannonExplosion = new BoolField(orbStrikeDiv, "Enabled", "orbStrikeMaliciousCannonExplosion", true);
+            orbStrikeMaliciousCannonExplosion.onValueChange += (BoolField.BoolValueChangeEvent e) =>
+            {
+                orbStrikeMaliciousCannonExplosionDiv.interactable = e.value;
+            };
+            orbStrikeMaliciousCannonExplosion.TriggerValueChangeEvent();
+            orbStrikeMaliciousCannonExplosionSizeMultiplier = new FloatField(orbStrikeMaliciousCannonExplosionDiv, "Size multiplier", "orbStrikeMaliciousCannonExplosionSizeMultiplier", 1.3f);
+            orbStrikeMaliciousCannonExplosionDamageMultiplier = new FloatField(orbStrikeMaliciousCannonExplosionDiv, "Damage multiplier", "orbStrikeMaliciousCannonExplosionDamageMultiplier", 1f);
 
             // ENEMY PANEL
             new ConfigHeader(enemyPanel, "Common Enemies");
@@ -924,6 +1030,7 @@ namespace DifficultyTweak
             v2SecondCoreSnipeMinDistanceToV2 = new FloatField(v2SecondSnipeDiv, "Min distance to V2", "v2SecondCoreSnipeMinDistanceToV2", 20f);
 
             config.Flush();
+            config.LogDuplicateGUID();
             Plugin.PatchAll();
             dirtyField = false;
         }
