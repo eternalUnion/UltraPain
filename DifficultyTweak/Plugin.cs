@@ -425,7 +425,7 @@ namespace DifficultyTweak
                 harmonyTweaks.Patch(GetMethod<Grenade>("Explode"), prefix: new HarmonyMethod(GetMethod<Grenade_Explode>("Prefix")), postfix: new HarmonyMethod(GetMethod<Grenade_Explode>("Postfix")));
                 if(ConfigManager.orbStrikeRevolverExplosion.value)
                 {
-                    harmonyTweaks.Patch(GetMethod<EnemyIdentifier>("DeliverDamage"), prefix: new HarmonyMethod(GetMethod<EnemyIdentifier_DeliverDamage>("Prefix")));
+                    harmonyTweaks.Patch(GetMethod<EnemyIdentifier>("DeliverDamage"), prefix: new HarmonyMethod(GetMethod<EnemyIdentifier_DeliverDamage>("Prefix")), postfix: new HarmonyMethod(GetMethod<EnemyIdentifier_DeliverDamage>("Postfix")));
                     harmonyTweaks.Patch(GetMethod<RevolverBeam>("ExecuteHits"), postfix: new HarmonyMethod(GetMethod<RevolverBeam_ExecuteHits>("Postfix")), prefix: new HarmonyMethod(GetMethod<RevolverBeam_ExecuteHits>("Prefix")));
                     harmonyTweaks.Patch(GetMethod<RevolverBeam>("HitSomething"), postfix: new HarmonyMethod(GetMethod<RevolverBeam_HitSomething>("Postfix")), prefix: new HarmonyMethod(GetMethod<RevolverBeam_HitSomething>("Prefix")));
                     harmonyTweaks.Patch(GetMethod<RevolverBeam>("Start"), prefix: new HarmonyMethod(GetMethod<RevolverBeam_Start>("Prefix")));

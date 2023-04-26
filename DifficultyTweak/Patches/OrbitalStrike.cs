@@ -1,4 +1,5 @@
-﻿using System;
+﻿using HarmonyLib;
+using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
@@ -23,6 +24,7 @@ namespace DifficultyTweak.Patches
 
     class Punch_BlastCheck
     {
+        [HarmonyBefore(new string[] { "tempy.fastpunch" })]
         static bool Prefix(Punch __instance)
         {
             __instance.blastWave = GameObject.Instantiate(Plugin.explosionWaveKnuckleblaster, new Vector3(1000000, 1000000, 1000000), Quaternion.identity);
@@ -30,6 +32,7 @@ namespace DifficultyTweak.Patches
             return true;
         }
 
+        [HarmonyBefore(new string[] { "tempy.fastpunch" })]
         static void Postfix(Punch __instance)
         {
             GameObject.Destroy(__instance.blastWave);
@@ -231,6 +234,7 @@ namespace DifficultyTweak.Patches
                         __instance.explosion = __state.templateExplosion;
                     }
                     OrbitalExplosionInfo info = __state.templateExplosion.AddComponent<OrbitalExplosionInfo>();
+                    info.id = "";
 
                     __state.state = true;
                     float damageMulti = 1f;
@@ -324,20 +328,6 @@ namespace DifficultyTweak.Patches
 
             if (!__state.state)
                 return;
-
-            /*Collider[] explosions = Physics.OverlapSphere(__instance.transform.position, 1f, 1 << 23, QueryTriggerInteraction.Collide);
-            if(explosions.Length == 0)
-            {
-                Debug.LogWarning("Could not find any explosions to add the orbital stats to");
-                return;
-            }
-
-            foreach(Collider col in explosions)
-            {
-                OrbitalExplosionInfo info = col.gameObject.AddComponent<OrbitalExplosionInfo>();
-                info.id = __state.id;
-                info.points = __state.points;
-            }*/
         }
     }
 
@@ -353,10 +343,11 @@ namespace DifficultyTweak.Patches
                 && __instance.canHit != AffectedSubjects.PlayerOnly)
             {
                 EnemyIdentifierIdentifier componentInParent = __0.GetComponentInParent<EnemyIdentifierIdentifier>();
-                if (componentInParent != null && componentInParent.eid != null && !componentInParent.eid.blessed && !componentInParent.eid.dead)
+                if (componentInParent != null && componentInParent.eid != null && !componentInParent.eid.blessed/* && !componentInParent.eid.dead*/)
                 {
                     flag.active = false;
-                    StyleHUD.Instance.AddPoints(flag.points, flag.id);
+                    if(flag.id != "")
+                        StyleHUD.Instance.AddPoints(flag.points, flag.id);
                 }
             }
 
@@ -368,12 +359,22 @@ namespace DifficultyTweak.Patches
     {
         static Coin lastExplosiveCoin = null;
 
-        static bool Prefix(EnemyIdentifier __instance)
+        class StateInfo
+        {
+            public bool canPostStyle = false;
+            public OrbitalExplosionInfo info = null;
+        }
+
+        static bool Prefix(EnemyIdentifier __instance, out StateInfo __state)
         {
             //if (Coin_ReflectRevolver.shootingCoin == lastExplosiveCoin)
             //    return true;
 
+            __state = new StateInfo();
             bool causeExplosion = false;
+
+            if (__instance.dead)
+                return true;
 
             if ((Coin_ReflectRevolver.coinIsShooting && Coin_ReflectRevolver.shootingCoin != null)/* || (Time.time - Coin_ReflectRevolver.lastCoinTime <= 0.1f)*/)
             {
@@ -400,6 +401,8 @@ namespace DifficultyTweak.Patches
 
             if(causeExplosion)
             {
+                __state.canPostStyle = true;
+
                 // REVOLVER NORMAL
                 if (Coin_ReflectRevolver.shootingAltBeam == null)
                 {
@@ -414,6 +417,11 @@ namespace DifficultyTweak.Patches
                             exp.speed *= ConfigManager.orbStrikeRevolverExplosionSize.value;
                             exp.damage = (int)(exp.damage * ConfigManager.orbStrikeRevolverExplosionDamage.value);
                         }
+
+                        OrbitalExplosionInfo info = explosion.AddComponent<OrbitalExplosionInfo>();
+                        info.id = ConfigManager.orbStrikeRevolverStyleText.guid;
+                        info.points = ConfigManager.orbStrikeRevolverStylePoint.value;
+                        __state.info = info;
                     }
                 }
                 else if (Coin_ReflectRevolver.shootingAltBeam.TryGetComponent(out RevolverBeam beam))
@@ -434,6 +442,9 @@ namespace DifficultyTweak.Patches
                                 comp.predictive = false;
                                 comp.hadParent = false;
                                 comp.noTracking = true;
+
+                                StyleHUD.Instance.AddPoints(ConfigManager.orbStrikeRevolverChargedStylePoint.value, ConfigManager.orbStrikeRevolverChargedStyleText.guid);
+                                __state.canPostStyle = false;
                             }
                         }
                         // REVOLVER ALT
@@ -450,6 +461,11 @@ namespace DifficultyTweak.Patches
                                     exp.speed *= ConfigManager.orbStrikeRevolverExplosionSize.value;
                                     exp.damage = (int)(exp.damage * ConfigManager.orbStrikeRevolverExplosionDamage.value);
                                 }
+
+                                OrbitalExplosionInfo info = explosion.AddComponent<OrbitalExplosionInfo>();
+                                info.id = ConfigManager.orbStrikeRevolverStyleText.guid;
+                                info.points = ConfigManager.orbStrikeRevolverStylePoint.value;
+                                __state.info = info;
                             }
                         }
                     }
@@ -473,6 +489,11 @@ namespace DifficultyTweak.Patches
 
                                 exp.canHit = AffectedSubjects.All;
                             }
+
+                            OrbitalExplosionInfo info = lighning.AddComponent<OrbitalExplosionInfo>();
+                            info.id = ConfigManager.orbStrikeElectricCannonStyleText.guid;
+                            info.points = ConfigManager.orbStrikeElectricCannonStylePoint.value;
+                            __state.info = info;
                         }
                     }
                     // MALICIOUS RAILCANNON
@@ -490,6 +511,16 @@ namespace DifficultyTweak.Patches
             }
 
             return true;
+        }
+
+        static void Postfix(EnemyIdentifier __instance, StateInfo __state)
+        {
+            if(__state.canPostStyle && __instance.dead && __state.info != null)
+            {
+                __state.info.active = false;
+                if (__state.info.id != "")
+                    StyleHUD.Instance.AddPoints(__state.info.points, __state.info.id);
+            }
         }
     }
 
@@ -520,6 +551,11 @@ namespace DifficultyTweak.Patches
                         exp.damage = (int)(exp.damage * ConfigManager.orbStrikeMaliciousCannonExplosionDamageMultiplier.value);
                     }
                     __instance.hitParticle = tempExp;
+
+                    OrbitalExplosionInfo info = tempExp.AddComponent<OrbitalExplosionInfo>();
+                    info.id = ConfigManager.orbStrikeMaliciousCannonStyleText.guid;
+                    info.points = ConfigManager.orbStrikeMaliciousCannonStylePoint.value;
+
                     RevolverBeam_ExecuteHits.orbitalBeamFlag.exploded = true;
                 }
                 Debug.Log("Already exploded");
