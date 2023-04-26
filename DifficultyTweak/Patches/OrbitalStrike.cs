@@ -233,12 +233,19 @@ namespace DifficultyTweak.Patches
                     OrbitalExplosionInfo info = __state.templateExplosion.AddComponent<OrbitalExplosionInfo>();
 
                     __state.state = true;
+                    float damageMulti = 1f;
+                    float sizeMulti = 1f;
+                    
                     // REVOLVER NORMAL
                     if (Coin_ReflectRevolver.shootingAltBeam == null)
                     {
-                        __3 += ConfigManager.orbStrikeRevolverGrenadeExtraSize.value;
-                        info.id = ConfigManager.orbStrikeRevolverStyleText.guid;
-                        info.points = ConfigManager.orbStrikeRevolverStylePoint.value;
+                        if (ConfigManager.orbStrikeRevolverGrenade.value)
+                        {
+                            damageMulti += ConfigManager.orbStrikeRevolverGrenadeExtraDamage.value;
+                            sizeMulti += ConfigManager.orbStrikeRevolverGrenadeExtraSize.value;
+                            info.id = ConfigManager.orbStrikeRevolverStyleText.guid;
+                            info.points = ConfigManager.orbStrikeRevolverStylePoint.value;
+                        }
                     }
                     else if (Coin_ReflectRevolver.shootingAltBeam.TryGetComponent(out RevolverBeam beam))
                     {
@@ -247,37 +254,61 @@ namespace DifficultyTweak.Patches
                             // REVOLVER CHARGED (NORMAL + ALT. IF DISTINCTION IS NEEDED, USE beam.strongAlt FOR ALT)
                             if (beam.ultraRicocheter)
                             {
-                                __3 += ConfigManager.orbStrikeRevolverChargedGrenadeExtraSize.value;
-                                info.id = ConfigManager.orbStrikeRevolverChargedStyleText.guid;
-                                info.points = ConfigManager.orbStrikeRevolverChargedStylePoint.value;
+                                if (ConfigManager.orbStrikeRevolverChargedGrenade.value)
+                                {
+                                    damageMulti += ConfigManager.orbStrikeRevolverChargedGrenadeExtraDamage.value;
+                                    sizeMulti += ConfigManager.orbStrikeRevolverChargedGrenadeExtraSize.value;
+                                    info.id = ConfigManager.orbStrikeRevolverChargedStyleText.guid;
+                                    info.points = ConfigManager.orbStrikeRevolverChargedStylePoint.value;
+                                }
                             }
                             // REVOLVER ALT
                             else
                             {
-                                __3 += ConfigManager.orbStrikeRevolverGrenadeExtraSize.value;
-                                info.id = ConfigManager.orbStrikeRevolverStyleText.guid;
-                                info.points = ConfigManager.orbStrikeRevolverStylePoint.value;
+                                if (ConfigManager.orbStrikeRevolverGrenade.value)
+                                {
+                                    damageMulti += ConfigManager.orbStrikeRevolverGrenadeExtraDamage.value;
+                                    sizeMulti += ConfigManager.orbStrikeRevolverGrenadeExtraSize.value;
+                                    info.id = ConfigManager.orbStrikeRevolverStyleText.guid;
+                                    info.points = ConfigManager.orbStrikeRevolverStylePoint.value;
+                                }
                             }
                         }
                         // ELECTRIC RAILCANNON
                         else if (beam.beamType == BeamType.Railgun && beam.hitAmount > 500)
                         {
-                            __3 += ConfigManager.orbStrikeElectricCannonGrenadeExtraSize.value;
-                            info.id = ConfigManager.orbStrikeElectricCannonStyleText.guid;
-                            info.points = ConfigManager.orbStrikeElectricCannonStylePoint.value;
+                            if (ConfigManager.orbStrikeElectricCannonGrenade.value)
+                            {
+                                damageMulti += ConfigManager.orbStrikeElectricCannonExplosionDamage.value;
+                                sizeMulti += ConfigManager.orbStrikeElectricCannonExplosionSize.value;
+                                info.id = ConfigManager.orbStrikeElectricCannonStyleText.guid;
+                                info.points = ConfigManager.orbStrikeElectricCannonStylePoint.value;
+                            }
                         }
                         // MALICIOUS RAILCANNON
                         else if (beam.beamType == BeamType.Railgun)
                         {
-                            __3 += ConfigManager.orbStrikeMaliciousCannonGrenadeExtraSize.value;
-                            info.id = ConfigManager.orbStrikeMaliciousCannonStyleText.guid;
-                            info.points = ConfigManager.orbStrikeMaliciousCannonStylePoint.value;
+                            if (ConfigManager.orbStrikeMaliciousCannonGrenade.value)
+                            {
+                                damageMulti += ConfigManager.orbStrikeMaliciousCannonGrenadeExtraDamage.value;
+                                sizeMulti += ConfigManager.orbStrikeMaliciousCannonGrenadeExtraSize.value;
+                                info.id = ConfigManager.orbStrikeMaliciousCannonStyleText.guid;
+                                info.points = ConfigManager.orbStrikeMaliciousCannonStylePoint.value;
+                            }
                         }
                         else
                             __state.state = false;
                     }
                     else
                         __state.state = false;
+
+                    if(sizeMulti != 1 || damageMulti != 1)
+                        foreach(Explosion exp in __state.templateExplosion.GetComponentsInChildren<Explosion>())
+                        {
+                            exp.maxSize *= sizeMulti;
+                            exp.speed *= sizeMulti;
+                            exp.damage = (int)(exp.damage * damageMulti);
+                        }
 
                     Debug.Log("Applied orbital strike bonus");
                 }
@@ -372,11 +403,17 @@ namespace DifficultyTweak.Patches
                 // REVOLVER NORMAL
                 if (Coin_ReflectRevolver.shootingAltBeam == null)
                 {
-                    GameObject explosion = GameObject.Instantiate(Plugin.explosion, __instance.gameObject.transform.position, Quaternion.identity);
-                    foreach (Explosion exp in explosion.GetComponentsInChildren<Explosion>())
+                    if(ConfigManager.orbStrikeRevolverExplosion.value)
                     {
-                        exp.enemy = false;
-                        exp.hitterWeapon = "";
+                        GameObject explosion = GameObject.Instantiate(Plugin.explosion, __instance.gameObject.transform.position, Quaternion.identity);
+                        foreach (Explosion exp in explosion.GetComponentsInChildren<Explosion>())
+                        {
+                            exp.enemy = false;
+                            exp.hitterWeapon = "";
+                            exp.maxSize *= ConfigManager.orbStrikeRevolverExplosionSize.value;
+                            exp.speed *= ConfigManager.orbStrikeRevolverExplosionSize.value;
+                            exp.damage = (int)(exp.damage * ConfigManager.orbStrikeRevolverExplosionDamage.value);
+                        }
                     }
                 }
                 else if (Coin_ReflectRevolver.shootingAltBeam.TryGetComponent(out RevolverBeam beam))
@@ -386,7 +423,42 @@ namespace DifficultyTweak.Patches
                         // REVOLVER CHARGED (NORMAL + ALT. IF DISTINCTION IS NEEDED, USE beam.strongAlt FOR ALT)
                         if (beam.ultraRicocheter)
                         {
-                            /*GameObject lighning = GameObject.Instantiate(Plugin.lightningStrikeExplosive, __instance.gameObject.transform.position, Quaternion.identity);
+                            if(ConfigManager.orbStrikeRevolverChargedInsignia.value)
+                            {
+                                GameObject insignia = GameObject.Instantiate(Plugin.virtueInsignia, __instance.transform.position, Quaternion.identity);
+                                float horizontalSize = ConfigManager.orbStrikeRevolverChargedInsigniaSize.value;
+                                insignia.transform.localScale = new Vector3(horizontalSize, insignia.transform.localScale.y, horizontalSize);
+                                VirtueInsignia comp = insignia.GetComponent<VirtueInsignia>();
+                                comp.windUpSpeedMultiplier = ConfigManager.orbStrikeRevolverChargedInsigniaDelayBoost.value;
+                                comp.damage = ConfigManager.orbStrikeRevolverChargedInsigniaDamage.value;
+                                comp.predictive = false;
+                                comp.hadParent = false;
+                                comp.noTracking = true;
+                            }
+                        }
+                        // REVOLVER ALT
+                        else
+                        {
+                            if (ConfigManager.orbStrikeRevolverExplosion.value)
+                            {
+                                GameObject explosion = GameObject.Instantiate(Plugin.explosion, __instance.gameObject.transform.position, Quaternion.identity);
+                                foreach (Explosion exp in explosion.GetComponentsInChildren<Explosion>())
+                                {
+                                    exp.enemy = false;
+                                    exp.hitterWeapon = "";
+                                    exp.maxSize *= ConfigManager.orbStrikeRevolverExplosionSize.value;
+                                    exp.speed *= ConfigManager.orbStrikeRevolverExplosionSize.value;
+                                    exp.damage = (int)(exp.damage * ConfigManager.orbStrikeRevolverExplosionDamage.value);
+                                }
+                            }
+                        }
+                    }
+                    // ELECTRIC RAILCANNON
+                    else if (beam.beamType == BeamType.Railgun && beam.hitAmount > 500)
+                    {
+                        if(ConfigManager.orbStrikeElectricCannonExplosion.value)
+                        {
+                            GameObject lighning = GameObject.Instantiate(Plugin.lightningStrikeExplosive, __instance.gameObject.transform.position, Quaternion.identity);
                             foreach (Explosion exp in lighning.GetComponentsInChildren<Explosion>())
                             {
                                 exp.enemy = false;
@@ -394,50 +466,13 @@ namespace DifficultyTweak.Patches
 
                                 if (exp.damage == 0)
                                     exp.maxSize /= 2;
-                                else
-                                    exp.damage = 10;
+
+                                exp.maxSize *= ConfigManager.orbStrikeElectricCannonExplosionSize.value;
+                                exp.speed *= ConfigManager.orbStrikeElectricCannonExplosionSize.value;
+                                exp.damage = (int)(exp.damage * ConfigManager.orbStrikeElectricCannonExplosionDamage.value);
 
                                 exp.canHit = AffectedSubjects.All;
-                                exp.damage /= 2;
-                                exp.maxSize /= 2;
-                                exp.speed /= 2;
-                            }*/
-
-                            GameObject insignia = GameObject.Instantiate(Plugin.virtueInsignia, __instance.transform.position, Quaternion.identity);
-                            insignia.transform.localScale = new Vector3(insignia.transform.localScale.x * 1.5f, insignia.transform.localScale.y, insignia.transform.localScale.z * 1.5f);
-                            VirtueInsignia comp = insignia.GetComponent<VirtueInsignia>();
-                            comp.windUpSpeedMultiplier = 2;
-                            comp.damage = 5;
-                            comp.predictive = false;
-                            comp.hadParent = false;
-                            comp.noTracking = true;
-                        }
-                        // REVOLVER ALT
-                        else
-                        {
-                            GameObject explosion = GameObject.Instantiate(Plugin.explosion, __instance.gameObject.transform.position, Quaternion.identity);
-                            foreach (Explosion exp in explosion.GetComponentsInChildren<Explosion>())
-                            {
-                                exp.enemy = false;
-                                exp.hitterWeapon = "";
                             }
-                        }
-                    }
-                    // ELECTRIC RAILCANNON
-                    else if (beam.beamType == BeamType.Railgun && beam.hitAmount > 500)
-                    {
-                        GameObject lighning = GameObject.Instantiate(Plugin.lightningStrikeExplosive, __instance.gameObject.transform.position, Quaternion.identity);
-                        foreach (Explosion exp in lighning.GetComponentsInChildren<Explosion>())
-                        {
-                            exp.enemy = false;
-                            exp.hitterWeapon = "";
-
-                            if (exp.damage == 0)
-                                exp.maxSize /= 2;
-                            else
-                                exp.damage = 10;
-
-                            exp.canHit = AffectedSubjects.All;
                         }
                     }
                     // MALICIOUS RAILCANNON
@@ -473,15 +508,16 @@ namespace DifficultyTweak.Patches
 
             if (RevolverBeam_ExecuteHits.orbitalBeam.GetInstanceID() == __instance.GetInstanceID())
             {
-                if (!RevolverBeam_ExecuteHits.orbitalBeamFlag.exploded)
+                if (!RevolverBeam_ExecuteHits.orbitalBeamFlag.exploded && ConfigManager.orbStrikeMaliciousCannonExplosion.value)
                 {
                     Debug.Log("MALICIOUS EXPLOSION EXTRA SIZE");
 
                     GameObject tempExp = GameObject.Instantiate(__instance.hitParticle, new Vector3(1000000, 1000000, 1000000), Quaternion.identity);
                     foreach (Explosion exp in tempExp.GetComponentsInChildren<Explosion>())
                     {
-                        exp.maxSize *= 1.2f;
-                        exp.speed *= 1.2f;
+                        exp.maxSize *= ConfigManager.orbStrikeMaliciousCannonExplosionSizeMultiplier.value;
+                        exp.speed *= ConfigManager.orbStrikeMaliciousCannonExplosionSizeMultiplier.value;
+                        exp.damage = (int)(exp.damage * ConfigManager.orbStrikeMaliciousCannonExplosionDamageMultiplier.value);
                     }
                     __instance.hitParticle = tempExp;
                     RevolverBeam_ExecuteHits.orbitalBeamFlag.exploded = true;

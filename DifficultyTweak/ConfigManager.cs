@@ -377,17 +377,18 @@ namespace DifficultyTweak
             grenadeBoostStyleText = new StringField(grenadeBoostDiv, "Style text", "grenadeBoostStyleText", "<color=cyan>FISTFUL OF 'NADE</color>");
             grenadeBoostStylePoints = new IntField(grenadeBoostDiv, "Style points", "grenadeBoostStylePoints", 10);
 
-            new ConfigHeader(playerPanel, "Orbital Strike");
+            new ConfigHeader(playerPanel, "Orbital Strike", 26);
             new ConfigHeader(playerPanel, "(Tweaks for coin-knuckleblaster)", 16);
             ConfigDivision orbStrikeDiv = new ConfigDivision(playerPanel, "orbStrikeDiv");
             orbStrikeToggle = new BoolField(playerPanel, "Enabled", "orbStrikeToggle", true);
             orbStrikeToggle.onValueChange += (BoolField.BoolValueChangeEvent e) =>
             {
                 orbStrikeDiv.interactable = e.value;
+                dirtyField = true;
             };
             orbStrikeToggle.TriggerValueChangeEvent();
 
-            new ConfigHeader(orbStrikeDiv, "Revolver Beam", 18);
+            new ConfigHeader(orbStrikeDiv, "Revolver Beam", 22);
             orbStrikeRevolverStyleText = new StringField(orbStrikeDiv, "Style text", "orbStrikeRevolverStyleText", "<color=maroon>ORBITALSTRIKE</color>");
             orbStrikeRevolverStylePoint = new IntField(orbStrikeDiv, "Style point", "orbStrikeRevolverStylePoint", 20);
             new ConfigHeader(orbStrikeDiv, "--Grenade Explosion Boost--", 12);
@@ -411,7 +412,7 @@ namespace DifficultyTweak
             orbStrikeRevolverExplosionDamage = new FloatField(orbStrikeRevolverExplosionDiv, "Damage multiplier", "orbStrikeRevolverExplosionDamage", 1f);
             orbStrikeRevolverExplosionSize = new FloatField(orbStrikeRevolverExplosionDiv, "Size multiplier", "orbStrikeRevolverExplosionSize", 1f);
 
-            new ConfigHeader(orbStrikeDiv, "Charged Revolver Beam", 18);
+            new ConfigHeader(orbStrikeDiv, "Charged Revolver Beam", 22);
             orbStrikeRevolverChargedStyleText = new StringField(orbStrikeDiv, "Style text", "orbStrikeRevolverChargedStyleText", "<color=maroon>ORBITAL</color><color=cyan>ZAP</color>");
             orbStrikeRevolverChargedStylePoint = new IntField(orbStrikeDiv, "Style point", "orbStrikeRevolverChargedStylePoint", 30);
             new ConfigHeader(orbStrikeDiv, "--Grenade Explosion Boost--", 12);
@@ -436,7 +437,7 @@ namespace DifficultyTweak
             orbStrikeRevolverChargedInsigniaSize = new FloatField(orbStrikeRevolverChargedInsigniaDiv, "Size", "orbStrikeRevolverChargedInsigniaSize", 2f);
             orbStrikeRevolverChargedInsigniaDelayBoost = new FloatField(orbStrikeRevolverChargedInsigniaDiv, "Windup speed multiplier", "orbStrikeRevolverChargedInsigniaDelayBoost", 2f);
 
-            new ConfigHeader(orbStrikeDiv, "Electric Cannon", 18);
+            new ConfigHeader(orbStrikeDiv, "Electric Cannon", 22);
             orbStrikeElectricCannonStyleText = new StringField(orbStrikeDiv, "Style text", "orbStrikeElectricCannonStyleText", "<color=orange>ULTRA</color><color=maroon>ORBITAL</color><color=cyan>ZAP</color>");
             orbStrikeElectricCannonStylePoint = new IntField(orbStrikeDiv, "Style point", "orbStrikeElectricCannonStylePoint", 50);
             new ConfigHeader(orbStrikeDiv, "--Grenade Explosion Boost--", 12);
@@ -461,7 +462,7 @@ namespace DifficultyTweak
             orbStrikeElectricCannonExplosionSize = new FloatField(orbStrikeElectricCannonExplosionDiv, "Size multiplier", "orbStrikeElectricCannonExplosionSize", 1f);
 
 
-            new ConfigHeader(orbStrikeDiv, "Malicious Cannon", 18);
+            new ConfigHeader(orbStrikeDiv, "Malicious Cannon", 22);
             orbStrikeMaliciousCannonStyleText = new StringField(orbStrikeDiv, "Style text", "orbStrikeMaliciousCannonStyleText", "<color=maroon>ORBITAL</color><color=red>NUKE</color>");
             orbStrikeMaliciousCannonStylePoint = new IntField(orbStrikeDiv, "Style point", "orbStrikeMaliciousCannonStylePoint", 70);
             new ConfigHeader(orbStrikeDiv, "--Grenade Explosion Boost--", 12);

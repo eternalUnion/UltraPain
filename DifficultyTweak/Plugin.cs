@@ -414,7 +414,6 @@ namespace DifficultyTweak
             if (ConfigManager.rocketGrabbingToggle.value)
                 harmonyTweaks.Patch(GetMethod<HookArm>("FixedUpdate"), prefix: new HarmonyMethod(GetMethod<HookArm_FixedUpdate_Patch>("Prefix")));
 
-            // ADD ME TOO
             if (ConfigManager.orbStrikeToggle.value)
             {
                 harmonyTweaks.Patch(GetMethod<Punch>("BlastCheck"), prefix: new HarmonyMethod(GetMethod<Punch_BlastCheck>("Prefix")), postfix: new HarmonyMethod(GetMethod<Punch_BlastCheck>("Postfix")));
