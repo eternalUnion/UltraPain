@@ -25,7 +25,7 @@ namespace DifficultyTweak.Patches
     [HarmonyPatch("CheckForProjectile")]
     class Punch_CheckForProjectile_Patch
     {
-        static bool Prefix(Punch __instance, Transform __0, ref bool __result, ref bool ___hitSomething)
+        static bool Prefix(Punch __instance, Transform __0, ref bool __result, ref bool ___hitSomething, Animator ___anim)
         {
             Grenade grn = __0.GetComponent<Grenade>();
             if(grn != null)
@@ -63,6 +63,7 @@ namespace DifficultyTweak.Patches
 
                 grn.rocketSpeed *= 1f + ConfigManager.rocketBoostSpeedMultiplierPerHit.value;
 
+                ___anim.Play("Hook", 0, 0.065f);
                 __result = true;
                 return false;
             }
