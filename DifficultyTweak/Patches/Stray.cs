@@ -48,7 +48,6 @@ namespace DifficultyTweak.Patches
         }
     }
 
-    [HarmonyPatch(typeof(ZombieProjectiles), "Start")]
     public class ZombieProjectile_Start_Patch1
     {
         static void Postfix(ZombieProjectiles __instance, ref EnemyIdentifier ___eid)
@@ -65,7 +64,6 @@ namespace DifficultyTweak.Patches
         }
     }
 
-    [HarmonyPatch(typeof(ZombieProjectiles), "ThrowProjectile")]
     public class ZombieProjectile_ThrowProjectile_Patch
     {
         public static float normalizedTime = 0f;
@@ -140,7 +138,6 @@ namespace DifficultyTweak.Patches
         }
     }
 
-    [HarmonyPatch(typeof(ZombieProjectiles), nameof(ZombieProjectiles.SpawnProjectile))]
     class Swing
     {
         static void Postfix(ZombieProjectiles __instance, ref EnemyIdentifier ___eid)
@@ -161,7 +158,6 @@ namespace DifficultyTweak.Patches
         }
     }*/
 
-    [HarmonyPatch(typeof(ZombieProjectiles), "SwingEnd")]
     class SwingEnd
     {
         static bool Prefix(ZombieProjectiles __instance, ref EnemyIdentifier ___eid)
@@ -189,7 +185,6 @@ namespace DifficultyTweak.Patches
         }
     }*/
 
-    [HarmonyPatch(typeof(ZombieProjectiles), "DamageEnd")]
     class DamageEnd
     {
         static bool Prefix(ZombieProjectiles __instance, ref EnemyIdentifier ___eid)

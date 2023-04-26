@@ -3,7 +3,6 @@ using UnityEngine.UI;
 
 namespace DifficultyTweak
 {
-    [HarmonyPatch(typeof(DifficultySelectButton), nameof(DifficultySelectButton.SetDifficulty))]
     class DifficultySelectPatch
     {
         static void Postfix(DifficultySelectButton __instance)

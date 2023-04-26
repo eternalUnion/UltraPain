@@ -3,8 +3,6 @@ using UnityEngine;
 
 namespace DifficultyTweak.Patches
 {
-    [HarmonyPatch(typeof(ZombieProjectiles))]
-    [HarmonyPatch("Start")]
     class Solider_Start_Patch
     {
         static void Postfix(ZombieProjectiles __instance, ref GameObject ___decProjectile, ref GameObject ___projectile, ref EnemyIdentifier ___eid, ref Animator ___anim)
@@ -21,8 +19,6 @@ namespace DifficultyTweak.Patches
         }
     }
 
-    [HarmonyPatch(typeof(ZombieProjectiles))]
-    [HarmonyPatch("SpawnProjectile")]
     class Solider_SpawnProjectile_Patch
     {
         static void Postfix(ZombieProjectiles __instance, ref EnemyIdentifier ___eid, ref GameObject ___origWP)
@@ -39,8 +35,6 @@ namespace DifficultyTweak.Patches
         public GameObject tempExplosion;
     }
 
-    [HarmonyPatch(typeof(ZombieProjectiles))]
-    [HarmonyPatch("ThrowProjectile")]
     class Solider_ThrowProjectile_Patch
     {
         static void Postfix(ZombieProjectiles __instance, ref GameObject ___currentProjectile, ref EnemyIdentifier ___eid, ref GameObject ___player, ref Animator ___anim, ref float ___coolDown)
@@ -89,7 +83,6 @@ namespace DifficultyTweak.Patches
         }
     }
 
-    [HarmonyPatch(typeof(Grenade), nameof(Grenade.Explode))]
     class Grenade_Explode_Patch
     {
         static bool Prefix(Grenade __instance, out bool __state)

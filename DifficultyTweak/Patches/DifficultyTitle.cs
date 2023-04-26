@@ -3,7 +3,6 @@ using UnityEngine.UI;
 
 namespace DifficultyTweak.Patches
 {
-    [HarmonyPatch(typeof(DifficultyTitle), "Check")]
     public class DifficultyTitle_Check_Patch
     {
         static void Postfix(DifficultyTitle __instance, ref Text ___txt)

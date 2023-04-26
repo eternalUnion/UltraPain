@@ -4,8 +4,6 @@ using UnityEngine;
 
 namespace DifficultyTweak.Patches
 {
-    [HarmonyPatch(typeof(Drone))]
-    [HarmonyPatch("Start")]
     class Drone_Start_Patch
     {
         static void Postfix(Drone __instance, ref EnemyIdentifier ___eid)
@@ -17,8 +15,6 @@ namespace DifficultyTweak.Patches
         }
     }
 
-    [HarmonyPatch(typeof(Drone))]
-    [HarmonyPatch("Shoot")]
     class Drone_Shoot_Patch
     {
         static bool Prefix(Drone __instance, ref EnemyIdentifier ___eid)

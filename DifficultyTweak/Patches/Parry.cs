@@ -21,8 +21,6 @@ namespace DifficultyTweak.Patches
         public GrenadeType grenadeType;
     }
 
-    [HarmonyPatch(typeof(Punch))]
-    [HarmonyPatch("CheckForProjectile")]
     class Punch_CheckForProjectile_Patch
     {
         static bool Prefix(Punch __instance, Transform __0, ref bool __result, ref bool ___hitSomething, Animator ___anim)
@@ -72,8 +70,6 @@ namespace DifficultyTweak.Patches
         }
     }
 
-    [HarmonyPatch(typeof(Grenade))]
-    [HarmonyPatch("Explode")]
     class Grenade_Explode_Patch1
     {
         static bool Prefix(Grenade __instance, ref bool __2, ref bool __1, ref bool ___exploded)
@@ -170,8 +166,6 @@ namespace DifficultyTweak.Patches
         }
     }
 
-    [HarmonyPatch(typeof(Grenade))]
-    [HarmonyPatch("Collision")]
     class Grenade_Collision_Patch
     {
         static float lastTime = 0;
@@ -204,8 +198,6 @@ namespace DifficultyTweak.Patches
         }
     }
 
-    [HarmonyPatch(typeof(Explosion))]
-    [HarmonyPatch("Collide")]
     class Explosion_Collide_Patch
     {
         static float lastTime = 0;

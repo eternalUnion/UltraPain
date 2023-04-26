@@ -3,8 +3,6 @@ using UnityEngine;
 
 namespace DifficultyTweak.Patches
 {
-    [HarmonyPatch(typeof(Drone))]
-    [HarmonyPatch("Start")]
     class Virtue_Start_Patch
     {
         static void Postfix(Drone __instance, ref EnemyIdentifier ___eid)
@@ -14,8 +12,6 @@ namespace DifficultyTweak.Patches
         }
     }
 
-    [HarmonyPatch(typeof(Drone))]
-    [HarmonyPatch("Death")]
     class Virtue_Death_Patch
     {
         static bool Prefix(Drone __instance, ref EnemyIdentifier ___eid)
@@ -62,8 +58,6 @@ namespace DifficultyTweak.Patches
         }
     }
 
-    [HarmonyPatch(typeof(Drone))]
-    [HarmonyPatch("SpawnInsignia")]
     class Virtue_SpawnInsignia_Patch
     {
         static bool Prefix(Drone __instance, ref EnemyIdentifier ___eid, ref int ___difficulty, ref Transform ___target, ref int ___usedAttacks)

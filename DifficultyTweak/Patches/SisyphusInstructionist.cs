@@ -32,7 +32,7 @@ namespace DifficultyTweak.Patches
 
     public class SisyphusInstructionist_Start
     {
-        private static GameObject _shockwave;
+        public static GameObject _shockwave;
         public static GameObject shockwave
         {
             get {
@@ -78,11 +78,11 @@ namespace DifficultyTweak.Patches
 
                     PhysicalShockwave shockComp = _shockwave.GetComponent<PhysicalShockwave>();
                     shockComp.maxSize = 100f;
-                    shockComp.speed = 35f;
-                    shockComp.damage = 20;
+                    shockComp.speed = ConfigManager.sisyInstJumpShockwaveSpeed.value;
+                    shockComp.damage = ConfigManager.sisyInstJumpShockwaveDamage.value;
                     shockComp.enemy = true;
                     shockComp.enemyType = EnemyType.Sisyphus;
-                    _shockwave.transform.localScale = new Vector3(_shockwave.transform.localScale.x, _shockwave.transform.localScale.y * 2f, _shockwave.transform.localScale.z);
+                    _shockwave.transform.localScale = new Vector3(_shockwave.transform.localScale.x, _shockwave.transform.localScale.y * ConfigManager.sisyInstJumpShockwaveSize.value, _shockwave.transform.localScale.z);
                 }
 
                 return _shockwave;
@@ -91,14 +91,27 @@ namespace DifficultyTweak.Patches
 
         static void Postfix(Sisyphus __instance, ref GameObject ___explosion, ref PhysicalShockwave ___m_ShockwavePrefab)
         {
-            ___explosion = shockwave/*___m_ShockwavePrefab.gameObject*/;
+            //___explosion = shockwave/*___m_ShockwavePrefab.gameObject*/;
             ___m_ShockwavePrefab = shockwave.GetComponent<PhysicalShockwave>();
         }
     }
 
     public class SisyphusInstructionist_SetupExplosion
     {
-        static bool Prefix(Sisyphus __instance, ref GameObject __0, ref Animator ___anim)
+        static void Postfix(Sisyphus __instance, ref GameObject __0)
+        {
+            GameObject shockwave = GameObject.Instantiate(Plugin.shockwave, __0.transform.position, __0.transform.rotation);
+            PhysicalShockwave comp = shockwave.GetComponent<PhysicalShockwave>();
+
+            comp.enemy = true;
+            comp.enemyType = EnemyType.Sisyphus;
+            comp.maxSize = 100f;
+            comp.speed = ConfigManager.sisyInstBoulderShockwaveSpeed.value;
+            comp.damage = ConfigManager.sisyInstBoulderShockwaveDamage.value;
+            shockwave.transform.localScale = new Vector3(shockwave.transform.localScale.x, shockwave.transform.localScale.y * ConfigManager.sisyInstBoulderShockwaveSize.value, shockwave.transform.localScale.z);
+        }
+
+        /*static bool Prefix(Sisyphus __instance, ref GameObject __0, ref Animator ___anim)
         {
             string clipName = ___anim.GetCurrentAnimatorClipInfo(0)[0].clip.name;
             Debug.Log($"Clip name: {clipName}");
@@ -118,7 +131,7 @@ namespace DifficultyTweak.Patches
             __0 = explosion;
 
             return true;
-        }
+        }*/
     }
 
     public class SisyphusInstructionist_StompExplosion
@@ -135,9 +148,9 @@ namespace DifficultyTweak.Patches
             {
                 exp.enemy = true;
                 exp.toIgnore.Add(EnemyType.Sisyphus);
-                exp.maxSize /= 2;
-                exp.speed /= 2;
-                exp.damage /= 2;
+                exp.maxSize *= ConfigManager.sisyInstStrongerExplosionSizeMulti.value;
+                exp.speed *= ConfigManager.sisyInstStrongerExplosionSizeMulti.value;
+                exp.damage = (int)(exp.damage * ConfigManager.sisyInstStrongerExplosionDamageMulti.value);
             }
 
             return false;

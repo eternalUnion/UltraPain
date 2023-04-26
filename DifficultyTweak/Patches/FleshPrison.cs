@@ -74,7 +74,6 @@ namespace DifficultyTweak.Patches
         }
     }
 
-    [HarmonyPatch(typeof(FleshPrison), "Start")]
     class FleshPrisonStart
     {
         static void Postfix(FleshPrison __instance)
@@ -89,7 +88,6 @@ namespace DifficultyTweak.Patches
         }
     }
 
-    [HarmonyPatch(typeof(FleshPrison), "HomingProjectileAttack")]
     class FleshPrisonShoot
     {
         static void Postfix(FleshPrison __instance, ref Animator ___anim)

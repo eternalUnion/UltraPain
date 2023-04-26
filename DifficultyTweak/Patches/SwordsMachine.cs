@@ -3,8 +3,6 @@ using UnityEngine;
 
 namespace DifficultyTweak.Patches
 {
-    [HarmonyPatch(typeof(SwordsMachine))]
-    [HarmonyPatch("Knockdown")]
     class SwordsMachine_Knockdown_Patch
     {
         static bool Prefix(SwordsMachine __instance, bool __0, ref Animator ___anim)
@@ -73,8 +71,6 @@ namespace DifficultyTweak.Patches
         }
     }*/
 
-    [HarmonyPatch(typeof(ThrownSword))]
-    [HarmonyPatch("Start")]
     class ThrownSword_Start_Patch
     {
         static void Postfix(ThrownSword __instance)
@@ -83,8 +79,6 @@ namespace DifficultyTweak.Patches
         }
     }
 
-    [HarmonyPatch(typeof(ThrownSword))]
-    [HarmonyPatch("OnTriggerEnter")]
     class ThrownSword_OnTriggerEnter_Patch
     {
         static void Postfix(ThrownSword __instance, Collider __0)

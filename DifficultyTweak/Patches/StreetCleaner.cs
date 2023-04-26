@@ -3,8 +3,6 @@ using UnityEngine;
 
 namespace DifficultyTweak.Patches
 {
-    [HarmonyPatch(typeof(Streetcleaner))]
-    [HarmonyPatch("Start")]
     class StreetCleaner_Start_Patch
     {
         static void Postfix(Streetcleaner __instance, ref EnemyIdentifier ___eid)
@@ -66,8 +64,6 @@ namespace DifficultyTweak.Patches
         }
     }*/
 
-    [HarmonyPatch(typeof(BulletCheck))]
-    [HarmonyPatch("OnTriggerEnter")]
     class BulletCheck_OnTriggerEnter_Patch
     {
         static void Postfix(BulletCheck __instance, Collider __0)

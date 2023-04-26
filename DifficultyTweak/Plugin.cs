@@ -396,10 +396,12 @@ namespace DifficultyTweak
             harmonyTweaks.Patch(GetMethod<Drone>("Start"), postfix: new HarmonyMethod(GetMethod<Virtue_Start_Patch>("Postfix")));
             harmonyTweaks.Patch(GetMethod<Drone>("SpawnInsignia"), prefix: new HarmonyMethod(GetMethod<Virtue_SpawnInsignia_Patch>("Prefix")));
 
-            // ADDME
-            harmonyTweaks.Patch(GetMethod<Sisyphus>("Start"), postfix: new HarmonyMethod(GetMethod<SisyphusInstructionist_Start>("Postfix")));
-            harmonyTweaks.Patch(GetMethod<Sisyphus>("SetupExplosion"), prefix: new HarmonyMethod(GetMethod<SisyphusInstructionist_SetupExplosion>("Prefix")));
-            harmonyTweaks.Patch(GetMethod<Sisyphus>("StompExplosion"), prefix: new HarmonyMethod(GetMethod<SisyphusInstructionist_StompExplosion>("Prefix")));
+            if(ConfigManager.sisyInstJumpShockwave.value)
+                harmonyTweaks.Patch(GetMethod<Sisyphus>("Start"), postfix: new HarmonyMethod(GetMethod<SisyphusInstructionist_Start>("Postfix")));
+            if(ConfigManager.sisyInstBoulderShockwave.value)
+                harmonyTweaks.Patch(GetMethod<Sisyphus>("SetupExplosion"), postfix: new HarmonyMethod(GetMethod<SisyphusInstructionist_SetupExplosion>("Postfix")));
+            if(ConfigManager.sisyInstStrongerExplosion.value)
+                harmonyTweaks.Patch(GetMethod<Sisyphus>("StompExplosion"), prefix: new HarmonyMethod(GetMethod<SisyphusInstructionist_StompExplosion>("Prefix")));
         }
 
         private static void PatchAllPlayers()

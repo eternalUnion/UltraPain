@@ -35,7 +35,6 @@ namespace DifficultyTweak.Patches
         }
     }
 
-    [HarmonyPatch(typeof(Ferryman), "Start")]
     class FerrymanStart
     {
         static void Postfix(Ferryman __instance)
@@ -44,7 +43,6 @@ namespace DifficultyTweak.Patches
         }
     }
 
-    [HarmonyPatch(typeof(Ferryman), /*"StopAction"*/"StopMoving")]
     class FerrymanStopMoving
     {
         public static MethodInfo SnapToGround = typeof(Ferryman).GetMethod("SnapToGround", BindingFlags.Instance | BindingFlags.NonPublic);

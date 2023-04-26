@@ -4,8 +4,6 @@ using UnityEngine;
 
 namespace DifficultyTweak.Patches
 {
-    [HarmonyPatch(typeof(Mindflayer))]
-    [HarmonyPatch("Start")]
     class Mindflayer_Start_Patch
     {
         static void Postfix(Mindflayer __instance, ref EnemyIdentifier ___eid)
@@ -15,8 +13,6 @@ namespace DifficultyTweak.Patches
         }
     }
 
-    [HarmonyPatch(typeof(Mindflayer))]
-    [HarmonyPatch(nameof(Mindflayer.ShootProjectiles))]
     class Mindflayer_ShootProjectiles_Patch
     {
         static bool Prefix(Mindflayer __instance, ref EnemyIdentifier ___eid, ref LayerMask ___environmentMask, ref bool ___enraged)
@@ -75,8 +71,6 @@ namespace DifficultyTweak.Patches
         }
     }
 
-    [HarmonyPatch(typeof(SwingCheck2))]
-    [HarmonyPatch("CheckCollision")]
     class SwingCheck2_CheckCollision_Patch
     {
         static FieldInfo goForward = typeof(Mindflayer).GetField("goForward", BindingFlags.NonPublic | BindingFlags.Instance);
@@ -114,8 +108,6 @@ namespace DifficultyTweak.Patches
         }
     }
 
-    [HarmonyPatch(typeof(Mindflayer))]
-    [HarmonyPatch("MeleeTeleport")]
     class Mindflayer_MeleeTeleport_Patch
     {
         static bool Prefix(Mindflayer __instance, ref EnemyIdentifier ___eid, ref LayerMask ___environmentMask, ref bool ___goingLeft, ref Animator ___anim, ref bool ___enraged)
@@ -156,8 +148,6 @@ namespace DifficultyTweak.Patches
         }
     }
 
-    [HarmonyPatch(typeof(SwingCheck2))]
-    [HarmonyPatch("DamageStop")]
     class SwingCheck2_DamageStop_Patch
     {
         static void Postfix(SwingCheck2 __instance)

@@ -8,7 +8,6 @@ namespace DifficultyTweak.Patches
 
     }
 
-    [HarmonyPatch(typeof(Projectile), nameof(Projectile.Explode))]
     public class Projectile_Explode_Patch 
     {
         static void Postfix(Projectile __instance)
@@ -48,7 +47,6 @@ namespace DifficultyTweak.Patches
         }
     }
 
-    [HarmonyPatch(typeof(Mass), "ShootExplosive")]
     public class HideousMassHoming
     {
         static bool Prefix(Mass __instance)

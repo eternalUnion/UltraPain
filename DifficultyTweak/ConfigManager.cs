@@ -2,6 +2,8 @@
 using PluginConfig.API.Fields;
 using PluginConfig.API.Decorators;
 using UnityEngine.UI;
+using DifficultyTweak.Patches;
+using UnityEngine;
 
 namespace DifficultyTweak
 {
@@ -99,6 +101,7 @@ namespace DifficultyTweak
         public static ConfigPanel minosPrimePanel;
         public static ConfigPanel v2FirstPanel;
         public static ConfigPanel v2SecondPanel;
+        public static ConfigPanel sisyInstPanel;
 
         // CERBERUS
         public static BoolField cerberusDashToggle;
@@ -271,6 +274,21 @@ namespace DifficultyTweak
         public static BoolField v2SecondCoreSnipeToggle;
         public static FloatField v2SecondCoreSnipeMaxDistanceToPlayer;
         public static FloatField v2SecondCoreSnipeMinDistanceToV2;
+
+        // SISYPHIUS INSTRUCTIONIST
+        public static BoolField sisyInstBoulderShockwave;
+        public static FloatField sisyInstBoulderShockwaveSize;
+        public static FloatField sisyInstBoulderShockwaveSpeed;
+        public static IntField sisyInstBoulderShockwaveDamage;
+
+        public static BoolField sisyInstJumpShockwave;
+        public static FloatField sisyInstJumpShockwaveSize;
+        public static FloatField sisyInstJumpShockwaveSpeed;
+        public static IntField sisyInstJumpShockwaveDamage;
+
+        public static BoolField sisyInstStrongerExplosion;
+        public static FloatField sisyInstStrongerExplosionSizeMulti;
+        public static FloatField sisyInstStrongerExplosionDamageMulti;
 
         private static bool dirtyField = false;
         public static void Initialize()
@@ -498,12 +516,13 @@ namespace DifficultyTweak
             stalkerPanel = new ConfigPanel(enemyPanel, "Stalker", "stalkerPanel");
             new ConfigHeader(enemyPanel, "Mini Bosses");
             cerberusPanel = new ConfigPanel(enemyPanel, "Cerberus", "cerberusPanel");
+            ferrymanPanel = new ConfigPanel(enemyPanel, "Ferryman", "ferrymanPanel");
+            hideousMassPanel = new ConfigPanel(enemyPanel, "Hideous Mass", "hideousMassPanel");
             maliciousFacePanel = new ConfigPanel(enemyPanel, "Malicious Face", "maliciousFacePanel");
             mindflayerPanel = new ConfigPanel(enemyPanel, "Mindflayer", "mindflayerPanel");
-            swordsMachinePanel = new ConfigPanel(enemyPanel, "Swords Machine", "swordsMachinePanel");
-            hideousMassPanel = new ConfigPanel(enemyPanel, "Hideous Mass", "hideousMassPanel");
-            ferrymanPanel = new ConfigPanel(enemyPanel, "Ferryman", "ferrymanPanel");
             turretPanel = new ConfigPanel(enemyPanel, "Sentry", "turretPanel");
+            sisyInstPanel = new ConfigPanel(enemyPanel, "Sisyphius Instructionist", "sisyInstPanel");
+            swordsMachinePanel = new ConfigPanel(enemyPanel, "Swords Machine", "swordsMachinePanel");
             new ConfigHeader(enemyPanel, "Bosses");
             v2FirstPanel = new ConfigPanel(enemyPanel, "V2 - First", "v2FirstPanel");
             v2SecondPanel = new ConfigPanel(enemyPanel, "V2 - Second", "v2SecondPanel");
@@ -1030,8 +1049,62 @@ namespace DifficultyTweak
             v2SecondCoreSnipeMaxDistanceToPlayer = new FloatField(v2SecondSnipeDiv, "Max distance to player", "v2SecondCoreSnipeMaxDistanceToPlayer", 10f);
             v2SecondCoreSnipeMinDistanceToV2 = new FloatField(v2SecondSnipeDiv, "Min distance to V2", "v2SecondCoreSnipeMinDistanceToV2", 20f);
 
+            // SISYPHIUS INSTRUCTIONIST
+            new ConfigHeader(sisyInstPanel, "Boulder Creates Shockwaves");
+            ConfigDivision sisyInstShockwaveDiv = new ConfigDivision(sisyInstPanel, "sisyInstShockwaveDiv");
+            sisyInstBoulderShockwave = new BoolField(sisyInstPanel, "Enabled", "sisyInstBoulderShockwave", true);
+            sisyInstBoulderShockwave.onValueChange += (BoolField.BoolValueChangeEvent e) =>
+            {
+                sisyInstShockwaveDiv.interactable = e.value;
+                dirtyField = true;
+            };
+            sisyInstBoulderShockwave.TriggerValueChangeEvent();
+            sisyInstBoulderShockwaveSize = new FloatField(sisyInstShockwaveDiv, "Shockwave size", "sisyInstBoulderShockwaveSize", 1f);
+            sisyInstBoulderShockwaveSpeed = new FloatField(sisyInstShockwaveDiv, "Shockwave speed", "sisyInstBoulderShockwaveSpeed", 35f);
+            sisyInstBoulderShockwaveDamage = new IntField(sisyInstShockwaveDiv, "Shockwave damage", "sisyInstBoulderShockwaveDamage", 10);
+            new ConfigHeader(sisyInstPanel, "Jump Shockwave Tweak");
+            ConfigDivision sisyInstJumpShockwaveDiv = new ConfigDivision(sisyInstPanel, "sisyInstJumpShockwaveDiv");
+            sisyInstJumpShockwave = new BoolField(sisyInstPanel, "Enabled", "sisyInstJumpShockwave", true);
+            sisyInstJumpShockwave.onValueChange += (BoolField.BoolValueChangeEvent e) =>
+            {
+                sisyInstJumpShockwaveDiv.interactable = e.value;
+                dirtyField = true;
+            };
+            sisyInstJumpShockwave.TriggerValueChangeEvent();
+            sisyInstJumpShockwaveSize = new FloatField(sisyInstJumpShockwaveDiv, "Shockwave size", "sisyInstJumpShockwaveSize", 2f);
+            sisyInstJumpShockwaveSize.onValueChange += (FloatField.FloatValueChangeEvent e) =>
+            {
+                GameObject shockwave = SisyphusInstructionist_Start.shockwave;
+                shockwave.transform.localScale = new Vector3(shockwave.transform.localScale.x, 20 * ConfigManager.sisyInstBoulderShockwaveSize.value, shockwave.transform.localScale.z);
+            };
+            sisyInstJumpShockwaveSpeed = new FloatField(sisyInstJumpShockwaveDiv, "Shockwave speed", "sisyInstJumpShockwaveSpeed", 35f);
+            sisyInstJumpShockwaveSpeed.onValueChange += (FloatField.FloatValueChangeEvent e) =>
+            {
+                GameObject shockwave = SisyphusInstructionist_Start.shockwave;
+                PhysicalShockwave comp = shockwave.GetComponent<PhysicalShockwave>();
+                comp.speed = e.value;
+            };
+            sisyInstJumpShockwaveDamage = new IntField(sisyInstJumpShockwaveDiv, "Shockwave damage", "sisyInstJumpShockwaveDamage", 15);
+            sisyInstJumpShockwaveDamage.onValueChange += (IntField.IntValueChangeEvent e) =>
+            {
+                GameObject shockwave = SisyphusInstructionist_Start.shockwave;
+                PhysicalShockwave comp = shockwave.GetComponent<PhysicalShockwave>();
+                comp.damage = e.value;
+            };
+            new ConfigHeader(sisyInstPanel, "Stronger Stomp");
+            ConfigDivision sisyInstExplosionDiv = new ConfigDivision(sisyInstPanel, "sisyInstExplosionDiv");
+            sisyInstStrongerExplosion = new BoolField(sisyInstPanel, "Enabled", "sisyInstStrongerExplosion", true);
+            sisyInstStrongerExplosion.onValueChange += (BoolField.BoolValueChangeEvent e) =>
+            {
+                sisyInstExplosionDiv.interactable = e.value;
+                dirtyField = true;
+            };
+            sisyInstStrongerExplosion.TriggerValueChangeEvent();
+            sisyInstStrongerExplosionSizeMulti = new FloatField(sisyInstExplosionDiv, "Size multiplier", "sisyInstStrongerExplosionSizeMulti", 0.5f);
+            sisyInstStrongerExplosionDamageMulti = new FloatField(sisyInstExplosionDiv, "Damage multiplier", "sisyInstStrongerExplosionDamageMulti", 0.5f);
+
             config.Flush();
-            config.LogDuplicateGUID();
+            //config.LogDuplicateGUID();
             Plugin.PatchAll();
             dirtyField = false;
         }

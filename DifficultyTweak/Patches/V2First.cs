@@ -39,7 +39,6 @@ namespace DifficultyTweak.Patches
         }
     }
 
-    [HarmonyPatch(typeof(V2), "Update")]
     class V2FirstUpdate
     {
         static MethodInfo ShootWeapon = typeof(V2).GetMethod("ShootWeapon", BindingFlags.Instance | BindingFlags.NonPublic);
@@ -93,7 +92,6 @@ namespace DifficultyTweak.Patches
         }
     }
 
-    [HarmonyPatch(typeof(V2), "ShootWeapon")]
     class V2FirstShootWeapon
     {
         static bool Prefix(V2 __instance, ref int ___currentWeapon)

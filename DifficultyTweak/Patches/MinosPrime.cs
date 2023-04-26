@@ -5,7 +5,6 @@ using UnityEngine.AI;
 
 namespace DifficultyTweak.Patches
 {
-    [HarmonyPatch(typeof(MinosPrime), "ProjectileCharge")]
     class MinosPrimeCharge
     {
         static GameObject decoy;

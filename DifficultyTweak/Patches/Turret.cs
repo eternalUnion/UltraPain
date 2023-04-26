@@ -8,7 +8,6 @@ namespace DifficultyTweak.Patches
         public int shootCountRemaining = ConfigManager.turretBurstFireCount.value;
     }
 
-    [HarmonyPatch(typeof(Turret), "Start")]
     class TurretStart
     {
         static void Postfix(Turret __instance)
@@ -17,7 +16,6 @@ namespace DifficultyTweak.Patches
         }
     }
 
-    [HarmonyPatch(typeof(Turret), "Shoot")]
     class TurretShoot
     {
         static bool Prefix(Turret __instance, ref EnemyIdentifier ___eid, ref RevolverBeam ___beam, ref Transform ___shootPoint,
@@ -53,7 +51,6 @@ namespace DifficultyTweak.Patches
         }
     }
 
-    [HarmonyPatch(typeof(Turret), "StartAiming")]
     class TurretAim
     {
         static void Postfix(Turret __instance)

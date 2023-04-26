@@ -3,7 +3,6 @@ using UnityEngine;
 
 namespace DifficultyTweak.Patches
 {
-    [HarmonyPatch(typeof(SwingCheck2), "CheckCollision")]
     class SwingCheck2_CheckCollision_Patch2
     {
         static bool Prefix(SwingCheck2 __instance, Collider __0)

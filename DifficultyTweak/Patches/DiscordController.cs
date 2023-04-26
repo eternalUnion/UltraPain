@@ -3,7 +3,6 @@ using HarmonyLib;
 
 namespace DifficultyTweak.Patches
 {
-    [HarmonyPatch(typeof(DiscordController), "SendActivity")]
     class DiscordController_SendActivity_Patch
     {
         static bool Prefix(DiscordController __instance, ref Activity ___cachedActivity)

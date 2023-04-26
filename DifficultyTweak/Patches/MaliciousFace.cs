@@ -4,8 +4,6 @@ using UnityEngine;
 
 namespace DifficultyTweak.Patches
 {
-    [HarmonyPatch(typeof(SpiderBody))]
-    [HarmonyPatch("Start")]
     class MaliciousFace_Start_Patch
     {
         static void Postfix(SpiderBody __instance, ref GameObject ___proj, ref int ___maxBurst)
@@ -15,8 +13,6 @@ namespace DifficultyTweak.Patches
         }
     }
 
-    [HarmonyPatch(typeof(SpiderBody))]
-    [HarmonyPatch("ShootProj")]
     class MaliciousFace_ShootProj_Patch
     {
         /*static bool Prefix(SpiderBody __instance, ref GameObject ___proj, out bool __state)
@@ -45,8 +41,6 @@ namespace DifficultyTweak.Patches
         }
     }
 
-    [HarmonyPatch(typeof(SpiderBody))]
-    [HarmonyPatch("Enrage")]
     class MaliciousFace_Enrage_Patch
     {
         static void Postfix(SpiderBody __instance)

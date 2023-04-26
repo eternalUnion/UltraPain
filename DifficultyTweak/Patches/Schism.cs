@@ -3,7 +3,6 @@ using UnityEngine;
 
 namespace DifficultyTweak.Patches
 {
-    [HarmonyPatch(typeof(ZombieProjectiles), nameof(ZombieProjectiles.ShootProjectile))]
     class ZombieProjectile_ShootProjectile_Patch
     {
         static void Postfix(ZombieProjectiles __instance, ref GameObject ___currentProjectile)

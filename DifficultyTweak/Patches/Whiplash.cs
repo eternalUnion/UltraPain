@@ -4,7 +4,6 @@ using UnityEngine;
 
 namespace DifficultyTweak.Patches
 {
-    [HarmonyPatch(typeof(HookArm), "FixedUpdate")]
     class HookArm_FixedUpdate_Patch
     {
         static bool Prefix(HookArm __instance, ref Grenade ___caughtGrenade, ref Vector3 ___caughtPoint, ref Vector3 ___hookPoint, ref float ___cooldown, ref List<Rigidbody> ___caughtObjects)
