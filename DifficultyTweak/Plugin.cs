@@ -256,6 +256,11 @@ namespace DifficultyTweak
                 MonoSingleton<StyleHUD>.Instance.RegisterStyleItem(StyleIDs.fistfulOfNades, ConfigManager.grenadeBoostStyleText.value);
                 MonoSingleton<StyleHUD>.Instance.RegisterStyleItem(StyleIDs.rocketBoost, ConfigManager.rocketBoostStyleText.value);
 
+                MonoSingleton<StyleHUD>.Instance.RegisterStyleItem(ConfigManager.orbStrikeRevolverStyleText.guid, ConfigManager.orbStrikeRevolverStyleText.value);
+                MonoSingleton<StyleHUD>.Instance.RegisterStyleItem(ConfigManager.orbStrikeRevolverChargedStyleText.guid, ConfigManager.orbStrikeRevolverChargedStyleText.value);
+                MonoSingleton<StyleHUD>.Instance.RegisterStyleItem(ConfigManager.orbStrikeElectricCannonStyleText.guid, ConfigManager.orbStrikeElectricCannonStyleText.value);
+                MonoSingleton<StyleHUD>.Instance.RegisterStyleItem(ConfigManager.orbStrikeMaliciousCannonStyleText.guid, ConfigManager.orbStrikeMaliciousCannonStyleText.value);
+
                 Debug.Log("Registered all style ids");
             }
         }
@@ -401,16 +406,21 @@ namespace DifficultyTweak
             harmonyTweaks.Patch(GetMethod<Grenade>("Explode"), prefix: new HarmonyMethod(GetMethod<Grenade_Explode_Patch1>("Prefix")));
             harmonyTweaks.Patch(GetMethod<Grenade>("Collision"), prefix: new HarmonyMethod(GetMethod<Grenade_Collision_Patch>("Prefix")));
 
-            if(ConfigManager.rocketGrabbingToggle.value)
+            if (ConfigManager.rocketGrabbingToggle.value)
                 harmonyTweaks.Patch(GetMethod<HookArm>("FixedUpdate"), prefix: new HarmonyMethod(GetMethod<HookArm_FixedUpdate_Patch>("Prefix")));
 
             // ADD ME TOO
-            harmonyTweaks.Patch(GetMethod<Punch>("BlastCheck"), prefix: new HarmonyMethod(GetMethod<Punch_BlastCheck>("Prefix")), postfix: new HarmonyMethod(GetMethod<Punch_BlastCheck>("Postfix")));
-            harmonyTweaks.Patch(GetMethod<Explosion>("Collide"), prefix: new HarmonyMethod(GetMethod<Explosion_Collide>("Prefix")));
-            harmonyTweaks.Patch(GetMethod<Coin>("DelayedReflectRevolver"), postfix: new HarmonyMethod(GetMethod<Coin_DelayedReflectRevolver>("Postfix")));
-            harmonyTweaks.Patch(GetMethod<Coin>("ReflectRevolver"), postfix: new HarmonyMethod(GetMethod<Coin_ReflectRevolver>("Postfix")), prefix: new HarmonyMethod(GetMethod<Coin_ReflectRevolver>("Prefix")));
-            harmonyTweaks.Patch(GetMethod<Grenade>("Explode"), prefix: new HarmonyMethod(GetMethod<Grenade_Explode>("Prefix")));
-            harmonyTweaks.Patch(GetMethod<EnemyIdentifier>("DeliverDamage"), prefix: new HarmonyMethod(GetMethod<EnemyIdentifier_DeliverDamage>("Prefix")));
+            if (ConfigManager.orbStrikeToggle.value)
+            {
+                harmonyTweaks.Patch(GetMethod<Punch>("BlastCheck"), prefix: new HarmonyMethod(GetMethod<Punch_BlastCheck>("Prefix")), postfix: new HarmonyMethod(GetMethod<Punch_BlastCheck>("Postfix")));
+                harmonyTweaks.Patch(GetMethod<Explosion>("Collide"), prefix: new HarmonyMethod(GetMethod<Explosion_Collide>("Prefix")));
+                harmonyTweaks.Patch(GetMethod<Coin>("DelayedReflectRevolver"), postfix: new HarmonyMethod(GetMethod<Coin_DelayedReflectRevolver>("Postfix")));
+                harmonyTweaks.Patch(GetMethod<Coin>("ReflectRevolver"), postfix: new HarmonyMethod(GetMethod<Coin_ReflectRevolver>("Postfix")), prefix: new HarmonyMethod(GetMethod<Coin_ReflectRevolver>("Prefix")));
+                harmonyTweaks.Patch(GetMethod<Grenade>("Explode"), prefix: new HarmonyMethod(GetMethod<Grenade_Explode>("Prefix")), postfix: new HarmonyMethod(GetMethod<Grenade_Explode>("Postfix")));
+                if(ConfigManager.orbStrikeRevolverExplosion.value)
+                    harmonyTweaks.Patch(GetMethod<EnemyIdentifier>("DeliverDamage"), prefix: new HarmonyMethod(GetMethod<EnemyIdentifier_DeliverDamage>("Prefix")));
+                harmonyTweaks.Patch(GetMethod<Explosion>("Collide"), prefix: new HarmonyMethod(GetMethod<Explosion_CollideOrbital>("Prefix")));
+            }
         }
 
         public static void PatchAll()

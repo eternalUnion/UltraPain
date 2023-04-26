@@ -131,10 +131,29 @@ namespace DifficultyTweak.Patches
         }
     }
 
+    class OrbitalExplosionInfo : MonoBehaviour
+    {
+        public bool active = true;
+        public string id;
+        public int points;
+    }
+
     class Grenade_Explode
     {
-        static bool Prefix(Grenade __instance, ref float __3)
+        class StateInfo
         {
+            public bool state = false;
+
+            public string id;
+            public int points;
+            public GameObject templateExplosion;
+        }
+
+        static bool Prefix(Grenade __instance, ref float __3, out StateInfo __state,
+            bool __1, bool __2)
+        {
+            __state = new StateInfo();
+
             if((Coin_ReflectRevolver.coinIsShooting && Coin_ReflectRevolver.shootingCoin != null) || (Time.time - Coin_ReflectRevolver.lastCoinTime <= 0.1f))
             {
                 CoinChainList list = null;
@@ -149,8 +168,110 @@ namespace DifficultyTweak.Patches
 
                 if (list != null && list.isOrbitalStrike)
                 {
-                    __3 += 0.7f;
+                    if (__1)
+                    {
+                        __state.templateExplosion = GameObject.Instantiate(__instance.harmlessExplosion, new Vector3(1000000, 1000000, 1000000), Quaternion.identity);
+                        __instance.harmlessExplosion = __state.templateExplosion;
+                    }
+                    else if (__2)
+                    {
+                        __state.templateExplosion = GameObject.Instantiate(__instance.superExplosion, new Vector3(1000000, 1000000, 1000000), Quaternion.identity);
+                        __instance.superExplosion = __state.templateExplosion;
+                    }
+                    else
+                    {
+                        __state.templateExplosion = GameObject.Instantiate(__instance.explosion, new Vector3(1000000, 1000000, 1000000), Quaternion.identity);
+                        __instance.explosion = __state.templateExplosion;
+                    }
+                    OrbitalExplosionInfo info = __state.templateExplosion.AddComponent<OrbitalExplosionInfo>();
+
+                    __state.state = true;
+                    if(Coin_ReflectRevolver.shootingAltBeam == null)
+                    {
+                        __3 += ConfigManager.orbStrikeRevolverExtraSize.value;
+                        info.id = ConfigManager.orbStrikeRevolverStyleText.guid;
+                        info.points = ConfigManager.orbStrikeRevolverStylePoint.value;
+                    }
+                    else if(Coin_ReflectRevolver.shootingAltBeam.TryGetComponent(out RevolverBeam beam))
+                    {
+                        if (beam.beamType == BeamType.Revolver)
+                        {
+                            if (beam.strongAlt)
+                            {
+                                __3 += ConfigManager.orbStrikeRevolverChargedExtraSize.value;
+                                info.id = ConfigManager.orbStrikeRevolverChargedStyleText.guid;
+                                info.points = ConfigManager.orbStrikeRevolverChargedStylePoint.value;
+                            }
+                            else
+                            {
+                                __3 += ConfigManager.orbStrikeRevolverExtraSize.value;
+                                info.id = ConfigManager.orbStrikeRevolverStyleText.guid;
+                                info.points = ConfigManager.orbStrikeRevolverStylePoint.value;
+                            }
+                        }
+                        else if (beam.beamType == BeamType.Railgun && beam.hitAmount > 500)
+                        {
+                            __3 += ConfigManager.orbStrikeElectricCannonExtraSize.value;
+                            info.id = ConfigManager.orbStrikeElectricCannonStyleText.guid;
+                            info.points = ConfigManager.orbStrikeElectricCannonStylePoint.value;
+                        }
+                        else if (beam.beamType == BeamType.Railgun)
+                        {
+                            __3 += ConfigManager.orbStrikeMaliciousCannonExtraSize.value;
+                            info.id = ConfigManager.orbStrikeMaliciousCannonStyleText.guid;
+                            info.points = ConfigManager.orbStrikeMaliciousCannonStylePoint.value;
+                        }
+                        else
+                            __state.state = false;
+                    }
+
                     Debug.Log("Applied orbital strike bonus");
+                }
+            }
+
+            return true;
+        }
+
+        static void Postfix(Grenade __instance, StateInfo __state)
+        {
+            if (__state.templateExplosion != null)
+                GameObject.Destroy(__state.templateExplosion);
+
+            if (!__state.state)
+                return;
+
+            /*Collider[] explosions = Physics.OverlapSphere(__instance.transform.position, 1f, 1 << 23, QueryTriggerInteraction.Collide);
+            if(explosions.Length == 0)
+            {
+                Debug.LogWarning("Could not find any explosions to add the orbital stats to");
+                return;
+            }
+
+            foreach(Collider col in explosions)
+            {
+                OrbitalExplosionInfo info = col.gameObject.AddComponent<OrbitalExplosionInfo>();
+                info.id = __state.id;
+                info.points = __state.points;
+            }*/
+        }
+    }
+
+    class Explosion_CollideOrbital
+    {
+        static bool Prefix(Explosion __instance, Collider __0)
+        {
+            OrbitalExplosionInfo flag = __instance.transform.parent.GetComponent<OrbitalExplosionInfo>();
+            if (flag == null || !flag.active)
+                return true;
+
+            if ( __0.gameObject.tag != "Player" && (__0.gameObject.layer == 10 || __0.gameObject.layer == 11)
+                && __instance.canHit != AffectedSubjects.PlayerOnly)
+            {
+                EnemyIdentifierIdentifier componentInParent = __0.GetComponentInParent<EnemyIdentifierIdentifier>();
+                if (componentInParent != null && componentInParent.eid != null && !componentInParent.eid.blessed && !componentInParent.eid.dead)
+                {
+                    flag.active = false;
+                    StyleHUD.Instance.AddPoints(flag.points, flag.id);
                 }
             }
 

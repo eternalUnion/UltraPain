@@ -36,6 +36,25 @@ namespace DifficultyTweak
         public static StringField grenadeBoostStyleText;
         public static IntField grenadeBoostStylePoints;
 
+        public static BoolField orbStrikeToggle;
+
+        public static StringField orbStrikeRevolverStyleText;
+        public static IntField orbStrikeRevolverStylePoint;
+        public static FloatField orbStrikeRevolverExtraSize;
+        public static BoolField orbStrikeRevolverExplosion;
+
+        public static StringField orbStrikeRevolverChargedStyleText;
+        public static IntField orbStrikeRevolverChargedStylePoint;
+        public static FloatField orbStrikeRevolverChargedExtraSize;
+
+        public static StringField orbStrikeElectricCannonStyleText;
+        public static IntField orbStrikeElectricCannonStylePoint;
+        public static FloatField orbStrikeElectricCannonExtraSize;
+
+        public static StringField orbStrikeMaliciousCannonStyleText;
+        public static IntField orbStrikeMaliciousCannonStylePoint;
+        public static FloatField orbStrikeMaliciousCannonExtraSize;
+
         // ENEMY PANEL
         public static ConfigPanel cerberusPanel;
         public static ConfigPanel dronePanel;
@@ -333,6 +352,32 @@ namespace DifficultyTweak
             grenadeBoostSizeMultiplier = new FloatField(grenadeBoostDiv, "Size multiplier", "grenadeBoostSizeMultiplier", 1f);
             grenadeBoostStyleText = new StringField(grenadeBoostDiv, "Style text", "grenadeBoostStyleText", "<color=cyan>FISTFUL OF 'NADE</color>");
             grenadeBoostStylePoints = new IntField(grenadeBoostDiv, "Style points", "grenadeBoostStylePoints", 10);
+
+            new ConfigHeader(playerPanel, "Orbital Strike\r\n<size=16>(Style bonuses for coin-knuckleblaster)</size>");
+            ConfigDivision orbStrikeDiv = new ConfigDivision(playerPanel, "orbStrikeDiv");
+            orbStrikeToggle = new BoolField(playerPanel, "Enabled", "orbStrikeToggle", true);
+            orbStrikeToggle.onValueChange += (BoolField.BoolValueChangeEvent e) =>
+            {
+                orbStrikeDiv.interactable = e.value;
+            };
+            orbStrikeToggle.TriggerValueChangeEvent();
+            new ConfigHeader(orbStrikeDiv, "Revolver", 18);
+            orbStrikeRevolverStyleText = new StringField(orbStrikeDiv, "Style text", "orbStrikeRevolverStyleText", "<color=maroon>ORBITALSTRIKE</color>");
+            orbStrikeRevolverStylePoint = new IntField(orbStrikeDiv, "Style point", "orbStrikeRevolverStylePoint", 20);
+            orbStrikeRevolverExtraSize = new FloatField(orbStrikeDiv, "Size bonus percent", "orbStrikeRevolverExtraSize", 0.2f);
+            orbStrikeRevolverExplosion = new BoolField(orbStrikeDiv, "Explosion on enemy hit", "orbStrikeRevolverExplosion", true);
+            new ConfigHeader(orbStrikeDiv, "Charged Revolver", 18);
+            orbStrikeRevolverChargedStyleText = new StringField(orbStrikeDiv, "Style text", "orbStrikeRevolverChargedStyleText", "<color=maroon>ORBITAL</color><color=cyan>ZAP</color>");
+            orbStrikeRevolverChargedStylePoint = new IntField(orbStrikeDiv, "Style point", "orbStrikeRevolverChargedStylePoint", 30);
+            orbStrikeRevolverChargedExtraSize = new FloatField(orbStrikeDiv, "Size bonus percent", "orbStrikeRevolverChargedExtraSize", 0.25f);
+            new ConfigHeader(orbStrikeDiv, "Electric Cannon", 18);
+            orbStrikeElectricCannonStyleText = new StringField(orbStrikeDiv, "Style text", "orbStrikeElectricCannonStyleText", "<color=orange>ULTRA</color><color=maroon>ORBITAL</color><color=cyan>ZAP</color>");
+            orbStrikeElectricCannonStylePoint = new IntField(orbStrikeDiv, "Style point", "orbStrikeElectricCannonStylePoint", 50);
+            orbStrikeElectricCannonExtraSize = new FloatField(orbStrikeDiv, "Size bonus percent", "orbStrikeElectricCannonExtraSize", 0.3f);
+            new ConfigHeader(orbStrikeDiv, "Malicious Cannon", 18);
+            orbStrikeMaliciousCannonStyleText = new StringField(orbStrikeDiv, "Style text", "orbStrikeMaliciousCannonStyleText", "<color=maroon>ORBITAL</color><color=red>NUKE</color>");
+            orbStrikeMaliciousCannonStylePoint = new IntField(orbStrikeDiv, "Style point", "orbStrikeMaliciousCannonStylePoint", 70);
+            orbStrikeMaliciousCannonExtraSize = new FloatField(orbStrikeDiv, "Size bonus percent", "orbStrikeMaliciousCannonExtraSize", 0.4f);
 
             // ENEMY PANEL
             new ConfigHeader(enemyPanel, "Common Enemies");
