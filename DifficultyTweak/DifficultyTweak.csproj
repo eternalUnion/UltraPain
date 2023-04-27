@@ -11,7 +11,7 @@
 
 	<AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
 	<AppendRuntimeIdentifierToOutputPath>false</AppendRuntimeIdentifierToOutputPath>
-	<OutputPath>D:\Games\UltrakillPatch\ULTRAKILL\ULTRAKILL\BepInEx\plugins\UltraPain</OutputPath>
+	<OutputPath>D:\Games\ULTRAKILL-CG\ULTRAKILL\BepInEx\plugins\UltraPain</OutputPath>
 	<ProduceReferenceAssembly>False</ProduceReferenceAssembly>
   </PropertyGroup>
 
@@ -46,14 +46,17 @@
     <Reference Include="PluginConfigurator">
       <HintPath>D:\Games\UltrakillPatch\ULTRAKILL\ULTRAKILL\BepInEx\plugins\PluginConfigurator\PluginConfigurator.dll</HintPath>
     </Reference>
+    <Reference Include="Unity.Addressables">
+      <HintPath>Libs\Unity.Addressables.dll</HintPath>
+    </Reference>
+    <Reference Include="Unity.ResourceManager">
+      <HintPath>Libs\Unity.ResourceManager.dll</HintPath>
+    </Reference>
     <Reference Include="UnityEngine.AssetBundleModule">
       <HintPath>Libs\UnityEngine.AssetBundleModule.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.UI">
       <HintPath>Libs\UnityEngine.UI.dll</HintPath>
-    </Reference>
-    <Reference Include="UniverseLib.Mono">
-      <HintPath>Libs\UniverseLib.Mono.dll</HintPath>
     </Reference>
   </ItemGroup>
 </Project>

@@ -10,6 +10,12 @@ using UnityEngine.UI;
 using UnityEngine.EventSystems;
 using System.Reflection;
 using Steamworks;
+using Unity.Audio;
+using System.Text;
+using System.Collections.Generic;
+using UnityEngine.AddressableAssets;
+using UnityEngine.AddressableAssets.ResourceLocators;
+using UnityEngine.ResourceManagement.ResourceLocations;
 
 namespace DifficultyTweak
 {
@@ -23,10 +29,11 @@ namespace DifficultyTweak
 
         public static Plugin instance;
 
-        public static string bundlePath = Path.Combine(Environment.CurrentDirectory, "ULTRAKILL_Data", "StreamingAssets", "Magenta", "Bundles");
+        //D:\Games\ULTRAKILL-CG\ULTRAKILL\ULTRAKILL_Data\StreamingAssets\aa\StandaloneWindows64\assets_assets_assets
+        public static string bundlePath = Path.Combine(Environment.CurrentDirectory, "ULTRAKILL_Data", "StreamingAssets", "aa", "StandaloneWindows64", "assets_assets_assets");
         public static AssetBundle GetAssetBundle(string name)
         {
-            AssetManager manager = MonoSingleton<AssetManager>.Instance;
+            /*AssetManager manager = MonoSingleton<AssetManager>.Instance;
             AssetBundle bundle = null;
 
             manager?.loadedBundles.TryGetValue(name, out bundle);
@@ -35,9 +42,35 @@ namespace DifficultyTweak
                 return bundle;
 
             bundle = AssetBundle.LoadFromFile(Path.Combine(bundlePath, name));
-            MonoSingleton<AssetManager>.Instance?.loadedBundles.Add(name, bundle);
+            MonoSingleton<AssetManager>.Instance?.loadedBundles.Add(name, bundle);*/
 
-            return bundle;
+            return AssetBundle.LoadFromFile(Path.Combine(bundlePath, name)); ;
+        }
+
+        public static ResourceLocationMap resourceMap = null;
+        public static T LoadObject<T>(string path)
+        {
+            if (resourceMap == null)
+            {
+                Addressables.InitializeAsync().WaitForCompletion();
+                resourceMap = Addressables.ResourceLocators.First() as ResourceLocationMap;
+            }
+
+            Debug.Log($"Loading {path}");
+            KeyValuePair<object, IList<IResourceLocation>> obj;
+
+            try
+            {
+                obj = resourceMap.Locations.Where(
+                    (KeyValuePair<object, IList<IResourceLocation>> pair) =>
+                    {
+                        return (pair.Key as string) == path;
+                        //return (pair.Key as string).Equals(path, StringComparison.OrdinalIgnoreCase);
+                    }).First();
+            }
+            catch (Exception) { return default(T); }
+            
+            return Addressables.LoadAsset<T>(obj.Value.First()).WaitForCompletion();
         }
 
         public static Vector3 PredictPlayerPosition(Collider safeCollider, float speedMod)
@@ -82,7 +115,7 @@ namespace DifficultyTweak
         public static GameObject sisyphiusPrimeExplosion;
         public static GameObject explosionWaveKnuckleblaster;
 
-        public static GameObject idol;
+        //public static GameObject idol;
         public static GameObject ferryman;
         public static GameObject minosPrime;
 
@@ -119,67 +152,76 @@ namespace DifficultyTweak
                 return;
             loadedPrefabs = true;
 
-            AssetBundle bundle0 = GetAssetBundle("bundle-0");
-            AssetBundle bundle1 = GetAssetBundle("bundle-1");
-            AssetBundle uhbundle0 = GetAssetBundle("unhardened-bundle-0");
-            AssetBundle uhbundle1 = GetAssetBundle("unhardened-bundle-1");
+            /*using(FileStream log = File.Open(Path.Combine(Environment.CurrentDirectory, "log_addr.txt"), FileMode.OpenOrCreate))
+            {
+                if (resourceMap == null)
+                {
+                    resourceMap = Addressables.ResourceLocators.First() as ResourceLocationMap;
+                }
 
-            //[bundle-0][assets/prefabs/projectilespread.prefab]
-            projectileSpread = bundle0.LoadAsset<GameObject>("assets/prefabs/projectilespread.prefab");
-            //[bundle-0][assets/prefabs/projectilehoming.prefab]
-            homingProjectile = bundle0.LoadAsset<GameObject>("assets/prefabs/projectilehoming.prefab");
-            //[bundle-1][assets/prefabs/projectiledecorative 2.prefab]
-            decorativeProjectile2 = bundle1.LoadAsset<GameObject>("assets/prefabs/projectiledecorative 2.prefab");
-            //[bundle-0][assets/prefabs/grenade.prefab]
-            shotgunGrenade = bundle0.LoadAsset<GameObject>("assets/prefabs/grenade.prefab");
-            //[bundle-0][assets/prefabs/turretbeam.prefab]
-            turretBeam = bundle0.LoadAsset<GameObject>("assets/prefabs/turretbeam.prefab");
-            //[bundle-0][assets/prefabs/dronemaliciousbeam.prefab]
-            beam = bundle0.LoadAsset<GameObject>("assets/prefabs/dronemaliciousbeam.prefab");
-            //[unhardened-bundle-0][assets/prefabs/lightningstrikeexplosive.prefab]
-            lightningStrikeExplosiveSetup = uhbundle0.LoadAsset<GameObject>("assets/prefabs/lightningstrikeexplosive.prefab");
-            //[unhardened-bundle-0][assets/particles/lightningboltwindupfollow variant.prefab]
-            lighningStrikeWindup = uhbundle0.LoadAsset<GameObject>("assets/particles/lightningboltwindupfollow variant.prefab");
+                foreach(object o in resourceMap.Keys)
+                {
+                    string line = (o as string) + '\n';
+                    log.Write(Encoding.ASCII.GetBytes(line), 0, line.Length);
+                }
+            }*/
+
+            // Assets/Prefabs/Attacks and Projectiles/Projectile Spread.prefab
+            projectileSpread = LoadObject<GameObject>("Assets/Prefabs/Attacks and Projectiles/Projectile Spread.prefab");
+            // Assets/Prefabs/Attacks and Projectiles/Projectile Homing.prefab
+            homingProjectile = LoadObject<GameObject>("Assets/Prefabs/Attacks and Projectiles/Projectile Homing.prefab");
+            // Assets/Prefabs/Attacks and Projectiles/Projectile Decorative 2.prefab
+            decorativeProjectile2 = LoadObject<GameObject>("Assets/Prefabs/Attacks and Projectiles/Projectile Decorative 2.prefab");
+            // Assets/Prefabs/Weapons/Shotgun Grenade.prefab
+            shotgunGrenade = LoadObject<GameObject>("Assets/Prefabs/Weapons/Shotgun Grenade.prefab");
+            // Assets/Prefabs/Attacks and Projectiles/Hitscan Beams/Turret Beam.prefab
+            turretBeam = LoadObject<GameObject>("Assets/Prefabs/Attacks and Projectiles/Hitscan Beams/Turret Beam.prefab");
+            // Assets/Prefabs/Attacks and Projectiles/Hitscan Beams/Malicious Beam.prefab
+            beam = LoadObject<GameObject>("Assets/Prefabs/Attacks and Projectiles/Hitscan Beams/Malicious Beam.prefab");
+            // Assets/Prefabs/Attacks and Projectiles/Explosions/Lightning Strike Explosive.prefab
+            lightningStrikeExplosiveSetup = LoadObject<GameObject>("Assets/Prefabs/Attacks and Projectiles/Explosions/Lightning Strike Explosive.prefab");
+            // Assets/Particles/Environment/LightningBoltWindupFollow Variant.prefab
+            lighningStrikeWindup = LoadObject<GameObject>("Assets/Particles/Environment/LightningBoltWindupFollow Variant.prefab");
             //[bundle-0][assets/prefabs/enemies/idol.prefab]
-            idol = bundle0.LoadAsset<GameObject>("assets/prefabs/enemies/idol.prefab");
-            //[bundle-0][assets/prefabs/enemies/ferryman.prefab]
-            ferryman = bundle0.LoadAsset<GameObject>("assets/prefabs/enemies/ferryman.prefab");
-            //[bundle-0][assets/prefabs/explosion.prefab]
-            explosion = bundle0.LoadAsset<GameObject>("assets/prefabs/explosion.prefab");
-            //[bundle-0][assets/prefabs/virtueinsignia.prefab]
-            virtueInsignia = bundle0.LoadAsset<GameObject>("assets/prefabs/virtueinsignia.prefab");
-            //[bundle-0][assets/prefabs/projectileexplosivehh.prefab]
-            hideousMassProjectile = bundle0.LoadAsset<GameObject>("assets/prefabs/projectileexplosivehh.prefab");
-            //[bundle-0][assets/particles/rageeffect.prefab]
-            enrageEffect = bundle0.LoadAsset<GameObject>("assets/particles/rageeffect.prefab");
-            //[bundle-0][assets/particles/v2flashunparriable.prefab]
-            v2flashUnparryable = bundle0.LoadAsset<GameObject>("assets/particles/v2flashunparriable.prefab");
-            //[bundle-0][assets/prefabs/rocket.prefab]
-            rocket = bundle0.LoadAsset<GameObject>("assets/prefabs/rocket.prefab");
-            //[bundle-0][assets/prefabs/revolverbullet.prefab]
-            revolverBullet = bundle0.LoadAsset<GameObject>("assets/prefabs/revolverbullet.prefab");
-            //[bundle-0][assets/prefabs/railcannonbeammalicious.prefab]
-            maliciousCannonBeam = bundle0.LoadAsset<GameObject>("assets/prefabs/railcannonbeammalicious.prefab");
-            //[bundle-0][assets/prefabs/revolverbeam.prefab]
-            revolverBeam = bundle0.LoadAsset<GameObject>("assets/prefabs/revolverbeam.prefab");
-            //[bundle-1][assets/prefabs/explosionwaveenemy.prefab]
-            blastwave = bundle1.LoadAsset<GameObject>("assets/prefabs/explosionwaveenemy.prefab");
-            //[bundle-0][assets/prefabs/enemies/minosprime.prefab]
-            minosPrime = bundle0.LoadAsset<GameObject>("assets/prefabs/enemies/minosprime.prefab");
-            //[unhardened-bundle-1][assets/prefabs/cannonball.prefab]
-            cannonBall = uhbundle1.LoadAsset<GameObject>("assets/prefabs/cannonball.prefab");
-            //[unhardened-bundle-1][assets/sounds/other weapons/machinepumploop.wav]
-            cannonBallChargeAudio = uhbundle1.LoadAsset<AudioClip>("assets/sounds/other weapons/machinepumploop.wav");
-            //[bundle-0][assets/prefabs/physicalshockwave.prefab]
-            shockwave = bundle0.LoadAsset<GameObject>("assets/prefabs/physicalshockwave.prefab");
-            //[bundle-0][assets/prefabs/explosionwavesisyphus.prefab]
-            sisyphiusExplosion = bundle0.LoadAsset<GameObject>("assets/prefabs/explosionwavesisyphus.prefab");
-            //[unhardened-bundle-0][assets/prefabs/explosionprimesisy.prefab]
-            sisyphiusPrimeExplosion = uhbundle0.LoadAsset<GameObject>("assets/prefabs/explosionprimesisy.prefab");
-            //[bundle-0][assets/prefabs/explosionwave.prefab]
-            explosionWaveKnuckleblaster = bundle0.LoadAsset<GameObject>("assets/prefabs/explosionwave.prefab");
-            //[bundle-0][assets/prefabs/explosionlightning variant.prefab]
-            lightningStrikeExplosive = bundle0.LoadAsset<GameObject>("assets/prefabs/explosionlightning variant.prefab");
+            //idol = LoadObject<GameObject>("assets/prefabs/enemies/idol.prefab");
+            // Assets/Prefabs/Enemies/Ferryman.prefab
+            ferryman = LoadObject<GameObject>("Assets/Prefabs/Enemies/Ferryman.prefab");
+            // Assets/Prefabs/Attacks and Projectiles/Explosions/Explosion.prefab
+            explosion = LoadObject<GameObject>("Assets/Prefabs/Attacks and Projectiles/Explosions/Explosion.prefab");
+            // Assets/Prefabs/Attacks and Projectiles/Virtue Insignia.prefab
+            virtueInsignia = LoadObject<GameObject>("Assets/Prefabs/Attacks and Projectiles/Virtue Insignia.prefab");
+            // Assets/Prefabs/Attacks and Projectiles/Projectile Explosive HH.prefab
+            hideousMassProjectile = LoadObject<GameObject>("Assets/Prefabs/Attacks and Projectiles/Projectile Explosive HH.prefab");
+            // Assets/Particles/Enemies/RageEffect.prefab
+            enrageEffect = LoadObject<GameObject>("Assets/Particles/Enemies/RageEffect.prefab");
+            // Assets/Particles/Flashes/V2FlashUnparriable.prefab
+            v2flashUnparryable = LoadObject<GameObject>("Assets/Particles/Flashes/V2FlashUnparriable.prefab");
+            // Assets/Prefabs/Attacks and Projectiles/Rocket.prefab
+            rocket = LoadObject<GameObject>("Assets/Prefabs/Attacks and Projectiles/Rocket.prefab");
+            // Assets/Prefabs/Attacks and Projectiles/RevolverBullet.prefab
+            revolverBullet = LoadObject<GameObject>("assets/prefabs/revolverbullet.prefab");
+            // Assets/Prefabs/Attacks and Projectiles/Hitscan Beams/Railcannon Beam Malicious.prefab
+            maliciousCannonBeam = LoadObject<GameObject>("Assets/Prefabs/Attacks and Projectiles/Hitscan Beams/Railcannon Beam Malicious.prefab");
+            // Assets/Prefabs/Attacks and Projectiles/Hitscan Beams/Revolver Beam.prefab
+            revolverBeam = LoadObject<GameObject>("Assets/Prefabs/Attacks and Projectiles/Hitscan Beams/Revolver Beam.prefab");
+            // Assets/Prefabs/Attacks and Projectiles/Explosions/Explosion Wave Enemy.prefab
+            blastwave = LoadObject<GameObject>("Assets/Prefabs/Attacks and Projectiles/Explosions/Explosion Wave Enemy.prefab");
+            // Assets/Prefabs/Enemies/MinosPrime.prefab
+            minosPrime = LoadObject<GameObject>("Assets/Prefabs/Enemies/MinosPrime.prefab");
+            // Assets/Prefabs/Attacks and Projectiles/Cannonball.prefab
+            cannonBall = LoadObject<GameObject>("Assets/Prefabs/Attacks and Projectiles/Cannonball.prefab");
+            // get from Assets/Prefabs/Weapons/Rocket Launcher Cannonball.prefab
+            cannonBallChargeAudio = LoadObject<GameObject>("Assets/Prefabs/Weapons/Rocket Launcher Cannonball.prefab").transform.Find("RocketLauncher/Armature/Body_Bone/HologramDisplay").GetComponent<AudioSource>().clip;
+            // Assets/Prefabs/Attacks and Projectiles/PhysicalShockwave.prefab
+            shockwave = LoadObject<GameObject>("Assets/Prefabs/Attacks and Projectiles/PhysicalShockwave.prefab");
+            // Assets/Prefabs/Attacks and Projectiles/Explosions/Explosion Wave Sisyphus.prefab
+            sisyphiusExplosion = LoadObject<GameObject>("Assets/Prefabs/Attacks and Projectiles/Explosions/Explosion Wave Sisyphus.prefab");
+            // Assets/Prefabs/Attacks and Projectiles/Explosions/Explosion Sisyphus Prime.prefab
+            sisyphiusPrimeExplosion = LoadObject<GameObject>("Assets/Prefabs/Attacks and Projectiles/Explosions/Explosion Sisyphus Prime.prefab");
+            // Assets/Prefabs/Attacks and Projectiles/Explosions/Explosion Wave.prefab
+            explosionWaveKnuckleblaster = LoadObject<GameObject>("Assets/Prefabs/Attacks and Projectiles/Explosions/Explosion Wave.prefab");
+            // Assets/Prefabs/Attacks and Projectiles/Explosions/Explosion Lightning.prefab - [bundle-0][assets/prefabs/explosionlightning variant.prefab]
+            lightningStrikeExplosive = LoadObject<GameObject>("Assets/Prefabs/Attacks and Projectiles/Explosions/Explosion Lightning.prefab");
 
             // hideousMassProjectile.AddComponent<HideousMassProjectile>();
         }
@@ -193,7 +235,8 @@ namespace DifficultyTweak
             StyleIDs.RegisterIDs();
             PatchAll();
 
-            if (SceneManager.GetActiveScene().name == "Main Menu")
+            string mainMenuSceneName = "b3e7f2f8052488a45b35549efb98d902";
+            if (SceneManager.GetActiveScene().name == mainMenuSceneName)
             {
                 LoadPrefabs();
 
@@ -451,9 +494,44 @@ namespace DifficultyTweak
             PatchAllPlayers();
         }
 
+        public static List<AssetBundle> bundles = new List<AssetBundle>();
         public void Awake()
         {
             instance = this;
+
+            // DEBUG
+            /*string logPath = Path.Combine(Environment.CurrentDirectory, "log.txt");
+            Logger.LogInfo($"Saving to {logPath}");
+            List<string> assetPaths = new List<string>()
+            {
+                "fonts.bundle",
+                "videos.bundle",
+                "shaders.bundle",
+                "particles.bundle",
+                "materials.bundle",
+                "animations.bundle",
+                "prefabs.bundle",
+                "physicsmaterials.bundle",
+                "models.bundle",
+                "textures.bundle",
+            };
+
+            //using (FileStream log = File.Open(logPath, FileMode.OpenOrCreate, FileAccess.Write))
+            //{
+                foreach(string assetPath in assetPaths)
+                {
+                    Logger.LogInfo($"Attempting to load {assetPath}");
+                    AssetBundle bundle = AssetBundle.LoadFromFile(Path.Combine(bundlePath, assetPath));
+                    bundles.Add(bundle);
+                    //foreach (string name in bundle.GetAllAssetNames())
+                    //{
+                    //    string line = $"[{bundle.name}][{name}]\n";
+                    //    log.Write(Encoding.ASCII.GetBytes(line), 0, line.Length);
+                    //}
+                    bundle.LoadAllAssets();
+                }
+            //}
+            */
 
             // Plugin startup logic 
             Logger.LogInfo($"Plugin {PluginInfo.PLUGIN_GUID} is loaded!");
