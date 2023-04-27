@@ -12,7 +12,7 @@
 	<AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
 	<AppendRuntimeIdentifierToOutputPath>false</AppendRuntimeIdentifierToOutputPath>
 	<OutputPath>D:\Games\ULTRAKILL-CG\ULTRAKILL\BepInEx\plugins\UltraPain</OutputPath>
-	<ProduceReferenceAssembly>False</ProduceReferenceAssembly>
+	<ProduceReferenceAssembly>True</ProduceReferenceAssembly>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
