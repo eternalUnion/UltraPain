@@ -331,6 +331,114 @@ namespace DifficultyTweak.Patches
         }
     }
 
+    class Cannonball_Explode
+    {
+        static bool Prefix(Cannonball __instance, GameObject ___interruptionExplosion, ref GameObject ___breakEffect)
+        {
+            if ((Coin_ReflectRevolver.coinIsShooting && Coin_ReflectRevolver.shootingCoin != null) || (Time.time - Coin_ReflectRevolver.lastCoinTime <= 0.1f))
+            {
+                CoinChainList list = null;
+                if (Coin_ReflectRevolver.shootingAltBeam != null)
+                {
+                    OrbitalStrikeFlag orbitalFlag = Coin_ReflectRevolver.shootingAltBeam.GetComponent<OrbitalStrikeFlag>();
+                    if (orbitalFlag != null)
+                        list = orbitalFlag.chainList;
+                }
+                else if (Coin_ReflectRevolver.shootingCoin != null && Coin_ReflectRevolver.shootingCoin.ccc != null)
+                    list = Coin_ReflectRevolver.shootingCoin.ccc.GetComponent<CoinChainList>();
+
+                if (list != null && list.isOrbitalStrike && ___interruptionExplosion != null)
+                {
+                    float damageMulti = 1f;
+                    float sizeMulti = 1f;
+                    GameObject explosion = GameObject.Instantiate<GameObject>(___interruptionExplosion, __instance.transform.position, Quaternion.identity);
+                    OrbitalExplosionInfo info = explosion.AddComponent<OrbitalExplosionInfo>();
+                    info.id = "";
+
+                    // REVOLVER NORMAL
+                    if (Coin_ReflectRevolver.shootingAltBeam == null)
+                    {
+                        if (ConfigManager.orbStrikeRevolverGrenade.value)
+                        {
+                            damageMulti += ConfigManager.orbStrikeRevolverGrenadeExtraDamage.value;
+                            sizeMulti += ConfigManager.orbStrikeRevolverGrenadeExtraSize.value;
+                            info.id = ConfigManager.orbStrikeRevolverStyleText.guid;
+                            info.points = ConfigManager.orbStrikeRevolverStylePoint.value;
+                        }
+                    }
+                    else if (Coin_ReflectRevolver.shootingAltBeam.TryGetComponent(out RevolverBeam beam))
+                    {
+                        if (beam.beamType == BeamType.Revolver)
+                        {
+                            // REVOLVER CHARGED (NORMAL + ALT. IF DISTINCTION IS NEEDED, USE beam.strongAlt FOR ALT)
+                            if (beam.ultraRicocheter)
+                            {
+                                if (ConfigManager.orbStrikeRevolverChargedGrenade.value)
+                                {
+                                    damageMulti += ConfigManager.orbStrikeRevolverChargedGrenadeExtraDamage.value;
+                                    sizeMulti += ConfigManager.orbStrikeRevolverChargedGrenadeExtraSize.value;
+                                    info.id = ConfigManager.orbStrikeRevolverChargedStyleText.guid;
+                                    info.points = ConfigManager.orbStrikeRevolverChargedStylePoint.value;
+                                }
+                            }
+                            // REVOLVER ALT
+                            else
+                            {
+                                if (ConfigManager.orbStrikeRevolverGrenade.value)
+                                {
+                                    damageMulti += ConfigManager.orbStrikeRevolverGrenadeExtraDamage.value;
+                                    sizeMulti += ConfigManager.orbStrikeRevolverGrenadeExtraSize.value;
+                                    info.id = ConfigManager.orbStrikeRevolverStyleText.guid;
+                                    info.points = ConfigManager.orbStrikeRevolverStylePoint.value;
+                                }
+                            }
+                        }
+                        // ELECTRIC RAILCANNON
+                        else if (beam.beamType == BeamType.Railgun && beam.hitAmount > 500)
+                        {
+                            if (ConfigManager.orbStrikeElectricCannonGrenade.value)
+                            {
+                                damageMulti += ConfigManager.orbStrikeElectricCannonExplosionDamage.value;
+                                sizeMulti += ConfigManager.orbStrikeElectricCannonExplosionSize.value;
+                                info.id = ConfigManager.orbStrikeElectricCannonStyleText.guid;
+                                info.points = ConfigManager.orbStrikeElectricCannonStylePoint.value;
+                            }
+                        }
+                        // MALICIOUS RAILCANNON
+                        else if (beam.beamType == BeamType.Railgun)
+                        {
+                            if (ConfigManager.orbStrikeMaliciousCannonGrenade.value)
+                            {
+                                damageMulti += ConfigManager.orbStrikeMaliciousCannonGrenadeExtraDamage.value;
+                                sizeMulti += ConfigManager.orbStrikeMaliciousCannonGrenadeExtraSize.value;
+                                info.id = ConfigManager.orbStrikeMaliciousCannonStyleText.guid;
+                                info.points = ConfigManager.orbStrikeMaliciousCannonStylePoint.value;
+                            }
+                        }
+                    }
+
+                    if (sizeMulti != 1 || damageMulti != 1)
+                        foreach (Explosion exp in explosion.GetComponentsInChildren<Explosion>())
+                        {
+                            exp.maxSize *= sizeMulti;
+                            exp.speed *= sizeMulti;
+                            exp.damage = (int)(exp.damage * damageMulti);
+                        }
+
+                    if (MonoSingleton<PrefsManager>.Instance.GetBoolLocal("simpleExplosions", false))
+                    {
+                        ___breakEffect = null;
+                    }
+                    __instance.Break();
+
+                    return false;
+                }
+            }
+
+            return true;
+        }
+    }
+
     class Explosion_CollideOrbital
     {
         static bool Prefix(Explosion __instance, Collider __0)
