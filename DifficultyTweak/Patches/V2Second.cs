@@ -412,10 +412,8 @@ namespace DifficultyTweak.Patches
                 return;
 
             Transform v2WeaponTrans = __instance.weapons[0].transform.parent;
-            GameObject rocketLauncher = player.transform.Find("Main Camera/Guns/Rocket Launcher Cannonball(Clone)").gameObject;
-            GameObject maliciousCannon = player.transform.Find("Main Camera/Guns/RailcannonMalicious(Clone)").gameObject;
 
-            GameObject v2rocketLauncher = GameObject.Instantiate(rocketLauncher, v2WeaponTrans);
+            GameObject v2rocketLauncher = GameObject.Instantiate(Plugin.rocketLauncherAlt, v2WeaponTrans);
             v2rocketLauncher.transform.localScale = new Vector3(0.5f, 0.5f, 0.5f);
             v2rocketLauncher.transform.localPosition = new Vector3(0.1f, -0.2f, -0.1f);
             v2rocketLauncher.transform.localRotation = Quaternion.Euler(new Vector3(10.2682f, 12.6638f, 198.834f));
@@ -432,7 +430,7 @@ namespace DifficultyTweak.Patches
             RemoveAlwaysOnTop(v2rocketLauncher.transform);
             flag.rocketLauncher = rocketComp;
 
-            GameObject v2maliciousCannon = GameObject.Instantiate(maliciousCannon, v2WeaponTrans);
+            GameObject v2maliciousCannon = GameObject.Instantiate(Plugin.maliciousRailcannon, v2WeaponTrans);
             GameObject.DestroyImmediate(v2maliciousCannon.GetComponent<Railcannon>());
             GameObject.DestroyImmediate(v2maliciousCannon.GetComponent<WeaponIcon>());
             GameObject.DestroyImmediate(v2maliciousCannon.GetComponent<WeaponIdentifier>());

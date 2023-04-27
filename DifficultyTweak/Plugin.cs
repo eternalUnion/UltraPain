@@ -124,6 +124,9 @@ namespace DifficultyTweak
 
         public static AudioClip cannonBallChargeAudio;
 
+        public static GameObject rocketLauncherAlt;
+        public static GameObject maliciousRailcannon;
+
         // Variables
         public static float SoliderShootAnimationStart = 1.2f;
         public static float SoliderGrenadeForce = 10000f;
@@ -152,28 +155,14 @@ namespace DifficultyTweak
                 return;
             loadedPrefabs = true;
 
-            /*using(FileStream log = File.Open(Path.Combine(Environment.CurrentDirectory, "log_addr.txt"), FileMode.OpenOrCreate))
-            {
-                if (resourceMap == null)
-                {
-                    resourceMap = Addressables.ResourceLocators.First() as ResourceLocationMap;
-                }
-
-                foreach(object o in resourceMap.Keys)
-                {
-                    string line = (o as string) + '\n';
-                    log.Write(Encoding.ASCII.GetBytes(line), 0, line.Length);
-                }
-            }*/
-
             // Assets/Prefabs/Attacks and Projectiles/Projectile Spread.prefab
             projectileSpread = LoadObject<GameObject>("Assets/Prefabs/Attacks and Projectiles/Projectile Spread.prefab");
             // Assets/Prefabs/Attacks and Projectiles/Projectile Homing.prefab
             homingProjectile = LoadObject<GameObject>("Assets/Prefabs/Attacks and Projectiles/Projectile Homing.prefab");
             // Assets/Prefabs/Attacks and Projectiles/Projectile Decorative 2.prefab
             decorativeProjectile2 = LoadObject<GameObject>("Assets/Prefabs/Attacks and Projectiles/Projectile Decorative 2.prefab");
-            // Assets/Prefabs/Weapons/Shotgun Grenade.prefab
-            shotgunGrenade = LoadObject<GameObject>("Assets/Prefabs/Weapons/Shotgun Grenade.prefab");
+            // Assets/Prefabs/Attacks and Projectiles/Grenade.prefab
+            shotgunGrenade = LoadObject<GameObject>("Assets/Prefabs/Attacks and Projectiles/Grenade.prefab");
             // Assets/Prefabs/Attacks and Projectiles/Hitscan Beams/Turret Beam.prefab
             turretBeam = LoadObject<GameObject>("Assets/Prefabs/Attacks and Projectiles/Hitscan Beams/Turret Beam.prefab");
             // Assets/Prefabs/Attacks and Projectiles/Hitscan Beams/Malicious Beam.prefab
@@ -222,6 +211,10 @@ namespace DifficultyTweak
             explosionWaveKnuckleblaster = LoadObject<GameObject>("Assets/Prefabs/Attacks and Projectiles/Explosions/Explosion Wave.prefab");
             // Assets/Prefabs/Attacks and Projectiles/Explosions/Explosion Lightning.prefab - [bundle-0][assets/prefabs/explosionlightning variant.prefab]
             lightningStrikeExplosive = LoadObject<GameObject>("Assets/Prefabs/Attacks and Projectiles/Explosions/Explosion Lightning.prefab");
+            // Assets/Prefabs/Weapons/Rocket Launcher Cannonball.prefab
+            rocketLauncherAlt = LoadObject<GameObject>("Assets/Prefabs/Weapons/Rocket Launcher Cannonball.prefab");
+            // Assets/Prefabs/Weapons/Railcannon Malicious.prefab
+            maliciousRailcannon = LoadObject<GameObject>("Assets/Prefabs/Weapons/Railcannon Malicious.prefab");
 
             // hideousMassProjectile.AddComponent<HideousMassProjectile>();
         }
@@ -233,7 +226,7 @@ namespace DifficultyTweak
         public void OnSceneChange(Scene before, Scene after)
         {
             StyleIDs.RegisterIDs();
-            PatchAll();
+            ScenePatchCheck();
 
             string mainMenuSceneName = "b3e7f2f8052488a45b35549efb98d902";
             if (SceneManager.GetActiveScene().name == mainMenuSceneName)
@@ -445,6 +438,11 @@ namespace DifficultyTweak
                 harmonyTweaks.Patch(GetMethod<Sisyphus>("SetupExplosion"), postfix: new HarmonyMethod(GetMethod<SisyphusInstructionist_SetupExplosion>("Postfix")));
             if(ConfigManager.sisyInstStrongerExplosion.value)
                 harmonyTweaks.Patch(GetMethod<Sisyphus>("StompExplosion"), prefix: new HarmonyMethod(GetMethod<SisyphusInstructionist_StompExplosion>("Prefix")));
+
+            // ADDME
+            harmonyTweaks.Patch(GetMethod<Mandalore>("FullBurst"), postfix: new HarmonyMethod(GetMethod<DruidKnight_FullBurst>("Postfix")), prefix: new HarmonyMethod(GetMethod<DruidKnight_FullBurst>("Prefix")));
+            harmonyTweaks.Patch(GetMethod<Mandalore>("FullerBurst"), prefix: new HarmonyMethod(GetMethod<DruidKnight_FullerBurst>("Prefix")));
+            harmonyTweaks.Patch(GetMethod<Drone>("Explode"), prefix: new HarmonyMethod(GetMethod<Drone_Explode>("Prefix")));
         }
 
         private static void PatchAllPlayers()
@@ -479,9 +477,23 @@ namespace DifficultyTweak
             }
         }
 
+        public static bool methodsPatched = false;
+        public static void ScenePatchCheck()
+        {
+            if(methodsPatched && !ultrapainDifficulty)
+            {
+                harmonyTweaks.UnpatchSelf();
+                methodsPatched = false;
+            }
+            else if(!methodsPatched && ultrapainDifficulty)
+            {
+                PatchAll();
+            }
+        }
         public static void PatchAll()
         {
             harmonyTweaks.UnpatchSelf();
+            methodsPatched = false;
 
             if (!ultrapainDifficulty)
                 return;
@@ -491,15 +503,37 @@ namespace DifficultyTweak
             if (realUltrapainDifficulty && ConfigManager.steamRichPresenceToggle.value)
                 harmonyTweaks.Patch(GetMethod<SteamFriends>("SetRichPresence"), prefix: new HarmonyMethod(GetMethod<SteamFriends_SetRichPresence_Patch>("Prefix")));
 
-
             PatchAllEnemies();
             PatchAllPlayers();
+            methodsPatched = true;
         }
 
-        public static List<AssetBundle> bundles = new List<AssetBundle>();
+        public static string workingPath;
+        public static string workingDir;
+
+        public static AssetBundle bundle;
+        public static AudioClip druidKnightFullAutoAud;
+        public static AudioClip druidKnightFullerAutoAud;
+        public static AudioClip druidKnightDeathAud;
+
         public void Awake()
         {
             instance = this;
+            workingPath = Assembly.GetExecutingAssembly().Location;
+            workingDir = Path.GetDirectoryName(workingPath);
+
+            Logger.LogInfo($"Working path: {workingPath}, Working dir: {workingDir}");
+            try
+            {
+                bundle = AssetBundle.LoadFromFile(Path.Combine(workingDir, "ultrapain"));
+                druidKnightFullAutoAud = bundle.LoadAsset<AudioClip>("assets/ultrapain/druidknight/fullauto.wav");
+                druidKnightFullerAutoAud = bundle.LoadAsset<AudioClip>("assets/ultrapain/druidknight/fullerauto.wav");
+                druidKnightDeathAud = bundle.LoadAsset<AudioClip>("assets/ultrapain/druidknight/death.wav");
+            }
+            catch (Exception e)
+            {
+                Logger.LogError($"Could not load the asset bundle:\n{e}");
+            }
 
             // DEBUG
             /*string logPath = Path.Combine(Environment.CurrentDirectory, "log.txt");
