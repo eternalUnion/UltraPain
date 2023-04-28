@@ -459,6 +459,12 @@ namespace Ultrapain
             }
         }
 
+        private static void PatchAllMemes()
+        {
+            if (ConfigManager.enrageSfxToggle.value)
+                harmonyTweaks.Patch(GetMethod<EnrageEffect>("Start"), postfix: new HarmonyMethod(GetMethod<EnrageEffect_Start>("Postfix")));
+        }
+
         public static bool methodsPatched = false;
         
         public static void ScenePatchCheck()
@@ -489,6 +495,7 @@ namespace Ultrapain
 
             PatchAllEnemies();
             PatchAllPlayers();
+            PatchAllMemes();
             methodsPatched = true;
         }
 
@@ -499,6 +506,7 @@ namespace Ultrapain
         public static AudioClip druidKnightFullAutoAud;
         public static AudioClip druidKnightFullerAutoAud;
         public static AudioClip druidKnightDeathAud;
+        public static AudioClip enrageAudioCustom;
 
         public void Awake()
         {
@@ -513,6 +521,7 @@ namespace Ultrapain
                 druidKnightFullAutoAud = bundle.LoadAsset<AudioClip>("assets/ultrapain/druidknight/fullauto.wav");
                 druidKnightFullerAutoAud = bundle.LoadAsset<AudioClip>("assets/ultrapain/druidknight/fullerauto.wav");
                 druidKnightDeathAud = bundle.LoadAsset<AudioClip>("assets/ultrapain/druidknight/death.wav");
+                enrageAudioCustom = bundle.LoadAsset<AudioClip>("assets/ultrapain/sfx/enraged.wav");
             }
             catch (Exception e)
             {

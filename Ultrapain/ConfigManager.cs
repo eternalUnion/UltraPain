@@ -20,6 +20,10 @@ namespace Ultrapain
         public static BoolField steamRichPresenceToggle;
         public static StringField pluginName;
         public static BoolField globalDifficultySwitch;
+        public static ConfigPanel memePanel;
+
+        // MEME PANEL
+        public static BoolField enrageSfxToggle;
 
         // PLAYER PANEL
         public static BoolField rocketBoostToggle;
@@ -353,6 +357,15 @@ namespace Ultrapain
             new ConfigHeader(config.rootPanel, "Global Difficulty");
             globalDifficultySwitch = new BoolField(config.rootPanel, "Enabled", "globalDifficultySwitch", false);
             globalDifficultySwitch.onValueChange += (BoolField.BoolValueChangeEvent e) =>
+            {
+                dirtyField = true;
+            };
+
+            memePanel = new ConfigPanel(config.rootPanel, "Memes", "memePanel");
+
+            // MEME PANEL
+            enrageSfxToggle = new BoolField(memePanel, "Enrage SFX", "enrageSfxToggle", false);
+            enrageSfxToggle.onValueChange += (BoolField.BoolValueChangeEvent e) =>
             {
                 dirtyField = true;
             };
