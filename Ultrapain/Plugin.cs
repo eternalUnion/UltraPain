@@ -424,7 +424,7 @@ namespace Ultrapain
             // ADDME
             harmonyTweaks.Patch(GetMethod<Mandalore>("FullBurst"), postfix: new HarmonyMethod(GetMethod<DruidKnight_FullBurst>("Postfix")), prefix: new HarmonyMethod(GetMethod<DruidKnight_FullBurst>("Prefix")));
             harmonyTweaks.Patch(GetMethod<Mandalore>("FullerBurst"), prefix: new HarmonyMethod(GetMethod<DruidKnight_FullerBurst>("Prefix")));
-            harmonyTweaks.Patch(GetMethod<Drone>("Explode"), prefix: new HarmonyMethod(GetMethod<Drone_Explode>("Prefix")));
+            harmonyTweaks.Patch(GetMethod<Drone>("Explode"), prefix: new HarmonyMethod(GetMethod<Drone_Explode>("Prefix")), postfix: new HarmonyMethod(GetMethod<Drone_Explode>("Postfix")));
         }
 
         private static void PatchAllPlayers()
