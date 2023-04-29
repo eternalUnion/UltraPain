@@ -86,6 +86,7 @@ namespace Ultrapain
         public static FloatField orbStrikeMaliciousCannonExplosionSizeMultiplier;
 
         // ENEMY PANEL
+        public static ConfigPanel globalEnemyPanel;
         public static ConfigPanel cerberusPanel;
         public static ConfigPanel dronePanel;
         public static ConfigPanel filthPanel;
@@ -106,6 +107,10 @@ namespace Ultrapain
         public static ConfigPanel v2FirstPanel;
         public static ConfigPanel v2SecondPanel;
         public static ConfigPanel sisyInstPanel;
+
+        // GLOBAL ENEMY CONFIG
+        public static BoolField friendlyFireDamageOverrideToggle;
+        public static FloatSliderField friendlyFireDamageOverride;
 
         // CERBERUS
         public static BoolField cerberusDashToggle;
@@ -518,6 +523,7 @@ namespace Ultrapain
             orbStrikeMaliciousCannonExplosionDamageMultiplier = new FloatField(orbStrikeMaliciousCannonExplosionDiv, "Damage multiplier", "orbStrikeMaliciousCannonExplosionDamageMultiplier", 1f);
 
             // ENEMY PANEL
+            globalEnemyPanel = new ConfigPanel(enemyPanel, "Global enemy tweaks", "globalEnemyPanel");
             new ConfigHeader(enemyPanel, "Common Enemies");
             filthPanel = new ConfigPanel(enemyPanel, "Filth", "filthPanel");
             strayPanel = new ConfigPanel(enemyPanel, "Stray", "strayPanel");
@@ -542,6 +548,17 @@ namespace Ultrapain
             new ConfigHeader(enemyPanel, "Prime Bosses");
             fleshPrisonPanel = new ConfigPanel(enemyPanel, "Flesh Prison", "fleshPrisonPanel");
             minosPrimePanel = new ConfigPanel(enemyPanel, "Minos Prime", "minosPrimePanel");
+
+            // GLOBAL ENEMY TWEAKS
+            new ConfigHeader(globalEnemyPanel, "Friendly Fire Damage Override");
+            friendlyFireDamageOverrideToggle = new BoolField(globalEnemyPanel, "Enabled", "friendlyFireDamageOverrideToggle", true);
+            friendlyFireDamageOverrideToggle.onValueChange += (BoolField.BoolValueChangeEvent e) =>
+            {
+                friendlyFireDamageOverride.interactable = e.value;
+                dirtyField = true;
+            };
+            friendlyFireDamageOverride = new FloatSliderField(globalEnemyPanel, "Friendly fire damage %", "friendlyFireDamageOverride", new System.Tuple<float, float>(0, 100), 50, 1);
+            friendlyFireDamageOverrideToggle.TriggerValueChangeEvent();
 
             // CERBERUS
             new ConfigHeader(cerberusPanel, "Extra Dashes");

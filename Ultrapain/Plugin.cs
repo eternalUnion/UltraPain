@@ -20,7 +20,7 @@ using UnityEngine.ResourceManagement.ResourceLocations;
 namespace Ultrapain
 {
     [BepInPlugin(PLUGIN_GUID, PLUGIN_NAME, PLUGIN_VERSION)]
-    [BepInDependency("com.eternalUnion.pluginConfigurator", "1.1.0")]
+    [BepInDependency("com.eternalUnion.pluginConfigurator", "1.2.0")]
     public class Plugin : BaseUnityPlugin
     {
         public const string PLUGIN_GUID = "com.eternalUnion.ultraPain";
@@ -299,6 +299,9 @@ namespace Ultrapain
         {
             if (!ConfigManager.enemyTweakToggle.value)
                 return;
+
+            if (ConfigManager.friendlyFireDamageOverrideToggle.value)
+                harmonyTweaks.Patch(GetMethod<EnemyIdentifier>("DeliverDamage"), prefix: new HarmonyMethod(GetMethod<EnemyIdentifier_DeliverDamage_FF>("Prefix")));
 
             harmonyTweaks.Patch(GetMethod<StatueBoss>("Start"), postfix: new HarmonyMethod(GetMethod<StatueBoss_Start_Patch>("Postfix")));
             if (ConfigManager.cerberusDashToggle.value)
