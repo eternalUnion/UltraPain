@@ -541,6 +541,8 @@ namespace Ultrapain.Patches
                             if(ConfigManager.orbStrikeRevolverChargedInsignia.value)
                             {
                                 GameObject insignia = GameObject.Instantiate(Plugin.virtueInsignia, __instance.transform.position, Quaternion.identity);
+                                // This is required for ff override to detect this insignia as non ff attack
+                                insignia.gameObject.name = "PlayerSpawned";
                                 float horizontalSize = ConfigManager.orbStrikeRevolverChargedInsigniaSize.value;
                                 insignia.transform.localScale = new Vector3(horizontalSize, insignia.transform.localScale.y, horizontalSize);
                                 VirtueInsignia comp = insignia.GetComponent<VirtueInsignia>();

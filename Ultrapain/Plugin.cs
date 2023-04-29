@@ -301,8 +301,17 @@ namespace Ultrapain
                 return;
 
             if (ConfigManager.friendlyFireDamageOverrideToggle.value)
-                harmonyTweaks.Patch(GetMethod<EnemyIdentifier>("DeliverDamage"), prefix: new HarmonyMethod(GetMethod<EnemyIdentifier_DeliverDamage_FF>("Prefix")));
+            {
+                harmonyTweaks.Patch(GetMethod<Explosion>("Collide"), prefix: new HarmonyMethod(GetMethod<Explosion_Collide_FF>("Prefix")), postfix: new HarmonyMethod(GetMethod<Explosion_Collide_FF>("Postfix")));
+                harmonyTweaks.Patch(GetMethod<PhysicalShockwave>("CheckCollision"), prefix: new HarmonyMethod(GetMethod<PhysicalShockwave_CheckCollision_FF>("Prefix")), postfix: new HarmonyMethod(GetMethod<PhysicalShockwave_CheckCollision_FF>("Postfix")));
+                harmonyTweaks.Patch(GetMethod<VirtueInsignia>("OnTriggerEnter"), prefix: new HarmonyMethod(GetMethod<VirtueInsignia_OnTriggerEnter_FF>("Prefix")), postfix: new HarmonyMethod(GetMethod<VirtueInsignia_OnTriggerEnter_FF>("Postfix")));
+                harmonyTweaks.Patch(GetMethod<SwingCheck2>("CheckCollision"), prefix: new HarmonyMethod(GetMethod<SwingCheck2_CheckCollision_FF>("Prefix")), postfix: new HarmonyMethod(GetMethod<SwingCheck2_CheckCollision_FF>("Postfix")));
+                harmonyTweaks.Patch(GetMethod<Projectile>("Collided"), prefix: new HarmonyMethod(GetMethod<Projectile_Collided_FF>("Prefix")), postfix: new HarmonyMethod(GetMethod<Projectile_Collided_FF>("Postfix")));
 
+                harmonyTweaks.Patch(GetMethod<EnemyIdentifier>("DeliverDamage"), prefix: new HarmonyMethod(GetMethod<EnemyIdentifier_DeliverDamage_FF>("Prefix")));
+                harmonyTweaks.Patch(GetMethod<Flammable>("Burn"), prefix: new HarmonyMethod(GetMethod<Flammable_Burn_FF>("Prefix")));
+            }
+            
             harmonyTweaks.Patch(GetMethod<StatueBoss>("Start"), postfix: new HarmonyMethod(GetMethod<StatueBoss_Start_Patch>("Postfix")));
             if (ConfigManager.cerberusDashToggle.value)
                 harmonyTweaks.Patch(GetMethod<StatueBoss>("StopDash"), postfix: new HarmonyMethod(GetMethod<StatueBoss_StopDash_Patch>("Postfix")));

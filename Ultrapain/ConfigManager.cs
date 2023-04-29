@@ -110,7 +110,10 @@ namespace Ultrapain
 
         // GLOBAL ENEMY CONFIG
         public static BoolField friendlyFireDamageOverrideToggle;
-        public static FloatSliderField friendlyFireDamageOverride;
+        public static FloatSliderField friendlyFireDamageOverrideExplosion;
+        public static FloatSliderField friendlyFireDamageOverrideProjectile;
+        public static FloatSliderField friendlyFireDamageOverrideFire;
+        public static FloatSliderField friendlyFireDamageOverrideMelee;
 
         // CERBERUS
         public static BoolField cerberusDashToggle;
@@ -551,15 +554,19 @@ namespace Ultrapain
 
             // GLOBAL ENEMY TWEAKS
             new ConfigHeader(globalEnemyPanel, "Friendly Fire Damage Override");
+            ConfigDivision ffDiv = new ConfigDivision(globalEnemyPanel, "ffDiv");
             friendlyFireDamageOverrideToggle = new BoolField(globalEnemyPanel, "Enabled", "friendlyFireDamageOverrideToggle", true);
             friendlyFireDamageOverrideToggle.onValueChange += (BoolField.BoolValueChangeEvent e) =>
             {
-                friendlyFireDamageOverride.interactable = e.value;
+                ffDiv.interactable = e.value;
                 dirtyField = true;
             };
-            friendlyFireDamageOverride = new FloatSliderField(globalEnemyPanel, "Friendly fire damage %", "friendlyFireDamageOverride", new System.Tuple<float, float>(0, 100), 50, 1);
             friendlyFireDamageOverrideToggle.TriggerValueChangeEvent();
-
+            friendlyFireDamageOverrideExplosion = new FloatSliderField(ffDiv, "Friendly-fire:\nExplosion damage %", "friendlyFireDamageOverrideExplosion", new System.Tuple<float, float>(0, 100), 50, 1);
+            friendlyFireDamageOverrideProjectile = new FloatSliderField(ffDiv, "Friendly-fire:\nProjectile damage %", "friendlyFireDamageOverrideProjectile", new System.Tuple<float, float>(0, 100), 50, 1);
+            friendlyFireDamageOverrideFire = new FloatSliderField(ffDiv, "Friendly-fire:\nFire damage %", "friendlyFireDamageOverrideFire", new System.Tuple<float, float>(0, 100), 50, 1);
+            friendlyFireDamageOverrideMelee = new FloatSliderField(ffDiv, "Friendly-fire:\nMelee damage %", "friendlyFireDamageOverrideMelee", new System.Tuple<float, float>(0, 100), 50, 1);
+            
             // CERBERUS
             new ConfigHeader(cerberusPanel, "Extra Dashes");
             ConfigDivision cerebusExtraDashDiv = new ConfigDivision(cerberusPanel, "cerberusExtraDashDiv");
