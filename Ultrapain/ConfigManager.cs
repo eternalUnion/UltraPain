@@ -269,6 +269,7 @@ namespace Ultrapain
         public static BoolField v2FirstCoreSnipeToggle;
         public static FloatField v2FirstCoreSnipeMaxDistanceToPlayer;
         public static FloatField v2FirstCoreSnipeMinDistanceToV2;
+        public static FloatField v2FirstCoreSnipeReactionTime;
 
         // V2 - SECOND
         public static BoolField v2SecondStartEnraged;
@@ -1085,6 +1086,7 @@ namespace Ultrapain
             v2FirstCoreSnipeToggle.TriggerValueChangeEvent();
             v2FirstCoreSnipeMaxDistanceToPlayer = new FloatField(v2FirstCoreSnipeDiv, "Max distance to player", "v2FirstCoreSnipeMaxDistanceToPlayer", 10f);
             v2FirstCoreSnipeMinDistanceToV2 = new FloatField(v2FirstCoreSnipeDiv, "Min distance to V2", "v2FirstCoreSnipeMinDistanceToV2", 20f);
+            v2FirstCoreSnipeReactionTime = new FloatField(v2FirstCoreSnipeDiv, "Reaction time", "v2FirstCoreSnipeReactionTime", 0.2f, 0f, 5f);
 
             // V2 - SECOND
             v2SecondStartEnraged = new BoolField(v2SecondPanel, "Start enraged", "v2SecondStartEnraged", true);

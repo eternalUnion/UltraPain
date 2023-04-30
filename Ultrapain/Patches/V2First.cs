@@ -10,6 +10,7 @@ namespace Ultrapain.Patches
     {
         public Collider v2collider;
         public float punchCooldown = 0f;
+        public Transform targetGrenade;
 
         void Update()
         {
@@ -42,12 +43,16 @@ namespace Ultrapain.Patches
     class V2FirstUpdate
     {
         static MethodInfo ShootWeapon = typeof(V2).GetMethod("ShootWeapon", BindingFlags.Instance | BindingFlags.NonPublic);
+        static MethodInfo SwitchWeapon = typeof(V2).GetMethod("SwitchWeapon", BindingFlags.Instance | BindingFlags.NonPublic);
         public static Transform targetGrenade;
 
         static bool Prefix(V2 __instance, ref int ___currentWeapon, ref Transform ___overrideTarget, ref Rigidbody ___overrideTargetRb, ref float ___shootCooldown,
-            ref bool ___aboutToShoot, ref EnemyIdentifier ___eid)
+            ref bool ___aboutToShoot, ref EnemyIdentifier ___eid, bool ___escaping)
         {
             if (__instance.secondEncounter)
+                return true;
+
+            if (!__instance.active || ___escaping)
                 return true;
 
             V2FirstFlag flag = __instance.GetComponent<V2FirstFlag>();
@@ -88,12 +93,43 @@ namespace Ultrapain.Patches
                 }
             }
 
+            // Core shooting
+            if (flag.targetGrenade == null && ConfigManager.v2FirstCoreSnipeToggle.value)
+            {
+                Transform closestGrenade = V2Utils.GetClosestGrenade();
+
+                if (closestGrenade != null)
+                {
+                    distanceToPlayer = Vector3.Distance(closestGrenade.position, PlayerTracker.Instance.GetTarget().position);
+                    float distanceToV2 = Vector3.Distance(closestGrenade.position, flag.v2collider.bounds.center);
+                    if (distanceToPlayer <= ConfigManager.v2FirstCoreSnipeMaxDistanceToPlayer.value && distanceToV2 >= ConfigManager.v2FirstCoreSnipeMinDistanceToV2.value)
+                    {
+                        flag.targetGrenade = closestGrenade;
+                        __instance.weapons[___currentWeapon].transform.GetChild(0).SendMessage("CancelAltCharge", SendMessageOptions.DontRequireReceiver);
+                        if (___currentWeapon != 0)
+                        {
+                            SwitchWeapon.Invoke(__instance, new object[1] { 0 });
+                        }
+                        __instance.CancelInvoke("ShootWeapon");
+                        __instance.CancelInvoke("AltShootWeapon");
+                        __instance.Invoke("ShootWeapon", ConfigManager.v2FirstCoreSnipeReactionTime.value / ___eid.totalSpeedModifier);
+
+                        ___shootCooldown = 1f;
+                        ___aboutToShoot = true;
+
+                        Debug.Log("Preparing to fire for grenade");
+                    }
+                }
+            }
+
             return true;
         }
     }
 
     class V2FirstShootWeapon
     {
+        static MethodInfo RevolverBeamStart = typeof(RevolverBeam).GetMethod("Start", BindingFlags.Instance | BindingFlags.NonPublic);
+
         static bool Prefix(V2 __instance, ref int ___currentWeapon)
         {
             if (__instance.secondEncounter)
@@ -106,7 +142,7 @@ namespace Ultrapain.Patches
             // PISTOL
             if (___currentWeapon == 0 && ConfigManager.v2FirstCoreSnipeToggle.value)
             {
-                Transform closestGrenade = V2Utils.GetClosestGrenade();
+                Transform closestGrenade = (flag.targetGrenade == null)? V2Utils.GetClosestGrenade() : flag.targetGrenade;
                 if (closestGrenade != null)
                 {
                     float distanceToPlayer = Vector3.Distance(closestGrenade.position, PlayerTracker.Instance.GetTarget().position);
@@ -119,6 +155,7 @@ namespace Ultrapain.Patches
                         if (revolverBeam.TryGetComponent<RevolverBeam>(out RevolverBeam comp))
                         {
                             comp.beamType = BeamType.Enemy;
+                            RevolverBeamStart.Invoke(comp, new object[0]);
                         }
 
                         __instance.ForceDodge(V2Utils.GetDirectionAwayFromTarget(flag.v2collider.bounds.center, closestGrenade.transform.position));
