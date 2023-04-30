@@ -13,6 +13,8 @@ namespace Ultrapain.Patches
         public V2RocketLauncher rocketLauncher;
         public V2MaliciousCannon maliciousCannon;
         public Collider v2collider;
+
+        public Transform targetGrenade;
     }
 
     public class V2RocketLauncher : MonoBehaviour
@@ -184,16 +186,16 @@ namespace Ultrapain.Patches
             else
             {
                 Transform playerTarget = PlayerTracker.Instance.GetTarget();
-                if (Physics.Raycast(new Ray(playerTarget.position, Vector3.down), out RaycastHit hit, 100f, new LayerMask() { value = (1 << 8 | 1 << 24) }, QueryTriggerInteraction.Ignore))
+                /*if (Physics.Raycast(new Ray(playerTarget.position, Vector3.down), out RaycastHit hit, 100f, new LayerMask() { value = (1 << 8 | 1 << 24) }, QueryTriggerInteraction.Ignore))
                 {
                     Debug.Log($"{debugTag} Targeted ground below player");
                     targetPosition = hit.point;
                 }
                 else
-                {
+                {*/
                     Debug.Log($"{debugTag} Targeted player with random spread");
                     targetPosition = playerTarget.transform.position + UnityEngine.Random.onUnitSphere * 2f;
-                }
+                //}
             }
 
             GameObject beam = Instantiate(Plugin.maliciousCannonBeam, v2trans.position, Quaternion.identity);
@@ -237,21 +239,43 @@ namespace Ultrapain.Patches
             if (flag.maliciousCannon.cooldown > 0)
                 flag.maliciousCannon.cooldown = Mathf.MoveTowards(flag.maliciousCannon.cooldown, 0, Time.deltaTime);
 
-            Transform target = V2Utils.GetClosestGrenade();
-            if (ConfigManager.v2SecondMalCannonSnipeToggle.value && target != null
-                && ___shootCooldown <= 0.9f && !___aboutToShoot && flag.maliciousCannon.cooldown == 0f)
+            if (flag.targetGrenade == null)
             {
-                float distanceToPlayer = Vector3.Distance(target.position, PlayerTracker.Instance.GetTarget().transform.position);
-                float distanceToV2 = Vector3.Distance(target.position, flag.v2collider.bounds.center);
-                if (distanceToPlayer <= ConfigManager.v2SecondMalCannonSnipeMaxDistanceToPlayer.value && distanceToV2 >= ConfigManager.v2SecondMalCannonSnipeMinDistanceToV2.value)
-                {
-                    V2SecondSwitchWeapon.SwitchWeapon.Invoke(__instance, new object[1] { 4 });
+                Transform target = V2Utils.GetClosestGrenade();
 
-                    ___shootCooldown = 1f;
-                    ___aboutToShoot = true;
-                    __instance.CancelInvoke("ShootWeapon");
-                    __instance.CancelInvoke("AltShootWeapon");
-                    __instance.Invoke("ShootWeapon", ConfigManager.v2SecondMalCannonSnipeReactTime.value / ___eid.totalSpeedModifier);
+                //if (ConfigManager.v2SecondMalCannonSnipeToggle.value && target != null
+                //    && ___shootCooldown <= 0.9f && !___aboutToShoot && flag.maliciousCannon.cooldown == 0f)
+                if(target != null)
+                {
+                    float distanceToPlayer = Vector3.Distance(target.position, PlayerTracker.Instance.GetTarget().transform.position);
+                    float distanceToV2 = Vector3.Distance(target.position, flag.v2collider.bounds.center);
+                    if (ConfigManager.v2SecondMalCannonSnipeToggle.value && flag.maliciousCannon.cooldown == 0 && distanceToPlayer <= ConfigManager.v2SecondMalCannonSnipeMaxDistanceToPlayer.value && distanceToV2 >= ConfigManager.v2SecondMalCannonSnipeMinDistanceToV2.value)
+                    {
+                        flag.targetGrenade = target;
+
+                        ___shootCooldown = 1f;
+                        ___aboutToShoot = true;
+                        __instance.weapons[___currentWeapon].transform.GetChild(0).SendMessage("CancelAltCharge", SendMessageOptions.DontRequireReceiver);
+                        __instance.CancelInvoke("ShootWeapon");
+                        __instance.CancelInvoke("AltShootWeapon");
+                        __instance.Invoke("ShootWeapon", ConfigManager.v2SecondMalCannonSnipeReactTime.value / ___eid.totalSpeedModifier);
+                        
+                        V2SecondSwitchWeapon.SwitchWeapon.Invoke(__instance, new object[1] { 4 });
+                    }
+                    else if(ConfigManager.v2SecondCoreSnipeToggle.value && distanceToPlayer <= ConfigManager.v2SecondCoreSnipeMaxDistanceToPlayer.value && distanceToV2 >= ConfigManager.v2SecondCoreSnipeMinDistanceToV2.value)
+                    {
+                        flag.targetGrenade = target;
+
+                        __instance.weapons[___currentWeapon].transform.GetChild(0).SendMessage("CancelAltCharge", SendMessageOptions.DontRequireReceiver);
+                        __instance.CancelInvoke("ShootWeapon");
+                        __instance.CancelInvoke("AltShootWeapon");
+                        __instance.Invoke("ShootWeapon", ConfigManager.v2SecondCoreSnipeReactionTime.value / ___eid.totalSpeedModifier);
+                        ___shootCooldown = 1f;
+                        ___aboutToShoot = true;
+
+                        V2SecondSwitchWeapon.SwitchWeapon.Invoke(__instance, new object[1] { 0 });
+                        Debug.Log("Preparing to fire for grenade");
+                    }
                 }
             }
 
@@ -272,7 +296,8 @@ namespace Ultrapain.Patches
 
             if (___currentWeapon == 0)
             {
-                Transform closestGrenade = V2Utils.GetClosestGrenade();
+                //Transform closestGrenade = V2Utils.GetClosestGrenade();
+                Transform closestGrenade = flag.targetGrenade;
                 if (closestGrenade != null && ConfigManager.v2SecondCoreSnipeToggle.value)
                 {
                     float distanceToPlayer = Vector3.Distance(closestGrenade.position, PlayerTracker.Instance.GetTarget().position);
@@ -447,6 +472,14 @@ namespace Ultrapain.Patches
             cannonComp.v2trans = __instance.transform;
             RemoveAlwaysOnTop(v2maliciousCannon.transform);
             flag.maliciousCannon = cannonComp;
+
+            EnemyRevolver rev = UnityUtils.GetComponentInChildrenRecursively<EnemyRevolver>(__instance.weapons[0].transform);
+            V2CommonRevolverComp revComp;
+            if (ConfigManager.v2SecondSharpshooterToggle.value)
+            {
+                revComp = rev.gameObject.AddComponent<V2CommonRevolverComp>();
+                revComp.secondPhase = __instance.secondEncounter;
+            }
 
             __instance.weapons = new GameObject[] { __instance.weapons[0], __instance.weapons[1], __instance.weapons[2], v2rocketLauncher, v2maliciousCannon };
         }

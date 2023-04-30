@@ -80,8 +80,11 @@ namespace Ultrapain.Patches
         }
     }
 
+    // SHARPSHOOTER
+
     class V2CommonRevolverComp : MonoBehaviour
     {
+        public bool secondPhase = false;
         public bool shootingForSharpshooter = false;
     }
 
@@ -91,7 +94,11 @@ namespace Ultrapain.Patches
         {
             if(__instance.TryGetComponent<V2CommonRevolverComp>(out V2CommonRevolverComp comp))
             {
-                bool sharp = UnityEngine.Random.Range(0f, 100f) <= ConfigManager.v2FirstSharpshooterChance.value;
+                if ((comp.secondPhase && !ConfigManager.v2SecondSharpshooterToggle.value)
+                    || (!comp.secondPhase && !ConfigManager.v2FirstSharpshooterToggle.value))
+                    return true;
+
+                bool sharp = UnityEngine.Random.Range(0f, 100f) <= (comp.secondPhase ? ConfigManager.v2SecondSharpshooterChance.value : ConfigManager.v2FirstSharpshooterChance.value);
 
                 Transform quad = ___altCharge.transform.Find("MuzzleFlash/Quad");
                 MeshRenderer quadRenderer = quad.gameObject.GetComponent<MeshRenderer>();
@@ -106,7 +113,8 @@ namespace Ultrapain.Patches
 
     class V2CommonRevolverBulletSharp : MonoBehaviour
     {
-        public int reflectionCount = ConfigManager.v2FirstSharpshooterReflections.value;
+        public int reflectionCount = 2;
+        public float autoAimAngle = 30f;
         public Collider lastCol;
         public bool collideWithPlayer = true;
         public bool alreadyDeflected = false;
@@ -233,6 +241,8 @@ namespace Ultrapain.Patches
 
                 GameObject bullet = GameObject.Instantiate(__instance.altBullet, position, __instance.shootPoint.rotation);
                 V2CommonRevolverBulletSharp bulletComp = bullet.AddComponent<V2CommonRevolverBulletSharp>();
+                bulletComp.autoAimAngle = comp.secondPhase ? ConfigManager.v2SecondSharpshooterAutoaimAngle.value : ConfigManager.v2FirstSharpshooterAutoaimAngle.value;
+                bulletComp.reflectionCount = comp.secondPhase ? ConfigManager.v2SecondSharpshooterReflections.value : ConfigManager.v2FirstSharpshooterReflections.value;
 
                 TrailRenderer rend = UnityUtils.GetComponentInChildrenRecursively<TrailRenderer>(bullet.transform);
                 rend.endColor = rend.startColor = new Color(1, 0, 0);
@@ -241,8 +251,8 @@ namespace Ultrapain.Patches
                 if (component)
                 {
                     component.safeEnemyType = __instance.safeEnemyType;
-                    component.speed *= ConfigManager.v2FirstSharpshooterSpeed.value;
-                    component.damage *= ConfigManager.v2FirstSharpshooterDamage.value;
+                    component.speed *= comp.secondPhase ? ConfigManager.v2SecondSharpshooterSpeed.value : ConfigManager.v2FirstSharpshooterSpeed.value;
+                    component.damage *= comp.secondPhase ? ConfigManager.v2SecondSharpshooterDamage.value : ConfigManager.v2FirstSharpshooterDamage.value;
                 }
 
                 LayerMask envMask = new LayerMask() { value = 1 << 8 | 1 << 24 };

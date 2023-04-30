@@ -297,6 +297,14 @@ namespace Ultrapain
         public static BoolField v2SecondCoreSnipeToggle;
         public static FloatField v2SecondCoreSnipeMaxDistanceToPlayer;
         public static FloatField v2SecondCoreSnipeMinDistanceToV2;
+        public static FloatField v2SecondCoreSnipeReactionTime;
+
+        public static BoolField v2SecondSharpshooterToggle;
+        public static FloatSliderField v2SecondSharpshooterChance;
+        public static FloatSliderField v2SecondSharpshooterAutoaimAngle;
+        public static IntField v2SecondSharpshooterReflections;
+        public static FloatField v2SecondSharpshooterDamage;
+        public static FloatField v2SecondSharpshooterSpeed;
 
         // SISYPHIUS INSTRUCTIONIST
         public static BoolField sisyInstBoulderShockwave;
@@ -1092,8 +1100,8 @@ namespace Ultrapain
                 dirtyField = true;
             };
             v2FirstCoreSnipeToggle.TriggerValueChangeEvent();
-            v2FirstCoreSnipeMaxDistanceToPlayer = new FloatField(v2FirstCoreSnipeDiv, "Max distance to player", "v2FirstCoreSnipeMaxDistanceToPlayer", 10f);
-            v2FirstCoreSnipeMinDistanceToV2 = new FloatField(v2FirstCoreSnipeDiv, "Min distance to V2", "v2FirstCoreSnipeMinDistanceToV2", 20f);
+            v2FirstCoreSnipeMaxDistanceToPlayer = new FloatField(v2FirstCoreSnipeDiv, "Max distance to player", "v2FirstCoreSnipeMaxDistanceToPlayer", 15f);
+            v2FirstCoreSnipeMinDistanceToV2 = new FloatField(v2FirstCoreSnipeDiv, "Min distance to V2", "v2FirstCoreSnipeMinDistanceToV2", 0f);
             v2FirstCoreSnipeReactionTime = new FloatField(v2FirstCoreSnipeDiv, "Reaction time", "v2FirstCoreSnipeReactionTime", 0.2f, 0f, 5f);
 
             new ConfigHeader(v2FirstPanel, "Sharpshooter");
@@ -1113,20 +1121,20 @@ namespace Ultrapain
             v2FirstSharpshooterToggle.TriggerValueChangeEvent();
 
             // V2 - SECOND
-            v2SecondStartEnraged = new BoolField(v2SecondPanel, "Start enraged", "v2SecondStartEnraged", true);
+            /*v2SecondStartEnraged = new BoolField(v2SecondPanel, "Start enraged", "v2SecondStartEnraged", true);
             v2SecondStartEnraged.onValueChange += (BoolField.BoolValueChangeEvent e) =>
             {
                 dirtyField = true;
-            };
+            };*/
             v2SecondRocketLauncherToggle = new BoolField(v2SecondPanel, "Use rocket launcher", "v2SecondRocketLauncherToggle", true);
             
-            v2SecondCoinRailcannon = new BoolField(v2SecondPanel, "Electric railcannon chargeback", "v2SecondCoinRailcannon", true);
+            /*v2SecondCoinRailcannon = new BoolField(v2SecondPanel, "Electric railcannon chargeback", "v2SecondCoinRailcannon", true);
             v2SecondCoinRailcannon.onValueChange += (BoolField.BoolValueChangeEvent e) =>
             {
                 v2SecondCoinRailcannonCooldown.interactable = e.value;
             };
             v2SecondCoinRailcannonCooldown = new FloatField(v2SecondPanel, "Electric railcannon cooldown", "v2SecondCoinRailcannonCooldown", 15f);
-            v2SecondCoinRailcannon.TriggerValueChangeEvent();
+            v2SecondCoinRailcannon.TriggerValueChangeEvent();*/
 
             ConfigDivision v2SecondFastCoinDiv = new ConfigDivision(v2SecondPanel, "v2SecondFastCoinDiv");
             new ConfigHeader(v2SecondPanel, "Shoot Coins Separately");
@@ -1153,7 +1161,7 @@ namespace Ultrapain
             v2SecondMalCannonSnipeCooldown = new FloatField(v2SecondMalCannonDiv, "Cooldown", "v2SecondMalCannonSnipeCooldown", 15f);
             v2SecondMalCannonSnipeReactTime = new FloatField(v2SecondMalCannonDiv, "React time", "v2SecondMalCannonSnipeReactTime", 0.2f);
             v2SecondMalCannonSnipeMaxDistanceToPlayer = new FloatField(v2SecondMalCannonDiv, "Max distance to player", "v2SecondMalCannonSnipeMaxDistanceToPlayer", 20f);
-            v2SecondMalCannonSnipeMinDistanceToV2 = new FloatField(v2SecondMalCannonDiv, "Min distance to V2", "v2SecondMalCannonSnipeMinDistanceToV2", 30f);
+            v2SecondMalCannonSnipeMinDistanceToV2 = new FloatField(v2SecondMalCannonDiv, "Min distance to V2", "v2SecondMalCannonSnipeMinDistanceToV2", 0f);
             ConfigDivision v2SecondSnipeDiv = new ConfigDivision(v2SecondPanel, "v2SecondSnipeDiv");
             new ConfigHeader(v2SecondPanel, "Grenade Snipe");
             v2SecondCoreSnipeToggle = new BoolField(v2SecondPanel, "Enabled", "v2SecondCoreSnipeToggle", true);
@@ -1163,8 +1171,25 @@ namespace Ultrapain
                 v2SecondSnipeDiv.interactable = e.value;
             };
             v2SecondCoreSnipeToggle.TriggerValueChangeEvent();
-            v2SecondCoreSnipeMaxDistanceToPlayer = new FloatField(v2SecondSnipeDiv, "Max distance to player", "v2SecondCoreSnipeMaxDistanceToPlayer", 10f);
-            v2SecondCoreSnipeMinDistanceToV2 = new FloatField(v2SecondSnipeDiv, "Min distance to V2", "v2SecondCoreSnipeMinDistanceToV2", 20f);
+            v2SecondCoreSnipeMaxDistanceToPlayer = new FloatField(v2SecondSnipeDiv, "Max distance to player", "v2SecondCoreSnipeMaxDistanceToPlayer", 15f);
+            v2SecondCoreSnipeMinDistanceToV2 = new FloatField(v2SecondSnipeDiv, "Min distance to V2", "v2SecondCoreSnipeMinDistanceToV2", 0f);
+            v2SecondCoreSnipeReactionTime = new FloatField(v2SecondSnipeDiv, "Reaction time", "v2SecondCoreSnipeReactionTime", 0.2f, 0f, 5f);
+
+            new ConfigHeader(v2SecondPanel, "Sharpshooter");
+            ConfigDivision v2SecondSharpShooterDiv = new ConfigDivision(v2SecondPanel, "v2SecondSharpShooterDiv");
+            v2SecondSharpshooterToggle = new BoolField(v2SecondPanel, "Enabled", "v2SecondSharpshooterToggle", true);
+            v2SecondSharpshooterToggle.presetLoadPriority = 1;
+            v2SecondSharpshooterToggle.onValueChange += (BoolField.BoolValueChangeEvent e) =>
+            {
+                v2SecondSharpShooterDiv.interactable = e.value;
+                dirtyField = true;
+            };
+            v2SecondSharpshooterChance = new FloatSliderField(v2SecondSharpShooterDiv, "Chance", "v2SecondSharpshooterChance", new System.Tuple<float, float>(0, 100), 50, 1);
+            v2SecondSharpshooterAutoaimAngle = new FloatSliderField(v2SecondSharpShooterDiv, "Autoaim angle maximum", "v2SecondSharpshooterAutoaimAngle", new System.Tuple<float, float>(0, 180), 30, 1);
+            v2SecondSharpshooterReflections = new IntField(v2SecondSharpShooterDiv, "Ricochet count", "v2SecondSharpshooterReflections", 2);
+            v2SecondSharpshooterDamage = new FloatField(v2SecondSharpShooterDiv, "Damage multiplier", "v2SecondSharpshooterDamage", 1f);
+            v2SecondSharpshooterSpeed = new FloatField(v2SecondSharpShooterDiv, "Speed multiplier", "v2SecondSharpshooterSpeed", 1f);
+            v2SecondSharpshooterToggle.TriggerValueChangeEvent();
 
             // SISYPHIUS INSTRUCTIONIST
             new ConfigHeader(sisyInstPanel, "Boulder Creates Shockwaves");

@@ -418,8 +418,8 @@ namespace Ultrapain
             harmonyTweaks.Patch(GetMethod<V2>("ShootWeapon"), prefix: new HarmonyMethod(GetMethod<V2FirstShootWeapon>("Prefix")));
 
             harmonyTweaks.Patch(GetMethod<V2>("Start"), postfix: new HarmonyMethod(GetMethod<V2SecondStart>("Postfix")));
-            if(ConfigManager.v2SecondStartEnraged.value)
-                harmonyTweaks.Patch(GetMethod<BossHealthBar>("OnEnable"), postfix: new HarmonyMethod(GetMethod<V2SecondEnrage>("Postfix")));
+            //if(ConfigManager.v2SecondStartEnraged.value)
+            //    harmonyTweaks.Patch(GetMethod<BossHealthBar>("OnEnable"), postfix: new HarmonyMethod(GetMethod<V2SecondEnrage>("Postfix")));
             harmonyTweaks.Patch(GetMethod<V2>("Update"), prefix: new HarmonyMethod(GetMethod<V2SecondUpdate>("Prefix")));
             //harmonyTweaks.Patch(GetMethod<V2>("AltShootWeapon"), postfix: new HarmonyMethod(GetMethod<V2AltShootWeapon>("Postfix")));
             harmonyTweaks.Patch(GetMethod<V2>("SwitchWeapon"), prefix: new HarmonyMethod(GetMethod<V2SecondSwitchWeapon>("Prefix")));
@@ -428,7 +428,7 @@ namespace Ultrapain
                 harmonyTweaks.Patch(GetMethod<V2>("ThrowCoins"), prefix: new HarmonyMethod(GetMethod<V2SecondFastCoin>("Prefix")));
             harmonyTweaks.Patch(GetMethod<Cannonball>("OnTriggerEnter"), prefix: new HarmonyMethod(GetMethod<V2RocketLauncher>("CannonBallTriggerPrefix")));
 
-            if (ConfigManager.v2FirstSharpshooterToggle.value)
+            if (ConfigManager.v2FirstSharpshooterToggle.value || ConfigManager.v2SecondSharpshooterToggle.value)
             {
                 harmonyTweaks.Patch(GetMethod<EnemyRevolver>("PrepareAltFire"), prefix: new HarmonyMethod(GetMethod<V2CommonRevolverPrepareAltFire>("Prefix")));
                 harmonyTweaks.Patch(GetMethod<Projectile>("Collided"), prefix: new HarmonyMethod(GetMethod<V2CommonRevolverBullet>("Prefix")));

@@ -179,8 +179,9 @@ namespace Ultrapain.Patches
             flag.v2collider = __instance.GetComponent<Collider>();
 
             EnemyRevolver rev = UnityUtils.GetComponentInChildrenRecursively<EnemyRevolver>(___weapons[0].transform);
-            V2CommonRevolverComp revComp = rev.gameObject.AddComponent<V2CommonRevolverComp>();
-
+            V2CommonRevolverComp revComp;
+            if (ConfigManager.v2FirstSharpshooterToggle.value)
+                revComp = rev.gameObject.AddComponent<V2CommonRevolverComp>();
         }
     }
 }
