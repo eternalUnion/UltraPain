@@ -335,9 +335,11 @@ namespace Ultrapain
                 harmonyTweaks.Patch(GetMethod<Mass>("ShootExplosive"), postfix: new HarmonyMethod(GetMethod<HideousMassHoming>("Postfix")), prefix: new HarmonyMethod(GetMethod<HideousMassHoming>("Prefix")));
             }
 
+            harmonyTweaks.Patch(GetMethod<SpiderBody>("Start"), postfix: new HarmonyMethod(GetMethod<MaliciousFace_Start_Patch>("Postfix")));
+            harmonyTweaks.Patch(GetMethod<SpiderBody>("ChargeBeam"), postfix: new HarmonyMethod(GetMethod<MaliciousFace_ChargeBeam>("Postfix")));
+            harmonyTweaks.Patch(GetMethod<SpiderBody>("BeamChargeEnd"), prefix: new HarmonyMethod(GetMethod<MaliciousFace_BeamChargeEnd>("Prefix")));
             if (ConfigManager.maliciousFaceHomingProjectileToggle.value)
             {
-                harmonyTweaks.Patch(GetMethod<SpiderBody>("Start"), postfix: new HarmonyMethod(GetMethod<MaliciousFace_Start_Patch>("Postfix")));
                 harmonyTweaks.Patch(GetMethod<SpiderBody>("ShootProj"), postfix: new HarmonyMethod(GetMethod<MaliciousFace_ShootProj_Patch>("Postfix")));
             }
             if (ConfigManager.maliciousFaceRadianceOnEnrage.value)

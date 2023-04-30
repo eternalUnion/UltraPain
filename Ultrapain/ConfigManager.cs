@@ -189,6 +189,8 @@ namespace Ultrapain
         public static IntField maliciousFaceHomingProjectileDamage;
         public static FloatField maliciousFaceHomingProjectileTurnSpeed;
         public static FloatField maliciousFaceHomingProjectileSpeed;
+        public static IntField maliciousFaceBeamCountNormal;
+        public static IntField maliciousFaceBeamCountEnraged;
 
         // MINDFLAYER
         public static BoolField mindflayerShootTweakToggle;
@@ -321,6 +323,7 @@ namespace Ultrapain
             // ROOT PANEL
             new ConfigHeader(config.rootPanel, "Enemy Tweaks");
             enemyTweakToggle = new BoolField(config.rootPanel, "Enabled", "enemyTweakToggle", true);
+            enemyTweakToggle.presetLoadPriority = 1;
             enemyPanel = new ConfigPanel(config.rootPanel, "Enemy Tweaks", "enemyTweakPanel");
             enemyTweakToggle.onValueChange += (BoolField.BoolValueChangeEvent data) =>
             {
@@ -331,6 +334,7 @@ namespace Ultrapain
 
             new ConfigHeader(config.rootPanel, "Player Tweaks");
             playerTweakToggle = new BoolField(config.rootPanel, "Enabled", "playerTweakToggle", true);
+            playerTweakToggle.presetLoadPriority = 1;
             playerPanel = new ConfigPanel(config.rootPanel, "Player Tweaks", "enemyTweakPanel");
             playerTweakToggle.onValueChange += (BoolField.BoolValueChangeEvent data) =>
             {
@@ -382,6 +386,7 @@ namespace Ultrapain
             new ConfigHeader(playerPanel, "Rocket Boosting");
             ConfigDivision rocketBoostDiv = new ConfigDivision(playerPanel, "rocketBoostDiv");
             rocketBoostToggle = new BoolField(playerPanel, "Enabled", "rocketBoostToggle", true);
+            rocketBoostToggle.presetLoadPriority = 1;
             rocketBoostToggle.onValueChange += (BoolField.BoolValueChangeEvent e) =>
             {
                 rocketBoostDiv.interactable = e.value;
@@ -405,6 +410,7 @@ namespace Ultrapain
             new ConfigHeader(playerPanel, "Grenade Boosting");
             ConfigDivision grenadeBoostDiv = new ConfigDivision(playerPanel, "grenadeBoostDiv");
             grenadeBoostToggle = new BoolField(playerPanel, "Enabled", "grenadeBoostToggle", true);
+            grenadeBoostToggle.presetLoadPriority = 1;
             grenadeBoostToggle.onValueChange += (BoolField.BoolValueChangeEvent e) =>
             {
                 grenadeBoostDiv.interactable = e.value;
@@ -420,6 +426,7 @@ namespace Ultrapain
             new ConfigHeader(playerPanel, "(Tweaks for coin-knuckleblaster)", 16);
             ConfigDivision orbStrikeDiv = new ConfigDivision(playerPanel, "orbStrikeDiv");
             orbStrikeToggle = new BoolField(playerPanel, "Enabled", "orbStrikeToggle", true);
+            orbStrikeToggle.presetLoadPriority = 1;
             orbStrikeToggle.onValueChange += (BoolField.BoolValueChangeEvent e) =>
             {
                 orbStrikeDiv.interactable = e.value;
@@ -433,6 +440,7 @@ namespace Ultrapain
             new ConfigHeader(orbStrikeDiv, "--Grenade Explosion Boost--", 12);
             ConfigDivision orbStrikeRevolverGrenadeDiv = new ConfigDivision(orbStrikeDiv, "orbStrikeRevolverGrenadeDiv");
             orbStrikeRevolverGrenade = new BoolField(orbStrikeDiv, "Enabled", "orbStrikeRevolverGrenade", true);
+            orbStrikeRevolverGrenade.presetLoadPriority = 1;
             orbStrikeRevolverGrenade.onValueChange += (BoolField.BoolValueChangeEvent e) =>
             {
                 orbStrikeRevolverGrenadeDiv.interactable = e.value;
@@ -443,6 +451,7 @@ namespace Ultrapain
             new ConfigHeader(orbStrikeDiv, "--Explosion On Enemy Hit--", 12);
             ConfigDivision orbStrikeRevolverExplosionDiv = new ConfigDivision(orbStrikeDiv, "orbStrikeRevolverExplosionDiv");
             orbStrikeRevolverExplosion = new BoolField(orbStrikeDiv, "Enabled", "orbStrikeRevolverExplosion", true);
+            orbStrikeRevolverExplosion.presetLoadPriority = 1;
             orbStrikeRevolverExplosion.onValueChange += (BoolField.BoolValueChangeEvent e) =>
             {
                 orbStrikeRevolverExplosionDiv.interactable = e.value;
@@ -457,6 +466,7 @@ namespace Ultrapain
             new ConfigHeader(orbStrikeDiv, "--Grenade Explosion Boost--", 12);
             ConfigDivision orbStrikeRevolverChargedGrenadeDiv = new ConfigDivision(orbStrikeDiv, "orbStrikeRevolverGrenadeDiv");
             orbStrikeRevolverChargedGrenade = new BoolField(orbStrikeDiv, "Enabled", "orbStrikeRevolverChargedGrenade", true);
+            orbStrikeRevolverChargedGrenade.presetLoadPriority = 1;
             orbStrikeRevolverChargedGrenade.onValueChange += (BoolField.BoolValueChangeEvent e) =>
             {
                 orbStrikeRevolverChargedGrenadeDiv.interactable = e.value;
@@ -467,6 +477,7 @@ namespace Ultrapain
             new ConfigHeader(orbStrikeDiv, "--Insignia On Enemy Hit--", 12);
             ConfigDivision orbStrikeRevolverChargedInsigniaDiv = new ConfigDivision(orbStrikeDiv, "orbStrikeRevolverChargedInsigniaDiv");
             orbStrikeRevolverChargedInsignia = new BoolField(orbStrikeDiv, "Enabled", "orbStrikeRevolverChargedInsignia", true);
+            orbStrikeRevolverChargedInsignia.presetLoadPriority = 1;
             orbStrikeRevolverChargedInsignia.onValueChange += (BoolField.BoolValueChangeEvent e) =>
             {
                 orbStrikeRevolverChargedInsigniaDiv.interactable = e.value;
@@ -482,6 +493,7 @@ namespace Ultrapain
             new ConfigHeader(orbStrikeDiv, "--Grenade Explosion Boost--", 12);
             ConfigDivision orbStrikeElectricCannonGrenadeDiv = new ConfigDivision(orbStrikeDiv, "orbStrikeRevolverGrenadeDiv");
             orbStrikeElectricCannonGrenade = new BoolField(orbStrikeDiv, "Enabled", "orbStrikeElectricCannonGrenade", true);
+            orbStrikeElectricCannonGrenade.presetLoadPriority = 1;
             orbStrikeElectricCannonGrenade.onValueChange += (BoolField.BoolValueChangeEvent e) =>
             {
                 orbStrikeElectricCannonGrenadeDiv.interactable = e.value;
@@ -492,6 +504,7 @@ namespace Ultrapain
             new ConfigHeader(orbStrikeDiv, "--Lightning Bolt On Enemy Hit--", 12);
             ConfigDivision orbStrikeElectricCannonExplosionDiv = new ConfigDivision(orbStrikeDiv, "orbStrikeRevolverGrenadeDiv");
             orbStrikeElectricCannonExplosion = new BoolField(orbStrikeDiv, "Enabled", "orbStrikeElectricCannonExplosion", true);
+            orbStrikeElectricCannonExplosion.presetLoadPriority = 1;
             orbStrikeElectricCannonExplosion.onValueChange += (BoolField.BoolValueChangeEvent e) =>
             {
                 orbStrikeElectricCannonExplosionDiv.interactable = e.value;
@@ -507,6 +520,7 @@ namespace Ultrapain
             new ConfigHeader(orbStrikeDiv, "--Grenade Explosion Boost--", 12);
             ConfigDivision orbStrikeMaliciousCannonGrenadeDiv = new ConfigDivision(orbStrikeDiv, "orbStrikeMaliciousCannonGrenadeDiv");
             orbStrikeMaliciousCannonGrenade = new BoolField(orbStrikeDiv, "Enabled", "orbStrikeMaliciousCannonGrenade", true);
+            orbStrikeMaliciousCannonGrenade.presetLoadPriority = 1;
             orbStrikeMaliciousCannonGrenade.onValueChange += (BoolField.BoolValueChangeEvent e) =>
             {
                 orbStrikeMaliciousCannonGrenadeDiv.interactable = e.value;
@@ -517,6 +531,7 @@ namespace Ultrapain
             new ConfigHeader(orbStrikeDiv, "--Stronger Malicious Explosion--", 12);
             ConfigDivision orbStrikeMaliciousCannonExplosionDiv = new ConfigDivision(orbStrikeDiv, "orbStrikeMaliciousCannonExplosionDiv");
             orbStrikeMaliciousCannonExplosion = new BoolField(orbStrikeDiv, "Enabled", "orbStrikeMaliciousCannonExplosion", true);
+            orbStrikeMaliciousCannonExplosion.presetLoadPriority = 1;
             orbStrikeMaliciousCannonExplosion.onValueChange += (BoolField.BoolValueChangeEvent e) =>
             {
                 orbStrikeMaliciousCannonExplosionDiv.interactable = e.value;
@@ -556,6 +571,7 @@ namespace Ultrapain
             new ConfigHeader(globalEnemyPanel, "Friendly Fire Damage Override");
             ConfigDivision ffDiv = new ConfigDivision(globalEnemyPanel, "ffDiv");
             friendlyFireDamageOverrideToggle = new BoolField(globalEnemyPanel, "Enabled", "friendlyFireDamageOverrideToggle", true);
+            friendlyFireDamageOverrideToggle.presetLoadPriority = 1;
             friendlyFireDamageOverrideToggle.onValueChange += (BoolField.BoolValueChangeEvent e) =>
             {
                 ffDiv.interactable = e.value;
@@ -571,6 +587,7 @@ namespace Ultrapain
             new ConfigHeader(cerberusPanel, "Extra Dashes");
             ConfigDivision cerebusExtraDashDiv = new ConfigDivision(cerberusPanel, "cerberusExtraDashDiv");
             cerberusDashToggle = new BoolField(cerberusPanel, "Enabled", "cerberusDashToggle", true);
+            cerberusDashToggle.presetLoadPriority = 1;
             cerberusDashToggle.onValueChange += (BoolField.BoolValueChangeEvent e) =>
             {
                 cerebusExtraDashDiv.interactable = e.value;
@@ -587,6 +604,7 @@ namespace Ultrapain
             };
             ConfigDivision droneSentryBeamDiv = new ConfigDivision(dronePanel, "droneSentryBeamDiv");
             droneSentryBeamToggle = new BoolField(dronePanel, "Can shoot sentry beam", "droneSentryBeamToggle", true);
+            droneSentryBeamToggle.presetLoadPriority = 1;
             droneSentryBeamToggle.onValueChange += (BoolField.BoolValueChangeEvent e) =>
             {
                 droneSentryBeamDiv.interactable = e.value;
@@ -599,6 +617,7 @@ namespace Ultrapain
             new ConfigHeader(filthPanel, "Explode On Hit");
             ConfigDivision filthExplosionDiv = new ConfigDivision(filthPanel, "filthExplosionDiv");
             filthExplodeToggle = new BoolField(filthPanel, "Enabled", "filthExplodeOnHit", true);
+            filthExplodeToggle.presetLoadPriority = 1;
             filthExplodeToggle.onValueChange += (BoolField.BoolValueChangeEvent e) =>
             {
                 filthExplosionDiv.interactable = e.value;
@@ -613,6 +632,7 @@ namespace Ultrapain
             new ConfigHeader(hideousMassPanel, "Insignia On Projectile Hit");
             ConfigDivision hideousMassInsigniaDiv = new ConfigDivision(hideousMassPanel, "hideousMassInsigniaDiv");
             hideousMassInsigniaToggle = new BoolField(hideousMassPanel, "Enabled", "hideousMassInsigniaToggle", true);
+            hideousMassInsigniaToggle.presetLoadPriority = 1;
             hideousMassInsigniaToggle.onValueChange += (BoolField.BoolValueChangeEvent e) =>
             {
                 hideousMassInsigniaDiv.interactable = e.value;
@@ -623,6 +643,7 @@ namespace Ultrapain
             new ConfigHeader(hideousMassInsigniaDiv, "Vertical Insignia", 12);
             ConfigDivision hideousMassInsigniaYdiv = new ConfigDivision(hideousMassInsigniaDiv, "hideousMassInsigniaYdiv");
             hideousMassInsigniaYtoggle = new BoolField(hideousMassInsigniaDiv, "Enabled", "hideousMassInsigniaYtoggle", true);
+            hideousMassInsigniaYtoggle.presetLoadPriority = 1;
             hideousMassInsigniaYtoggle.onValueChange += (BoolField.BoolValueChangeEvent e) =>
             {
                 hideousMassInsigniaYdiv.interactable = e.value;
@@ -633,6 +654,7 @@ namespace Ultrapain
             new ConfigHeader(hideousMassInsigniaDiv, "Forward Insignia", 12);
             ConfigDivision hideousMassInsigniaZdiv = new ConfigDivision(hideousMassInsigniaDiv, "hideousMassInsigniaZdiv");
             hideousMassInsigniaZtoggle = new BoolField(hideousMassInsigniaDiv, "Enabled", "hideousMassInsigniaZtoggle", false);
+            hideousMassInsigniaZtoggle.presetLoadPriority = 1;
             hideousMassInsigniaZtoggle.onValueChange += (BoolField.BoolValueChangeEvent e) =>
             {
                 hideousMassInsigniaZdiv.interactable = e.value;
@@ -643,6 +665,7 @@ namespace Ultrapain
             new ConfigHeader(hideousMassInsigniaDiv, "Side Insignia", 12);
             ConfigDivision hideousMassInsigniaXdiv = new ConfigDivision(hideousMassInsigniaDiv, "hideousMassInsigniaXdiv");
             hideousMassInsigniaXtoggle = new BoolField(hideousMassInsigniaDiv, "Enabled", "hideousMassInsigniaXtoggle", false);
+            hideousMassInsigniaXtoggle.presetLoadPriority = 1;
             hideousMassInsigniaXtoggle.onValueChange += (BoolField.BoolValueChangeEvent e) =>
             {
                 hideousMassInsigniaXdiv.interactable = e.value;
@@ -655,6 +678,7 @@ namespace Ultrapain
             new ConfigHeader(maliciousFacePanel, "Radiance When Enraged");
             ConfigDivision maliciousFaceRadianceOnEnrageDiv = new ConfigDivision(maliciousFacePanel, "maliciousFaceRadianceOnEnrageDiv");
             maliciousFaceRadianceOnEnrage = new BoolField(maliciousFacePanel, "Enabled", "maliciousFaceRadianceWhenEnraged", true);
+            maliciousFaceRadianceOnEnrage.presetLoadPriority = 1;
             maliciousFaceRadianceOnEnrage.onValueChange += (BoolField.BoolValueChangeEvent e) =>
             {
                 maliciousFaceRadianceOnEnrageDiv.interactable = e.value;
@@ -665,6 +689,7 @@ namespace Ultrapain
             new ConfigHeader(maliciousFacePanel, "Homing Projectile");
             ConfigDivision maliciousFaceHomingProjecileDiv = new ConfigDivision(maliciousFacePanel, "maliciousFaceHomingProjecileDiv");
             maliciousFaceHomingProjectileToggle = new BoolField(maliciousFacePanel, "Enabled", "maliciousFaceHomingProjectileToggle", true);
+            maliciousFaceHomingProjectileToggle.presetLoadPriority = 1;
             maliciousFaceHomingProjectileToggle.onValueChange += (BoolField.BoolValueChangeEvent e) =>
             {
                 maliciousFaceHomingProjecileDiv.interactable = e.value;
@@ -675,11 +700,15 @@ namespace Ultrapain
             maliciousFaceHomingProjectileDamage = new IntField(maliciousFaceHomingProjecileDiv, "Projectile damage", "maliciousFaceHomingProjectileDamage", 25);
             maliciousFaceHomingProjectileSpeed = new FloatField(maliciousFaceHomingProjecileDiv, "Projectile speed", "maliciousFaceHomingProjectileSpeed", 20f);
             maliciousFaceHomingProjectileTurnSpeed = new FloatField(maliciousFaceHomingProjecileDiv, "Projectile turn speed", "maliciousFaceHomingProjectileTurnSpeed", 0.4f);
+            new ConfigHeader(maliciousFacePanel, "Beam Count");
+            maliciousFaceBeamCountNormal = new IntField(maliciousFacePanel, "Normal state", "maliciousFaceBeamCountNormal", 1);
+            maliciousFaceBeamCountEnraged = new IntField(maliciousFacePanel, "Enraged state", "maliciousFaceBeamCountEnraged", 2);
 
             // MINDFLAYER
             new ConfigHeader(mindflayerPanel, "Shoot Tweak");
             ConfigDivision mindflayerShootTweakDiv = new ConfigDivision(mindflayerPanel, "mindflayerShootTweakDiv");
             mindflayerShootTweakToggle = new BoolField(mindflayerPanel, "Enabled", "mindflayerShootTweakToggle", true);
+            mindflayerShootTweakToggle.presetLoadPriority = 1;
             mindflayerShootTweakToggle.onValueChange += (BoolField.BoolValueChangeEvent e) =>
             {
                 mindflayerShootTweakDiv.interactable = e.value;
@@ -700,6 +729,7 @@ namespace Ultrapain
             new ConfigHeader(schismPanel, "Spread Attack");
             ConfigDivision schismSpreadAttackDiv = new ConfigDivision(schismPanel, "schismSpreadAttackDiv");
             schismSpreadAttackToggle = new BoolField(schismPanel, "Enabled", "schismSpreadAttackToggle", true);
+            schismSpreadAttackToggle.presetLoadPriority = 1;
             schismSpreadAttackToggle.onValueChange += (BoolField.BoolValueChangeEvent e) =>
             {
                 schismSpreadAttackDiv.interactable = e.value;
@@ -719,6 +749,7 @@ namespace Ultrapain
             new ConfigHeader(soliderPanel, "Shoot Tweak");
             ConfigDivision soliderShootTweakDiv = new ConfigDivision(soliderPanel, "soliderShootTweakDiv");
             soliderShootTweakToggle = new BoolField(soliderPanel, "Enabled", "soliderShootTweakToggle", true);
+            soliderShootTweakToggle.presetLoadPriority = 1;
             soliderShootTweakToggle.onValueChange += (BoolField.BoolValueChangeEvent e) =>
             {
                 soliderShootTweakDiv.interactable = e.value;
@@ -729,6 +760,7 @@ namespace Ultrapain
             new ConfigHeader(soliderPanel, "Shoot Grenade");
             ConfigDivision soliderShootGrenadeDiv = new ConfigDivision(soliderPanel, "soliderShootGrenadeDiv");
             soliderShootGrenadeToggle = new BoolField(soliderPanel, "Enabled", "soliderShootGrenade", true);
+            soliderShootGrenadeToggle.presetLoadPriority = 1;
             soliderShootGrenadeToggle.onValueChange += (BoolField.BoolValueChangeEvent e) =>
             {
                 soliderShootGrenadeDiv.interactable = e.value;
@@ -749,6 +781,7 @@ namespace Ultrapain
             new ConfigHeader(strayPanel, "Shoot Tweak");
             ConfigDivision strayShootDiv = new ConfigDivision(strayPanel, "strayShootDiv");
             strayShootToggle = new BoolField(strayPanel, "Enabled", "strayShootToggle", true);
+            strayShootToggle.presetLoadPriority = 1;
             strayShootToggle.onValueChange += (BoolField.BoolValueChangeEvent e) =>
             {
                 strayShootDiv.interactable = e.value;
@@ -788,6 +821,7 @@ namespace Ultrapain
             new ConfigHeader(swordsMachinePanel, "Explosive Sword Throw");
             ConfigDivision swordsMachineExplosiveSwordDiv = new ConfigDivision(swordsMachinePanel, "swordsMachineExplosiveSwordDiv");
             swordsMachineExplosiveSwordToggle = new BoolField(swordsMachinePanel, "Enabled", "swordsMachineExplosiveSwordToggle", true);
+            swordsMachineExplosiveSwordToggle.presetLoadPriority = 1;
             swordsMachineExplosiveSwordToggle.onValueChange += (BoolField.BoolValueChangeEvent e) =>
             {
                 swordsMachineExplosiveSwordDiv.interactable = e.value;
@@ -801,6 +835,7 @@ namespace Ultrapain
             new ConfigHeader(virtuePanel, "Tweak Normal Attack");
             ConfigDivision virtueTweakNormalAttackDiv = new ConfigDivision(virtuePanel, "virtueTweakNormalAttackDiv");
             virtueTweakNormalAttackToggle = new BoolField(virtuePanel, "Enabled", "virtueTweakNormalAttackToggle", true);
+            virtueTweakNormalAttackToggle.presetLoadPriority = 1;
             virtueTweakNormalAttackToggle.onValueChange += (BoolField.BoolValueChangeEvent e) =>
             {
                 virtueTweakNormalAttackDiv.interactable = e.value;
@@ -813,6 +848,7 @@ namespace Ultrapain
             ConfigDivision virtueNormalYInsigniaDiv = new ConfigDivision(virtueNormalInsigniaDiv, "virtueNormalYInsigniaDiv");
             new ConfigHeader(virtueNormalInsigniaDiv, "Vertical Insignia", 12);
             virtueNormalInsigniaYtoggle = new BoolField(virtueNormalInsigniaDiv, "Enabled", "virtueNormalInsigniaYtoggle", true);
+            virtueNormalInsigniaYtoggle.presetLoadPriority = 1;
             virtueNormalInsigniaYtoggle.onValueChange += (BoolField.BoolValueChangeEvent e) =>
             {
                 virtueNormalYInsigniaDiv.interactable = e.value;
@@ -824,6 +860,7 @@ namespace Ultrapain
             ConfigDivision virtueNormalZInsigniaDiv = new ConfigDivision(virtueNormalInsigniaDiv, "virtueNormalZInsigniaDiv");
             new ConfigHeader(virtueNormalInsigniaDiv, "Forward Insignia", 12);
             virtueNormalInsigniaZtoggle = new BoolField(virtueNormalInsigniaDiv, "Enabled", "virtueNormalInsigniaZtoggle", false);
+            virtueNormalInsigniaZtoggle.presetLoadPriority = 1;
             virtueNormalInsigniaZtoggle.onValueChange += (BoolField.BoolValueChangeEvent e) =>
             {
                 virtueNormalZInsigniaDiv.interactable = e.value;
@@ -835,6 +872,7 @@ namespace Ultrapain
             ConfigDivision virtueNormalXInsigniaDiv = new ConfigDivision(virtueNormalInsigniaDiv, "virtueNormalXInsigniaDiv");
             new ConfigHeader(virtueNormalInsigniaDiv, "Side Insignia", 12);
             virtueNormalInsigniaXtoggle = new BoolField(virtueNormalInsigniaDiv, "Enabled", "virtueNormalInsigniaXtoggle", false);
+            virtueNormalInsigniaXtoggle.presetLoadPriority = 1;
             virtueNormalInsigniaXtoggle.onValueChange += (BoolField.BoolValueChangeEvent e) =>
             {
                 virtueNormalXInsigniaDiv.interactable = e.value;
@@ -848,6 +886,7 @@ namespace Ultrapain
             //virtueNormalLightningSize = new FloatField(virtuePanel, "Size multiplier", "virtueNormalLightningSize", 1f);
             virtueNormalLightningDelay = new FloatField(virtueNormalLigthningDiv, "Lighning delay", "virtueNormalLightningDelay", 3f);
 
+            virtueNormalAttackType.presetLoadPriority = 1;
             virtueNormalAttackType.onValueChange += (EnumField<VirtueAttackType>.EnumValueChangeEvent newType) =>
             {
                 if (newType.value == VirtueAttackType.Insignia)
@@ -866,6 +905,7 @@ namespace Ultrapain
             new ConfigHeader(virtuePanel, "Tweak Enraged Attack");
             ConfigDivision virtueTweakEnragedAttackDiv = new ConfigDivision(virtuePanel, "virtueTweakEnragedAttackDiv");
             virtueTweakEnragedAttackToggle = new BoolField(virtuePanel, "Enabled", "virtueTweakEnragedAttackToggle", true);
+            virtueTweakEnragedAttackToggle.presetLoadPriority = 1;
             virtueTweakEnragedAttackToggle.onValueChange += (BoolField.BoolValueChangeEvent e) =>
             {
                 virtueTweakEnragedAttackDiv.interactable = e.value;
@@ -878,6 +918,7 @@ namespace Ultrapain
             ConfigHeader virtueEnragedYInsigniaHeader = new ConfigHeader(virtueEnragedInsigniaDiv, "Vertical Insignia", 12);
             ConfigDivision virtueEnragedYInsigniaDiv = new ConfigDivision(virtueEnragedInsigniaDiv, "virtueEnragedYInsigniaDiv");
             virtueEnragedInsigniaYtoggle = new BoolField(virtueEnragedInsigniaDiv, "Enabled", "virtueEnragedInsigniaYtoggle", true);
+            virtueEnragedInsigniaYtoggle.presetLoadPriority = 1;
             virtueEnragedInsigniaYtoggle.onValueChange += (BoolField.BoolValueChangeEvent e) =>
             {
                 virtueEnragedYInsigniaDiv.interactable = e.value;
@@ -890,6 +931,7 @@ namespace Ultrapain
             ConfigHeader virtueEnragedZInsigniaHeader = new ConfigHeader(virtueEnragedInsigniaDiv, "Forward Insignia", 12);
             ConfigDivision virtueEnragedZInsigniaDiv = new ConfigDivision(virtueEnragedInsigniaDiv, "virtueEnragedZInsigniaDiv");
             virtueEnragedInsigniaZtoggle = new BoolField(virtueEnragedInsigniaDiv, "Enabled", "virtueEnragedInsigniaZtoggle", true);
+            virtueEnragedInsigniaZtoggle.presetLoadPriority = 1;
             virtueEnragedInsigniaZtoggle.onValueChange += (BoolField.BoolValueChangeEvent e) =>
             {
                 virtueEnragedZInsigniaDiv.interactable = e.value;
@@ -902,6 +944,7 @@ namespace Ultrapain
             ConfigHeader virtueEnragedXInsigniaHeader = new ConfigHeader(virtueEnragedInsigniaDiv, "Side Insignia", 12);
             ConfigDivision virtueEnragedXInsigniaDiv = new ConfigDivision(virtueEnragedInsigniaDiv, "virtueEnragedXInsigniaDiv");
             virtueEnragedInsigniaXtoggle = new BoolField(virtueEnragedInsigniaDiv, "Enabled", "virtueEnragedInsigniaXtoggle", true);
+            virtueEnragedInsigniaXtoggle.presetLoadPriority = 1;
             virtueEnragedInsigniaXtoggle.onValueChange += (BoolField.BoolValueChangeEvent e) =>
             {
                 virtueEnragedXInsigniaDiv.interactable = e.value;
@@ -916,6 +959,7 @@ namespace Ultrapain
             //virtueEnragedLightningSize = new FloatField(virtuePanel, "Size multiplier", "virtueEnragedLightningSize", 1f);
             virtueEnragedLightningDelay = new FloatField(virtueEnragedLigthningDiv, "Lighning delay", "virtueEnragedLightningDelay", 2f);
 
+            virtueEnragedAttackType.presetLoadPriority = 1;
             virtueEnragedAttackType.onValueChange += (EnumField<VirtueAttackType>.EnumValueChangeEvent newType) =>
             {
                 if (newType.value == VirtueAttackType.Insignia)
@@ -935,6 +979,7 @@ namespace Ultrapain
             new ConfigHeader(ferrymanPanel, "Melee Combo");
             ConfigDivision ferrymanComboDiv = new ConfigDivision(ferrymanPanel, "ferrymanComboDiv");
             ferrymanComboToggle = new BoolField(ferrymanPanel, "Enabled", "ferrymanComboToggle", true);
+            ferrymanComboToggle.presetLoadPriority = 1;
             ferrymanComboToggle.onValueChange += (BoolField.BoolValueChangeEvent e) =>
             {
                 ferrymanComboDiv.interactable = e.value;
@@ -948,6 +993,7 @@ namespace Ultrapain
             new ConfigHeader(turretPanel, "Burst Fire");
             ConfigDivision turretBurstFireDiv = new ConfigDivision(turretPanel, "turretBurstFireDiv");
             turretBurstFireToggle = new BoolField(turretPanel, "Enabled", "turretBurstFireToggle", true);
+            turretBurstFireToggle.presetLoadPriority = 1;
             turretBurstFireToggle.onValueChange += (BoolField.BoolValueChangeEvent e) =>
             {
                 turretBurstFireDiv.interactable = e.value;
@@ -961,6 +1007,7 @@ namespace Ultrapain
             new ConfigHeader(fleshPrisonPanel, "Spin Insignia");
             ConfigDivision fleshPrionSpinAttackDiv = new ConfigDivision(fleshPrisonPanel, "fleshPrionSpinAttackDiv");
             fleshPrisonSpinAttackToggle = new BoolField(fleshPrisonPanel, "Enabled", "fleshPrisonSpinAttackToggle", true);
+            fleshPrisonSpinAttackToggle.presetLoadPriority = 1;
             fleshPrisonSpinAttackToggle.onValueChange += (BoolField.BoolValueChangeEvent e) =>
             {
                 fleshPrionSpinAttackDiv.interactable = e.value;
@@ -978,6 +1025,7 @@ namespace Ultrapain
             new ConfigHeader(minosPrimePanel, "Random Teleport Before Shoot");
             ConfigDivision minosPrimeRandomTeleportDiv = new ConfigDivision(minosPrimePanel, "minosPrimeRandomTeleportDiv");
             minosPrimeRandomTeleportToggle = new BoolField(minosPrimePanel, "Enabled", "minosPrimeRandomTeleportToggle", true);
+            minosPrimeRandomTeleportToggle.presetLoadPriority = 1;
             minosPrimeRandomTeleportToggle.onValueChange += (BoolField.BoolValueChangeEvent e) =>
             {
                 minosPrimeRandomTeleportDiv.interactable = e.value;
@@ -997,6 +1045,7 @@ namespace Ultrapain
             new ConfigHeader(v2FirstPanel, "Knuckleblaster");
             ConfigDivision v2FirstKnuckleBlasterDiv = new ConfigDivision(v2FirstPanel, "v2FirstKnuckleBlasterDiv");
             v2FirstKnuckleBlasterToggle = new BoolField(v2FirstPanel, "Enabled", "v2FirstKnuckleBlasterToggle", true);
+            v2FirstKnuckleBlasterToggle.presetLoadPriority = 1;
             v2FirstKnuckleBlasterToggle.onValueChange += (BoolField.BoolValueChangeEvent e) =>
             {
                 v2FirstKnuckleBlasterDiv.interactable = e.value;
@@ -1006,6 +1055,7 @@ namespace Ultrapain
             v2FirstKnuckleBlasterCooldown = new FloatField(v2FirstKnuckleBlasterDiv, "Cooldown", "v2FirstKnuckleBlasterCooldown", 3f, 0f, float.MaxValue);
             ConfigDivision v2FirstKnuckleBlasterHitPlayerDiv = new ConfigDivision(v2FirstKnuckleBlasterDiv, "v2FirstKnuckleBlasterHitPlayerDiv");
             v2FirstKnuckleBlasterHitPlayerToggle = new BoolField(v2FirstKnuckleBlasterDiv, "Hit player", "v2FirstKnuckleBlasterHitPlayerToggle", true);
+            v2FirstKnuckleBlasterHitPlayerToggle.presetLoadPriority = 1;
             v2FirstKnuckleBlasterHitPlayerToggle.onValueChange += (BoolField.BoolValueChangeEvent e) =>
             {
                 v2FirstKnuckleBlasterHitPlayerDiv.interactable = e.value;
@@ -1026,6 +1076,7 @@ namespace Ultrapain
             new ConfigHeader(v2FirstPanel, "Grenade Snipe");
             ConfigDivision v2FirstCoreSnipeDiv = new ConfigDivision(v2FirstPanel, "v2FirstCoreSnipeDiv");
             v2FirstCoreSnipeToggle = new BoolField(v2FirstPanel, "Enabled", "v2FirstCoreSnipeToggle", true);
+            v2FirstCoreSnipeToggle.presetLoadPriority = 1;
             v2FirstCoreSnipeToggle.onValueChange += (BoolField.BoolValueChangeEvent e) =>
             {
                 v2FirstCoreSnipeDiv.interactable = e.value;
@@ -1054,6 +1105,7 @@ namespace Ultrapain
             ConfigDivision v2SecondFastCoinDiv = new ConfigDivision(v2SecondPanel, "v2SecondFastCoinDiv");
             new ConfigHeader(v2SecondPanel, "Shoot Coins Separately");
             v2SecondFastCoinToggle = new BoolField(v2SecondPanel, "Enabled", "v2SecondFastCoin", true);
+            v2SecondFastCoinToggle.presetLoadPriority = 1;
             v2SecondFastCoinToggle.onValueChange += (BoolField.BoolValueChangeEvent e) =>
             {
                 v2SecondFastCoinDiv.interactable = e.value;
@@ -1066,6 +1118,7 @@ namespace Ultrapain
             ConfigDivision v2SecondMalCannonDiv = new ConfigDivision(v2SecondPanel, "v2SecondMalCannonDiv");
             new ConfigHeader(v2SecondPanel, "Malicious Cannon Snipe");
             v2SecondMalCannonSnipeToggle = new BoolField(v2SecondPanel, "Enabled", "v2SecondMalCannonSnipeToggle", true);
+            v2SecondMalCannonSnipeToggle.presetLoadPriority = 1;
             v2SecondMalCannonSnipeToggle.onValueChange += (BoolField.BoolValueChangeEvent e) =>
             {
                 v2SecondMalCannonDiv.interactable = e.value;
@@ -1078,6 +1131,7 @@ namespace Ultrapain
             ConfigDivision v2SecondSnipeDiv = new ConfigDivision(v2SecondPanel, "v2SecondSnipeDiv");
             new ConfigHeader(v2SecondPanel, "Grenade Snipe");
             v2SecondCoreSnipeToggle = new BoolField(v2SecondPanel, "Enabled", "v2SecondCoreSnipeToggle", true);
+            v2SecondCoreSnipeToggle.presetLoadPriority = 1;
             v2SecondCoreSnipeToggle.onValueChange += (BoolField.BoolValueChangeEvent e) =>
             {
                 v2SecondSnipeDiv.interactable = e.value;
@@ -1090,6 +1144,7 @@ namespace Ultrapain
             new ConfigHeader(sisyInstPanel, "Boulder Creates Shockwaves");
             ConfigDivision sisyInstShockwaveDiv = new ConfigDivision(sisyInstPanel, "sisyInstShockwaveDiv");
             sisyInstBoulderShockwave = new BoolField(sisyInstPanel, "Enabled", "sisyInstBoulderShockwave", true);
+            sisyInstBoulderShockwave.presetLoadPriority = 1;
             sisyInstBoulderShockwave.onValueChange += (BoolField.BoolValueChangeEvent e) =>
             {
                 sisyInstShockwaveDiv.interactable = e.value;
@@ -1102,6 +1157,7 @@ namespace Ultrapain
             new ConfigHeader(sisyInstPanel, "Jump Shockwave Tweak");
             ConfigDivision sisyInstJumpShockwaveDiv = new ConfigDivision(sisyInstPanel, "sisyInstJumpShockwaveDiv");
             sisyInstJumpShockwave = new BoolField(sisyInstPanel, "Enabled", "sisyInstJumpShockwave", true);
+            sisyInstJumpShockwave.presetLoadPriority = 1;
             sisyInstJumpShockwave.onValueChange += (BoolField.BoolValueChangeEvent e) =>
             {
                 sisyInstJumpShockwaveDiv.interactable = e.value;
@@ -1109,12 +1165,14 @@ namespace Ultrapain
             };
             sisyInstJumpShockwave.TriggerValueChangeEvent();
             sisyInstJumpShockwaveSize = new FloatField(sisyInstJumpShockwaveDiv, "Shockwave size", "sisyInstJumpShockwaveSize", 2f);
+            sisyInstJumpShockwaveSize.presetLoadPriority = 1;
             sisyInstJumpShockwaveSize.onValueChange += (FloatField.FloatValueChangeEvent e) =>
             {
                 GameObject shockwave = SisyphusInstructionist_Start.shockwave;
                 shockwave.transform.localScale = new Vector3(shockwave.transform.localScale.x, 20 * ConfigManager.sisyInstBoulderShockwaveSize.value, shockwave.transform.localScale.z);
             };
             sisyInstJumpShockwaveSpeed = new FloatField(sisyInstJumpShockwaveDiv, "Shockwave speed", "sisyInstJumpShockwaveSpeed", 35f);
+            sisyInstJumpShockwaveSpeed.presetLoadPriority = 1;
             sisyInstJumpShockwaveSpeed.onValueChange += (FloatField.FloatValueChangeEvent e) =>
             {
                 GameObject shockwave = SisyphusInstructionist_Start.shockwave;
@@ -1122,6 +1180,7 @@ namespace Ultrapain
                 comp.speed = e.value;
             };
             sisyInstJumpShockwaveDamage = new IntField(sisyInstJumpShockwaveDiv, "Shockwave damage", "sisyInstJumpShockwaveDamage", 15);
+            sisyInstJumpShockwaveDamage.presetLoadPriority = 1;
             sisyInstJumpShockwaveDamage.onValueChange += (IntField.IntValueChangeEvent e) =>
             {
                 GameObject shockwave = SisyphusInstructionist_Start.shockwave;
@@ -1131,6 +1190,7 @@ namespace Ultrapain
             new ConfigHeader(sisyInstPanel, "Stronger Stomp");
             ConfigDivision sisyInstExplosionDiv = new ConfigDivision(sisyInstPanel, "sisyInstExplosionDiv");
             sisyInstStrongerExplosion = new BoolField(sisyInstPanel, "Enabled", "sisyInstStrongerExplosion", true);
+            sisyInstStrongerExplosion.presetLoadPriority = 1;
             sisyInstStrongerExplosion.onValueChange += (BoolField.BoolValueChangeEvent e) =>
             {
                 sisyInstExplosionDiv.interactable = e.value;
