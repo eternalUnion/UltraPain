@@ -4,6 +4,7 @@ using PluginConfig.API.Decorators;
 using UnityEngine.UI;
 using Ultrapain.Patches;
 using UnityEngine;
+using System.Runtime.InteropServices;
 
 namespace Ultrapain
 {
@@ -200,7 +201,7 @@ namespace Ultrapain
 
         // SCHISM
         public static BoolField schismSpreadAttackToggle;
-        public static FloatField schismSpreadAttackAngle;
+        public static FloatSliderField schismSpreadAttackAngle;
         public static IntField schismSpreadAttackCount;
 
         // SOLIDER
@@ -270,6 +271,13 @@ namespace Ultrapain
         public static FloatField v2FirstCoreSnipeMaxDistanceToPlayer;
         public static FloatField v2FirstCoreSnipeMinDistanceToV2;
         public static FloatField v2FirstCoreSnipeReactionTime;
+
+        public static BoolField v2FirstSharpshooterToggle;
+        public static FloatSliderField v2FirstSharpshooterChance;
+        public static FloatSliderField v2FirstSharpshooterAutoaimAngle;
+        public static IntField v2FirstSharpshooterReflections;
+        public static FloatField v2FirstSharpshooterDamage;
+        public static FloatField v2FirstSharpshooterSpeed;
 
         // V2 - SECOND
         public static BoolField v2SecondStartEnraged;
@@ -737,7 +745,7 @@ namespace Ultrapain
                 dirtyField = true;
             };
             schismSpreadAttackToggle.TriggerValueChangeEvent();
-            schismSpreadAttackAngle = new FloatField(schismSpreadAttackDiv, "Angular spread", "schismSpreadAttackAngle", 15f);
+            schismSpreadAttackAngle = new FloatSliderField(schismSpreadAttackDiv, "Angular spread", "schismSpreadAttackAngle", new System.Tuple<float, float>(0, 360), 15, 1);
             schismSpreadAttackCount = new IntField(schismSpreadAttackDiv, "Projectile count per side", "schismSpreadAttackCount", 1);
 
             // SOLIDER
@@ -1065,7 +1073,7 @@ namespace Ultrapain
             v2FirstKnuckleBlasterHitPlayerToggle.TriggerValueChangeEvent();
             v2FirstKnuckleBlasterHitPlayerMinDistance = new FloatField(v2FirstKnuckleBlasterHitPlayerDiv, "Minimum distance to player", "v2FirstKnuckleBlasterHitPlayerMinDistance", 5f);
             v2FirstKnuckleBlasterHitDamage = new IntField(v2FirstKnuckleBlasterHitPlayerDiv, "Hit damage", "v2FirstKnuckleBlasterHitDamage", 5);
-            v2FirstKnuckleBlasterDeflectShotgunToggle = new BoolField(v2FirstKnuckleBlasterDiv, "Deflect shotgun pellets", "v2FirstKnuckleBlasterDeflectShotgunToggle", true);
+            v2FirstKnuckleBlasterDeflectShotgunToggle = new BoolField(v2FirstKnuckleBlasterDiv, "Deflect shotgun pellets", "v2FirstKnuckleBlasterDeflectShotgunToggle", false);
             v2FirstKnuckleBlasterDeflectShotgunToggle.onValueChange += (BoolField.BoolValueChangeEvent e) =>
             {
                 dirtyField = true;
@@ -1087,6 +1095,22 @@ namespace Ultrapain
             v2FirstCoreSnipeMaxDistanceToPlayer = new FloatField(v2FirstCoreSnipeDiv, "Max distance to player", "v2FirstCoreSnipeMaxDistanceToPlayer", 10f);
             v2FirstCoreSnipeMinDistanceToV2 = new FloatField(v2FirstCoreSnipeDiv, "Min distance to V2", "v2FirstCoreSnipeMinDistanceToV2", 20f);
             v2FirstCoreSnipeReactionTime = new FloatField(v2FirstCoreSnipeDiv, "Reaction time", "v2FirstCoreSnipeReactionTime", 0.2f, 0f, 5f);
+
+            new ConfigHeader(v2FirstPanel, "Sharpshooter");
+            ConfigDivision v2FirstSharpShooterDiv = new ConfigDivision(v2FirstPanel, "v2FirstSharpShooterDiv");
+            v2FirstSharpshooterToggle = new BoolField(v2FirstPanel, "Enabled", "v2FirstSharpshooterToggle", true);
+            v2FirstSharpshooterToggle.presetLoadPriority = 1;
+            v2FirstSharpshooterToggle.onValueChange += (BoolField.BoolValueChangeEvent e) =>
+            {
+                v2FirstSharpShooterDiv.interactable = e.value;
+                dirtyField = true;
+            };
+            v2FirstSharpshooterChance = new FloatSliderField(v2FirstSharpShooterDiv, "Chance", "v2FirstSharpshooterChance", new System.Tuple<float, float>(0, 100), 50, 1);
+            v2FirstSharpshooterAutoaimAngle = new FloatSliderField(v2FirstSharpShooterDiv, "Autoaim angle maximum", "v2FirstSharpshooterAutoaimAngle", new System.Tuple<float, float>(0, 180), 30, 1);
+            v2FirstSharpshooterReflections = new IntField(v2FirstSharpShooterDiv, "Ricochet count", "v2FirstSharpshooterReflections", 2);
+            v2FirstSharpshooterDamage = new FloatField(v2FirstSharpShooterDiv, "Damage multiplier", "v2FirstSharpshooterDamage", 1f);
+            v2FirstSharpshooterSpeed = new FloatField(v2FirstSharpShooterDiv, "Speed multiplier", "v2FirstSharpshooterSpeed", 1f);
+            v2FirstSharpshooterToggle.TriggerValueChangeEvent();
 
             // V2 - SECOND
             v2SecondStartEnraged = new BoolField(v2SecondPanel, "Start enraged", "v2SecondStartEnraged", true);

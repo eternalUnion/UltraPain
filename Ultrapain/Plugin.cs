@@ -103,6 +103,7 @@ namespace Ultrapain
 
         public static GameObject enrageEffect;
         public static GameObject v2flashUnparryable;
+        public static GameObject ricochetSfx;
 
         public static AudioClip cannonBallChargeAudio;
 
@@ -197,6 +198,8 @@ namespace Ultrapain
             rocketLauncherAlt = LoadObject<GameObject>("Assets/Prefabs/Weapons/Rocket Launcher Cannonball.prefab");
             // Assets/Prefabs/Weapons/Railcannon Malicious.prefab
             maliciousRailcannon = LoadObject<GameObject>("Assets/Prefabs/Weapons/Railcannon Malicious.prefab");
+            //Assets/Particles/SoundBubbles/Ricochet.prefab
+            ricochetSfx = LoadObject<GameObject>("Assets/Particles/SoundBubbles/Ricochet.prefab");
 
             // hideousMassProjectile.AddComponent<HideousMassProjectile>();
         }
@@ -425,10 +428,12 @@ namespace Ultrapain
                 harmonyTweaks.Patch(GetMethod<V2>("ThrowCoins"), prefix: new HarmonyMethod(GetMethod<V2SecondFastCoin>("Prefix")));
             harmonyTweaks.Patch(GetMethod<Cannonball>("OnTriggerEnter"), prefix: new HarmonyMethod(GetMethod<V2RocketLauncher>("CannonBallTriggerPrefix")));
 
-            // ADDME
-            harmonyTweaks.Patch(GetMethod<EnemyRevolver>("PrepareAltFire"), prefix: new HarmonyMethod(GetMethod<V2CommonRevolverPrepareAltFire>("Prefix")));
-            harmonyTweaks.Patch(GetMethod<Projectile>("Collided"), prefix: new HarmonyMethod(GetMethod<V2CommonRevolverBullet>("Prefix")));
-            harmonyTweaks.Patch(GetMethod<EnemyRevolver>("AltFire"), prefix: new HarmonyMethod(GetMethod<V2CommonRevolverAltShoot>("Prefix")));
+            if (ConfigManager.v2FirstSharpshooterToggle.value)
+            {
+                harmonyTweaks.Patch(GetMethod<EnemyRevolver>("PrepareAltFire"), prefix: new HarmonyMethod(GetMethod<V2CommonRevolverPrepareAltFire>("Prefix")));
+                harmonyTweaks.Patch(GetMethod<Projectile>("Collided"), prefix: new HarmonyMethod(GetMethod<V2CommonRevolverBullet>("Prefix")));
+                harmonyTweaks.Patch(GetMethod<EnemyRevolver>("AltFire"), prefix: new HarmonyMethod(GetMethod<V2CommonRevolverAltShoot>("Prefix")));
+            }
 
             harmonyTweaks.Patch(GetMethod<Drone>("Start"), postfix: new HarmonyMethod(GetMethod<Virtue_Start_Patch>("Postfix")));
             harmonyTweaks.Patch(GetMethod<Drone>("SpawnInsignia"), prefix: new HarmonyMethod(GetMethod<Virtue_SpawnInsignia_Patch>("Prefix")));

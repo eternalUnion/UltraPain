@@ -91,7 +91,7 @@ namespace Ultrapain.Patches
         {
             if(__instance.TryGetComponent<V2CommonRevolverComp>(out V2CommonRevolverComp comp))
             {
-                bool sharp = UnityEngine.Random.RandomRangeInt(0, 100) >= 0;
+                bool sharp = UnityEngine.Random.Range(0f, 100f) <= ConfigManager.v2FirstSharpshooterChance.value;
 
                 Transform quad = ___altCharge.transform.Find("MuzzleFlash/Quad");
                 MeshRenderer quadRenderer = quad.gameObject.GetComponent<MeshRenderer>();
@@ -106,14 +106,24 @@ namespace Ultrapain.Patches
 
     class V2CommonRevolverBulletSharp : MonoBehaviour
     {
-        public int reflectionCount = 2;
-        public float shootTime = 0;
-        bool firstShot = true;
+        public int reflectionCount = ConfigManager.v2FirstSharpshooterReflections.value;
         public Collider lastCol;
+        public bool collideWithPlayer = true;
+        public bool alreadyDeflected = false;
+
+        public Vector3 predictedHit = Vector3.zero;
+        public float timeShot;
+
+        public int updateCount = 0;
 
         private void Awake()
         {
-            shootTime = Time.time;
+            timeShot = Time.time;
+        }
+
+        private void Update()
+        {
+            updateCount += 1;
         }
     }
 
@@ -124,8 +134,18 @@ namespace Ultrapain.Patches
             V2CommonRevolverBulletSharp comp = __instance.GetComponent<V2CommonRevolverBulletSharp>();
             if (comp == null)
                 return true;
+            Projectile proj = __instance.GetComponent<Projectile>();
 
-            if(__0.gameObject.layer == 8 || __0.gameObject.layer == 24)
+            LayerMask envMask = new LayerMask() { value = 1 << 8 | 1 << 24 };
+
+            bool isPlayer = __0.gameObject.tag == "Player";
+            if (isPlayer && !comp.collideWithPlayer)
+                return false;
+
+            if (comp.alreadyDeflected)
+                return true;
+
+            if(__0.gameObject.layer == 8 || __0.gameObject.layer == 24 || isPlayer)
             {
                 //if (Time.time - comp.shootTime <= 0.1f)
                 //    return false;
@@ -136,27 +156,61 @@ namespace Ultrapain.Patches
                 if (comp.reflectionCount <= 0)
                     return true;
 
-                comp.reflectionCount -= 1;
-                comp.lastCol = __0;
-
-                LayerMask envMask = new LayerMask() { value = 1 << 8 | 1 << 24 };
-                GameObject reflectedBullet = GameObject.Instantiate(__instance.gameObject, __instance.transform.position, __instance.transform.rotation);
-                if (Physics.Raycast(reflectedBullet.transform.position - reflectedBullet.transform.forward, reflectedBullet.transform.forward, out RaycastHit raycastHit, float.PositiveInfinity, envMask))
+                if (!isPlayer && comp.predictedHit != null)
                 {
-                    reflectedBullet.transform.forward = Vector3.Reflect(reflectedBullet.transform.forward, raycastHit.normal).normalized;
-                    reflectedBullet.transform.position = raycastHit.point + reflectedBullet.transform.forward;
-                    Debug.Log("Successfull reflection");
+                    /*float dist = Vector3.Distance(comp.predictedHit, __instance.transform.position);
+                    if (dist >= 2.5f)
+                    {
+                        Debug.Log($"Predicted overdistance: {dist}");
+                        return false;
+                    }*/
+
+                    if(comp.updateCount <= 3)
+                    {
+                        Debug.Log("Low update, skipping");
+                        return false;
+                    }
                 }
 
-                /*if(reflectedBullet.TryGetComponent(out V2CommonRevolverBulletSharp bulletComp))
-                {
-                    bulletComp.reflectionCount = ;
-                }*/
+                if(!isPlayer)
+                    comp.reflectionCount -= 1;
+                comp.lastCol = isPlayer ? null : __0;
+                comp.collideWithPlayer = true;
+                comp.alreadyDeflected = false;
+                if (isPlayer)
+                    comp.collideWithPlayer = false;
 
-                Vector3 playerVectorFromBullet = NewMovement.Instance.transform.position - reflectedBullet.transform.position;
-                float angle = Vector3.Angle(playerVectorFromBullet, reflectedBullet.transform.forward);
-                if (angle <= 30f)
-                    reflectedBullet.transform.LookAt(NewMovement.Instance.transform.position);
+                GameObject reflectedBullet = GameObject.Instantiate(__instance.gameObject, __instance.transform.position, __instance.transform.rotation);
+                comp.alreadyDeflected = true;
+                reflectedBullet.name = comp.name;
+                if (!isPlayer)
+                {
+                    if (Physics.Raycast(reflectedBullet.transform.position - reflectedBullet.transform.forward, reflectedBullet.transform.forward, out RaycastHit raycastHit, float.PositiveInfinity, envMask))
+                    {
+                        reflectedBullet.transform.forward = Vector3.Reflect(reflectedBullet.transform.forward, raycastHit.normal).normalized;
+                        reflectedBullet.transform.position = raycastHit.point + reflectedBullet.transform.forward;
+                        Debug.Log($"Successfull reflection {comp.reflectionCount}");
+                    }
+
+                    Vector3 playerVectorFromBullet = NewMovement.Instance.transform.position - reflectedBullet.transform.position;
+                    float angle = Vector3.Angle(playerVectorFromBullet, reflectedBullet.transform.forward);
+                    if (angle <= ConfigManager.v2FirstSharpshooterAutoaimAngle.value)
+                        reflectedBullet.transform.LookAt(NewMovement.Instance.transform.position);
+
+                    reflectedBullet.transform.position += reflectedBullet.transform.forward;
+                    if (Physics.Raycast(reflectedBullet.transform.position, reflectedBullet.transform.forward, out RaycastHit hit, float.PositiveInfinity, envMask))
+                        reflectedBullet.GetComponent<V2CommonRevolverBulletSharp>().predictedHit = hit.point;
+                }
+                else
+                {
+                    NewMovement.Instance.GetHurt(Mathf.RoundToInt(proj.damage), true, 1f, false, false);
+                }
+
+                GameObject.Instantiate(Plugin.ricochetSfx, reflectedBullet.transform.position, Quaternion.identity);
+                /*if (isPlayer)
+                    return true;*/
+                GameObject.Destroy(__instance.gameObject);
+                return false;
             }
 
             return true;
@@ -187,8 +241,8 @@ namespace Ultrapain.Patches
                 if (component)
                 {
                     component.safeEnemyType = __instance.safeEnemyType;
-                    component.speed *= 2f;
-                    component.damage *= 1.5f;
+                    component.speed *= ConfigManager.v2FirstSharpshooterSpeed.value;
+                    component.damage *= ConfigManager.v2FirstSharpshooterDamage.value;
                 }
 
                 LayerMask envMask = new LayerMask() { value = 1 << 8 | 1 << 24 };
@@ -227,6 +281,10 @@ namespace Ultrapain.Patches
                     }
                 }
 
+                GameObject.Instantiate(__instance.muzzleFlashAlt, __instance.shootPoint.position, __instance.shootPoint.rotation);
+
+                if (Physics.Raycast(bullet.transform.position, bullet.transform.forward, out RaycastHit predictedHit, float.PositiveInfinity, envMask))
+                    bulletComp.predictedHit = predictedHit.point;
                 comp.shootingForSharpshooter = false;
                 return false;
             }
