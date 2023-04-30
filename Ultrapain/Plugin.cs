@@ -425,6 +425,11 @@ namespace Ultrapain
                 harmonyTweaks.Patch(GetMethod<V2>("ThrowCoins"), prefix: new HarmonyMethod(GetMethod<V2SecondFastCoin>("Prefix")));
             harmonyTweaks.Patch(GetMethod<Cannonball>("OnTriggerEnter"), prefix: new HarmonyMethod(GetMethod<V2RocketLauncher>("CannonBallTriggerPrefix")));
 
+            // ADDME
+            harmonyTweaks.Patch(GetMethod<EnemyRevolver>("PrepareAltFire"), prefix: new HarmonyMethod(GetMethod<V2CommonRevolverPrepareAltFire>("Prefix")));
+            harmonyTweaks.Patch(GetMethod<Projectile>("Collided"), prefix: new HarmonyMethod(GetMethod<V2CommonRevolverBullet>("Prefix")));
+            harmonyTweaks.Patch(GetMethod<EnemyRevolver>("AltFire"), prefix: new HarmonyMethod(GetMethod<V2CommonRevolverAltShoot>("Prefix")));
+
             harmonyTweaks.Patch(GetMethod<Drone>("Start"), postfix: new HarmonyMethod(GetMethod<Virtue_Start_Patch>("Postfix")));
             harmonyTweaks.Patch(GetMethod<Drone>("SpawnInsignia"), prefix: new HarmonyMethod(GetMethod<Virtue_SpawnInsignia_Patch>("Prefix")));
 
