@@ -137,6 +137,8 @@ namespace Ultrapain.Patches
 
     class V2CommonRevolverBullet
     {
+        public static float deltaDistance = 1f;
+
         static bool Prefix(Projectile __instance, Collider __0)
         {
             V2CommonRevolverBulletSharp comp = __instance.GetComponent<V2CommonRevolverBulletSharp>();
@@ -196,16 +198,40 @@ namespace Ultrapain.Patches
                     if (Physics.Raycast(reflectedBullet.transform.position - reflectedBullet.transform.forward, reflectedBullet.transform.forward, out RaycastHit raycastHit, float.PositiveInfinity, envMask))
                     {
                         reflectedBullet.transform.forward = Vector3.Reflect(reflectedBullet.transform.forward, raycastHit.normal).normalized;
-                        reflectedBullet.transform.position = raycastHit.point + reflectedBullet.transform.forward;
+                        //reflectedBullet.transform.position = raycastHit.point + reflectedBullet.transform.forward * deltaDistance;
                         Debug.Log($"Successfull reflection {comp.reflectionCount}");
                     }
+
+                    reflectedBullet.transform.position += reflectedBullet.transform.forward * deltaDistance;
 
                     Vector3 playerVectorFromBullet = NewMovement.Instance.transform.position - reflectedBullet.transform.position;
                     float angle = Vector3.Angle(playerVectorFromBullet, reflectedBullet.transform.forward);
                     if (angle <= ConfigManager.v2FirstSharpshooterAutoaimAngle.value)
-                        reflectedBullet.transform.LookAt(NewMovement.Instance.transform.position);
+                    {
+                        Debug.Log("OK angle");
+                        Quaternion lastRotation = reflectedBullet.transform.rotation;
+                        reflectedBullet.transform.LookAt(NewMovement.Instance.playerCollider.bounds.center);
 
-                    reflectedBullet.transform.position += reflectedBullet.transform.forward;
+                        RaycastHit[] hits = Physics.RaycastAll(reflectedBullet.transform.position, reflectedBullet.transform.forward, Vector3.Distance(reflectedBullet.transform.position, NewMovement.Instance.playerCollider.bounds.center));
+                        bool hitEnv = false;
+                        Collider problem = null;
+                        foreach(RaycastHit rayHit in hits)
+                            if(rayHit.transform.gameObject.layer == 8 || rayHit.transform.gameObject.layer == 24)
+                            {
+                                hitEnv = true;
+                                problem = rayHit.collider;
+                                break;
+                            }
+
+                        if (hitEnv)
+                        {
+                            Debug.Log($"CANCELLED auto-aim : {problem.name}");
+                            reflectedBullet.transform.rotation = lastRotation;
+                        }
+                        else
+                            Debug.Log("OK to hit player");
+                    }
+
                     if (Physics.Raycast(reflectedBullet.transform.position, reflectedBullet.transform.forward, out RaycastHit hit, float.PositiveInfinity, envMask))
                         reflectedBullet.GetComponent<V2CommonRevolverBulletSharp>().predictedHit = hit.point;
                 }

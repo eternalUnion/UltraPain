@@ -25,6 +25,7 @@ namespace Ultrapain
 
         // MEME PANEL
         public static BoolField enrageSfxToggle;
+        public static BoolField funnyDruidKnightSFXToggle;
 
         // PLAYER PANEL
         public static BoolField rocketBoostToggle;
@@ -255,6 +256,7 @@ namespace Ultrapain
         public static FloatField minosPrimeRandomTeleportMinDistance;
         public static FloatField minosPrimeRandomTeleportMaxDistance;
         public static BoolField minosPrimeTeleportTrail;
+        public static FloatField minosPrimeTeleportTrailDuration;
 
         // V2 - FIRST
         public static BoolField v2FirstKnuckleBlasterToggle;
@@ -321,6 +323,11 @@ namespace Ultrapain
         public static FloatField sisyInstStrongerExplosionSizeMulti;
         public static FloatField sisyInstStrongerExplosionDamageMulti;
 
+        /////////// ADD MEEEE
+        // GABRIEL SECOND
+        public static BoolField gabriSecondP1Chaos;
+        public static IntField gabriSecondP1ChaosCount;
+
         private static bool dirtyField = false;
         public static void Initialize()
         {
@@ -338,6 +345,8 @@ namespace Ultrapain
             };
 
             // ROOT PANEL
+            ButtonArrayField buttons = new ButtonArrayField(config.rootPanel, "buttons", 2, new float[] { 0.5f, 0.5f }, new string[] { "Bug Report", "Feature Request" });
+
             new ConfigHeader(config.rootPanel, "Enemy Tweaks");
             enemyTweakToggle = new BoolField(config.rootPanel, "Enabled", "enemyTweakToggle", true);
             enemyTweakToggle.presetLoadPriority = 1;
@@ -395,6 +404,11 @@ namespace Ultrapain
             // MEME PANEL
             enrageSfxToggle = new BoolField(memePanel, "Enrage SFX", "enrageSfxToggle", false);
             enrageSfxToggle.onValueChange += (BoolField.BoolValueChangeEvent e) =>
+            {
+                dirtyField = true;
+            };
+            funnyDruidKnightSFXToggle = new BoolField(memePanel, "Funny druid knight sfx", "funnyDruidKnightSFXToggle", false);
+            funnyDruidKnightSFXToggle.onValueChange += (BoolField.BoolValueChangeEvent e) =>
             {
                 dirtyField = true;
             };
@@ -565,7 +579,7 @@ namespace Ultrapain
             schismPanel = new ConfigPanel(enemyPanel, "Schism", "schismPanel");
             soliderPanel = new ConfigPanel(enemyPanel, "Soldier", "soliderPanel");
             dronePanel = new ConfigPanel(enemyPanel, "Drone", "dronePanel");
-            streetCleanerPanel = new ConfigPanel(enemyPanel, "Street Cleaner", "streetCleanerPanel");
+            streetCleanerPanel = new ConfigPanel(enemyPanel, "Streetcleaner", "streetCleanerPanel");
             virtuePanel = new ConfigPanel(enemyPanel, "Virtue", "virtuePanel");
             stalkerPanel = new ConfigPanel(enemyPanel, "Stalker", "stalkerPanel");
             new ConfigHeader(enemyPanel, "Mini Bosses");
@@ -575,8 +589,8 @@ namespace Ultrapain
             maliciousFacePanel = new ConfigPanel(enemyPanel, "Malicious Face", "maliciousFacePanel");
             mindflayerPanel = new ConfigPanel(enemyPanel, "Mindflayer", "mindflayerPanel");
             turretPanel = new ConfigPanel(enemyPanel, "Sentry", "turretPanel");
-            sisyInstPanel = new ConfigPanel(enemyPanel, "Sisyphius Instructionist", "sisyInstPanel");
-            swordsMachinePanel = new ConfigPanel(enemyPanel, "Swords Machine", "swordsMachinePanel");
+            sisyInstPanel = new ConfigPanel(enemyPanel, "Sisyphean Insurrectionist", "sisyInstPanel");
+            swordsMachinePanel = new ConfigPanel(enemyPanel, "Swordsmachine", "swordsMachinePanel");
             new ConfigHeader(enemyPanel, "Bosses");
             v2FirstPanel = new ConfigPanel(enemyPanel, "V2 - First", "v2FirstPanel");
             v2SecondPanel = new ConfigPanel(enemyPanel, "V2 - Second", "v2SecondPanel");
@@ -815,7 +829,7 @@ namespace Ultrapain
             };
 
             // STREET CLEANER
-            new ConfigHeader(streetCleanerPanel, "Predictive Dodge");
+            new ConfigHeader(streetCleanerPanel, "Predictive Parry");
             streetCleanerPredictiveDodgeToggle = new BoolField(streetCleanerPanel, "Enabled", "streetCleanerPredictiveDodgeToggle", true);
             streetCleanerPredictiveDodgeToggle.onValueChange += (BoolField.BoolValueChangeEvent e) =>
             {
@@ -1055,8 +1069,10 @@ namespace Ultrapain
             minosPrimeTeleportTrail = new BoolField(minosPrimePanel, "Enabled", "minosPrimeTeleportTrail", true);
             minosPrimeTeleportTrail.onValueChange += (BoolField.BoolValueChangeEvent e) =>
             {
+                minosPrimeTeleportTrailDuration.hidden = e.value;
                 dirtyField = true;
             };
+            minosPrimeTeleportTrailDuration = new FloatField(minosPrimePanel, "Duration", "minosPrimeTeleportTrailDuration", 0.5f, 0, float.PositiveInfinity);
 
             // V2 - FIRST
             new ConfigHeader(v2FirstPanel, "Knuckleblaster");
@@ -1191,7 +1207,7 @@ namespace Ultrapain
             v2SecondSharpshooterSpeed = new FloatField(v2SecondSharpShooterDiv, "Speed multiplier", "v2SecondSharpshooterSpeed", 1f);
             v2SecondSharpshooterToggle.TriggerValueChangeEvent();
 
-            // SISYPHIUS INSTRUCTIONIST
+            // Sisyphean Insurrectionist (yeah don't judge)
             new ConfigHeader(sisyInstPanel, "Boulder Creates Shockwaves");
             ConfigDivision sisyInstShockwaveDiv = new ConfigDivision(sisyInstPanel, "sisyInstShockwaveDiv");
             sisyInstBoulderShockwave = new BoolField(sisyInstPanel, "Enabled", "sisyInstBoulderShockwave", true);

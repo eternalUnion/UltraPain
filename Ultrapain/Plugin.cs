@@ -313,6 +313,7 @@ namespace Ultrapain
 
                 harmonyTweaks.Patch(GetMethod<EnemyIdentifier>("DeliverDamage"), prefix: new HarmonyMethod(GetMethod<EnemyIdentifier_DeliverDamage_FF>("Prefix")));
                 harmonyTweaks.Patch(GetMethod<Flammable>("Burn"), prefix: new HarmonyMethod(GetMethod<Flammable_Burn_FF>("Prefix")));
+                harmonyTweaks.Patch(GetMethod<FireZone>("OnTriggerStay"), prefix: new HarmonyMethod(GetMethod<StreetCleaner_Fire_FF>("Prefix")), postfix: new HarmonyMethod(GetMethod<StreetCleaner_Fire_FF>("Postfix")));
             }
             
             harmonyTweaks.Patch(GetMethod<StatueBoss>("Start"), postfix: new HarmonyMethod(GetMethod<StatueBoss_Start_Patch>("Postfix")));
@@ -446,9 +447,13 @@ namespace Ultrapain
                 harmonyTweaks.Patch(GetMethod<Sisyphus>("StompExplosion"), prefix: new HarmonyMethod(GetMethod<SisyphusInstructionist_StompExplosion>("Prefix")));
 
             // ADDME
-            harmonyTweaks.Patch(GetMethod<Mandalore>("FullBurst"), postfix: new HarmonyMethod(GetMethod<DruidKnight_FullBurst>("Postfix")), prefix: new HarmonyMethod(GetMethod<DruidKnight_FullBurst>("Prefix")));
-            harmonyTweaks.Patch(GetMethod<Mandalore>("FullerBurst"), prefix: new HarmonyMethod(GetMethod<DruidKnight_FullerBurst>("Prefix")));
-            harmonyTweaks.Patch(GetMethod<Drone>("Explode"), prefix: new HarmonyMethod(GetMethod<Drone_Explode>("Prefix")), postfix: new HarmonyMethod(GetMethod<Drone_Explode>("Postfix")));
+            /*
+            harmonyTweaks.Patch(GetMethod<GabrielSecond>("Start"), postfix: new HarmonyMethod(GetMethod<GabrielSecond_Start>("Postfix")));
+            harmonyTweaks.Patch(GetMethod<GabrielSecond>("BasicCombo"), postfix: new HarmonyMethod(GetMethod<GabrielSecond_BasicCombo>("Postfix")));
+            harmonyTweaks.Patch(GetMethod<GabrielSecond>("FastCombo"), postfix: new HarmonyMethod(GetMethod<GabrielSecond_FastCombo>("Postfix")));
+            harmonyTweaks.Patch(GetMethod<GabrielSecond>("CombineSwords"), postfix: new HarmonyMethod(GetMethod<GabrielSecond_CombineSwords>("Postfix")));
+            harmonyTweaks.Patch(GetMethod<GabrielSecond>("ThrowCombo"), postfix: new HarmonyMethod(GetMethod<GabrielSecond_ThrowCombo>("Postfix")));
+            */
         }
 
         private static void PatchAllPlayers()
@@ -487,6 +492,13 @@ namespace Ultrapain
         {
             if (ConfigManager.enrageSfxToggle.value)
                 harmonyTweaks.Patch(GetMethod<EnrageEffect>("Start"), postfix: new HarmonyMethod(GetMethod<EnrageEffect_Start>("Postfix")));
+            
+            if(ConfigManager.funnyDruidKnightSFXToggle.value)
+            {
+                harmonyTweaks.Patch(GetMethod<Mandalore>("FullBurst"), postfix: new HarmonyMethod(GetMethod<DruidKnight_FullBurst>("Postfix")), prefix: new HarmonyMethod(GetMethod<DruidKnight_FullBurst>("Prefix")));
+                harmonyTweaks.Patch(GetMethod<Mandalore>("FullerBurst"), prefix: new HarmonyMethod(GetMethod<DruidKnight_FullerBurst>("Prefix")));
+                harmonyTweaks.Patch(GetMethod<Drone>("Explode"), prefix: new HarmonyMethod(GetMethod<Drone_Explode>("Prefix")), postfix: new HarmonyMethod(GetMethod<Drone_Explode>("Postfix")));
+            }
         }
 
         public static bool methodsPatched = false;

@@ -141,4 +141,22 @@ namespace Ultrapain.Patches
             return true;
         }
     }
+
+    class StreetCleaner_Fire_FF
+    {
+        static bool Prefix(FireZone __instance)
+        {
+            if (__instance.source != FlameSource.Streetcleaner)
+                return true;
+
+            EnemyIdentifier_DeliverDamage_FF.friendlyBurn = true;
+            return true;
+        }
+
+        static void Postfix(FireZone __instance)
+        {
+            if (__instance.source == FlameSource.Streetcleaner)
+                EnemyIdentifier_DeliverDamage_FF.friendlyBurn = false;
+        }
+    }
 }

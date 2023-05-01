@@ -61,7 +61,8 @@ namespace Ultrapain.Patches
             if (distance / deltaDistance > 15)
                 deltaDistance = distance / 15;
 
-            while(currentPosition != targetPosition)
+            float fadeSpeed = 1f / ConfigManager.minosPrimeTeleportTrailDuration.value;
+            while (currentPosition != targetPosition)
             {
                 GameObject gameObject = GameObject.Instantiate(decoy, currentPosition, instance.transform.rotation);
                 gameObject.SetActive(true);
@@ -69,6 +70,7 @@ namespace Ultrapain.Patches
                 AnimatorStateInfo currentAnimatorStateInfo = anim.GetCurrentAnimatorStateInfo(0);
                 componentInChildren.Play(currentAnimatorStateInfo.shortNameHash, 0, currentAnimatorStateInfo.normalizedTime);
                 componentInChildren.speed = 0f;
+                gameObject.GetComponent<MindflayerDecoy>().fadeSpeed = fadeSpeed;
 
                 currentPosition = Vector3.MoveTowards(currentPosition, targetPosition, deltaDistance);
             }
