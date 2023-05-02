@@ -109,6 +109,7 @@ namespace Ultrapain
         public static ConfigPanel v2FirstPanel;
         public static ConfigPanel v2SecondPanel;
         public static ConfigPanel sisyInstPanel;
+        public static ConfigPanel leviathanPanel;
 
         // GLOBAL ENEMY CONFIG
         public static BoolField friendlyFireDamageOverrideToggle;
@@ -322,6 +323,12 @@ namespace Ultrapain
         public static BoolField sisyInstStrongerExplosion;
         public static FloatField sisyInstStrongerExplosionSizeMulti;
         public static FloatField sisyInstStrongerExplosionDamageMulti;
+
+        // ADD ME
+        // LEVIATHAN
+        public static BoolField leviathanProjectileMixToggle;
+        public static FloatSliderField leviathanProjectileBlueChance;
+        public static FloatSliderField leviathanProjectileYellowChance;
 
         /////////// ADD MEEEE
         // GABRIEL SECOND
@@ -596,6 +603,7 @@ namespace Ultrapain
             new ConfigHeader(enemyPanel, "Bosses");
             v2FirstPanel = new ConfigPanel(enemyPanel, "V2 - First", "v2FirstPanel");
             v2SecondPanel = new ConfigPanel(enemyPanel, "V2 - Second", "v2SecondPanel");
+            leviathanPanel = new ConfigPanel(enemyPanel, "Leviathan", "leviathanPanel");
             new ConfigHeader(enemyPanel, "Prime Bosses");
             fleshPrisonPanel = new ConfigPanel(enemyPanel, "Flesh Prison", "fleshPrisonPanel");
             minosPrimePanel = new ConfigPanel(enemyPanel, "Minos Prime", "minosPrimePanel");
@@ -1269,6 +1277,19 @@ namespace Ultrapain
             sisyInstStrongerExplosionSizeMulti = new FloatField(sisyInstExplosionDiv, "Size multiplier", "sisyInstStrongerExplosionSizeMulti", 0.5f);
             sisyInstStrongerExplosionDamageMulti = new FloatField(sisyInstExplosionDiv, "Damage multiplier", "sisyInstStrongerExplosionDamageMulti", 0.5f);
 
+            new ConfigHeader(leviathanPanel, "Mixed Projectile Burst");
+            ConfigDivision leviathanMixProjectileDiv = new ConfigDivision(leviathanPanel, "leviathanMixProjectileDiv");
+            leviathanProjectileMixToggle = new BoolField(leviathanPanel, "Enabled", "leviathanProjectileMixToggle", true);
+            leviathanProjectileMixToggle.presetLoadPriority = 1;
+            leviathanProjectileMixToggle.onValueChange += (BoolField.BoolValueChangeEvent e) =>
+            {
+                leviathanMixProjectileDiv.interactable = e.value;
+                dirtyField = true;
+            };
+            leviathanProjectileMixToggle.TriggerValueChangeEvent();
+            leviathanProjectileBlueChance = new FloatSliderField(leviathanMixProjectileDiv, "Blue projectile", "leviathanProjectileBlueChance", new System.Tuple<float, float>(0, 100), 40f);
+            leviathanProjectileYellowChance = new FloatSliderField(leviathanMixProjectileDiv, "Yellow projectile", "leviathanProjectileYellowChance", new System.Tuple<float, float>(0, 100), 10f);
+            
             config.Flush();
             //config.LogDuplicateGUID();
             Plugin.PatchAll();

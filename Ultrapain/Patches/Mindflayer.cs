@@ -76,22 +76,31 @@ namespace Ultrapain.Patches
         static FieldInfo goForward = typeof(Mindflayer).GetField("goForward", BindingFlags.NonPublic | BindingFlags.Instance);
         static MethodInfo meleeAttack = typeof(Mindflayer).GetMethod("MeleeAttack", BindingFlags.NonPublic | BindingFlags.Instance);
 
-        static void Postfix(SwingCheck2 __instance, Collider __0)
+        static bool Prefix(Collider __0, out int __state)
         {
-            if (__0.gameObject.tag != "Player" || __0.gameObject.layer == 15)
+            __state = __0.gameObject.layer;
+            return true;
+        }
+
+        static void Postfix(SwingCheck2 __instance, Collider __0, int __state)
+        {
+            if (__0.tag == "Player")
+                Debug.Log($"Collision with {__0.name} with tag {__0.tag} and layer {__state}");
+            if (__0.gameObject.tag != "Player" || __state == 15)
                 return;
 
             if (__instance.transform.parent == null)
                 return;
 
-            GameObject parent = __instance.transform.parent.gameObject;
-            Mindflayer mf = parent.GetComponent<Mindflayer>();
+            Debug.Log("Parent check");
+            Mindflayer mf = __instance.transform.parent.gameObject.GetComponent<Mindflayer>();
 
             if (mf == null)
                 return;
 
             //MindflayerPatch patch = mf.gameObject.GetComponent<MindflayerPatch>();
 
+            Debug.Log("Attempting melee combo");
             __instance.DamageStop();
             goForward.SetValue(mf, false);
             meleeAttack.Invoke(mf, new object[] { });
@@ -110,12 +119,14 @@ namespace Ultrapain.Patches
 
     class Mindflayer_MeleeTeleport_Patch
     {
+        public static Vector3 deltaPosition = new Vector3(0, -10, 0);
+
         static bool Prefix(Mindflayer __instance, ref EnemyIdentifier ___eid, ref LayerMask ___environmentMask, ref bool ___goingLeft, ref Animator ___anim, ref bool ___enraged)
         {
             if (___eid.drillers.Count > 0)
                 return false;
 
-            Vector3 targetPosition = MonoSingleton<PlayerTracker>.Instance.PredictPlayerPosition(0.9f) - Vector3.down * 2;
+            Vector3 targetPosition = MonoSingleton<PlayerTracker>.Instance.PredictPlayerPosition(0.9f) + deltaPosition;
             float distance = Vector3.Distance(__instance.transform.position, targetPosition);
 
             Ray targetRay = new Ray(__instance.transform.position, targetPosition - __instance.transform.position);
