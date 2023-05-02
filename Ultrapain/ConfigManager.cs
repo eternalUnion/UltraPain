@@ -346,6 +346,8 @@ namespace Ultrapain
 
             // ROOT PANEL
             ButtonArrayField buttons = new ButtonArrayField(config.rootPanel, "buttons", 2, new float[] { 0.5f, 0.5f }, new string[] { "Bug Report", "Feature Request" });
+            buttons.OnClickEventHandler(0).onClick += () => Application.OpenURL("https://preview.redd.it/secw8dd72hn81.png?width=614&format=png&auto=webp&s=b0d474c0add04489071c9042703d726add9edb74");
+            buttons.OnClickEventHandler(1).onClick += () => Application.OpenURL("https://i.redd.it/yzf24m2ljhsa1.jpg");
 
             new ConfigHeader(config.rootPanel, "Enemy Tweaks");
             enemyTweakToggle = new BoolField(config.rootPanel, "Enabled", "enemyTweakToggle", true);
