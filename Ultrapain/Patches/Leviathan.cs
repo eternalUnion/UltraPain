@@ -12,6 +12,7 @@ namespace Ultrapain.Patches
     {
         private LeviathanHead comp;
         private Animator anim;
+        private LayerMask envMask = new LayerMask() { value = 1 << 8 | 1 << 24 };
 
         public float playerRocketRideTracker = 0;
 
@@ -21,11 +22,9 @@ namespace Ultrapain.Patches
         public float currentProjectileSize = 0;
         public float beamChargeRate = 12f / 1f;
 
-        public int maxBeamCount = 2;
         public int beamRemaining = 0;
 
         public int projectilesRemaining = 0;
-        public float projectileDelay = 0.015f;
         public float projectileDelayRemaining = 0f;
 
         private static FieldInfo ___inAction = typeof(LeviathanHead).GetField("inAction", BindingFlags.NonPublic | BindingFlags.Instance);
@@ -42,7 +41,7 @@ namespace Ultrapain.Patches
         public bool charging = false;
         private void Update()
         {
-            if (charging && currentProjectileEffect != null)
+            if (currentProjectileEffect != null && (charging || currentProjectileSize < 11.9f))
             {
                 currentProjectileSize += beamChargeRate * Time.deltaTime;
                 currentProjectileEffect.transform.localScale = Vector3.one * currentProjectileSize;
@@ -63,8 +62,9 @@ namespace Ultrapain.Patches
             currentProjectileEffect.transform.localPosition = new Vector3(0, 0, 6);
             currentProjectileEffect.transform.localScale = Vector3.zero;
 
-            beamRemaining = maxBeamCount;
-            Invoke("PrepareForFire", 1f);
+            beamRemaining = ConfigManager.leviathanChargeCount.value;
+            beamChargeRate = 11.9f / ConfigManager.leviathanChargeDelay.value;
+            Invoke("PrepareForFire", ConfigManager.leviathanChargeDelay.value);
         }
 
         private Grenade FindTargetGrenade()
@@ -88,8 +88,11 @@ namespace Ultrapain.Patches
         public void PrepareForFire()
         {
             charging = false;
+            targetShootPoint = NewMovement.Instance.playerCollider.bounds.center;
+            if (Physics.Raycast(NewMovement.Instance.transform.position, Vector3.down, out RaycastHit hit, float.MaxValue, envMask))
+                targetShootPoint = hit.point;
 
-            Invoke("Shoot", 0.5f);
+            Invoke("Shoot", ConfigManager.leviathanChargeDelay.value);
         }
 
         private Vector3 RandomVector(float min, float max)
@@ -114,9 +117,9 @@ namespace Ultrapain.Patches
             }
             else
             {
-                //proj.transform.rotation = Quaternion.LookRotation(targetShootPoint - proj.transform.position);
-                proj.transform.rotation = Quaternion.LookRotation(NewMovement.Instance.playerCollider.bounds.center - proj.transform.position);
-                proj.transform.eulerAngles += RandomVector(-5f, 5f);
+                proj.transform.rotation = Quaternion.LookRotation(targetShootPoint - proj.transform.position);
+                //proj.transform.rotation = Quaternion.LookRotation(NewMovement.Instance.playerCollider.bounds.center - proj.transform.position);
+                //proj.transform.eulerAngles += RandomVector(-5f, 5f);
             }
             proj.transform.localScale = new Vector3(2f, 1f, 2f);
 
@@ -126,8 +129,9 @@ namespace Ultrapain.Patches
 
                 foreach (Explosion exp in expClone.GetComponentsInChildren<Explosion>())
                 {
-                    exp.maxSize *= 1.5f;
-                    exp.speed *= 1.5f;
+                    exp.maxSize *= ConfigManager.leviathanChargeSizeMulti.value;
+                    exp.speed *= ConfigManager.leviathanChargeSizeMulti.value;
+                    exp.damage = (int)(exp.damage * ConfigManager.leviathanChargeDamageMulti.value);
                     exp.toIgnore.Add(EnemyType.Leviathan);
                 }
 
@@ -157,8 +161,12 @@ namespace Ultrapain.Patches
             }
             else
             {
+                targetShootPoint = NewMovement.Instance.playerCollider.bounds.center;
+                if (Physics.Raycast(NewMovement.Instance.transform.position, Vector3.down, out RaycastHit hit, float.MaxValue, envMask))
+                    targetShootPoint = hit.point;
+
                 comp.lookAtPlayer = true;
-                Invoke("PrepareForFire", 0.5f);
+                Invoke("PrepareForFire", ConfigManager.leviathanChargeDelay.value);
             }
         }
 
@@ -170,7 +178,6 @@ namespace Ultrapain.Patches
 
     class LeviathanTail_Flag : MonoBehaviour
     {
-        public int maxSwingCount = 3;
         public int swingCount = 0;
 
         private Animator ___anim;
@@ -192,14 +199,14 @@ namespace Ultrapain.Patches
         static void Postfix(LeviathanHead __instance)
         {
             Leviathan_Flag flag = __instance.gameObject.AddComponent<Leviathan_Flag>();
-            flag.Invoke("SwitchToSecondPhase", 1f);
+            if(ConfigManager.leviathanSecondPhaseBegin.value)
+                flag.Invoke("SwitchToSecondPhase", 1f);
         }
     }
 
     class Leviathan_FixedUpdate
     {
         public static float projectileForward = 10f;
-        public static float projectileEnemyDamageMultiplier = 1f / 15f;
 
         static bool Roll(float chancePercent)
         {
@@ -227,11 +234,11 @@ namespace Ultrapain.Patches
                 else
                 {
                     flag.projectilesRemaining -= 1;
-                    flag.projectileDelayRemaining = flag.projectileDelay;
+                    flag.projectileDelayRemaining = 1f / ConfigManager.leviathanProjectileDensity.value;
 
                     GameObject proj = null;
                     Projectile comp = null;
-                    if (Roll(ConfigManager.leviathanProjectileYellowChance.value))
+                    if (Roll(ConfigManager.leviathanProjectileYellowChance.value) && ConfigManager.leviathanProjectileMixToggle.value)
                     {
                         proj = GameObject.Instantiate(Plugin.hideousMassProjectile, ___shootPoint.position, ___shootPoint.rotation);
                         comp = proj.GetComponent<Projectile>();
@@ -243,7 +250,7 @@ namespace Ultrapain.Patches
                         comp.turningSpeedMultiplier *= 4f;
                         comp.predictiveHomingMultiplier = 1.25f;
                     }
-                    else if (Roll(ConfigManager.leviathanProjectileBlueChance.value))
+                    else if (Roll(ConfigManager.leviathanProjectileBlueChance.value) && ConfigManager.leviathanProjectileMixToggle.value)
                     {
                         proj = GameObject.Instantiate(Plugin.homingProjectile, ___shootPoint.position, ___shootPoint.rotation);
                         comp = proj.GetComponent<Projectile>();
@@ -269,7 +276,7 @@ namespace Ultrapain.Patches
                     comp.speed *= __instance.lcon.eid.totalSpeedModifier;
                     comp.damage *= __instance.lcon.eid.totalDamageModifier;
                     comp.safeEnemyType = EnemyType.Leviathan;
-                    comp.enemyDamageMultiplier = projectileEnemyDamageMultiplier;
+                    comp.enemyDamageMultiplier = ConfigManager.leviathanProjectileFriendlyFireDamageMultiplier.normalizedValue;
                     proj.transform.localScale *= 2f;
                     proj.transform.position += proj.transform.forward * projectileForward;
                 }
@@ -286,10 +293,10 @@ namespace Ultrapain.Patches
                 }
                 else
                 {
-                    if (NewMovement.Instance.ridingRocket != null)
+                    if (NewMovement.Instance.ridingRocket != null && ConfigManager.leviathanChargeHauntRocketRiding.value)
                     {
                         flag.playerRocketRideTracker += Time.deltaTime;
-                        if (flag.playerRocketRideTracker >= 2)
+                        if (flag.playerRocketRideTracker >= 1)
                         {
                             flag.projectileAttack = false;
                             flag.beamAttack = true;
@@ -328,11 +335,11 @@ namespace Ultrapain.Patches
                 return false;
 
             bool beamAttack = false;
-            if (NewMovement.Instance.ridingRocket != null)
+            if (NewMovement.Instance.ridingRocket != null && ConfigManager.leviathanChargeHauntRocketRiding.value)
             {
                 beamAttack = true;
             }
-            else if (UnityEngine.Random.RandomRangeInt(0, 100) <= 25)
+            else if (UnityEngine.Random.Range(0, 99.9f) <= ConfigManager.leviathanChargeChance.value && ConfigManager.leviathanChargeAttack.value)
             {
                 beamAttack = true;
             }
@@ -369,7 +376,7 @@ namespace Ultrapain.Patches
             {
                 if(flag.projectilesRemaining <= 0)
                 {
-                    flag.projectilesRemaining = 160;
+                    flag.projectilesRemaining = ConfigManager.leviathanProjectileCount.value;
                     flag.projectileDelayRemaining = 0;
                 }
 
@@ -407,7 +414,7 @@ namespace Ultrapain.Patches
             if (flag == null)
                 return true;
 
-            flag.swingCount = flag.maxSwingCount;
+            flag.swingCount = ConfigManager.leviathanTailComboCount.value;
             return true;
         }
     }

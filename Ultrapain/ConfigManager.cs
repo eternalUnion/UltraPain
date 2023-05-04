@@ -326,9 +326,26 @@ namespace Ultrapain
 
         // ADD ME
         // LEVIATHAN
+        public static BoolField leviathanSecondPhaseBegin;
+
         public static BoolField leviathanProjectileMixToggle;
         public static FloatSliderField leviathanProjectileBlueChance;
         public static FloatSliderField leviathanProjectileYellowChance;
+
+        public static IntField leviathanProjectileCount;
+        public static FloatField leviathanProjectileDensity;
+        public static FloatSliderField leviathanProjectileFriendlyFireDamageMultiplier;
+
+        public static BoolField leviathanChargeAttack;
+        public static FloatSliderField leviathanChargeChance;
+        public static FloatField leviathanChargeSizeMulti;
+        public static FloatField leviathanChargeDamageMulti;
+        public static IntField leviathanChargeCount;
+        public static FloatField leviathanChargeDelay;
+        public static BoolField leviathanChargeHauntRocketRiding;
+
+        public static IntField leviathanTailComboCount;
+
 
         /////////// ADD MEEEE
         // GABRIEL SECOND
@@ -1277,6 +1294,7 @@ namespace Ultrapain
             sisyInstStrongerExplosionSizeMulti = new FloatField(sisyInstExplosionDiv, "Size multiplier", "sisyInstStrongerExplosionSizeMulti", 0.5f);
             sisyInstStrongerExplosionDamageMulti = new FloatField(sisyInstExplosionDiv, "Damage multiplier", "sisyInstStrongerExplosionDamageMulti", 0.5f);
 
+            leviathanSecondPhaseBegin = new BoolField(leviathanPanel, "Start at the second phase", "leviathanSecondPhaseBegin", true); ;
             new ConfigHeader(leviathanPanel, "Mixed Projectile Burst");
             ConfigDivision leviathanMixProjectileDiv = new ConfigDivision(leviathanPanel, "leviathanMixProjectileDiv");
             leviathanProjectileMixToggle = new BoolField(leviathanPanel, "Enabled", "leviathanProjectileMixToggle", true);
@@ -1289,7 +1307,28 @@ namespace Ultrapain
             leviathanProjectileMixToggle.TriggerValueChangeEvent();
             leviathanProjectileBlueChance = new FloatSliderField(leviathanMixProjectileDiv, "Blue projectile", "leviathanProjectileBlueChance", new System.Tuple<float, float>(0, 100), 40f);
             leviathanProjectileYellowChance = new FloatSliderField(leviathanMixProjectileDiv, "Yellow projectile", "leviathanProjectileYellowChance", new System.Tuple<float, float>(0, 100), 10f);
-            
+            new ConfigHeader(leviathanPanel, "Projectile Burst Tweaker");
+            leviathanProjectileCount = new IntField(leviathanPanel, "Projectile count", "leviathanProjectileCount", 80);
+            leviathanProjectileDensity = new FloatField(leviathanPanel, "Projectiles per second", "leviathanProjectileDensity", 25);
+            leviathanProjectileFriendlyFireDamageMultiplier = new FloatSliderField(leviathanPanel, "Projectile friendly fire damage%", "leviathanProjectileFriendlyFireDamageMultiplier", new System.Tuple<float, float>(0, 100), 5f);
+            new ConfigHeader(leviathanPanel, "Charged Attack");
+            ConfigDivision leviathanChargedDiv = new ConfigDivision(leviathanPanel, "leviathanChargedDiv");
+            leviathanChargeAttack = new BoolField(leviathanPanel, "Enabled", "leviathanChargeAttack", true);
+            leviathanChargeAttack.onValueChange += (BoolField.BoolValueChangeEvent e) =>
+            {
+                leviathanChargedDiv.interactable = e.value;
+                dirtyField = true;
+            };
+            leviathanChargeAttack.TriggerValueChangeEvent();
+            leviathanChargeChance = new FloatSliderField(leviathanChargedDiv, "Chance", "leviathanChargeChance", new System.Tuple<float, float>(0, 100), 25);
+            leviathanChargeCount = new IntField(leviathanChargedDiv, "Number of charges shot", "leviathanChargeCount", 3, 1, int.MaxValue);
+            leviathanChargeDelay = new FloatField(leviathanChargedDiv, "Delay between shots", "leviathanChargeDelay", 0.75f);
+            leviathanChargeSizeMulti = new FloatField(leviathanChargedDiv, "Explosion size multiplier", "leviathanChargeSizeMulti", 1.5f);
+            leviathanChargeDamageMulti = new FloatField(leviathanChargedDiv, "Explosion damage multiplier", "leviathanChargeDamageMulti", 1f);
+            leviathanChargeHauntRocketRiding = new BoolField(leviathanChargedDiv, "Target ridden rockets", "leviathanChargeHauntRocketRiding", true);
+            new ConfigHeader(leviathanPanel, "Tail Swing Combo");
+            leviathanTailComboCount = new IntField(leviathanPanel, "Tail swing count", "leviathanTailComboCount", 3, 1, int.MaxValue);
+
             config.Flush();
             //config.LogDuplicateGUID();
             Plugin.PatchAll();
