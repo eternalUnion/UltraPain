@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Reflection;
 using System.Text;
+using ULTRAKILL.Cheats;
 using UnityEngine;
 
 namespace Ultrapain.Patches
@@ -11,6 +12,8 @@ namespace Ultrapain.Patches
     {
         private LeviathanHead comp;
         private Animator anim;
+
+        public float playerRocketRideTracker = 0;
 
         private GameObject currentProjectileEffect;
         private AudioSource currentProjectileAud;
@@ -21,6 +24,10 @@ namespace Ultrapain.Patches
         public int maxBeamCount = 2;
         public int beamRemaining = 0;
 
+        public int projectilesRemaining = 0;
+        public float projectileDelay = 0.015f;
+        public float projectileDelayRemaining = 0f;
+
         private static FieldInfo ___inAction = typeof(LeviathanHead).GetField("inAction", BindingFlags.NonPublic | BindingFlags.Instance);
 
         private void Awake()
@@ -28,6 +35,9 @@ namespace Ultrapain.Patches
             comp = GetComponent<LeviathanHead>();
             anim = GetComponent<Animator>();
         }
+
+        public bool beamAttack = false;
+        public bool projectileAttack = false;
 
         public bool charging = false;
         private void Update()
@@ -78,19 +88,6 @@ namespace Ultrapain.Patches
         public void PrepareForFire()
         {
             charging = false;
-            //comp.lookAtPlayer = false;
-
-            //targetGrenade = FindTargetGrenade();
-
-            //targetShootPoint = NewMovement.Instance.playerCollider.bounds.center;
-            /*if (targetGrenade == null)
-            {
-                comp.lookAtPlayer = false;
-            }
-            else
-            {
-                comp.lookAtPlayer = true;
-            }*/
 
             Invoke("Shoot", 0.5f);
         }
@@ -131,6 +128,7 @@ namespace Ultrapain.Patches
                 {
                     exp.maxSize *= 1.5f;
                     exp.speed *= 1.5f;
+                    exp.toIgnore.Add(EnemyType.Leviathan);
                 }
 
                 projComp.damage *= 2;
@@ -142,17 +140,31 @@ namespace Ultrapain.Patches
             {
                 Destroy(currentProjectileEffect);
                 currentProjectileSize = 0;
+                beamAttack = false;
 
-                comp.lookAtPlayer = false;
-                anim.SetBool("ProjectileBurst", false);
-                ___inAction.SetValue(comp, false);
-                targetGrenade = null;
+                if (projectilesRemaining <= 0)
+                {
+                    comp.lookAtPlayer = false;
+                    anim.SetBool("ProjectileBurst", false);
+                    ___inAction.SetValue(comp, false);
+                    targetGrenade = null;
+                }
+                else
+                {
+                    comp.lookAtPlayer = true;
+                    projectileAttack = true;
+                }
             }
             else
             {
                 comp.lookAtPlayer = true;
                 Invoke("PrepareForFire", 0.5f);
             }
+        }
+
+        private void SwitchToSecondPhase()
+        {
+            comp.lcon.phaseChangeHealth = comp.lcon.stat.health;
         }
     }
 
@@ -179,79 +191,123 @@ namespace Ultrapain.Patches
     {
         static void Postfix(LeviathanHead __instance)
         {
-            __instance.gameObject.AddComponent<Leviathan_Flag>();
+            Leviathan_Flag flag = __instance.gameObject.AddComponent<Leviathan_Flag>();
+            flag.Invoke("SwitchToSecondPhase", 1f);
         }
     }
 
     class Leviathan_FixedUpdate
     {
+        public static float projectileForward = 10f;
+        public static float projectileEnemyDamageMultiplier = 1f / 15f;
+
         static bool Roll(float chancePercent)
         {
             return UnityEngine.Random.Range(0, 99.9f) <= chancePercent;
         }
 
-        struct StateInfo
+        static bool Prefix(LeviathanHead __instance, LeviathanController ___lcon, ref bool ___projectileBursting, float ___projectileBurstCooldown,
+            Transform ___shootPoint, ref bool ___trackerIgnoreLimits, Animator ___anim, ref int ___previousAttack)
         {
-            public GameObject oldProjectile;
-            public GameObject currentProjectile;
-
-            public StateInfo(GameObject oldProjectile, GameObject currentProjectile)
+            if (!__instance.active)
             {
-                this.oldProjectile = oldProjectile;
-                this.currentProjectile = currentProjectile;
+                return false;
             }
-        }
 
-        static bool Prefix(LeviathanHead __instance, LeviathanController ___lcon, bool ___projectileBursting, float ___projectileBurstCooldown, out StateInfo __state)
-        {
-            __state = new StateInfo(null, null);
-            if (___projectileBursting && ___projectileBurstCooldown == 0)
+            Leviathan_Flag flag = __instance.GetComponent<Leviathan_Flag>();
+            if (flag == null)
+                return true;
+
+            if (___projectileBursting && flag.projectileAttack)
             {
-                __state.oldProjectile = MonoSingleton<DefaultReferenceManager>.Instance.projectile;
-
-                if (Roll(ConfigManager.leviathanProjectileYellowChance.value))
+                if (flag.projectileDelayRemaining > 0f)
                 {
-                    GameObject proj = MonoSingleton<DefaultReferenceManager>.Instance.projectile = GameObject.Instantiate(Plugin.hideousMassProjectile);
-                    __state.currentProjectile = proj;
-                    Projectile comp = proj.GetComponent<Projectile>();
-                    comp.target = MonoSingleton<PlayerTracker>.Instance.GetTarget();
-                    comp.safeEnemyType = EnemyType.Leviathan;
-
-                    // values from p2 flesh prison
-                    comp.turnSpeed *= 4f;
-                    comp.turningSpeedMultiplier *= 4f;
-                    comp.predictiveHomingMultiplier = 1.25f;
-
-                    comp.speed *= ___lcon.eid.totalSpeedModifier;
-                    comp.damage *= ___lcon.eid.totalDamageModifier;
-                }
-                else if (Roll(ConfigManager.leviathanProjectileBlueChance.value))
-                {
-                    GameObject proj = MonoSingleton<DefaultReferenceManager>.Instance.projectile = GameObject.Instantiate(Plugin.homingProjectile);
-                    __state.currentProjectile = proj;
-                    Projectile comp = proj.GetComponent<Projectile>();
-                    comp.target = MonoSingleton<PlayerTracker>.Instance.GetTarget();
-                    comp.safeEnemyType = EnemyType.Leviathan;
-
-                    // values from mindflayer
-                    comp.turningSpeedMultiplier = 0.5f;
-                    comp.speed *= ___lcon.eid.totalSpeedModifier;
-                    comp.damage *= ___lcon.eid.totalDamageModifier;
+                    flag.projectileDelayRemaining = Mathf.MoveTowards(flag.projectileDelayRemaining, 0f, Time.deltaTime * __instance.lcon.eid.totalSpeedModifier);
                 }
                 else
-                    __state.oldProjectile = null;
+                {
+                    flag.projectilesRemaining -= 1;
+                    flag.projectileDelayRemaining = flag.projectileDelay;
+
+                    GameObject proj = null;
+                    Projectile comp = null;
+                    if (Roll(ConfigManager.leviathanProjectileYellowChance.value))
+                    {
+                        proj = GameObject.Instantiate(Plugin.hideousMassProjectile, ___shootPoint.position, ___shootPoint.rotation);
+                        comp = proj.GetComponent<Projectile>();
+                        comp.target = MonoSingleton<PlayerTracker>.Instance.GetTarget();
+                        comp.safeEnemyType = EnemyType.Leviathan;
+
+                        // values from p2 flesh prison
+                        comp.turnSpeed *= 4f;
+                        comp.turningSpeedMultiplier *= 4f;
+                        comp.predictiveHomingMultiplier = 1.25f;
+                    }
+                    else if (Roll(ConfigManager.leviathanProjectileBlueChance.value))
+                    {
+                        proj = GameObject.Instantiate(Plugin.homingProjectile, ___shootPoint.position, ___shootPoint.rotation);
+                        comp = proj.GetComponent<Projectile>();
+                        comp.target = MonoSingleton<PlayerTracker>.Instance.GetTarget();
+                        comp.safeEnemyType = EnemyType.Leviathan;
+
+                        // values from mindflayer
+                        comp.turningSpeedMultiplier = 0.5f;
+                        comp.speed = 20f;
+                        comp.speed *= ___lcon.eid.totalSpeedModifier;
+                        comp.damage *= ___lcon.eid.totalDamageModifier;
+                    }
+                    else
+                    {
+                        proj = GameObject.Instantiate<GameObject>(MonoSingleton<DefaultReferenceManager>.Instance.projectile, ___shootPoint.position, ___shootPoint.rotation);
+                        comp = proj.GetComponent<Projectile>();
+                        comp.safeEnemyType = EnemyType.Leviathan;
+
+                        comp.speed *= 2f;
+                        comp.enemyDamageMultiplier = 0.5f;
+                    }
+
+                    comp.speed *= __instance.lcon.eid.totalSpeedModifier;
+                    comp.damage *= __instance.lcon.eid.totalDamageModifier;
+                    comp.safeEnemyType = EnemyType.Leviathan;
+                    comp.enemyDamageMultiplier = projectileEnemyDamageMultiplier;
+                    proj.transform.localScale *= 2f;
+                    proj.transform.position += proj.transform.forward * projectileForward;
+                }
             }
 
-            return true;
-        }
-
-        static void Postfix(StateInfo __state)
-        {
-            if (__state.oldProjectile != null)
+            if (___projectileBursting)
             {
-                MonoSingleton<DefaultReferenceManager>.Instance.projectile = __state.oldProjectile;
-                GameObject.Destroy(__state.currentProjectile);
+                if (flag.projectilesRemaining <= 0 || BlindEnemies.Blind)
+                {
+                    flag.projectileAttack = false;
+                    ___projectileBursting = false;
+                    ___trackerIgnoreLimits = false;
+                    ___anim.SetBool("ProjectileBurst", false);
+                }
+                else
+                {
+                    if (NewMovement.Instance.ridingRocket != null)
+                    {
+                        flag.playerRocketRideTracker += Time.deltaTime;
+                        if (flag.playerRocketRideTracker >= 2)
+                        {
+                            flag.projectileAttack = false;
+                            flag.beamAttack = true;
+                            __instance.lookAtPlayer = true;
+                            flag.ChargeBeam(___shootPoint);
+                            flag.beamRemaining = 1;
+
+                            return false;
+                        }
+                    }
+                    else
+                    {
+                        flag.playerRocketRideTracker = 0;
+                    }
+                }
             }
+
+            return false;
         }
     }
 
@@ -268,15 +324,37 @@ namespace Ultrapain.Patches
             Leviathan_Flag flag = __instance.GetComponent<Leviathan_Flag>();
             if (flag == null)
                 return true;
+            if (flag.beamAttack || flag.projectileAttack)
+                return false;
 
-            Debug.Log("Attempting to prepare beam for leviathan");
-            ___anim.SetBool("ProjectileBurst", true);
+            bool beamAttack = false;
+            if (NewMovement.Instance.ridingRocket != null)
+            {
+                beamAttack = true;
+            }
+            else if (UnityEngine.Random.RandomRangeInt(0, 100) <= 25)
+            {
+                beamAttack = true;
+            }
 
-            ___projectilesLeftInBurst = 1;
-            ___projectileBurstCooldown = 100f;
-            ___inAction = true;
+            if (!beamAttack)
+            {
+                flag.projectileAttack = true;
+                return true;
+            }
+            else
+            {
+                flag.beamAttack = true;
 
-            return false;
+                Debug.Log("Attempting to prepare beam for leviathan");
+                ___anim.SetBool("ProjectileBurst", true);
+
+                ___projectilesLeftInBurst = 1;
+                ___projectileBurstCooldown = 100f;
+                ___inAction = true;
+
+                return false;
+            }
         }
     }
 
@@ -287,9 +365,18 @@ namespace Ultrapain.Patches
             Leviathan_Flag flag = __instance.GetComponent<Leviathan_Flag>();
             if (flag == null)
                 return true;
+            if (flag.projectileAttack)
+            {
+                if(flag.projectilesRemaining <= 0)
+                {
+                    flag.projectilesRemaining = 160;
+                    flag.projectileDelayRemaining = 0;
+                }
+
+                return true;
+            }
             if (flag.charging)
                 return false;
-
 
             Debug.Log("Attempting to charge beam for leviathan");
             __instance.lookAtPlayer = true;

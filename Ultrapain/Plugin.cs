@@ -480,7 +480,7 @@ namespace Ultrapain
             harmonyTweaks.Patch(GetMethod<LeviathanHead>("ProjectileBurstStart"), prefix: GetHarmonyMethod(GetMethod<Leviathan_ProjectileBurstStart>("Prefix")));
             if (ConfigManager.leviathanProjectileMixToggle.value)
             {
-                harmonyTweaks.Patch(GetMethod<LeviathanHead>("FixedUpdate"), prefix: GetHarmonyMethod(GetMethod<Leviathan_FixedUpdate>("Prefix")), postfix: GetHarmonyMethod(GetMethod<Leviathan_FixedUpdate>("Postfix")));
+                harmonyTweaks.Patch(GetMethod<LeviathanHead>("FixedUpdate"), prefix: GetHarmonyMethod(GetMethod<Leviathan_FixedUpdate>("Prefix")));
             }
 
             // ADDME
