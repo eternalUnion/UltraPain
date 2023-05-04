@@ -411,7 +411,7 @@ namespace Ultrapain
             memePanel = new ConfigPanel(config.rootPanel, "Memes", "memePanel");
 
             // MEME PANEL
-            enrageSfxToggle = new BoolField(memePanel, "Enrage SFX", "enrageSfxToggle", false);
+            enrageSfxToggle = new BoolField(memePanel, "Enrage SFX\n(volume warning)", "enrageSfxToggle", false);
             enrageSfxToggle.onValueChange += (BoolField.BoolValueChangeEvent e) =>
             {
                 dirtyField = true;

@@ -97,10 +97,13 @@ namespace Ultrapain
         public static GameObject sisyphiusExplosion;
         public static GameObject sisyphiusPrimeExplosion;
         public static GameObject explosionWaveKnuckleblaster;
+        public static GameObject chargeEffect;
+        public static GameObject maliciousFaceProjectile;
 
         //public static GameObject idol;
         public static GameObject ferryman;
         public static GameObject minosPrime;
+        //public static GameObject maliciousFace;
 
         public static GameObject enrageEffect;
         public static GameObject v2flashUnparryable;
@@ -201,6 +204,14 @@ namespace Ultrapain
             maliciousRailcannon = LoadObject<GameObject>("Assets/Prefabs/Weapons/Railcannon Malicious.prefab");
             //Assets/Particles/SoundBubbles/Ricochet.prefab
             ricochetSfx = LoadObject<GameObject>("Assets/Particles/SoundBubbles/Ricochet.prefab");
+
+            //Assets/Prefabs/Enemies/Spider.prefab
+            //maliciousFace = LoadObject<GameObject>("Assets/Prefabs/Enemies/Spider.prefab");
+
+            //Assets/Prefabs/Effects/Charge Effect.prefab
+            chargeEffect = LoadObject<GameObject>("Assets/Prefabs/Effects/Charge Effect.prefab");
+            //Assets/Prefabs/Attacks and Projectiles/Hitscan Beams/Malicious Beam.prefab
+            maliciousFaceProjectile = LoadObject<GameObject>("Assets/Prefabs/Attacks and Projectiles/Hitscan Beams/Malicious Beam.prefab");
 
             // hideousMassProjectile.AddComponent<HideousMassProjectile>();
         }
@@ -460,7 +471,14 @@ namespace Ultrapain
             if(ConfigManager.sisyInstStrongerExplosion.value)
                 harmonyTweaks.Patch(GetMethod<Sisyphus>("StompExplosion"), prefix: GetHarmonyMethod(GetMethod<SisyphusInstructionist_StompExplosion>("Prefix")));
 
-            if(ConfigManager.leviathanProjectileMixToggle.value)
+            harmonyTweaks.Patch(GetMethod<LeviathanTail>("Awake"), postfix: GetHarmonyMethod(GetMethod<LeviathanTail_Start>("Postfix")));
+            harmonyTweaks.Patch(GetMethod<LeviathanTail>("BigSplash"), prefix: GetHarmonyMethod(GetMethod<LeviathanTail_BigSplash>("Prefix")));
+            harmonyTweaks.Patch(GetMethod<LeviathanTail>("SwingEnd"), prefix: GetHarmonyMethod(GetMethod<LeviathanTail_SwingEnd>("Prefix")));
+
+            harmonyTweaks.Patch(GetMethod<LeviathanHead>("Start"), postfix: GetHarmonyMethod(GetMethod<Leviathan_Start>("Postfix")));
+            harmonyTweaks.Patch(GetMethod<LeviathanHead>("ProjectileBurst"), prefix: GetHarmonyMethod(GetMethod<Leviathan_ProjectileBurst>("Prefix")));
+            harmonyTweaks.Patch(GetMethod<LeviathanHead>("ProjectileBurstStart"), prefix: GetHarmonyMethod(GetMethod<Leviathan_ProjectileBurstStart>("Prefix")));
+            if (ConfigManager.leviathanProjectileMixToggle.value)
             {
                 harmonyTweaks.Patch(GetMethod<LeviathanHead>("FixedUpdate"), prefix: GetHarmonyMethod(GetMethod<Leviathan_FixedUpdate>("Prefix")), postfix: GetHarmonyMethod(GetMethod<Leviathan_FixedUpdate>("Postfix")));
             }

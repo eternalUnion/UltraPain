@@ -15,6 +15,10 @@ namespace Ultrapain.Patches
 
     class Mindflayer_ShootProjectiles_Patch
     {
+        public static float maxProjDistance = 5;
+        public static float initialProjectileDistance = -1f;
+        public static float distancePerProjShot = 0.2f;
+
         static bool Prefix(Mindflayer __instance, ref EnemyIdentifier ___eid, ref LayerMask ___environmentMask, ref bool ___enraged)
         {
             /*for(int i = 0; i < 20; i++)
@@ -52,13 +56,16 @@ namespace Ultrapain.Patches
             }
 
             Quaternion randomRotation = Quaternion.LookRotation(MonoSingleton<PlayerTracker>.Instance.GetTarget().position - __instance.transform.position);
-            randomRotation.eulerAngles += new Vector3(UnityEngine.Random.Range(-5.0f, 5.0f), UnityEngine.Random.Range(-5.0f, 5.0f), UnityEngine.Random.Range(-5.0f, 5.0f));
+            randomRotation.eulerAngles += new Vector3(UnityEngine.Random.Range(-10.0f, 10.0f), UnityEngine.Random.Range(-10.0f, 10.0f), UnityEngine.Random.Range(-10.0f, 10.0f));
             Projectile componentInChildren = GameObject.Instantiate(Plugin.homingProjectile, __instance.transform.position + __instance.transform.forward, randomRotation).GetComponentInChildren<Projectile>();
 
             Vector3 randomPos = __instance.tentacles[UnityEngine.Random.RandomRangeInt(0, __instance.tentacles.Length)].position;
             if (!Physics.Raycast(__instance.transform.position, randomPos - __instance.transform.position, Vector3.Distance(randomPos, __instance.transform.position), ___environmentMask))
                 componentInChildren.transform.position = randomPos;
-                
+
+            int shotCount = ConfigManager.mindflayerShootAmount.value - counter.shotsLeft;
+            componentInChildren.transform.position += componentInChildren.transform.forward * Mathf.Clamp(initialProjectileDistance + shotCount * distancePerProjShot, 0, maxProjDistance);
+
             componentInChildren.speed = 10f * ___eid.totalSpeedModifier;
             //componentInChildren.turnSpeed = 150f;
             componentInChildren.target = MonoSingleton<PlayerTracker>.Instance.GetTarget();
