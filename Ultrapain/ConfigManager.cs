@@ -5,6 +5,9 @@ using UnityEngine.UI;
 using Ultrapain.Patches;
 using UnityEngine;
 using System.Runtime.InteropServices;
+using System.Collections.Generic;
+using System;
+using BepInEx.Configuration;
 
 namespace Ultrapain
 {
@@ -117,6 +120,23 @@ namespace Ultrapain
         public static FloatSliderField friendlyFireDamageOverrideProjectile;
         public static FloatSliderField friendlyFireDamageOverrideFire;
         public static FloatSliderField friendlyFireDamageOverrideMelee;
+
+        // ENEMY STAT CONFIG
+        public struct EidStatContainer
+        {
+            public FloatField health;
+            public FloatField damage;
+            public FloatField speed;
+
+            public void SetHidden(bool hidden)
+            {
+                health.hidden = damage.hidden = speed.hidden = hidden;
+            }
+        }
+
+        public static ConfigPanel eidStatEditorPanel;
+        public static EnumField<EnemyType> eidStatEditorSelector;
+        public static Dictionary<EnemyType, EidStatContainer> enemyStats = new Dictionary<EnemyType, EidStatContainer>();
 
         // CERBERUS
         public static BoolField cerberusDashToggle;
@@ -418,6 +438,7 @@ namespace Ultrapain
                     Plugin.currentDifficultyPanel.transform.Find("Title (1)").GetComponent<Text>().text = $"--{data.value}--";
             };
 
+            // GLOBAL STATE
             new ConfigHeader(config.rootPanel, "Global Difficulty");
             globalDifficultySwitch = new BoolField(config.rootPanel, "Enabled", "globalDifficultySwitch", false);
             globalDifficultySwitch.onValueChange += (BoolField.BoolValueChangeEvent e) =>
@@ -626,6 +647,31 @@ namespace Ultrapain
             minosPrimePanel = new ConfigPanel(enemyPanel, "Minos Prime", "minosPrimePanel");
 
             // GLOBAL ENEMY TWEAKS
+            eidStatEditorPanel = new ConfigPanel(globalEnemyPanel, "Enemy stat editor", "eidStatEditorPanel");
+
+            eidStatEditorSelector = new EnumField<EnemyType>(eidStatEditorPanel, "Enemy", "eidStatEditorSelector", EnemyType.Filth);
+            foreach(EnemyType eid in Enum.GetValues(typeof(EnemyType)))
+            {
+                EidStatContainer container = new EidStatContainer();
+                container.health = new FloatField(eidStatEditorPanel, "Health multiplier", $"eid_{eid}_health", 1f, 0.1f, float.MaxValue);
+                container.damage = new FloatField(eidStatEditorPanel, "Damage multiplier", $"eid_{eid}_damage", 1f, 0.1f, float.MaxValue);
+                container.speed = new FloatField(eidStatEditorPanel, "Speed multiplier", $"eid_{eid}_speed", 1f, 0.1f, float.MaxValue);
+                enemyStats.Add(eid, container);
+            }
+
+            eidStatEditorSelector.onValueChange += (EnumField<EnemyType>.EnumValueChangeEvent e) =>
+            {
+                foreach (KeyValuePair<EnemyType, EidStatContainer> stats in enemyStats)
+                    stats.Value.SetHidden(stats.Key != e.value);
+            };
+            eidStatEditorSelector.TriggerValueChangeEvent();
+            ButtonField statResetButton = new ButtonField(eidStatEditorPanel, "Reset All Stats", "statResetButton");
+            statResetButton.onClick += () =>
+            {
+                foreach (EidStatContainer stat in enemyStats.Values)
+                    stat.health.value = stat.damage.value = stat.speed.value = 1f;
+            };
+
             new ConfigHeader(globalEnemyPanel, "Friendly Fire Damage Override");
             ConfigDivision ffDiv = new ConfigDivision(globalEnemyPanel, "ffDiv");
             friendlyFireDamageOverrideToggle = new BoolField(globalEnemyPanel, "Enabled", "friendlyFireDamageOverrideToggle", true);

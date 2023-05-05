@@ -3,9 +3,22 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using UnityEngine;
+using static Ultrapain.ConfigManager;
 
 namespace Ultrapain.Patches
 {
+    // EID
+    class EnemyIdentifier_UpdateModifiers
+    {
+        static void Postfix(EnemyIdentifier __instance)
+        {
+            EidStatContainer container = ConfigManager.enemyStats[__instance.enemyType];
+            __instance.totalHealthModifier *= container.health.value;
+            __instance.totalDamageModifier *= container.damage.value;
+            __instance.totalSpeedModifier *= container.speed.value;
+        }
+    }
+
     // DETECT DAMAGE TYPE
     class Explosion_Collide_FF
     {

@@ -340,7 +340,9 @@ namespace Ultrapain
                 harmonyTweaks.Patch(GetMethod<Flammable>("Burn"), prefix: GetHarmonyMethod(GetMethod<Flammable_Burn_FF>("Prefix")));
                 harmonyTweaks.Patch(GetMethod<FireZone>("OnTriggerStay"), prefix: GetHarmonyMethod(GetMethod<StreetCleaner_Fire_FF>("Prefix")), postfix: GetHarmonyMethod(GetMethod<StreetCleaner_Fire_FF>("Postfix")));
             }
-            
+
+            harmonyTweaks.Patch(GetMethod<EnemyIdentifier>("UpdateModifiers"), postfix: GetHarmonyMethod(GetMethod<EnemyIdentifier_UpdateModifiers>("Postfix")));
+
             harmonyTweaks.Patch(GetMethod<StatueBoss>("Start"), postfix: GetHarmonyMethod(GetMethod<StatueBoss_Start_Patch>("Postfix")));
             if (ConfigManager.cerberusDashToggle.value)
                 harmonyTweaks.Patch(GetMethod<StatueBoss>("StopDash"), postfix: GetHarmonyMethod(GetMethod<StatueBoss_StopDash_Patch>("Postfix")));
