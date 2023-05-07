@@ -268,6 +268,16 @@ namespace Ultrapain
 
                 evt.triggers.Add(trigger1);
                 evt.triggers.Add(trigger2);
+
+                foreach(EventTrigger trigger in difficultySelect.GetComponentsInChildren<EventTrigger>())
+                {
+                    if (trigger.gameObject == ultrapainButton)
+                        continue;
+
+                    EventTrigger.Entry closeTrigger = new EventTrigger.Entry() { eventID = EventTriggerType.PointerEnter };
+                    closeTrigger.callback.AddListener((BaseEventData data) => info.SetActive(false));
+                    trigger.triggers.Add(closeTrigger);
+                }
             }
 
             // LOAD CUSTOM PREFABS HERE TO AVOID MID GAME LAG
