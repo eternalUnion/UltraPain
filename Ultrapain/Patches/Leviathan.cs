@@ -287,16 +287,20 @@ namespace Ultrapain.Patches
                 if (flag.projectilesRemaining <= 0 || BlindEnemies.Blind)
                 {
                     flag.projectileAttack = false;
-                    ___projectileBursting = false;
-                    ___trackerIgnoreLimits = false;
-                    ___anim.SetBool("ProjectileBurst", false);
+
+                    if (!flag.beamAttack)
+                    {
+                        ___projectileBursting = false;
+                        ___trackerIgnoreLimits = false;
+                        ___anim.SetBool("ProjectileBurst", false);
+                    }
                 }
                 else
                 {
-                    if (NewMovement.Instance.ridingRocket != null && ConfigManager.leviathanChargeHauntRocketRiding.value)
+                    if (NewMovement.Instance.ridingRocket != null && ConfigManager.leviathanChargeAttack.value && ConfigManager.leviathanChargeHauntRocketRiding.value)
                     {
                         flag.playerRocketRideTracker += Time.deltaTime;
-                        if (flag.playerRocketRideTracker >= 1)
+                        if (flag.playerRocketRideTracker >= 1 && !flag.beamAttack)
                         {
                             flag.projectileAttack = false;
                             flag.beamAttack = true;
@@ -334,34 +338,39 @@ namespace Ultrapain.Patches
             if (flag.beamAttack || flag.projectileAttack)
                 return false;
 
-            bool beamAttack = false;
-            if (NewMovement.Instance.ridingRocket != null && ConfigManager.leviathanChargeHauntRocketRiding.value)
+            flag.beamAttack = false;
+            if (ConfigManager.leviathanChargeAttack.value)
             {
-                beamAttack = true;
-            }
-            else if (UnityEngine.Random.Range(0, 99.9f) <= ConfigManager.leviathanChargeChance.value && ConfigManager.leviathanChargeAttack.value)
-            {
-                beamAttack = true;
+                if (NewMovement.Instance.ridingRocket != null && ConfigManager.leviathanChargeHauntRocketRiding.value)
+                {
+                    flag.beamAttack = true;
+                }
+                else if (UnityEngine.Random.Range(0, 99.9f) <= ConfigManager.leviathanChargeChance.value && ConfigManager.leviathanChargeAttack.value)
+                {
+                    flag.beamAttack = true;
+                }
             }
 
-            if (!beamAttack)
+            flag.projectileAttack = true;
+            return true;
+
+            /*if (!beamAttack)
             {
                 flag.projectileAttack = true;
                 return true;
-            }
-            else
-            {
-                flag.beamAttack = true;
+            }*/
 
+            /*if(flag.beamAttack)
+            {
                 Debug.Log("Attempting to prepare beam for leviathan");
                 ___anim.SetBool("ProjectileBurst", true);
 
-                ___projectilesLeftInBurst = 1;
-                ___projectileBurstCooldown = 100f;
+                //___projectilesLeftInBurst = 1;
+                //___projectileBurstCooldown = 100f;
                 ___inAction = true;
 
-                return false;
-            }
+                return true;
+            }*/
         }
     }
 
@@ -379,16 +388,18 @@ namespace Ultrapain.Patches
                     flag.projectilesRemaining = ConfigManager.leviathanProjectileCount.value;
                     flag.projectileDelayRemaining = 0;
                 }
-
-                return true;
             }
-            if (flag.charging)
-                return false;
 
-            Debug.Log("Attempting to charge beam for leviathan");
-            __instance.lookAtPlayer = true;
-            flag.ChargeBeam(___shootPoint);
-            return false;
+            if (flag.beamAttack)
+            {
+                if (!flag.charging)
+                {
+                    Debug.Log("Attempting to charge beam for leviathan");
+                    __instance.lookAtPlayer = true;
+                    flag.ChargeBeam(___shootPoint);
+                }
+            }
+            return true;
         }
     }
 
