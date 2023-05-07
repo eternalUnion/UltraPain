@@ -23,6 +23,7 @@ namespace Ultrapain
         public static BoolField discordRichPresenceToggle;
         public static BoolField steamRichPresenceToggle;
         public static StringField pluginName;
+        public static StringMultilineField pluginInfo;
         public static BoolField globalDifficultySwitch;
         public static ConfigPanel memePanel;
 
@@ -427,7 +428,7 @@ namespace Ultrapain
                 dirtyField = true;
             };
 
-            new ConfigHeader(config.rootPanel, "Plugin Difficulty Name");
+            new ConfigHeader(config.rootPanel, "Plugin Difficulty Info");
             pluginName = new StringField(config.rootPanel, "Difficulty name", "pluginName", "ULTRAPAIN");
             pluginName.onValueChange += (StringField.StringValueChangeEvent data) =>
             {
@@ -437,6 +438,22 @@ namespace Ultrapain
                 if (Plugin.currentDifficultyPanel != null)
                     Plugin.currentDifficultyPanel.transform.Find("Title (1)").GetComponent<Text>().text = $"--{data.value}--";
             };
+            pluginInfo = new StringMultilineField(config.rootPanel, "Difficulty info", "pluginInfo",
+                """
+                    Fast and aggressive enemies with unique attack patterns.
+
+                    Quick thinking, mobility options, and a decent understanding of the vanilla game are essential.
+
+                    <color=red>Recommended for players who have gotten used to VIOLENT's changes and are looking to freshen up their gameplay with unique enemy mechanics.</color>
+                    
+                    <color=orange>This difficulty uses UKMD difficulty and slot. To use the mod on another difficulty, enable global difficulty from settings.</color>
+                    """);
+            pluginInfo.onValueChange += (StringMultilineField.StringValueChangeEvent e) =>
+            {
+                if (Plugin.currentDifficultyInfoText != null)
+                    Plugin.currentDifficultyInfoText.text = e.value;
+            };
+            
 
             // GLOBAL STATE
             new ConfigHeader(config.rootPanel, "Global Difficulty");

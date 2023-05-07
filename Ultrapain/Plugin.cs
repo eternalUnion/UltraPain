@@ -220,6 +220,7 @@ namespace Ultrapain
         public static bool realUltrapainDifficulty = false;
         public static GameObject currentDifficultyButton;
         public static GameObject currentDifficultyPanel;
+        public static Text currentDifficultyInfoText;
         public void OnSceneChange(Scene before, Scene after)
         {
             StyleIDs.RegisterIDs();
@@ -243,20 +244,13 @@ namespace Ultrapain
                 //Canvas/Difficulty Select (1)/Violent Info
                 GameObject info = GameObject.Instantiate(difficultySelect.Find("Violent Info").gameObject, difficultySelect);
                 currentDifficultyPanel = info;
-                info.transform.Find("Text").GetComponent<Text>().text =
-                    """
-                    Fast and aggressive enemies with unique attack patterns.
-
-                    Quick thinking, mobility options, and a decent understanding of the vanilla game are essential.
-
-                    <color=red>Recommended for players who have gotten used to VIOLENT's changes and are looking to freshen up their gameplay with unique enemy mechanics.</color>
-                    
-                    <color=orange>This difficulty uses UKMD difficulty and slot. To use the mod on another difficulty, enable global difficulty from settings.</color>
-                    """;
-                info.transform.Find("Title (1)").GetComponent<Text>().text = $"--{ConfigManager.pluginName.value}--";
-                info.transform.Find("Title (1)").GetComponent<Text>().resizeTextForBestFit = true;
-                info.transform.Find("Title (1)").GetComponent<Text>().horizontalOverflow = HorizontalWrapMode.Wrap;
-                info.transform.Find("Title (1)").GetComponent<Text>().verticalOverflow = VerticalWrapMode.Truncate;
+                currentDifficultyInfoText = info.transform.Find("Text").GetComponent<Text>();
+                currentDifficultyInfoText.text = ConfigManager.pluginInfo.value;
+                Text currentDifficultyHeaderText = info.transform.Find("Title (1)").GetComponent<Text>();
+                currentDifficultyHeaderText.text = $"--{ConfigManager.pluginName.value}--";
+                currentDifficultyHeaderText.resizeTextForBestFit = true;
+                currentDifficultyHeaderText.horizontalOverflow = HorizontalWrapMode.Wrap;
+                currentDifficultyHeaderText.verticalOverflow = VerticalWrapMode.Truncate;
                 info.SetActive(false);
 
                 EventTrigger evt = ultrapainButton.GetComponent<EventTrigger>();
