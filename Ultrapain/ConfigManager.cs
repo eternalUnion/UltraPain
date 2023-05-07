@@ -650,6 +650,19 @@ namespace Ultrapain
             eidStatEditorPanel = new ConfigPanel(globalEnemyPanel, "Enemy stat editor", "eidStatEditorPanel");
 
             eidStatEditorSelector = new EnumField<EnemyType>(eidStatEditorPanel, "Enemy", "eidStatEditorSelector", EnemyType.Filth);
+            eidStatEditorSelector.SetEnumDisplayName(EnemyType.V2Second, "V2 Second");
+            eidStatEditorSelector.SetEnumDisplayName(EnemyType.Sisyphus, "Sisyphean Insurrectionist");
+            eidStatEditorSelector.SetEnumDisplayName(EnemyType.SisyphusPrime, "Sisyphus Prime");
+            eidStatEditorSelector.SetEnumDisplayName(EnemyType.CancerousRodent, "Cancerous Rodent");
+            eidStatEditorSelector.SetEnumDisplayName(EnemyType.FleshPanopticon, "Flesh Panopticon");
+            eidStatEditorSelector.SetEnumDisplayName(EnemyType.FleshPrison, "Flesh Prison");
+            eidStatEditorSelector.SetEnumDisplayName(EnemyType.GabrielSecond, "Gabriel Second");
+            eidStatEditorSelector.SetEnumDisplayName(EnemyType.HideousMass, "Hideous Mass");
+            eidStatEditorSelector.SetEnumDisplayName(EnemyType.MaliciousFace, "Malicious Face");
+            eidStatEditorSelector.SetEnumDisplayName(EnemyType.Mandalore, "Druid Knight");
+            eidStatEditorSelector.SetEnumDisplayName(EnemyType.MinosPrime, "Minos Prime");
+            eidStatEditorSelector.SetEnumDisplayName(EnemyType.VeryCancerousRodent, "Very Cancerous Rodent");
+            eidStatEditorSelector.SetEnumDisplayName(EnemyType.Wicked, "Something Wicked");
             foreach(EnemyType eid in Enum.GetValues(typeof(EnemyType)))
             {
                 EidStatContainer container = new EidStatContainer();

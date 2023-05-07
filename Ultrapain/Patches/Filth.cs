@@ -5,7 +5,7 @@ namespace Ultrapain.Patches
 {
     class SwingCheck2_CheckCollision_Patch2
     {
-        static bool Prefix(SwingCheck2 __instance, Collider __0)
+        static bool Prefix(SwingCheck2 __instance, Collider __0, EnemyIdentifier ___eid)
         {
             if (__0.gameObject.tag != "Player")
                 return true;
@@ -21,7 +21,7 @@ namespace Ultrapain.Patches
             foreach(Explosion exp in expObj.GetComponentsInChildren<Explosion>())
             {
                 exp.enemy = true;
-                exp.damage = ConfigManager.filthExplosionDamage.value;
+                exp.damage = (int)(ConfigManager.filthExplosionDamage.value * ___eid.totalDamageModifier);
                 exp.maxSize *= ConfigManager.filthExplosionSize.value;
                 exp.speed *= ConfigManager.filthExplosionSize.value;
                 exp.toIgnore.Add(EnemyType.Filth);

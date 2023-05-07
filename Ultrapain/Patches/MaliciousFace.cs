@@ -1,5 +1,6 @@
 ﻿using HarmonyLib;
 using System;
+using System.ComponentModel;
 using UnityEngine;
 
 namespace Ultrapain.Patches
@@ -64,7 +65,7 @@ namespace Ultrapain.Patches
             return true;
         }*/
 
-        static void Postfix(SpiderBody __instance, ref GameObject ___currentProj/*, bool __state*/)
+        static void Postfix(SpiderBody __instance, ref GameObject ___currentProj, EnemyIdentifier ___eid/*, bool __state*/)
         {
             /*if (!__state)
                 return;*/
@@ -74,6 +75,9 @@ namespace Ultrapain.Patches
             proj.speed = ConfigManager.maliciousFaceHomingProjectileSpeed.value;
             proj.turningSpeedMultiplier = ConfigManager.maliciousFaceHomingProjectileTurnSpeed.value;
             proj.damage = ConfigManager.maliciousFaceHomingProjectileDamage.value;
+            proj.safeEnemyType = EnemyType.MaliciousFace;
+            proj.speed *= ___eid.totalSpeedModifier;
+            proj.damage *= ___eid.totalDamageModifier;
             ___currentProj.SetActive(true);
         }
     }

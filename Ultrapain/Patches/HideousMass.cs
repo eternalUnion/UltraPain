@@ -5,7 +5,8 @@ namespace Ultrapain.Patches
 {
     public class HideousMassProjectile : MonoBehaviour
     {
-
+        public float damageBuf = 1f;
+        public float speedBuf = 1f;
     }
 
     public class Projectile_Explode_Patch 
@@ -21,8 +22,8 @@ namespace Ultrapain.Patches
                 GameObject insignia = GameObject.Instantiate(Plugin.virtueInsignia, __instance.transform.position, Quaternion.identity);
                 insignia.transform.localScale = new Vector3(size, 1f, size);
                 VirtueInsignia comp = insignia.GetComponent<VirtueInsignia>();
-                comp.windUpSpeedMultiplier = ConfigManager.hideousMassInsigniaSpeed.value;
-                comp.damage = damage;
+                comp.windUpSpeedMultiplier = ConfigManager.hideousMassInsigniaSpeed.value * flag.speedBuf;
+                comp.damage = (int)(damage * flag.damageBuf);
                 comp.predictive = false;
                 comp.hadParent = false;
                 comp.noTracking = true;
@@ -49,10 +50,12 @@ namespace Ultrapain.Patches
 
     public class HideousMassHoming
     {
-        static bool Prefix(Mass __instance)
+        static bool Prefix(Mass __instance, EnemyIdentifier ___eid)
         {
             __instance.explosiveProjectile = GameObject.Instantiate(Plugin.hideousMassProjectile);
-            __instance.explosiveProjectile.AddComponent<HideousMassProjectile>();
+            HideousMassProjectile flag = __instance.explosiveProjectile.AddComponent<HideousMassProjectile>();
+            flag.damageBuf = ___eid.totalDamageModifier;
+            flag.speedBuf = ___eid.totalSpeedModifier;
             return true;
         }
 

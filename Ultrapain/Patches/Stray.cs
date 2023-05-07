@@ -92,10 +92,10 @@ namespace Ultrapain.Patches
                 if (proj != null)
                 {
                     proj.target = MonoSingleton<PlayerTracker>.Instance.GetTarget();
-                    proj.speed = projectileSpeed;
+                    proj.speed = projectileSpeed * ___eid.totalSpeedModifier;
                     proj.turningSpeedMultiplier = turnSpeedMultiplier;
                     proj.safeEnemyType = EnemyType.Stray;
-                    proj.damage = projectileDamage;
+                    proj.damage = projectileDamage * ___eid.totalDamageModifier;
                 }
 
                 flag.currentMode = StrayFlag.AttackMode.ProjectileCombo;

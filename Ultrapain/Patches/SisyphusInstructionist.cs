@@ -98,7 +98,7 @@ namespace Ultrapain.Patches
 
     public class SisyphusInstructionist_SetupExplosion
     {
-        static void Postfix(Sisyphus __instance, ref GameObject __0)
+        static void Postfix(Sisyphus __instance, ref GameObject __0, EnemyIdentifier ___eid)
         {
             GameObject shockwave = GameObject.Instantiate(Plugin.shockwave, __0.transform.position, __0.transform.rotation);
             PhysicalShockwave comp = shockwave.GetComponent<PhysicalShockwave>();
@@ -106,8 +106,8 @@ namespace Ultrapain.Patches
             comp.enemy = true;
             comp.enemyType = EnemyType.Sisyphus;
             comp.maxSize = 100f;
-            comp.speed = ConfigManager.sisyInstBoulderShockwaveSpeed.value;
-            comp.damage = ConfigManager.sisyInstBoulderShockwaveDamage.value;
+            comp.speed = ConfigManager.sisyInstBoulderShockwaveSpeed.value * ___eid.totalSpeedModifier;
+            comp.damage = (int)(ConfigManager.sisyInstBoulderShockwaveDamage.value * ___eid.totalDamageModifier);
             shockwave.transform.localScale = new Vector3(shockwave.transform.localScale.x, shockwave.transform.localScale.y * ConfigManager.sisyInstBoulderShockwaveSize.value, shockwave.transform.localScale.z);
         }
 
@@ -136,7 +136,7 @@ namespace Ultrapain.Patches
 
     public class SisyphusInstructionist_StompExplosion
     {
-        static bool Prefix(Sisyphus __instance, Transform ___target)
+        static bool Prefix(Sisyphus __instance, Transform ___target, EnemyIdentifier ___eid)
         {
             Vector3 vector = __instance.transform.position + Vector3.up;
             if (Physics.Raycast(vector, ___target.position - vector, Vector3.Distance(___target.position, vector), LayerMaskDefaults.Get(LMD.Environment)))
@@ -149,8 +149,8 @@ namespace Ultrapain.Patches
                 exp.enemy = true;
                 exp.toIgnore.Add(EnemyType.Sisyphus);
                 exp.maxSize *= ConfigManager.sisyInstStrongerExplosionSizeMulti.value;
-                exp.speed *= ConfigManager.sisyInstStrongerExplosionSizeMulti.value;
-                exp.damage = (int)(exp.damage * ConfigManager.sisyInstStrongerExplosionDamageMulti.value);
+                exp.speed *= ConfigManager.sisyInstStrongerExplosionSizeMulti.value * ___eid.totalSpeedModifier;
+                exp.damage = (int)(exp.damage * ConfigManager.sisyInstStrongerExplosionDamageMulti.value * ___eid.totalDamageModifier);
             }
 
             return false;

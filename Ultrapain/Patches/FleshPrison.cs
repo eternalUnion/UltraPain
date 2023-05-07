@@ -17,6 +17,8 @@ namespace Ultrapain.Patches
     {
         List<VirtueInsignia> insignias = new List<VirtueInsignia>();
         public FleshPrison prison;
+        public float damageMod = 1f;
+        public float speedMod = 1f;
 
         void SpawnInsignias()
         {
@@ -38,8 +40,8 @@ namespace Ultrapain.Patches
                 comp.predictiveVersion = null;
                 comp.otherParent = transform;
                 comp.target = insignia.transform;
-                comp.windUpSpeedMultiplier = ConfigManager.fleshPrisonSpinAttackActivateSpeed.value;
-                comp.damage = ConfigManager.fleshPrisonSpinAttackDamage.value;
+                comp.windUpSpeedMultiplier = ConfigManager.fleshPrisonSpinAttackActivateSpeed.value * speedMod;
+                comp.damage = (int)(ConfigManager.fleshPrisonSpinAttackDamage.value * damageMod);
                 float size = Mathf.Abs(ConfigManager.fleshPrisonSpinAttackSize.value);
                 insignia.transform.localScale = new Vector3(size, insignia.transform.localScale.y, size);
                 insignias.Add(comp);
@@ -58,7 +60,7 @@ namespace Ultrapain.Patches
         bool markedForDestruction = false;
         void Update()
         {
-            transform.Rotate(new Vector3(0, anglePerSecond * Time.deltaTime, 0));
+            transform.Rotate(new Vector3(0, anglePerSecond * Time.deltaTime * speedMod, 0));
 
             if (!markedForDestruction && (prison == null || !(bool)inAction.GetValue(prison)))
             {
@@ -90,7 +92,7 @@ namespace Ultrapain.Patches
 
     class FleshPrisonShoot
     {
-        static void Postfix(FleshPrison __instance, ref Animator ___anim)
+        static void Postfix(FleshPrison __instance, ref Animator ___anim, EnemyIdentifier ___eid)
         {
             if (__instance.altVersion)
                 return;
@@ -99,6 +101,8 @@ namespace Ultrapain.Patches
             obj.transform.position = __instance.transform.position + Vector3.up;
             FleshPrisonRotatingInsignia flag = obj.AddComponent<FleshPrisonRotatingInsignia>();
             flag.prison = __instance;
+            flag.damageMod = ___eid.totalDamageModifier;
+            flag.speedMod = ___eid.totalSpeedModifier;
         }
     }
 

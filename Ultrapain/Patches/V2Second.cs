@@ -205,7 +205,7 @@ namespace Ultrapain.Patches
             if (beam.TryGetComponent<RevolverBeam>(out RevolverBeam comp))
             {
                 comp.alternateStartPoint = shootPoint.transform.position;
-                comp.ignoreEnemyType = EnemyType.V2;
+                comp.ignoreEnemyType = EnemyType.V2Second;
                 comp.sourceWeapon = gameObject;
                 //comp.beamType = BeamType.Enemy;
                 //maliciousIgnorePlayer.SetValue(comp, false);
@@ -424,13 +424,16 @@ namespace Ultrapain.Patches
             t.gameObject.layer = Physics.IgnoreRaycastLayer;
         }
 
-        static void Postfix(V2 __instance)
+        static void Postfix(V2 __instance, EnemyIdentifier ___eid)
         {
             if (!__instance.secondEncounter)
                 return;
 
             V2SecondFlag flag = __instance.gameObject.AddComponent<V2SecondFlag>();
             flag.v2collider = __instance.GetComponent<Collider>();
+
+            ___eid.enemyType = EnemyType.V2Second;
+            ___eid.UpdateBuffs();
 
             GameObject player = SceneManager.GetActiveScene().GetRootGameObjects().Where(obj => obj.name == "Player").FirstOrDefault();
             if (player == null)

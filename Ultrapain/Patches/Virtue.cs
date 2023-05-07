@@ -44,7 +44,7 @@ namespace Ultrapain.Patches
             LightningStrikeExplosive lightningStrikeExplosive = Instantiate(Plugin.lightningStrikeExplosiveSetup.gameObject, windupObj.transform.position, Quaternion.identity).GetComponent<LightningStrikeExplosive>();
             lightningStrikeExplosive.safeForPlayer = false;
             lightningStrikeExplosive.damageMultiplier = eid.totalDamageModifier * ((virtue.enraged)? ConfigManager.virtueEnragedLightningDamage.value : ConfigManager.virtueNormalLightningDamage.value);
-
+            
             if(windupObj != null)
                 Destroy(windupObj.gameObject);
         }

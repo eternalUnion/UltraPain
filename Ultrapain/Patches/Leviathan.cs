@@ -64,7 +64,7 @@ namespace Ultrapain.Patches
 
             beamRemaining = ConfigManager.leviathanChargeCount.value;
             beamChargeRate = 11.9f / ConfigManager.leviathanChargeDelay.value;
-            Invoke("PrepareForFire", ConfigManager.leviathanChargeDelay.value);
+            Invoke("PrepareForFire", ConfigManager.leviathanChargeDelay.value / comp.lcon.eid.totalSpeedModifier);
         }
 
         private Grenade FindTargetGrenade()
@@ -92,7 +92,7 @@ namespace Ultrapain.Patches
             if (Physics.Raycast(NewMovement.Instance.transform.position, Vector3.down, out RaycastHit hit, float.MaxValue, envMask))
                 targetShootPoint = hit.point;
 
-            Invoke("Shoot", ConfigManager.leviathanChargeDelay.value);
+            Invoke("Shoot", ConfigManager.leviathanChargeDelay.value / comp.lcon.eid.totalSpeedModifier);
         }
 
         private Vector3 RandomVector(float min, float max)
@@ -131,11 +131,11 @@ namespace Ultrapain.Patches
                 {
                     exp.maxSize *= ConfigManager.leviathanChargeSizeMulti.value;
                     exp.speed *= ConfigManager.leviathanChargeSizeMulti.value;
-                    exp.damage = (int)(exp.damage * ConfigManager.leviathanChargeDamageMulti.value);
+                    exp.damage = (int)(exp.damage * ConfigManager.leviathanChargeDamageMulti.value * comp.lcon.eid.totalDamageModifier);
                     exp.toIgnore.Add(EnemyType.Leviathan);
                 }
 
-                projComp.damage *= 2;
+                projComp.damage *= 2 * comp.lcon.eid.totalDamageModifier;
                 projComp.hitParticle = expClone;
             }
 
@@ -166,7 +166,7 @@ namespace Ultrapain.Patches
                     targetShootPoint = hit.point;
 
                 comp.lookAtPlayer = true;
-                Invoke("PrepareForFire", ConfigManager.leviathanChargeDelay.value);
+                Invoke("PrepareForFire", ConfigManager.leviathanChargeDelay.value / comp.lcon.eid.totalSpeedModifier);
             }
         }
 
@@ -200,7 +200,7 @@ namespace Ultrapain.Patches
         {
             Leviathan_Flag flag = __instance.gameObject.AddComponent<Leviathan_Flag>();
             if(ConfigManager.leviathanSecondPhaseBegin.value)
-                flag.Invoke("SwitchToSecondPhase", 1f);
+                flag.Invoke("SwitchToSecondPhase", 2f / __instance.lcon.eid.totalSpeedModifier);
         }
     }
 
@@ -234,7 +234,7 @@ namespace Ultrapain.Patches
                 else
                 {
                     flag.projectilesRemaining -= 1;
-                    flag.projectileDelayRemaining = 1f / ConfigManager.leviathanProjectileDensity.value;
+                    flag.projectileDelayRemaining = (1f / ConfigManager.leviathanProjectileDensity.value) / __instance.lcon.eid.totalSpeedModifier;
 
                     GameObject proj = null;
                     Projectile comp = null;
