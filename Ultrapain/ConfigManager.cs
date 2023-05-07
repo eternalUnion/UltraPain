@@ -8,12 +8,18 @@ using System.Runtime.InteropServices;
 using System.Collections.Generic;
 using System;
 using BepInEx.Configuration;
+using System.IO;
 
 namespace Ultrapain
 {
     public static class ConfigManager
     {
         public static PluginConfigurator config = null;
+
+        public static string[] customPresetNames = new string[]
+        {
+            "System Overload"
+        };
 
         // ROOT PANEL
         public static BoolField enemyTweakToggle;
@@ -457,13 +463,30 @@ namespace Ultrapain
 
             // GLOBAL STATE
             new ConfigHeader(config.rootPanel, "Global Difficulty");
+            new ConfigHeader(config.rootPanel, "(Enable tweaks on all difficulties)", 12);
             globalDifficultySwitch = new BoolField(config.rootPanel, "Enabled", "globalDifficultySwitch", false);
             globalDifficultySwitch.onValueChange += (BoolField.BoolValueChangeEvent e) =>
             {
                 dirtyField = true;
             };
 
+            new ConfigHeader(config.rootPanel, "Extras");
             memePanel = new ConfigPanel(config.rootPanel, "Memes", "memePanel");
+
+            new ConfigHeader(config.rootPanel, "Danger Zone");
+            ButtonField resetDefaultPresets = new ButtonField(config.rootPanel, "Reset default presets", "resetDefaultPresets");
+            resetDefaultPresets.onClick += () =>
+            {
+                foreach (string presetName in customPresetNames)
+                    config.DeletePreset(presetName);
+
+                foreach(string presetName in customPresetNames)
+                {
+                    string presetPath = Path.Combine(Plugin.workingDir, "defaultpresets", $"{presetName}.config");
+                    if (File.Exists(presetPath))
+                        config.TryAddPreset(presetName, presetName, presetPath);
+                }
+            };
 
             // MEME PANEL
             enrageSfxToggle = new BoolField(memePanel, "Enrage SFX\n(volume warning)", "enrageSfxToggle", false);
