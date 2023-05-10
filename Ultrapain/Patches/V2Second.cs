@@ -433,6 +433,7 @@ namespace Ultrapain.Patches
             t.gameObject.layer = Physics.IgnoreRaycastLayer;
         }
 
+        static FieldInfo machineV2 = typeof(Machine).GetField("v2", BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Instance);
         static void Postfix(V2 __instance, EnemyIdentifier ___eid)
         {
             if (!__instance.secondEncounter)
@@ -443,6 +444,7 @@ namespace Ultrapain.Patches
 
             ___eid.enemyType = EnemyType.V2Second;
             ___eid.UpdateBuffs();
+            machineV2.SetValue(__instance.GetComponent<Machine>(), __instance);
 
             GameObject player = SceneManager.GetActiveScene().GetRootGameObjects().Where(obj => obj.name == "Player").FirstOrDefault();
             if (player == null)
