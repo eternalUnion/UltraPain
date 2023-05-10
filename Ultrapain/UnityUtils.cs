@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Xml.Linq;
 using UnityEngine;
 
 namespace Ultrapain
@@ -70,6 +71,20 @@ namespace Ultrapain
                 if (t.name == name)
                     return t;
                 Transform child = GetChildByNameRecursively(t, name);
+                if (child != null)
+                    return child;
+            }
+
+            return null;
+        }
+
+        public static Transform GetChildByTagRecursively(Transform parent, string tag)
+        {
+            foreach (Transform t in parent)
+            {
+                if (t.tag == tag)
+                    return t;
+                Transform child = GetChildByTagRecursively(t, tag);
                 if (child != null)
                     return child;
             }
