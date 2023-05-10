@@ -12,6 +12,7 @@ namespace Ultrapain.Patches
     {
         private LeviathanHead comp;
         private Animator anim;
+        //private Collider col;
         private LayerMask envMask = new LayerMask() { value = 1 << 8 | 1 << 24 };
 
         public float playerRocketRideTracker = 0;
@@ -33,6 +34,7 @@ namespace Ultrapain.Patches
         {
             comp = GetComponent<LeviathanHead>();
             anim = GetComponent<Animator>();
+            //col = GetComponent<Collider>();
         }
 
         public bool beamAttack = false;
@@ -88,9 +90,26 @@ namespace Ultrapain.Patches
         public void PrepareForFire()
         {
             charging = false;
-            targetShootPoint = NewMovement.Instance.playerCollider.bounds.center;
-            if (Physics.Raycast(NewMovement.Instance.transform.position, Vector3.down, out RaycastHit hit, float.MaxValue, envMask))
-                targetShootPoint = hit.point;
+
+            // OLD PREDICTION
+            //targetShootPoint = NewMovement.Instance.playerCollider.bounds.center;
+            //if (Physics.Raycast(NewMovement.Instance.transform.position, Vector3.down, out RaycastHit hit, float.MaxValue, envMask))
+            //    targetShootPoint = hit.point;
+
+            // Malicious face beam prediction
+            GameObject player = MonoSingleton<PlayerTracker>.Instance.GetPlayer().gameObject;
+            Vector3 a = new Vector3(MonoSingleton<PlayerTracker>.Instance.GetPlayerVelocity().x, MonoSingleton<PlayerTracker>.Instance.GetPlayerVelocity().y / (float)(MonoSingleton<NewMovement>.Instance.ridingRocket ? 1 : 2), MonoSingleton<PlayerTracker>.Instance.GetPlayerVelocity().z);
+            targetShootPoint = (MonoSingleton<NewMovement>.Instance.ridingRocket ? MonoSingleton<NewMovement>.Instance.ridingRocket.transform.position : player.transform.position) + a / (1f / ConfigManager.leviathanChargeDelay.value) / comp.lcon.eid.totalSpeedModifier;
+            RaycastHit raycastHit;
+            // I guess this was in case player is approaching the malface, but it is very unlikely with leviathan
+            /*if (MonoSingleton<PlayerTracker>.Instance.GetPlayerVelocity().magnitude > 0f && col.Raycast(new Ray(player.transform.position, MonoSingleton<PlayerTracker>.Instance.GetPlayerVelocity()), out raycastHit, MonoSingleton<PlayerTracker>.Instance.GetPlayerVelocity().magnitude * 0.5f / comp.lcon.eid.totalSpeedModifier))
+            {
+                targetShootPoint = player.transform.position;
+            }
+            else */if (Physics.Raycast(player.transform.position, targetShootPoint - player.transform.position, out raycastHit, Vector3.Distance(targetShootPoint, player.transform.position), LayerMaskDefaults.Get(LMD.EnvironmentAndBigEnemies), QueryTriggerInteraction.Collide))
+            {
+                targetShootPoint = raycastHit.point;
+            }
 
             Invoke("Shoot", ConfigManager.leviathanChargeDelay.value / comp.lcon.eid.totalSpeedModifier);
         }
