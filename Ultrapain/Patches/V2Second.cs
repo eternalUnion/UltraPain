@@ -82,11 +82,11 @@ namespace Ultrapain.Patches
             */
 
             // NEW PREDICTION
-            Vector3 playerPos = Tools.PredictPlayerPosition(1f);
+            Vector3 playerPos = Tools.PredictPlayerPosition(0.5f);
             rocket.LookAt(playerPos);
             Rigidbody rb = rocket.GetComponent<Rigidbody>();
             rb.velocity = Vector3.zero;
-            rb.AddForce(rocket.transform.forward * 20000f);
+            rb.AddForce(rocket.transform.forward * 10000f);
         }
 
         void Fire()
