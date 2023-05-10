@@ -62,7 +62,8 @@ namespace Ultrapain.Patches
 
         void SetRocketRotation(Transform rocket)
         {
-            Rigidbody rb = rocket.GetComponent<Rigidbody>();
+            // OLD PREDICTION
+            /*Rigidbody rb = rocket.GetComponent<Rigidbody>();
             Grenade grn = rocket.GetComponent<Grenade>();
             float magnitude = grn.rocketSpeed;
 
@@ -78,6 +79,14 @@ namespace Ultrapain.Patches
             rb.velocity = Vector3.zero;
             rb.AddRelativeForce(Vector3.forward * magnitude * rb.mass, ForceMode.VelocityChange);
             // rb.velocity = rocket.transform.forward * velocity;
+            */
+
+            // NEW PREDICTION
+            Vector3 playerPos = Tools.PredictPlayerPosition(1f);
+            rocket.LookAt(playerPos);
+            Rigidbody rb = rocket.GetComponent<Rigidbody>();
+            rb.velocity = Vector3.zero;
+            rb.AddForce(rocket.transform.forward * 20000f);
         }
 
         void Fire()
