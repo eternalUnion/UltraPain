@@ -348,10 +348,12 @@ namespace Ultrapain
             harmonyTweaks.Patch(GetMethod<StatueBoss>("Start"), postfix: GetHarmonyMethod(GetMethod<StatueBoss_Start_Patch>("Postfix")));
             if (ConfigManager.cerberusDashToggle.value)
                 harmonyTweaks.Patch(GetMethod<StatueBoss>("StopDash"), postfix: GetHarmonyMethod(GetMethod<StatueBoss_StopDash_Patch>("Postfix")));
-            // ADDME
-            harmonyTweaks.Patch(GetMethod<StatueBoss>("StopTracking"), postfix: GetHarmonyMethod(GetMethod<StatueBoss_StopTracking_Patch>("Postfix")));
-            harmonyTweaks.Patch(GetMethod<StatueBoss>("Stomp"), postfix: GetHarmonyMethod(GetMethod<StatueBoss_Stomp_Patch>("Postfix")));
-            harmonyTweaks.Patch(GetMethod<Statue>("GetHurt"), prefix: GetHarmonyMethod(GetMethod<Statue_GetHurt_Patch>("Prefix")));
+            if(ConfigManager.cerberusParryable.value)
+            {
+                harmonyTweaks.Patch(GetMethod<StatueBoss>("StopTracking"), postfix: GetHarmonyMethod(GetMethod<StatueBoss_StopTracking_Patch>("Postfix")));
+                harmonyTweaks.Patch(GetMethod<StatueBoss>("Stomp"), postfix: GetHarmonyMethod(GetMethod<StatueBoss_Stomp_Patch>("Postfix")));
+                harmonyTweaks.Patch(GetMethod<Statue>("GetHurt"), prefix: GetHarmonyMethod(GetMethod<Statue_GetHurt_Patch>("Prefix")));
+            }
 
             harmonyTweaks.Patch(GetMethod<Drone>("Start"), postfix: GetHarmonyMethod(GetMethod<Drone_Start_Patch>("Postfix")));
             harmonyTweaks.Patch(GetMethod<Drone>("Shoot"), prefix: GetHarmonyMethod(GetMethod<Drone_Shoot_Patch>("Prefix")));

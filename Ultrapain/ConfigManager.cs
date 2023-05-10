@@ -148,6 +148,9 @@ namespace Ultrapain
         // CERBERUS
         public static BoolField cerberusDashToggle;
         public static IntField cerberusTotalDashCount;
+        public static BoolField cerberusParryable;
+        public static FloatField cerberusParryableDuration;
+        public static IntField cerberusParryDamage;
 
         // DRONE
         public static BoolField droneExplosionBeamToggle;
@@ -752,6 +755,17 @@ namespace Ultrapain
             };
             cerberusDashToggle.TriggerValueChangeEvent();
             cerberusTotalDashCount = new IntField(cerebusExtraDashDiv, "Total dash count", "cerberusTotalDashCount", 3, 1, int.MaxValue);
+            new ConfigHeader(cerberusPanel, "Parryable");
+            ConfigDivision cerberusParryableDiv = new ConfigDivision(cerberusPanel, "cerberusParryableDiv");
+            cerberusParryable = new BoolField(cerberusPanel, "Enabled", "cerberusParryable", true);
+            cerberusParryable.onValueChange += (BoolField.BoolValueChangeEvent e) =>
+            {
+                cerberusParryableDiv.interactable = e.value;
+                dirtyField = true;
+            };
+            cerberusParryable.TriggerValueChangeEvent();
+            cerberusParryableDuration = new FloatField(cerberusParryableDiv, "Duration", "cerberusParryableDuration", 0.5f, 0f, float.MaxValue);
+            cerberusParryDamage = new IntField(cerberusParryableDiv, "Parry damage", "cerberusParryDamage", 5, 0, int.MaxValue);
 
             // DRONE
             droneExplosionBeamToggle = new BoolField(dronePanel, "Can shoot explosions", "droneExplosionBeamToggle", true);

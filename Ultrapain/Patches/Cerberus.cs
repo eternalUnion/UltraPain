@@ -66,11 +66,11 @@ namespace Ultrapain.Patches
                 return true;
 
             float deltaTime = Time.time - flag.lastParryTime;
-            if (deltaTime > 0.5f / ___eid.totalSpeedModifier)
+            if (deltaTime > ConfigManager.cerberusParryableDuration.value / ___eid.totalSpeedModifier)
                 return true;
 
             flag.lastParryTime = 0;
-            ___eid.health -= 5;
+            ___eid.health -= ConfigManager.cerberusParryDamage.value;
             MonoSingleton<FistControl>.Instance.currentPunch.Parry(false, ___eid);
             return true;
         }
