@@ -9,6 +9,7 @@ using System.Collections.Generic;
 using System;
 using BepInEx.Configuration;
 using System.IO;
+using PluginConfig.API.Functionals;
 
 namespace Ultrapain
 {
