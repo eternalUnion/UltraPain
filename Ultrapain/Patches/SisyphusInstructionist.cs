@@ -96,6 +96,21 @@ namespace Ultrapain.Patches
         }
     }
 
+    /*
+     * A bug occurs where if the player respawns, the shockwave prefab gets deleted
+     * 
+     * Check existence of the prefab on update
+     */
+    public class SisyphusInstructionist_Update
+    {
+        static void Postfix(Sisyphus __instance, ref PhysicalShockwave ___m_ShockwavePrefab)
+        {
+            //___explosion = shockwave/*___m_ShockwavePrefab.gameObject*/;
+            if(___m_ShockwavePrefab == null)
+                ___m_ShockwavePrefab = SisyphusInstructionist_Start.shockwave.GetComponent<PhysicalShockwave>();
+        }
+    }
+
     public class SisyphusInstructionist_SetupExplosion
     {
         static void Postfix(Sisyphus __instance, ref GameObject __0, EnemyIdentifier ___eid)

@@ -474,8 +474,11 @@ namespace Ultrapain
             harmonyTweaks.Patch(GetMethod<Drone>("Start"), postfix: GetHarmonyMethod(GetMethod<Virtue_Start_Patch>("Postfix")));
             harmonyTweaks.Patch(GetMethod<Drone>("SpawnInsignia"), prefix: GetHarmonyMethod(GetMethod<Virtue_SpawnInsignia_Patch>("Prefix")));
 
-            if(ConfigManager.sisyInstJumpShockwave.value)
+            if (ConfigManager.sisyInstJumpShockwave.value)
+            {
                 harmonyTweaks.Patch(GetMethod<Sisyphus>("Start"), postfix: GetHarmonyMethod(GetMethod<SisyphusInstructionist_Start>("Postfix")));
+                harmonyTweaks.Patch(GetMethod<Sisyphus>("Update"), postfix: GetHarmonyMethod(GetMethod<SisyphusInstructionist_Update>("Postfix")));
+            }
             if(ConfigManager.sisyInstBoulderShockwave.value)
                 harmonyTweaks.Patch(GetMethod<Sisyphus>("SetupExplosion"), postfix: GetHarmonyMethod(GetMethod<SisyphusInstructionist_SetupExplosion>("Postfix")));
             if(ConfigManager.sisyInstStrongerExplosion.value)
