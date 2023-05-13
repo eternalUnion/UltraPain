@@ -44,7 +44,7 @@ namespace Ultrapain
         public static FloatField rocketBoostDamageMultiplierPerHit;
         public static FloatField rocketBoostSizeMultiplierPerHit;
         public static FloatField rocketBoostSpeedMultiplierPerHit;
-        public static StringField rocketBoostStyleText;
+        public static FormattedStringField rocketBoostStyleText;
         public static IntField rocketBoostStylePoints;
 
         public static BoolField rocketGrabbingToggle;
@@ -52,13 +52,13 @@ namespace Ultrapain
         public static BoolField grenadeBoostToggle;
         public static FloatField grenadeBoostDamageMultiplier;
         public static FloatField grenadeBoostSizeMultiplier;
-        public static StringField grenadeBoostStyleText;
+        public static FormattedStringField grenadeBoostStyleText;
         public static IntField grenadeBoostStylePoints;
 
         public static BoolField orbStrikeToggle;
 
         // REVOLVER BEAM ORBITAL
-        public static StringField orbStrikeRevolverStyleText;
+        public static FormattedStringField orbStrikeRevolverStyleText;
         public static IntField orbStrikeRevolverStylePoint;
         public static BoolField orbStrikeRevolverGrenade;
         public static FloatField orbStrikeRevolverGrenadeExtraSize;
@@ -68,7 +68,7 @@ namespace Ultrapain
         public static FloatField orbStrikeRevolverExplosionSize;
 
         // CHARGED BEAM ORBITAL
-        public static StringField orbStrikeRevolverChargedStyleText;
+        public static FormattedStringField orbStrikeRevolverChargedStyleText;
         public static IntField orbStrikeRevolverChargedStylePoint;
         public static BoolField orbStrikeRevolverChargedGrenade;
         public static FloatField orbStrikeRevolverChargedGrenadeExtraSize;
@@ -79,7 +79,7 @@ namespace Ultrapain
         public static FloatField orbStrikeRevolverChargedInsigniaSize;
 
         // ELECTRIC RAIL CANNON
-        public static StringField orbStrikeElectricCannonStyleText;
+        public static FormattedStringField orbStrikeElectricCannonStyleText;
         public static IntField orbStrikeElectricCannonStylePoint;
         public static BoolField orbStrikeElectricCannonGrenade;
         public static FloatField orbStrikeElectricCannonGrenadeExtraSize;
@@ -89,7 +89,7 @@ namespace Ultrapain
         public static FloatField orbStrikeElectricCannonExplosionSize;
 
         // MALICIOUS CANNON
-        public static StringField orbStrikeMaliciousCannonStyleText;
+        public static FormattedStringField orbStrikeMaliciousCannonStyleText;
         public static IntField orbStrikeMaliciousCannonStylePoint;
         public static BoolField orbStrikeMaliciousCannonGrenade;
         public static FloatField orbStrikeMaliciousCannonGrenadeExtraSize;
@@ -519,7 +519,10 @@ namespace Ultrapain
             rocketBoostDamageMultiplierPerHit = new FloatField(rocketBoostDiv, "Damage multiplier per hit", "rocketBoostDamageMultiplier", 0.35f);
             rocketBoostSizeMultiplierPerHit = new FloatField(rocketBoostDiv, "Size multiplier per hit", "rocketBoostSizeMultiplier", 0.35f);
             rocketBoostSpeedMultiplierPerHit = new FloatField(rocketBoostDiv, "Speed multiplier per hit", "rocketBoostSpeedMultiplierPerHit", 0.35f);
-            rocketBoostStyleText = new StringField(rocketBoostDiv, "Style text", "rocketBoostStyleText", "<color=lime>ROCKET BOOST</color>");
+            FormattedStringBuilder rocketBoostStyleBuilder = new FormattedStringBuilder();
+            rocketBoostStyleBuilder.currentFormat = new PluginConfig.API.Fields.CharacterInfo() { color = Color.green };
+            rocketBoostStyleBuilder += "ROCKET BOOST";
+            rocketBoostStyleText = new FormattedStringField(rocketBoostDiv, "Style text", "rocketBoostStyleText", rocketBoostStyleBuilder.Build());
             rocketBoostStylePoints = new IntField(rocketBoostDiv, "Style points", "rocketBoostStylePoints", 10);
 
             new ConfigHeader(playerPanel, "Rocket Grabbing\r\n<size=16>(Can pull yourself to frozen rockets)</size>");
@@ -541,7 +544,10 @@ namespace Ultrapain
             grenadeBoostToggle.TriggerValueChangeEvent();
             grenadeBoostDamageMultiplier = new FloatField(grenadeBoostDiv, "Damage multiplier", "grenadeBoostDamageMultiplier", 1f);
             grenadeBoostSizeMultiplier = new FloatField(grenadeBoostDiv, "Size multiplier", "grenadeBoostSizeMultiplier", 1f);
-            grenadeBoostStyleText = new StringField(grenadeBoostDiv, "Style text", "grenadeBoostStyleText", "<color=cyan>FISTFUL OF 'NADE</color>");
+            FormattedStringBuilder grenadeBoostStyleBuilder = new FormattedStringBuilder();
+            grenadeBoostStyleBuilder.currentFormat = new PluginConfig.API.Fields.CharacterInfo() { color = Color.cyan };
+            grenadeBoostStyleBuilder += "FISTFUL OF 'NADE";
+            grenadeBoostStyleText = new FormattedStringField(grenadeBoostDiv, "Style text", "grenadeBoostStyleText", grenadeBoostStyleBuilder.Build());
             grenadeBoostStylePoints = new IntField(grenadeBoostDiv, "Style points", "grenadeBoostStylePoints", 10);
 
             new ConfigHeader(playerPanel, "Orbital Strike", 26);
@@ -557,7 +563,10 @@ namespace Ultrapain
             orbStrikeToggle.TriggerValueChangeEvent();
 
             new ConfigHeader(orbStrikeDiv, "Revolver Beam", 22);
-            orbStrikeRevolverStyleText = new StringField(orbStrikeDiv, "Style text", "orbStrikeRevolverStyleText", "<color=maroon>ORBITALSTRIKE</color>");
+            FormattedStringBuilder orbStrikeRevolverBuilder = new FormattedStringBuilder();
+            orbStrikeRevolverBuilder.currentFormat = new PluginConfig.API.Fields.CharacterInfo() { color = Color.red };
+            orbStrikeRevolverBuilder += "ORBITALSTRIKE";
+            orbStrikeRevolverStyleText = new FormattedStringField(orbStrikeDiv, "Style text", "orbStrikeRevolverStyleText", orbStrikeRevolverBuilder.Build());
             orbStrikeRevolverStylePoint = new IntField(orbStrikeDiv, "Style point", "orbStrikeRevolverStylePoint", 20);
             new ConfigHeader(orbStrikeDiv, "--Grenade Explosion Boost--", 12);
             ConfigDivision orbStrikeRevolverGrenadeDiv = new ConfigDivision(orbStrikeDiv, "orbStrikeRevolverGrenadeDiv");
@@ -583,7 +592,12 @@ namespace Ultrapain
             orbStrikeRevolverExplosionSize = new FloatField(orbStrikeRevolverExplosionDiv, "Size multiplier", "orbStrikeRevolverExplosionSize", 1f);
 
             new ConfigHeader(orbStrikeDiv, "Charged Revolver Beam", 22);
-            orbStrikeRevolverChargedStyleText = new StringField(orbStrikeDiv, "Style text", "orbStrikeRevolverChargedStyleText", "<color=maroon>ORBITAL</color><color=cyan>ZAP</color>");
+            FormattedStringBuilder orbStrikeRevolverChargedBuilder = new FormattedStringBuilder();
+            orbStrikeRevolverChargedBuilder.currentFormat = new PluginConfig.API.Fields.CharacterInfo() { color = Color.red };
+            orbStrikeRevolverChargedBuilder += "ORBITAL";
+            orbStrikeRevolverChargedBuilder.currentFormat.color = Color.cyan;
+            orbStrikeRevolverChargedBuilder += "ZAP";
+            orbStrikeRevolverChargedStyleText = new FormattedStringField(orbStrikeDiv, "Style text", "orbStrikeRevolverChargedStyleText", orbStrikeRevolverChargedBuilder.Build());
             orbStrikeRevolverChargedStylePoint = new IntField(orbStrikeDiv, "Style point", "orbStrikeRevolverChargedStylePoint", 30);
             new ConfigHeader(orbStrikeDiv, "--Grenade Explosion Boost--", 12);
             ConfigDivision orbStrikeRevolverChargedGrenadeDiv = new ConfigDivision(orbStrikeDiv, "orbStrikeRevolverGrenadeDiv");
@@ -610,7 +624,14 @@ namespace Ultrapain
             orbStrikeRevolverChargedInsigniaDelayBoost = new FloatField(orbStrikeRevolverChargedInsigniaDiv, "Windup speed multiplier", "orbStrikeRevolverChargedInsigniaDelayBoost", 2f);
 
             new ConfigHeader(orbStrikeDiv, "Electric Cannon", 22);
-            orbStrikeElectricCannonStyleText = new StringField(orbStrikeDiv, "Style text", "orbStrikeElectricCannonStyleText", "<color=orange>ULTRA</color><color=maroon>ORBITAL</color><color=cyan>ZAP</color>");
+            FormattedStringBuilder orbStrikeElectricCannonBuilder = new FormattedStringBuilder();
+            orbStrikeElectricCannonBuilder.currentFormat.color = new Color(0xff / 255f, 0xa5 / 255f, 0);
+            orbStrikeElectricCannonBuilder += "ULTRA";
+            orbStrikeElectricCannonBuilder.currentFormat.color = Color.red;
+            orbStrikeElectricCannonBuilder += "ORBITAL";
+            orbStrikeElectricCannonBuilder.currentFormat.color = Color.cyan;
+            orbStrikeElectricCannonBuilder += "ZAP";
+            orbStrikeElectricCannonStyleText = new FormattedStringField(orbStrikeDiv, "Style text", "orbStrikeElectricCannonStyleText", orbStrikeElectricCannonBuilder.Build());
             orbStrikeElectricCannonStylePoint = new IntField(orbStrikeDiv, "Style point", "orbStrikeElectricCannonStylePoint", 50);
             new ConfigHeader(orbStrikeDiv, "--Grenade Explosion Boost--", 12);
             ConfigDivision orbStrikeElectricCannonGrenadeDiv = new ConfigDivision(orbStrikeDiv, "orbStrikeRevolverGrenadeDiv");
@@ -637,7 +658,12 @@ namespace Ultrapain
 
 
             new ConfigHeader(orbStrikeDiv, "Malicious Cannon", 22);
-            orbStrikeMaliciousCannonStyleText = new StringField(orbStrikeDiv, "Style text", "orbStrikeMaliciousCannonStyleText", "<color=maroon>ORBITAL</color><color=red>NUKE</color>");
+            FormattedStringBuilder orbStrikeMaliciousBuilder = new FormattedStringBuilder();
+            orbStrikeMaliciousBuilder.currentFormat.color = Color.red;
+            orbStrikeMaliciousBuilder += "ORBITAL";
+            orbStrikeMaliciousBuilder.currentFormat.color = new Color(0x80 / 255f, 0, 0);
+            orbStrikeMaliciousBuilder += "NUKE";
+            orbStrikeMaliciousCannonStyleText = new FormattedStringField(orbStrikeDiv, "Style text", "orbStrikeMaliciousCannonStyleText", orbStrikeMaliciousBuilder.Build());
             orbStrikeMaliciousCannonStylePoint = new IntField(orbStrikeDiv, "Style point", "orbStrikeMaliciousCannonStylePoint", 70);
             new ConfigHeader(orbStrikeDiv, "--Grenade Explosion Boost--", 12);
             ConfigDivision orbStrikeMaliciousCannonGrenadeDiv = new ConfigDivision(orbStrikeDiv, "orbStrikeMaliciousCannonGrenadeDiv");
