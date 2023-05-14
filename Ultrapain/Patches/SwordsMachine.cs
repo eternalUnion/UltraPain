@@ -69,7 +69,7 @@ namespace Ultrapain.Patches
         {
             if (!__0)
             {
-                if (ConfigManager.swordsMachineSecondPhaseMode.value != ConfigManager.SwordsMachineSecondPhase.SpeedUp)
+                if (ConfigManager.swordsMachineSecondPhaseMode.value != ConfigManager.SwordsMachineSecondPhase.SpeedUp || __instance.secondPhasePosTarget != null)
                     return;
 
                 SwordsMachineFlag flag = __instance.GetComponent<SwordsMachineFlag>();
@@ -99,7 +99,7 @@ namespace Ultrapain.Patches
 
         static void Postfix(SwordsMachine __instance, Animator ___anim, EnemyIdentifier ___eid)
         {
-            if (ConfigManager.swordsMachineSecondPhaseMode.value != ConfigManager.SwordsMachineSecondPhase.SpeedUp)
+            if (ConfigManager.swordsMachineSecondPhaseMode.value != ConfigManager.SwordsMachineSecondPhase.SpeedUp || __instance.secondPhasePosTarget != null)
                 return;
 
             SwordsMachineFlag flag = __instance.GetComponent<SwordsMachineFlag>();
@@ -128,7 +128,7 @@ namespace Ultrapain.Patches
 
         static void Postfix(SwordsMachine __instance, Animator ___anim, EnemyIdentifier ___eid)
         {
-            if (ConfigManager.swordsMachineSecondPhaseMode.value != ConfigManager.SwordsMachineSecondPhase.SpeedUp)
+            if (ConfigManager.swordsMachineSecondPhaseMode.value != ConfigManager.SwordsMachineSecondPhase.SpeedUp || __instance.secondPhasePosTarget != null)
                 return;
 
             SwordsMachineFlag flag = __instance.GetComponent<SwordsMachineFlag>();
@@ -146,7 +146,7 @@ namespace Ultrapain.Patches
         }
     }
 
-    class SwordsMachine_SetSpeed_Patch
+    /*class SwordsMachine_SetSpeed_Patch
     {
         static bool Prefix(SwordsMachine __instance, ref Animator ___anim)
         {
@@ -159,7 +159,7 @@ namespace Ultrapain.Patches
 
             return false;
         }
-    }
+    }*/
 
     /*[HarmonyPatch(typeof(SwordsMachine))]
     [HarmonyPatch("Down")]
