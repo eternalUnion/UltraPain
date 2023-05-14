@@ -259,7 +259,15 @@ namespace Ultrapain
         public static BoolField streetCleanerCoinsIgnoreWeakPointToggle;
 
         // SWORDS MACHINE
+        public enum SwordsMachineSecondPhase
+        {
+            None,
+            SpeedUp,
+            Skip
+        }
         public static BoolField swordsMachineNoLightKnockbackToggle;
+        public static EnumField<SwordsMachineSecondPhase> swordsMachineSecondPhaseMode;
+        public static FloatField swordsMachineSecondPhaseSpeed;
         public static BoolField swordsMachineExplosiveSwordToggle;
         public static IntField swordsMachineExplosiveSwordDamage;
         public static FloatField swordsMachineExplosiveSwordSize;
@@ -1010,12 +1018,21 @@ namespace Ultrapain
             };
 
             // SWORDS MACHINE
-            new ConfigHeader(swordsMachinePanel, "No Light Knockback");
-            swordsMachineNoLightKnockbackToggle = new BoolField(swordsMachinePanel, "Enabled", "swordsMachineNoLightKnockbackToggle", true);
+            new ConfigHeader(swordsMachinePanel, "Knockback Modifier");
+            swordsMachineNoLightKnockbackToggle = new BoolField(swordsMachinePanel, "No light knockback", "swordsMachineNoLightKnockbackToggle", true);
             swordsMachineNoLightKnockbackToggle.onValueChange += (BoolField.BoolValueChangeEvent e) =>
             {
                 dirtyField = true;
             };
+            swordsMachineSecondPhaseMode = new EnumField<SwordsMachineSecondPhase>(swordsMachinePanel, "Second phase", "swordsMachineSecondPhaseMode", SwordsMachineSecondPhase.SpeedUp);
+            swordsMachineSecondPhaseSpeed = new FloatField(swordsMachinePanel, "Speed multiplier", "swordsMachineSecondPhaseSpeed", 2.5f, 1f, float.MaxValue);
+            swordsMachineSecondPhaseMode.onValueChange += (EnumField<SwordsMachineSecondPhase>.EnumValueChangeEvent e) =>
+            {
+                dirtyField = true;
+                swordsMachineSecondPhaseSpeed.hidden = e.value != SwordsMachineSecondPhase.SpeedUp;
+            };
+            swordsMachineSecondPhaseMode.TriggerValueChangeEvent();
+
             new ConfigHeader(swordsMachinePanel, "Explosive Sword Throw");
             ConfigDivision swordsMachineExplosiveSwordDiv = new ConfigDivision(swordsMachinePanel, "swordsMachineExplosiveSwordDiv");
             swordsMachineExplosiveSwordToggle = new BoolField(swordsMachinePanel, "Enabled", "swordsMachineExplosiveSwordToggle", true);
@@ -1473,6 +1490,11 @@ namespace Ultrapain
             //config.LogDuplicateGUID();
             Plugin.PatchAll();
             dirtyField = false;
+        }
+
+        private static void SwordsMachineSecondPhaseMode_onValueChange(EnumField<SwordsMachineSecondPhase>.EnumValueChangeEvent data)
+        {
+            throw new NotImplementedException();
         }
     }
 }

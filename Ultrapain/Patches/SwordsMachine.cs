@@ -1,19 +1,163 @@
 ﻿using HarmonyLib;
+using System.Security.Cryptography;
 using UnityEngine;
 
 namespace Ultrapain.Patches
 {
+    class SwordsMachineFlag : MonoBehaviour
+    {
+        public SwordsMachine sm;
+        public Animator anim;
+        public EnemyIdentifier eid;
+        public bool speedingUp = false;
+
+        private void ResetAnimSpeed()
+        {
+            if(anim.GetCurrentAnimatorStateInfo(0).IsName("Knockdown"))
+            {
+                Invoke("ResetAnimSpeed", 0.01f);
+                return;
+            }
+
+            Debug.Log("Resetting speed");
+            speedingUp = false;
+            sm.SendMessage("SetSpeed");
+        }
+
+        private void Awake()
+        {
+            anim = GetComponent<Animator>();
+            eid = GetComponent<EnemyIdentifier>();
+        }
+
+        public float speed = 1f;
+        private void Update()
+        {
+            if (speedingUp)
+                anim.speed = speed;
+        }
+    }
+
+    class SwordsMachine_Start
+    {
+        static void Postfix(SwordsMachine __instance)
+        {
+            SwordsMachineFlag flag = __instance.gameObject.AddComponent<SwordsMachineFlag>();
+            flag.sm = __instance;
+        }
+    }
+
     class SwordsMachine_Knockdown_Patch
     {
-        static bool Prefix(SwordsMachine __instance, bool __0, ref Animator ___anim)
+        static bool Prefix(SwordsMachine __instance, bool __0)
         {
             if (__0 == true)
             {
                 __instance.Enrage();
                 return false;
             }
+            else
+            {
+                if (ConfigManager.swordsMachineSecondPhaseMode.value == ConfigManager.SwordsMachineSecondPhase.Skip)
+                    return false;
+            }
 
             return true;
+        }
+
+        static void Postfix(SwordsMachine __instance, EnemyIdentifier ___eid, bool __0, Animator ___anim)
+        {
+            if (!__0)
+            {
+                if (ConfigManager.swordsMachineSecondPhaseMode.value != ConfigManager.SwordsMachineSecondPhase.SpeedUp)
+                    return;
+
+                SwordsMachineFlag flag = __instance.GetComponent<SwordsMachineFlag>();
+                if (flag == null)
+                {
+                    flag = __instance.gameObject.AddComponent<SwordsMachineFlag>();
+                    flag.sm = __instance;
+                }
+                flag.speedingUp = true;
+                flag.speed = (1f * ___eid.totalSpeedModifier) * ConfigManager.swordsMachineSecondPhaseSpeed.value;
+                ___anim.speed = flag.speed;
+
+                AnimatorClipInfo clipInfo = ___anim.GetCurrentAnimatorClipInfo(0)[0];
+                flag.Invoke("ResetAnimSpeed", clipInfo.clip.length / flag.speed);
+            }
+        }
+    }
+
+    class SwordsMachine_Down_Patch
+    {
+        static bool Prefix(SwordsMachine __instance)
+        {
+            if (ConfigManager.swordsMachineSecondPhaseMode.value == ConfigManager.SwordsMachineSecondPhase.Skip)
+                return false;
+            return true;
+        }
+
+        static void Postfix(SwordsMachine __instance, Animator ___anim, EnemyIdentifier ___eid)
+        {
+            if (ConfigManager.swordsMachineSecondPhaseMode.value != ConfigManager.SwordsMachineSecondPhase.SpeedUp)
+                return;
+
+            SwordsMachineFlag flag = __instance.GetComponent<SwordsMachineFlag>();
+            if (flag == null)
+            {
+                flag = __instance.gameObject.AddComponent<SwordsMachineFlag>();
+                flag.sm = __instance;
+            }
+            flag.speedingUp = true;
+            flag.speed = (1f * ___eid.totalSpeedModifier) * ConfigManager.swordsMachineSecondPhaseSpeed.value;
+            ___anim.speed = flag.speed;
+
+            AnimatorClipInfo clipInfo = ___anim.GetCurrentAnimatorClipInfo(0)[0];
+            flag.Invoke("ResetAnimSpeed", clipInfo.clip.length / flag.speed);
+        }
+    }
+
+    class SwordsMachine_EndFirstPhase_Patch
+    {
+        static bool Prefix(SwordsMachine __instance)
+        {
+            if (ConfigManager.swordsMachineSecondPhaseMode.value == ConfigManager.SwordsMachineSecondPhase.Skip)
+                return false;
+            return true;
+        }
+
+        static void Postfix(SwordsMachine __instance, Animator ___anim, EnemyIdentifier ___eid)
+        {
+            if (ConfigManager.swordsMachineSecondPhaseMode.value != ConfigManager.SwordsMachineSecondPhase.SpeedUp)
+                return;
+
+            SwordsMachineFlag flag = __instance.GetComponent<SwordsMachineFlag>();
+            if (flag == null)
+            {
+                flag = __instance.gameObject.AddComponent<SwordsMachineFlag>();
+                flag.sm = __instance;
+            }
+            flag.speedingUp = true;
+            flag.speed = (1f * ___eid.totalSpeedModifier) * ConfigManager.swordsMachineSecondPhaseSpeed.value;
+            ___anim.speed = flag.speed;
+
+            AnimatorClipInfo clipInfo = ___anim.GetCurrentAnimatorClipInfo(0)[0];
+            flag.Invoke("ResetAnimSpeed", clipInfo.clip.length / flag.speed);
+        }
+    }
+
+    class SwordsMachine_SetSpeed_Patch
+    {
+        static bool Prefix(SwordsMachine __instance, ref Animator ___anim)
+        {
+            if (___anim == null)
+                ___anim = __instance.GetComponent<Animator>();
+
+            SwordsMachineFlag flag = __instance.GetComponent<SwordsMachineFlag>();
+            if (flag == null || !flag.speedingUp)
+                return true;
+
+            return false;
         }
     }
 
