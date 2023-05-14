@@ -99,7 +99,7 @@ namespace Ultrapain.Patches
                     if(!rocketHitGround || ConfigManager.rocketBoostAlwaysExplodesToggle.value)
                         __1 = false;
 
-                    foreach(Explosion e in flag.temporaryExplosion.GetComponentsInChildren<Explosion>())
+                    foreach(Explosion e in (__2) ? flag.temporaryBigExplosion.GetComponentsInChildren<Explosion>() : flag.temporaryExplosion.GetComponentsInChildren<Explosion>())
                     {
                         GrenadeParriedFlag fFlag = e.gameObject.AddComponent<GrenadeParriedFlag>();
                         fFlag.weapon = flag.weapon;
