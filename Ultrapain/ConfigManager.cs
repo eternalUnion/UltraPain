@@ -17,10 +17,31 @@ namespace Ultrapain
     {
         public static PluginConfigurator config = null;
 
-        public static string[] customPresetNames = new string[]
+        public static void AddMissingPresets()
         {
-            "System Overload"
-        };
+            string presetFolder = Path.Combine(Plugin.workingDir, "defaultpresets");
+            if (!Directory.Exists(presetFolder))
+            {
+                Debug.LogWarning("UltraPain misses the default preset folder at " + presetFolder);
+                return;
+            }
+
+            foreach (string filePath in Directory.GetFiles(presetFolder))
+            {
+                if (!filePath.EndsWith(".config"))
+                {
+                    Debug.LogWarning($"Incorrect file format at {filePath}. Extension must be .config");
+                    continue;
+                }
+
+                string fileName = Path.GetFileName(filePath);
+                fileName = fileName.Substring(0, fileName.Length - 7);
+                if (string.IsNullOrWhiteSpace(fileName))
+                    continue;
+
+                config.TryAddPreset(fileName, fileName, filePath);
+            }
+        }
 
         // ROOT PANEL
         public static BoolField enemyTweakToggle;
@@ -409,8 +430,8 @@ namespace Ultrapain
 
             // ROOT PANEL
             ButtonArrayField buttons = new ButtonArrayField(config.rootPanel, "buttons", 2, new float[] { 0.5f, 0.5f }, new string[] { "Bug Report", "Feature Request" });
-            buttons.OnClickEventHandler(0).onClick += () => Application.OpenURL("https://preview.redd.it/secw8dd72hn81.png?width=614&format=png&auto=webp&s=b0d474c0add04489071c9042703d726add9edb74");
-            buttons.OnClickEventHandler(1).onClick += () => Application.OpenURL("https://i.redd.it/yzf24m2ljhsa1.jpg");
+            buttons.OnClickEventHandler(0).onClick += () => Application.OpenURL("https://github.com/eternalUnion/UltraPain/issues/new?assignees=eternalUnion&labels=bug&projects=&template=bug-report.md&title=%5BBUG%5D+Bug+name+here");
+            buttons.OnClickEventHandler(1).onClick += () => Application.OpenURL("https://github.com/eternalUnion/UltraPain/issues/new?assignees=eternalUnion&labels=feature+request&projects=&template=feature-request.md&title=%5BFEATURE%5D+Your+idea+goes+here");
 
             new ConfigHeader(config.rootPanel, "Enemy Tweaks");
             enemyTweakToggle = new BoolField(config.rootPanel, "Enabled", "enemyTweakToggle", true);
@@ -486,19 +507,8 @@ namespace Ultrapain
             memePanel = new ConfigPanel(config.rootPanel, "Memes", "memePanel");
 
             new ConfigHeader(config.rootPanel, "Danger Zone");
-            ButtonField resetDefaultPresets = new ButtonField(config.rootPanel, "Reset default presets", "resetDefaultPresets");
-            resetDefaultPresets.onClick += () =>
-            {
-                foreach (string presetName in customPresetNames)
-                    config.DeletePreset(presetName);
-
-                foreach(string presetName in customPresetNames)
-                {
-                    string presetPath = Path.Combine(Plugin.workingDir, "defaultpresets", $"{presetName}.config");
-                    if (File.Exists(presetPath))
-                        config.TryAddPreset(presetName, presetName, presetPath);
-                }
-            };
+            ButtonField addMissingDefaultPresets = new ButtonField(config.rootPanel, "Add missing default presets", "addMissingDefaultPresets");
+            addMissingDefaultPresets.onClick += AddMissingPresets;
 
             // MEME PANEL
             enrageSfxToggle = new BoolField(memePanel, "Enrage SFX\n(volume warning)", "enrageSfxToggle", false);
@@ -524,9 +534,9 @@ namespace Ultrapain
             };
             rocketBoostToggle.TriggerValueChangeEvent();
             rocketBoostAlwaysExplodesToggle = new BoolField(rocketBoostDiv, "Always explode", "rocketBoostAlwaysExplodes", true);
-            rocketBoostDamageMultiplierPerHit = new FloatField(rocketBoostDiv, "Damage multiplier per hit", "rocketBoostDamageMultiplier", 0.35f);
-            rocketBoostSizeMultiplierPerHit = new FloatField(rocketBoostDiv, "Size multiplier per hit", "rocketBoostSizeMultiplier", 0.35f);
-            rocketBoostSpeedMultiplierPerHit = new FloatField(rocketBoostDiv, "Speed multiplier per hit", "rocketBoostSpeedMultiplierPerHit", 0.35f);
+            rocketBoostDamageMultiplierPerHit = new FloatField(rocketBoostDiv, "Damage multiplier per hit", "rocketBoostDamageMultiplier", 0.35f, 0f, float.MaxValue);
+            rocketBoostSizeMultiplierPerHit = new FloatField(rocketBoostDiv, "Size multiplier per hit", "rocketBoostSizeMultiplier", 0.35f, 0f, float.MaxValue);
+            rocketBoostSpeedMultiplierPerHit = new FloatField(rocketBoostDiv, "Speed multiplier per hit", "rocketBoostSpeedMultiplierPerHit", 0.35f, 0f, float.MaxValue);
             FormattedStringBuilder rocketBoostStyleBuilder = new FormattedStringBuilder();
             rocketBoostStyleBuilder.currentFormat = new PluginConfig.API.Fields.CharacterInfo() { color = Color.green };
             rocketBoostStyleBuilder += "ROCKET BOOST";
@@ -535,7 +545,7 @@ namespace Ultrapain
             {
                 Plugin.StyleIDs.UpdateID(rocketBoostStyleText.guid, e.formattedString.formattedString);
             };
-            rocketBoostStylePoints = new IntField(rocketBoostDiv, "Style points", "rocketBoostStylePoints", 10);
+            rocketBoostStylePoints = new IntField(rocketBoostDiv, "Style points", "rocketBoostStylePoints", 10, 0, int.MaxValue);
 
             new ConfigHeader(playerPanel, "Rocket Grabbing\r\n<size=16>(Can pull yourself to frozen rockets)</size>");
             rocketGrabbingToggle = new BoolField(playerPanel, "Enabled", "rocketGrabbingTabble", true);
@@ -554,8 +564,8 @@ namespace Ultrapain
                 dirtyField = true;
             };
             grenadeBoostToggle.TriggerValueChangeEvent();
-            grenadeBoostDamageMultiplier = new FloatField(grenadeBoostDiv, "Damage multiplier", "grenadeBoostDamageMultiplier", 1f);
-            grenadeBoostSizeMultiplier = new FloatField(grenadeBoostDiv, "Size multiplier", "grenadeBoostSizeMultiplier", 1f);
+            grenadeBoostDamageMultiplier = new FloatField(grenadeBoostDiv, "Damage multiplier", "grenadeBoostDamageMultiplier", 1f, 0f, float.MaxValue);
+            grenadeBoostSizeMultiplier = new FloatField(grenadeBoostDiv, "Size multiplier", "grenadeBoostSizeMultiplier", 1f, 0f, float.MaxValue);
             FormattedStringBuilder grenadeBoostStyleBuilder = new FormattedStringBuilder();
             grenadeBoostStyleBuilder.currentFormat = new PluginConfig.API.Fields.CharacterInfo() { color = Color.cyan };
             grenadeBoostStyleBuilder += "FISTFUL OF 'NADE";
@@ -564,7 +574,7 @@ namespace Ultrapain
             {
                 Plugin.StyleIDs.UpdateID(grenadeBoostStyleText.guid, e.formattedString.formattedString);
             };
-            grenadeBoostStylePoints = new IntField(grenadeBoostDiv, "Style points", "grenadeBoostStylePoints", 10);
+            grenadeBoostStylePoints = new IntField(grenadeBoostDiv, "Style points", "grenadeBoostStylePoints", 10, 0, int.MaxValue);
 
             new ConfigHeader(playerPanel, "Orbital Strike", 26);
             new ConfigHeader(playerPanel, "(Tweaks for coin-knuckleblaster)", 16);
@@ -587,7 +597,7 @@ namespace Ultrapain
             {
                 Plugin.StyleIDs.UpdateID(orbStrikeRevolverStyleText.guid, e.formattedString.formattedString);
             };
-            orbStrikeRevolverStylePoint = new IntField(orbStrikeDiv, "Style point", "orbStrikeRevolverStylePoint", 20);
+            orbStrikeRevolverStylePoint = new IntField(orbStrikeDiv, "Style point", "orbStrikeRevolverStylePoint", 20, 0, int.MaxValue);
             new ConfigHeader(orbStrikeDiv, "--Grenade Explosion Boost--", 12);
             ConfigDivision orbStrikeRevolverGrenadeDiv = new ConfigDivision(orbStrikeDiv, "orbStrikeRevolverGrenadeDiv");
             orbStrikeRevolverGrenade = new BoolField(orbStrikeDiv, "Enabled", "orbStrikeRevolverGrenade", true);
@@ -597,8 +607,8 @@ namespace Ultrapain
                 orbStrikeRevolverGrenadeDiv.interactable = e.value;
             };
             orbStrikeRevolverGrenade.TriggerValueChangeEvent();
-            orbStrikeRevolverGrenadeExtraSize = new FloatField(orbStrikeRevolverGrenadeDiv, "Size bonus percent", "orbStrikeRevolverExtraSize", 0.2f);
-            orbStrikeRevolverGrenadeExtraDamage = new FloatField(orbStrikeRevolverGrenadeDiv, "Damage bonus percent", "orbStrikeRevolverGrenadeExtraDamage", 0f);
+            orbStrikeRevolverGrenadeExtraSize = new FloatField(orbStrikeRevolverGrenadeDiv, "Size bonus percent", "orbStrikeRevolverExtraSize", 0.2f, 0f, float.MaxValue);
+            orbStrikeRevolverGrenadeExtraDamage = new FloatField(orbStrikeRevolverGrenadeDiv, "Damage bonus percent", "orbStrikeRevolverGrenadeExtraDamage", 0f, 0f, float.MaxValue);
             new ConfigHeader(orbStrikeDiv, "--Explosion On Enemy Hit--", 12);
             ConfigDivision orbStrikeRevolverExplosionDiv = new ConfigDivision(orbStrikeDiv, "orbStrikeRevolverExplosionDiv");
             orbStrikeRevolverExplosion = new BoolField(orbStrikeDiv, "Enabled", "orbStrikeRevolverExplosion", true);
@@ -608,8 +618,8 @@ namespace Ultrapain
                 orbStrikeRevolverExplosionDiv.interactable = e.value;
             };
             orbStrikeRevolverExplosion.TriggerValueChangeEvent();
-            orbStrikeRevolverExplosionDamage = new FloatField(orbStrikeRevolverExplosionDiv, "Damage multiplier", "orbStrikeRevolverExplosionDamage", 1f);
-            orbStrikeRevolverExplosionSize = new FloatField(orbStrikeRevolverExplosionDiv, "Size multiplier", "orbStrikeRevolverExplosionSize", 1f);
+            orbStrikeRevolverExplosionDamage = new FloatField(orbStrikeRevolverExplosionDiv, "Damage multiplier", "orbStrikeRevolverExplosionDamage", 1f, 0f, float.MaxValue);
+            orbStrikeRevolverExplosionSize = new FloatField(orbStrikeRevolverExplosionDiv, "Size multiplier", "orbStrikeRevolverExplosionSize", 1f, 0f, float.MaxValue);
 
             new ConfigHeader(orbStrikeDiv, "Charged Revolver Beam", 22);
             FormattedStringBuilder orbStrikeRevolverChargedBuilder = new FormattedStringBuilder();
@@ -622,7 +632,7 @@ namespace Ultrapain
             {
                 Plugin.StyleIDs.UpdateID(orbStrikeRevolverChargedStyleText.guid, e.formattedString.formattedString);
             };
-            orbStrikeRevolverChargedStylePoint = new IntField(orbStrikeDiv, "Style point", "orbStrikeRevolverChargedStylePoint", 30);
+            orbStrikeRevolverChargedStylePoint = new IntField(orbStrikeDiv, "Style point", "orbStrikeRevolverChargedStylePoint", 30, 0, int.MaxValue);
             new ConfigHeader(orbStrikeDiv, "--Grenade Explosion Boost--", 12);
             ConfigDivision orbStrikeRevolverChargedGrenadeDiv = new ConfigDivision(orbStrikeDiv, "orbStrikeRevolverGrenadeDiv");
             orbStrikeRevolverChargedGrenade = new BoolField(orbStrikeDiv, "Enabled", "orbStrikeRevolverChargedGrenade", true);
@@ -632,8 +642,8 @@ namespace Ultrapain
                 orbStrikeRevolverChargedGrenadeDiv.interactable = e.value;
             };
             orbStrikeRevolverChargedGrenade.TriggerValueChangeEvent();
-            orbStrikeRevolverChargedGrenadeExtraSize = new FloatField(orbStrikeRevolverChargedGrenadeDiv, "Size bonus percent", "orbStrikeRevolverChargedGrenadeExtraSize", 0.25f);
-            orbStrikeRevolverChargedGrenadeExtraDamage = new FloatField(orbStrikeRevolverChargedGrenadeDiv, "Damage bonus percent", "orbStrikeRevolverChargedGrenadeExtraDamage", 0f);
+            orbStrikeRevolverChargedGrenadeExtraSize = new FloatField(orbStrikeRevolverChargedGrenadeDiv, "Size bonus percent", "orbStrikeRevolverChargedGrenadeExtraSize", 0.25f, 0f, float.MaxValue);
+            orbStrikeRevolverChargedGrenadeExtraDamage = new FloatField(orbStrikeRevolverChargedGrenadeDiv, "Damage bonus percent", "orbStrikeRevolverChargedGrenadeExtraDamage", 0f, 0f, float.MaxValue);
             new ConfigHeader(orbStrikeDiv, "--Insignia On Enemy Hit--", 12);
             ConfigDivision orbStrikeRevolverChargedInsigniaDiv = new ConfigDivision(orbStrikeDiv, "orbStrikeRevolverChargedInsigniaDiv");
             orbStrikeRevolverChargedInsignia = new BoolField(orbStrikeDiv, "Enabled", "orbStrikeRevolverChargedInsignia", true);
@@ -643,9 +653,9 @@ namespace Ultrapain
                 orbStrikeRevolverChargedInsigniaDiv.interactable = e.value;
             };
             orbStrikeRevolverChargedInsignia.TriggerValueChangeEvent();
-            orbStrikeRevolverChargedInsigniaDamage = new IntField(orbStrikeRevolverChargedInsigniaDiv, "Damage", "orbStrikeRevolverChargedInsigniaDamage", 10);
-            orbStrikeRevolverChargedInsigniaSize = new FloatField(orbStrikeRevolverChargedInsigniaDiv, "Size", "orbStrikeRevolverChargedInsigniaSize", 2f);
-            orbStrikeRevolverChargedInsigniaDelayBoost = new FloatField(orbStrikeRevolverChargedInsigniaDiv, "Windup speed multiplier", "orbStrikeRevolverChargedInsigniaDelayBoost", 2f);
+            orbStrikeRevolverChargedInsigniaDamage = new IntField(orbStrikeRevolverChargedInsigniaDiv, "Damage", "orbStrikeRevolverChargedInsigniaDamage", 10, 0, int.MaxValue);
+            orbStrikeRevolverChargedInsigniaSize = new FloatField(orbStrikeRevolverChargedInsigniaDiv, "Size", "orbStrikeRevolverChargedInsigniaSize", 2f, 0f, float.MaxValue);
+            orbStrikeRevolverChargedInsigniaDelayBoost = new FloatField(orbStrikeRevolverChargedInsigniaDiv, "Windup speed multiplier", "orbStrikeRevolverChargedInsigniaDelayBoost", 2f, 0f, float.MaxValue);
 
             new ConfigHeader(orbStrikeDiv, "Electric Cannon", 22);
             FormattedStringBuilder orbStrikeElectricCannonBuilder = new FormattedStringBuilder();
@@ -660,7 +670,7 @@ namespace Ultrapain
             {
                 Plugin.StyleIDs.UpdateID(orbStrikeElectricCannonStyleText.guid, e.formattedString.formattedString);
             };
-            orbStrikeElectricCannonStylePoint = new IntField(orbStrikeDiv, "Style point", "orbStrikeElectricCannonStylePoint", 50);
+            orbStrikeElectricCannonStylePoint = new IntField(orbStrikeDiv, "Style point", "orbStrikeElectricCannonStylePoint", 50, 0, int.MaxValue);
             new ConfigHeader(orbStrikeDiv, "--Grenade Explosion Boost--", 12);
             ConfigDivision orbStrikeElectricCannonGrenadeDiv = new ConfigDivision(orbStrikeDiv, "orbStrikeRevolverGrenadeDiv");
             orbStrikeElectricCannonGrenade = new BoolField(orbStrikeDiv, "Enabled", "orbStrikeElectricCannonGrenade", true);
@@ -670,8 +680,8 @@ namespace Ultrapain
                 orbStrikeElectricCannonGrenadeDiv.interactable = e.value;
             };
             orbStrikeElectricCannonGrenade.TriggerValueChangeEvent();
-            orbStrikeElectricCannonGrenadeExtraSize = new FloatField(orbStrikeElectricCannonGrenadeDiv, "Size bonus percent", "orbStrikeElectricCannonGrenadeExtraSize", 0.3f);
-            orbStrikeElectricCannonGrenadeExtraDamage = new FloatField(orbStrikeElectricCannonGrenadeDiv, "Damage bonus percent", "orbStrikeElectricCannonGrenadeExtraDamage", 0f);
+            orbStrikeElectricCannonGrenadeExtraSize = new FloatField(orbStrikeElectricCannonGrenadeDiv, "Size bonus percent", "orbStrikeElectricCannonGrenadeExtraSize", 0.3f, 0f, float.MaxValue);
+            orbStrikeElectricCannonGrenadeExtraDamage = new FloatField(orbStrikeElectricCannonGrenadeDiv, "Damage bonus percent", "orbStrikeElectricCannonGrenadeExtraDamage", 0f, 0f, float.MaxValue);
             new ConfigHeader(orbStrikeDiv, "--Lightning Bolt On Enemy Hit--", 12);
             ConfigDivision orbStrikeElectricCannonExplosionDiv = new ConfigDivision(orbStrikeDiv, "orbStrikeRevolverGrenadeDiv");
             orbStrikeElectricCannonExplosion = new BoolField(orbStrikeDiv, "Enabled", "orbStrikeElectricCannonExplosion", true);
@@ -681,8 +691,8 @@ namespace Ultrapain
                 orbStrikeElectricCannonExplosionDiv.interactable = e.value;
             };
             orbStrikeElectricCannonExplosion.TriggerValueChangeEvent();
-            orbStrikeElectricCannonExplosionDamage = new FloatField(orbStrikeElectricCannonExplosionDiv, "Damage multiplier", "orbStrikeElectricCannonExplosionDamage", 1f);
-            orbStrikeElectricCannonExplosionSize = new FloatField(orbStrikeElectricCannonExplosionDiv, "Size multiplier", "orbStrikeElectricCannonExplosionSize", 1f);
+            orbStrikeElectricCannonExplosionDamage = new FloatField(orbStrikeElectricCannonExplosionDiv, "Damage multiplier", "orbStrikeElectricCannonExplosionDamage", 1f, 0f, float.MaxValue);
+            orbStrikeElectricCannonExplosionSize = new FloatField(orbStrikeElectricCannonExplosionDiv, "Size multiplier", "orbStrikeElectricCannonExplosionSize", 1f, 0f, float.MaxValue);
 
 
             new ConfigHeader(orbStrikeDiv, "Malicious Cannon", 22);
@@ -696,7 +706,7 @@ namespace Ultrapain
             {
                 Plugin.StyleIDs.UpdateID(orbStrikeMaliciousCannonStyleText.guid, e.formattedString.formattedString);
             };
-            orbStrikeMaliciousCannonStylePoint = new IntField(orbStrikeDiv, "Style point", "orbStrikeMaliciousCannonStylePoint", 70);
+            orbStrikeMaliciousCannonStylePoint = new IntField(orbStrikeDiv, "Style point", "orbStrikeMaliciousCannonStylePoint", 70, 0, int.MaxValue);
             new ConfigHeader(orbStrikeDiv, "--Grenade Explosion Boost--", 12);
             ConfigDivision orbStrikeMaliciousCannonGrenadeDiv = new ConfigDivision(orbStrikeDiv, "orbStrikeMaliciousCannonGrenadeDiv");
             orbStrikeMaliciousCannonGrenade = new BoolField(orbStrikeDiv, "Enabled", "orbStrikeMaliciousCannonGrenade", true);
@@ -706,8 +716,8 @@ namespace Ultrapain
                 orbStrikeMaliciousCannonGrenadeDiv.interactable = e.value;
             };
             orbStrikeMaliciousCannonGrenade.TriggerValueChangeEvent();
-            orbStrikeMaliciousCannonGrenadeExtraSize = new FloatField(orbStrikeMaliciousCannonGrenadeDiv, "Size bonus percent", "orbStrikeMaliciousCannonGrenadeExtraSize", 0.4f);
-            orbStrikeMaliciousCannonGrenadeExtraDamage = new FloatField(orbStrikeMaliciousCannonGrenadeDiv, "Damage bonus percent", "orbStrikeMaliciousCannonGrenadeExtraDamage", 0f);
+            orbStrikeMaliciousCannonGrenadeExtraSize = new FloatField(orbStrikeMaliciousCannonGrenadeDiv, "Size bonus percent", "orbStrikeMaliciousCannonGrenadeExtraSize", 0.4f, 0f, float.MaxValue);
+            orbStrikeMaliciousCannonGrenadeExtraDamage = new FloatField(orbStrikeMaliciousCannonGrenadeDiv, "Damage bonus percent", "orbStrikeMaliciousCannonGrenadeExtraDamage", 0f, 0f, float.MaxValue);
             new ConfigHeader(orbStrikeDiv, "--Stronger Malicious Explosion--", 12);
             ConfigDivision orbStrikeMaliciousCannonExplosionDiv = new ConfigDivision(orbStrikeDiv, "orbStrikeMaliciousCannonExplosionDiv");
             orbStrikeMaliciousCannonExplosion = new BoolField(orbStrikeDiv, "Enabled", "orbStrikeMaliciousCannonExplosion", true);
@@ -717,8 +727,8 @@ namespace Ultrapain
                 orbStrikeMaliciousCannonExplosionDiv.interactable = e.value;
             };
             orbStrikeMaliciousCannonExplosion.TriggerValueChangeEvent();
-            orbStrikeMaliciousCannonExplosionSizeMultiplier = new FloatField(orbStrikeMaliciousCannonExplosionDiv, "Size multiplier", "orbStrikeMaliciousCannonExplosionSizeMultiplier", 1.3f);
-            orbStrikeMaliciousCannonExplosionDamageMultiplier = new FloatField(orbStrikeMaliciousCannonExplosionDiv, "Damage multiplier", "orbStrikeMaliciousCannonExplosionDamageMultiplier", 1f);
+            orbStrikeMaliciousCannonExplosionSizeMultiplier = new FloatField(orbStrikeMaliciousCannonExplosionDiv, "Size multiplier", "orbStrikeMaliciousCannonExplosionSizeMultiplier", 1.3f, 0f, float.MaxValue);
+            orbStrikeMaliciousCannonExplosionDamageMultiplier = new FloatField(orbStrikeMaliciousCannonExplosionDiv, "Damage multiplier", "orbStrikeMaliciousCannonExplosionDamageMultiplier", 1f, 0f, float.MaxValue);
 
             // ENEMY PANEL
             globalEnemyPanel = new ConfigPanel(enemyPanel, "Global enemy tweaks", "globalEnemyPanel");
@@ -768,9 +778,9 @@ namespace Ultrapain
             foreach(EnemyType eid in Enum.GetValues(typeof(EnemyType)))
             {
                 EidStatContainer container = new EidStatContainer();
-                container.health = new FloatField(eidStatEditorPanel, "Health multiplier", $"eid_{eid}_health", 1f, 0.1f, float.MaxValue);
-                container.damage = new FloatField(eidStatEditorPanel, "Damage multiplier", $"eid_{eid}_damage", 1f, 0.1f, float.MaxValue);
-                container.speed = new FloatField(eidStatEditorPanel, "Speed multiplier", $"eid_{eid}_speed", 1f, 0.1f, float.MaxValue);
+                container.health = new FloatField(eidStatEditorPanel, "Health multiplier", $"eid_{eid}_health", 1f, 0.01f, float.MaxValue);
+                container.damage = new FloatField(eidStatEditorPanel, "Damage multiplier", $"eid_{eid}_damage", 1f, 0.01f, float.MaxValue);
+                container.speed = new FloatField(eidStatEditorPanel, "Speed multiplier", $"eid_{eid}_speed", 1f, 0.01f, float.MaxValue);
                 enemyStats.Add(eid, container);
             }
 
@@ -855,8 +865,8 @@ namespace Ultrapain
             };
             filthExplodeToggle.TriggerValueChangeEvent();
             filthExplodeKills = new BoolField(filthExplosionDiv, "Explosion kills the filth", "filthExplosionKills", false);
-            filthExplosionDamage = new IntField(filthExplosionDiv, "Explosion damage", "filthExplosionDamage", 30);
-            filthExplosionSize = new FloatField(filthExplosionDiv, "Explosion size", "filthExplosionSize", 0.5f);
+            filthExplosionDamage = new IntField(filthExplosionDiv, "Explosion damage", "filthExplosionDamage", 30, 0, int.MaxValue);
+            filthExplosionSize = new FloatField(filthExplosionDiv, "Explosion size", "filthExplosionSize", 0.5f, 0f, float.MaxValue);
 
             // HIDEOUS MASS
             new ConfigHeader(hideousMassPanel, "Insignia On Projectile Hit");
@@ -869,7 +879,7 @@ namespace Ultrapain
                 dirtyField = true;
             };
             hideousMassInsigniaToggle.TriggerValueChangeEvent();
-            hideousMassInsigniaSpeed = new FloatField(hideousMassInsigniaDiv, "Insignia speed multiplier", "hideousMassInsigniaSpeed", 2.5f);
+            hideousMassInsigniaSpeed = new FloatField(hideousMassInsigniaDiv, "Insignia speed multiplier", "hideousMassInsigniaSpeed", 2.5f, 0f, float.MaxValue);
             new ConfigHeader(hideousMassInsigniaDiv, "Vertical Insignia", 12);
             ConfigDivision hideousMassInsigniaYdiv = new ConfigDivision(hideousMassInsigniaDiv, "hideousMassInsigniaYdiv");
             hideousMassInsigniaYtoggle = new BoolField(hideousMassInsigniaDiv, "Enabled", "hideousMassInsigniaYtoggle", true);
@@ -879,8 +889,8 @@ namespace Ultrapain
                 hideousMassInsigniaYdiv.interactable = e.value;
             };
             hideousMassInsigniaYtoggle.TriggerValueChangeEvent();
-            hideousMassInsigniaYdamage = new IntField(hideousMassInsigniaYdiv, "Damage", "hideousMassInsigniaYdamage", 20);
-            hideousMassInsigniaYsize = new FloatField(hideousMassInsigniaYdiv, "Size", "hideousMassInsigniaYsize", 2f);
+            hideousMassInsigniaYdamage = new IntField(hideousMassInsigniaYdiv, "Damage", "hideousMassInsigniaYdamage", 20, 0, int.MaxValue);
+            hideousMassInsigniaYsize = new FloatField(hideousMassInsigniaYdiv, "Size", "hideousMassInsigniaYsize", 2f, 0f, float.MaxValue);
             new ConfigHeader(hideousMassInsigniaDiv, "Forward Insignia", 12);
             ConfigDivision hideousMassInsigniaZdiv = new ConfigDivision(hideousMassInsigniaDiv, "hideousMassInsigniaZdiv");
             hideousMassInsigniaZtoggle = new BoolField(hideousMassInsigniaDiv, "Enabled", "hideousMassInsigniaZtoggle", false);
@@ -890,8 +900,8 @@ namespace Ultrapain
                 hideousMassInsigniaZdiv.interactable = e.value;
             };
             hideousMassInsigniaZtoggle.TriggerValueChangeEvent();
-            hideousMassInsigniaZdamage = new IntField(hideousMassInsigniaZdiv, "Damage", "hideousMassInsigniaZdamage", 20);
-            hideousMassInsigniaZsize = new FloatField(hideousMassInsigniaZdiv, "Size", "hideousMassInsigniaZsize", 2f);
+            hideousMassInsigniaZdamage = new IntField(hideousMassInsigniaZdiv, "Damage", "hideousMassInsigniaZdamage", 20, 0, int.MaxValue);
+            hideousMassInsigniaZsize = new FloatField(hideousMassInsigniaZdiv, "Size", "hideousMassInsigniaZsize", 2f, 0f, float.MaxValue);
             new ConfigHeader(hideousMassInsigniaDiv, "Side Insignia", 12);
             ConfigDivision hideousMassInsigniaXdiv = new ConfigDivision(hideousMassInsigniaDiv, "hideousMassInsigniaXdiv");
             hideousMassInsigniaXtoggle = new BoolField(hideousMassInsigniaDiv, "Enabled", "hideousMassInsigniaXtoggle", false);
@@ -901,8 +911,8 @@ namespace Ultrapain
                 hideousMassInsigniaXdiv.interactable = e.value;
             };
             hideousMassInsigniaXtoggle.TriggerValueChangeEvent();
-            hideousMassInsigniaXdamage = new IntField(hideousMassInsigniaXdiv, "Damage", "hideousMassInsigniaXdamage", 20);
-            hideousMassInsigniaXsize = new FloatField(hideousMassInsigniaXdiv, "Size", "hideousMassInsigniaXsize", 2f);
+            hideousMassInsigniaXdamage = new IntField(hideousMassInsigniaXdiv, "Damage", "hideousMassInsigniaXdamage", 20, 0, int.MaxValue);
+            hideousMassInsigniaXsize = new FloatField(hideousMassInsigniaXdiv, "Size", "hideousMassInsigniaXsize", 2f, 0f, float.MaxValue);
 
             // MALICIOUS FACE
             new ConfigHeader(maliciousFacePanel, "Radiance When Enraged");
@@ -915,7 +925,7 @@ namespace Ultrapain
                 dirtyField = true;
             };
             maliciousFaceRadianceOnEnrage.TriggerValueChangeEvent();
-            maliciousFaceRadianceAmount = new IntField(maliciousFaceRadianceOnEnrageDiv, "Radiance level", "maliciousFaceRadianceAmount", 1);
+            maliciousFaceRadianceAmount = new IntField(maliciousFaceRadianceOnEnrageDiv, "Radiance level", "maliciousFaceRadianceAmount", 1, 0, int.MaxValue);
             new ConfigHeader(maliciousFacePanel, "Homing Projectile");
             ConfigDivision maliciousFaceHomingProjecileDiv = new ConfigDivision(maliciousFacePanel, "maliciousFaceHomingProjecileDiv");
             maliciousFaceHomingProjectileToggle = new BoolField(maliciousFacePanel, "Enabled", "maliciousFaceHomingProjectileToggle", true);
@@ -926,13 +936,13 @@ namespace Ultrapain
                 dirtyField = true;
             };
             maliciousFaceHomingProjectileToggle.TriggerValueChangeEvent();
-            maliciousFaceHomingProjectileCount = new IntField(maliciousFaceHomingProjecileDiv, "Projectile count", "maliciousFaceHomingProjectileCount", 5);
-            maliciousFaceHomingProjectileDamage = new IntField(maliciousFaceHomingProjecileDiv, "Projectile damage", "maliciousFaceHomingProjectileDamage", 25);
-            maliciousFaceHomingProjectileSpeed = new FloatField(maliciousFaceHomingProjecileDiv, "Projectile speed", "maliciousFaceHomingProjectileSpeed", 20f);
-            maliciousFaceHomingProjectileTurnSpeed = new FloatField(maliciousFaceHomingProjecileDiv, "Projectile turn speed", "maliciousFaceHomingProjectileTurnSpeed", 0.4f);
+            maliciousFaceHomingProjectileCount = new IntField(maliciousFaceHomingProjecileDiv, "Projectile count", "maliciousFaceHomingProjectileCount", 5, 0, int.MaxValue);
+            maliciousFaceHomingProjectileDamage = new IntField(maliciousFaceHomingProjecileDiv, "Projectile damage", "maliciousFaceHomingProjectileDamage", 25, 0, int.MaxValue);
+            maliciousFaceHomingProjectileSpeed = new FloatField(maliciousFaceHomingProjecileDiv, "Projectile speed", "maliciousFaceHomingProjectileSpeed", 20f, 0f, float.MaxValue);
+            maliciousFaceHomingProjectileTurnSpeed = new FloatField(maliciousFaceHomingProjecileDiv, "Projectile turn speed", "maliciousFaceHomingProjectileTurnSpeed", 0.4f, 0f, float.MaxValue);
             new ConfigHeader(maliciousFacePanel, "Beam Count");
-            maliciousFaceBeamCountNormal = new IntField(maliciousFacePanel, "Normal state", "maliciousFaceBeamCountNormal", 1);
-            maliciousFaceBeamCountEnraged = new IntField(maliciousFacePanel, "Enraged state", "maliciousFaceBeamCountEnraged", 2);
+            maliciousFaceBeamCountNormal = new IntField(maliciousFacePanel, "Normal state", "maliciousFaceBeamCountNormal", 1, 0, int.MaxValue);
+            maliciousFaceBeamCountEnraged = new IntField(maliciousFacePanel, "Enraged state", "maliciousFaceBeamCountEnraged", 2, 0, int.MaxValue);
 
             // MINDFLAYER
             new ConfigHeader(mindflayerPanel, "Shoot Tweak");
@@ -945,8 +955,8 @@ namespace Ultrapain
                 dirtyField = true;
             };
             mindflayerShootTweakToggle.TriggerValueChangeEvent();
-            mindflayerShootAmount = new IntField(mindflayerShootTweakDiv, "Projectile amount", "mindflayerShootProjectileAmount", 20);
-            mindflayerShootDelay = new FloatField(mindflayerShootTweakDiv, "Delay between shots", "mindflayerShootProjectileDelay", 0.02f);
+            mindflayerShootAmount = new IntField(mindflayerShootTweakDiv, "Projectile amount", "mindflayerShootProjectileAmount", 20, 0, int.MaxValue);
+            mindflayerShootDelay = new FloatField(mindflayerShootTweakDiv, "Delay between shots", "mindflayerShootProjectileDelay", 0.02f, 0f, float.MaxValue);
             new ConfigHeader(mindflayerPanel, "Melee Combo");
             ConfigDivision mindflayerMeleeDiv = new ConfigDivision(mindflayerPanel, "mindflayerMeleeDiv");
             mindflayerTeleportComboToggle = new BoolField(mindflayerPanel, "Enabled", "mindflayerMeleeCombo", true);
@@ -967,7 +977,7 @@ namespace Ultrapain
             };
             schismSpreadAttackToggle.TriggerValueChangeEvent();
             schismSpreadAttackAngle = new FloatSliderField(schismSpreadAttackDiv, "Angular spread", "schismSpreadAttackAngle", new System.Tuple<float, float>(0, 360), 15, 1);
-            schismSpreadAttackCount = new IntField(schismSpreadAttackDiv, "Projectile count per side", "schismSpreadAttackCount", 1);
+            schismSpreadAttackCount = new IntField(schismSpreadAttackDiv, "Projectile count per side", "schismSpreadAttackCount", 1, 0, int.MaxValue);
 
             // SOLIDER
             new ConfigHeader(soliderPanel, "Coins Ignore Weak Point");
@@ -986,7 +996,7 @@ namespace Ultrapain
                 dirtyField = true;
             };
             soliderShootTweakToggle.TriggerValueChangeEvent();
-            soliderShootCount = new IntField(soliderShootTweakDiv, "Shoot count", "soliderShootCount", 3);
+            soliderShootCount = new IntField(soliderShootTweakDiv, "Shoot count", "soliderShootCount", 3, 1, int.MaxValue);
             new ConfigHeader(soliderPanel, "Shoot Grenade");
             ConfigDivision soliderShootGrenadeDiv = new ConfigDivision(soliderPanel, "soliderShootGrenadeDiv");
             soliderShootGrenadeToggle = new BoolField(soliderPanel, "Enabled", "soliderShootGrenade", true);
@@ -996,8 +1006,8 @@ namespace Ultrapain
                 soliderShootGrenadeDiv.interactable = e.value;
                 dirtyField = true;
             };
-            soliderGrenadeDamage = new IntField(soliderShootGrenadeDiv, "Explosion damage", "soliderGrenadeDamage", 10);
-            soliderGrenadeSize = new FloatField(soliderShootGrenadeDiv, "Explosion size multiplier", "soliderGrenadeSize", 0.75f);
+            soliderGrenadeDamage = new IntField(soliderShootGrenadeDiv, "Explosion damage", "soliderGrenadeDamage", 10, 0, int.MaxValue);
+            soliderGrenadeSize = new FloatField(soliderShootGrenadeDiv, "Explosion size multiplier", "soliderGrenadeSize", 0.75f, 0f, float.MaxValue);
 
             // STALKER
             new ConfigHeader(stalkerPanel, "Survive Explosion");
@@ -1018,8 +1028,8 @@ namespace Ultrapain
                 dirtyField = true;
             };
             strayShootToggle.TriggerValueChangeEvent();
-            strayShootCount = new IntField(strayShootDiv, "Extra projectile count", "strayShootCount", 2);
-            strayShootSpeed = new FloatField(strayShootDiv, "Shoot speed", "strayShootSpeed", 20f);
+            strayShootCount = new IntField(strayShootDiv, "Extra projectile count", "strayShootCount", 2, 1, int.MaxValue);
+            strayShootSpeed = new FloatField(strayShootDiv, "Shoot speed", "strayShootSpeed", 20f, 0f, float.MaxValue);
             new ConfigHeader(strayPanel, "Coins Ignore Weak Point");
             strayCoinsIgnoreWeakPointToggle = new BoolField(strayPanel, "Enabled", "strayCoinsIgnoreWeakPointToggle", true);
             strayCoinsIgnoreWeakPointToggle.onValueChange += (BoolField.BoolValueChangeEvent e) =>
@@ -1067,8 +1077,8 @@ namespace Ultrapain
                 dirtyField = true;
             };
             swordsMachineExplosiveSwordToggle.TriggerValueChangeEvent();
-            swordsMachineExplosiveSwordDamage = new IntField(swordsMachineExplosiveSwordDiv, "Explosion damage", "swordsMachineExplosiveSwordDamage", 20);
-            swordsMachineExplosiveSwordSize = new FloatField(swordsMachineExplosiveSwordDiv, "Explosion size multiplier", "swordsMachineExplosiveSwordSize", 0.5f);
+            swordsMachineExplosiveSwordDamage = new IntField(swordsMachineExplosiveSwordDiv, "Explosion damage", "swordsMachineExplosiveSwordDamage", 20, 0, int.MaxValue);
+            swordsMachineExplosiveSwordSize = new FloatField(swordsMachineExplosiveSwordDiv, "Explosion size multiplier", "swordsMachineExplosiveSwordSize", 0.5f, 0f, float.MaxValue);
 
             // VIRTUE
             new ConfigHeader(virtuePanel, "Tweak Normal Attack");
@@ -1093,8 +1103,8 @@ namespace Ultrapain
                 virtueNormalYInsigniaDiv.interactable = e.value;
             };
             virtueNormalInsigniaYtoggle.TriggerValueChangeEvent();
-            virtueNormalInsigniaYdamage = new IntField(virtueNormalYInsigniaDiv, "Damage", "virtueNormalInsigniaYdamage", 30);
-            virtueNormalInsigniaYsize = new FloatField(virtueNormalYInsigniaDiv, "Size", "virtueNormalInsigniaYsize", 2f);
+            virtueNormalInsigniaYdamage = new IntField(virtueNormalYInsigniaDiv, "Damage", "virtueNormalInsigniaYdamage", 30, 0, int.MaxValue);
+            virtueNormalInsigniaYsize = new FloatField(virtueNormalYInsigniaDiv, "Size", "virtueNormalInsigniaYsize", 2f, 0f, float.MaxValue);
 
             ConfigDivision virtueNormalZInsigniaDiv = new ConfigDivision(virtueNormalInsigniaDiv, "virtueNormalZInsigniaDiv");
             new ConfigHeader(virtueNormalInsigniaDiv, "Forward Insignia", 12);
@@ -1105,8 +1115,8 @@ namespace Ultrapain
                 virtueNormalZInsigniaDiv.interactable = e.value;
             };
             virtueNormalInsigniaZtoggle.TriggerValueChangeEvent();
-            virtueNormalInsigniaZdamage = new IntField(virtueNormalZInsigniaDiv, "Damage", "virtueNormalInsigniaZdamage", 15);
-            virtueNormalInsigniaZsize = new FloatField(virtueNormalZInsigniaDiv, "Size", "virtueNormalInsigniaZsize", 2f);
+            virtueNormalInsigniaZdamage = new IntField(virtueNormalZInsigniaDiv, "Damage", "virtueNormalInsigniaZdamage", 15, 0, int.MaxValue);
+            virtueNormalInsigniaZsize = new FloatField(virtueNormalZInsigniaDiv, "Size", "virtueNormalInsigniaZsize", 2f, 0f, float.MaxValue);
 
             ConfigDivision virtueNormalXInsigniaDiv = new ConfigDivision(virtueNormalInsigniaDiv, "virtueNormalXInsigniaDiv");
             new ConfigHeader(virtueNormalInsigniaDiv, "Side Insignia", 12);
@@ -1117,13 +1127,13 @@ namespace Ultrapain
                 virtueNormalXInsigniaDiv.interactable = e.value;
             };
             virtueNormalInsigniaXtoggle.TriggerValueChangeEvent();
-            virtueNormalInsigniaXdamage = new IntField(virtueNormalXInsigniaDiv, "Damage", "virtueNormalInsigniaXdamage", 15);
-            virtueNormalInsigniaXsize = new FloatField(virtueNormalXInsigniaDiv, "Size", "virtueNormalInsigniaXsize", 2f);
+            virtueNormalInsigniaXdamage = new IntField(virtueNormalXInsigniaDiv, "Damage", "virtueNormalInsigniaXdamage", 15, 0, int.MaxValue);
+            virtueNormalInsigniaXsize = new FloatField(virtueNormalXInsigniaDiv, "Size", "virtueNormalInsigniaXsize", 2f, 0f, float.MaxValue);
 
             ConfigDivision virtueNormalLigthningDiv = new ConfigDivision(virtueTweakNormalAttackDiv, "virtueNormalLigthningDiv");
-            virtueNormalLightningDamage = new FloatField(virtueNormalLigthningDiv, "Damage multiplier", "virtueNormalLightningDamage", 1f);
+            virtueNormalLightningDamage = new FloatField(virtueNormalLigthningDiv, "Damage multiplier", "virtueNormalLightningDamage", 1f, 0f, float.MaxValue);
             //virtueNormalLightningSize = new FloatField(virtuePanel, "Size multiplier", "virtueNormalLightningSize", 1f);
-            virtueNormalLightningDelay = new FloatField(virtueNormalLigthningDiv, "Lighning delay", "virtueNormalLightningDelay", 3f);
+            virtueNormalLightningDelay = new FloatField(virtueNormalLigthningDiv, "Lighning delay", "virtueNormalLightningDelay", 3f, 0f, float.MaxValue);
 
             virtueNormalAttackType.presetLoadPriority = 1;
             virtueNormalAttackType.onValueChange += (EnumField<VirtueAttackType>.EnumValueChangeEvent newType) =>
@@ -1164,8 +1174,8 @@ namespace Ultrapain
                 dirtyField = true;
             };
             virtueEnragedInsigniaYtoggle.TriggerValueChangeEvent();
-            virtueEnragedInsigniaYdamage = new IntField(virtueEnragedYInsigniaDiv, "Damage", "virtueEnragedInsigniaYdamage", 30);
-            virtueEnragedInsigniaYsize = new FloatField(virtueEnragedYInsigniaDiv, "Size", "virtueEnragedInsigniaYsize", 2f);
+            virtueEnragedInsigniaYdamage = new IntField(virtueEnragedYInsigniaDiv, "Damage", "virtueEnragedInsigniaYdamage", 30, 0, int.MaxValue);
+            virtueEnragedInsigniaYsize = new FloatField(virtueEnragedYInsigniaDiv, "Size", "virtueEnragedInsigniaYsize", 2f, 0f, float.MaxValue);
 
             ConfigHeader virtueEnragedZInsigniaHeader = new ConfigHeader(virtueEnragedInsigniaDiv, "Forward Insignia", 12);
             ConfigDivision virtueEnragedZInsigniaDiv = new ConfigDivision(virtueEnragedInsigniaDiv, "virtueEnragedZInsigniaDiv");
@@ -1177,8 +1187,8 @@ namespace Ultrapain
                 dirtyField = true;
             };
             virtueEnragedInsigniaZtoggle.TriggerValueChangeEvent();
-            virtueEnragedInsigniaZdamage = new IntField(virtueEnragedZInsigniaDiv, "Damage", "virtueEnragedInsigniaZdamage", 15);
-            virtueEnragedInsigniaZsize = new FloatField(virtueEnragedZInsigniaDiv, "Size", "virtueEnragedInsigniaZsize", 2f);
+            virtueEnragedInsigniaZdamage = new IntField(virtueEnragedZInsigniaDiv, "Damage", "virtueEnragedInsigniaZdamage", 15, 0, int.MaxValue);
+            virtueEnragedInsigniaZsize = new FloatField(virtueEnragedZInsigniaDiv, "Size", "virtueEnragedInsigniaZsize", 2f, 0f, float.MaxValue);
 
             ConfigHeader virtueEnragedXInsigniaHeader = new ConfigHeader(virtueEnragedInsigniaDiv, "Side Insignia", 12);
             ConfigDivision virtueEnragedXInsigniaDiv = new ConfigDivision(virtueEnragedInsigniaDiv, "virtueEnragedXInsigniaDiv");
@@ -1190,13 +1200,13 @@ namespace Ultrapain
                 dirtyField = true;
             };
             virtueEnragedInsigniaXtoggle.TriggerValueChangeEvent();
-            virtueEnragedInsigniaXdamage = new IntField(virtueEnragedXInsigniaDiv, "Damage", "virtueEnragedInsigniaXdamage", 15);
-            virtueEnragedInsigniaXsize = new FloatField(virtueEnragedXInsigniaDiv, "Size", "virtueEnragedInsigniaXsize", 2f);
+            virtueEnragedInsigniaXdamage = new IntField(virtueEnragedXInsigniaDiv, "Damage", "virtueEnragedInsigniaXdamage", 15, 0, int.MaxValue);
+            virtueEnragedInsigniaXsize = new FloatField(virtueEnragedXInsigniaDiv, "Size", "virtueEnragedInsigniaXsize", 2f, 0f, float.MaxValue);
 
             ConfigDivision virtueEnragedLigthningDiv = new ConfigDivision(virtueTweakEnragedAttackDiv, "virtueEnragedLigthningDiv");
-            virtueEnragedLightningDamage = new FloatField(virtueEnragedLigthningDiv, "Damage multiplier", "virtueEnragedLightningDamage", 1f);
+            virtueEnragedLightningDamage = new FloatField(virtueEnragedLigthningDiv, "Damage multiplier", "virtueEnragedLightningDamage", 1f, 0f, float.MaxValue);
             //virtueEnragedLightningSize = new FloatField(virtuePanel, "Size multiplier", "virtueEnragedLightningSize", 1f);
-            virtueEnragedLightningDelay = new FloatField(virtueEnragedLigthningDiv, "Lighning delay", "virtueEnragedLightningDelay", 2f);
+            virtueEnragedLightningDelay = new FloatField(virtueEnragedLigthningDiv, "Lighning delay", "virtueEnragedLightningDelay", 2f, 0f, float.MaxValue);
 
             virtueEnragedAttackType.presetLoadPriority = 1;
             virtueEnragedAttackType.onValueChange += (EnumField<VirtueAttackType>.EnumValueChangeEvent newType) =>
@@ -1225,8 +1235,8 @@ namespace Ultrapain
                 dirtyField = true;
             };
             ferrymanComboToggle.TriggerValueChangeEvent();
-            ferrymanComboCount = new IntField(ferrymanComboDiv, "Count", "ferrymanComboCount", 3);
-            ferrymanAttackDelay = new FloatField(ferrymanComboDiv, "Delay (0-1)", "ferrymanAttackDelay", 0.1f);
+            ferrymanComboCount = new IntField(ferrymanComboDiv, "Count", "ferrymanComboCount", 3, 1, int.MaxValue);
+            ferrymanAttackDelay = new FloatField(ferrymanComboDiv, "Delay (0-1)", "ferrymanAttackDelay", 0.1f, 0f, float.MaxValue);
 
             // SENTRY
             new ConfigHeader(turretPanel, "Burst Fire");
@@ -1239,8 +1249,8 @@ namespace Ultrapain
                 dirtyField = true;
             };
             turretBurstFireToggle.TriggerValueChangeEvent();
-            turretBurstFireCount = new IntField(turretBurstFireDiv, "Extra shots", "turretBurstFireCount", 1);
-            turretBurstFireDelay = new FloatField(turretBurstFireDiv, "Delay between shots", "turretBurstFireDelay", 1f);
+            turretBurstFireCount = new IntField(turretBurstFireDiv, "Extra shots", "turretBurstFireCount", 1, 0, int.MaxValue);
+            turretBurstFireDelay = new FloatField(turretBurstFireDiv, "Delay between shots", "turretBurstFireDelay", 1f, 0f, float.MaxValue);
 
             // FLESH PRISON
             new ConfigHeader(fleshPrisonPanel, "Spin Insignia");
@@ -1253,12 +1263,12 @@ namespace Ultrapain
                 dirtyField = true;
             };
             fleshPrisonSpinAttackToggle.TriggerValueChangeEvent();
-            fleshPrisonSpinAttackCount = new IntField(fleshPrionSpinAttackDiv, "Insignia count", "fleshPrisonSpinAttackCount", 5);
-            fleshPrisonSpinAttackDamage = new IntField(fleshPrionSpinAttackDiv, "Insignia damage", "fleshPrisonSpinAttackDamage", 10);
-            fleshPrisonSpinAttackSize = new FloatField(fleshPrionSpinAttackDiv, "Insignia size", "fleshPrisonSpinAttackSize", 2f);
-            fleshPrisonSpinAttackDistance = new FloatField(fleshPrionSpinAttackDiv, "Circle radius", "fleshPrisonSpinAttackDistance", 30f);
-            fleshPrisonSpinAttackTurnSpeed = new FloatField(fleshPrionSpinAttackDiv, "Turn speed", "fleshPrisonSpinAttackTurnSpeed", 30f);
-            fleshPrisonSpinAttackActivateSpeed = new FloatField(fleshPrionSpinAttackDiv, "Activasion speed", "fleshPrisonSpinAttackActivateSpeed", 0.5f);
+            fleshPrisonSpinAttackCount = new IntField(fleshPrionSpinAttackDiv, "Insignia count", "fleshPrisonSpinAttackCount", 5, 1, int.MaxValue);
+            fleshPrisonSpinAttackDamage = new IntField(fleshPrionSpinAttackDiv, "Insignia damage", "fleshPrisonSpinAttackDamage", 10, 0, int.MaxValue);
+            fleshPrisonSpinAttackSize = new FloatField(fleshPrionSpinAttackDiv, "Insignia size", "fleshPrisonSpinAttackSize", 2f, 0f, float.MaxValue);
+            fleshPrisonSpinAttackDistance = new FloatField(fleshPrionSpinAttackDiv, "Circle radius", "fleshPrisonSpinAttackDistance", 30f, 0f, float.MaxValue);
+            fleshPrisonSpinAttackTurnSpeed = new FloatField(fleshPrionSpinAttackDiv, "Turn speed", "fleshPrisonSpinAttackTurnSpeed", 30f, 0f, float.MaxValue);
+            fleshPrisonSpinAttackActivateSpeed = new FloatField(fleshPrionSpinAttackDiv, "Activasion speed", "fleshPrisonSpinAttackActivateSpeed", 0.5f, 0f, float.MaxValue);
 
             // MINOS PRIME
             new ConfigHeader(minosPrimePanel, "Random Teleport Before Shoot");
@@ -1271,8 +1281,8 @@ namespace Ultrapain
                 dirtyField = true;
             };
             minosPrimeRandomTeleportToggle.TriggerValueChangeEvent();
-            minosPrimeRandomTeleportMinDistance = new FloatField(minosPrimeRandomTeleportDiv, "Minimum distance", "minosPrimeRandomTeleportMinDistance", 20f);
-            minosPrimeRandomTeleportMaxDistance = new FloatField(minosPrimeRandomTeleportDiv, "Maximum distance", "minosPrimeRandomTeleportMaxDistance", 50f);
+            minosPrimeRandomTeleportMinDistance = new FloatField(minosPrimeRandomTeleportDiv, "Minimum distance", "minosPrimeRandomTeleportMinDistance", 20f, 0f, float.MaxValue);
+            minosPrimeRandomTeleportMaxDistance = new FloatField(minosPrimeRandomTeleportDiv, "Maximum distance", "minosPrimeRandomTeleportMaxDistance", 50f, 0f, float.MaxValue);
             new ConfigHeader(minosPrimePanel, "Teleport Trail");
             minosPrimeTeleportTrail = new BoolField(minosPrimePanel, "Enabled", "minosPrimeTeleportTrail", true);
             minosPrimeTeleportTrail.onValueChange += (BoolField.BoolValueChangeEvent e) =>
@@ -1303,16 +1313,16 @@ namespace Ultrapain
                 dirtyField = true;
             };
             v2FirstKnuckleBlasterHitPlayerToggle.TriggerValueChangeEvent();
-            v2FirstKnuckleBlasterHitPlayerMinDistance = new FloatField(v2FirstKnuckleBlasterHitPlayerDiv, "Minimum distance to player", "v2FirstKnuckleBlasterHitPlayerMinDistance", 5f);
-            v2FirstKnuckleBlasterHitDamage = new IntField(v2FirstKnuckleBlasterHitPlayerDiv, "Hit damage", "v2FirstKnuckleBlasterHitDamage", 5);
+            v2FirstKnuckleBlasterHitPlayerMinDistance = new FloatField(v2FirstKnuckleBlasterHitPlayerDiv, "Minimum distance to player", "v2FirstKnuckleBlasterHitPlayerMinDistance", 5f, 0f, float.MaxValue);
+            v2FirstKnuckleBlasterHitDamage = new IntField(v2FirstKnuckleBlasterHitPlayerDiv, "Hit damage", "v2FirstKnuckleBlasterHitDamage", 5, 0, int.MaxValue);
             v2FirstKnuckleBlasterDeflectShotgunToggle = new BoolField(v2FirstKnuckleBlasterDiv, "Deflect shotgun pellets", "v2FirstKnuckleBlasterDeflectShotgunToggle", false);
             v2FirstKnuckleBlasterDeflectShotgunToggle.onValueChange += (BoolField.BoolValueChangeEvent e) =>
             {
                 dirtyField = true;
             };
-            v2FirstKnuckleBlasterExplosionDamage = new IntField(v2FirstKnuckleBlasterDiv, "Explosion damage", "v2FirstKnuckleBlasterExplosionDamage", 10);
-            v2FirstKnuckleBlasterSize = new FloatField(v2FirstKnuckleBlasterDiv, "Explosion size", "v2FirstKnuckleBlasterSize", 15);
-            v2FirstKnuckleBlasterSpeed = new FloatField(v2FirstKnuckleBlasterDiv, "Explosion speed", "v2FirstKnuckleBlasterSpeed", 15f / 2);
+            v2FirstKnuckleBlasterExplosionDamage = new IntField(v2FirstKnuckleBlasterDiv, "Explosion damage", "v2FirstKnuckleBlasterExplosionDamage", 10, 0, int.MaxValue);
+            v2FirstKnuckleBlasterSize = new FloatField(v2FirstKnuckleBlasterDiv, "Explosion size", "v2FirstKnuckleBlasterSize", 15, 0f, float.MaxValue);
+            v2FirstKnuckleBlasterSpeed = new FloatField(v2FirstKnuckleBlasterDiv, "Explosion speed", "v2FirstKnuckleBlasterSpeed", 15f / 2, 0f, float.MaxValue);
 
             new ConfigHeader(v2FirstPanel, "Grenade Snipe");
             ConfigDivision v2FirstCoreSnipeDiv = new ConfigDivision(v2FirstPanel, "v2FirstCoreSnipeDiv");
@@ -1324,8 +1334,8 @@ namespace Ultrapain
                 dirtyField = true;
             };
             v2FirstCoreSnipeToggle.TriggerValueChangeEvent();
-            v2FirstCoreSnipeMaxDistanceToPlayer = new FloatField(v2FirstCoreSnipeDiv, "Max distance to player", "v2FirstCoreSnipeMaxDistanceToPlayer", 15f);
-            v2FirstCoreSnipeMinDistanceToV2 = new FloatField(v2FirstCoreSnipeDiv, "Min distance to V2", "v2FirstCoreSnipeMinDistanceToV2", 0f);
+            v2FirstCoreSnipeMaxDistanceToPlayer = new FloatField(v2FirstCoreSnipeDiv, "Max distance to player", "v2FirstCoreSnipeMaxDistanceToPlayer", 15f, 0f, float.MaxValue);
+            v2FirstCoreSnipeMinDistanceToV2 = new FloatField(v2FirstCoreSnipeDiv, "Min distance to V2", "v2FirstCoreSnipeMinDistanceToV2", 0f, 0f, float.MaxValue);
             v2FirstCoreSnipeReactionTime = new FloatField(v2FirstCoreSnipeDiv, "Reaction time", "v2FirstCoreSnipeReactionTime", 0.2f, 0f, 5f);
 
             new ConfigHeader(v2FirstPanel, "Sharpshooter");
@@ -1339,9 +1349,9 @@ namespace Ultrapain
             };
             v2FirstSharpshooterChance = new FloatSliderField(v2FirstSharpShooterDiv, "Chance", "v2FirstSharpshooterChance", new System.Tuple<float, float>(0, 100), 50, 1);
             v2FirstSharpshooterAutoaimAngle = new FloatSliderField(v2FirstSharpShooterDiv, "Autoaim angle maximum", "v2FirstSharpshooterAutoaimAngle", new System.Tuple<float, float>(0, 180), 30, 1);
-            v2FirstSharpshooterReflections = new IntField(v2FirstSharpShooterDiv, "Ricochet count", "v2FirstSharpshooterReflections", 2);
-            v2FirstSharpshooterDamage = new FloatField(v2FirstSharpShooterDiv, "Damage multiplier", "v2FirstSharpshooterDamage", 1f);
-            v2FirstSharpshooterSpeed = new FloatField(v2FirstSharpShooterDiv, "Speed multiplier", "v2FirstSharpshooterSpeed", 1f);
+            v2FirstSharpshooterReflections = new IntField(v2FirstSharpShooterDiv, "Ricochet count", "v2FirstSharpshooterReflections", 2, 0, int.MaxValue);
+            v2FirstSharpshooterDamage = new FloatField(v2FirstSharpShooterDiv, "Damage multiplier", "v2FirstSharpshooterDamage", 1f, 0f, float.MaxValue);
+            v2FirstSharpshooterSpeed = new FloatField(v2FirstSharpShooterDiv, "Speed multiplier", "v2FirstSharpshooterSpeed", 1f, 0f, float.MaxValue);
             v2FirstSharpshooterToggle.TriggerValueChangeEvent();
 
             // V2 - SECOND
@@ -1382,10 +1392,10 @@ namespace Ultrapain
                 v2SecondMalCannonDiv.interactable = e.value;
             };
             v2SecondMalCannonSnipeToggle.TriggerValueChangeEvent();
-            v2SecondMalCannonSnipeCooldown = new FloatField(v2SecondMalCannonDiv, "Cooldown", "v2SecondMalCannonSnipeCooldown", 15f);
-            v2SecondMalCannonSnipeReactTime = new FloatField(v2SecondMalCannonDiv, "React time", "v2SecondMalCannonSnipeReactTime", 0.2f);
-            v2SecondMalCannonSnipeMaxDistanceToPlayer = new FloatField(v2SecondMalCannonDiv, "Max distance to player", "v2SecondMalCannonSnipeMaxDistanceToPlayer", 20f);
-            v2SecondMalCannonSnipeMinDistanceToV2 = new FloatField(v2SecondMalCannonDiv, "Min distance to V2", "v2SecondMalCannonSnipeMinDistanceToV2", 0f);
+            v2SecondMalCannonSnipeCooldown = new FloatField(v2SecondMalCannonDiv, "Cooldown", "v2SecondMalCannonSnipeCooldown", 15f, 0f, float.MaxValue);
+            v2SecondMalCannonSnipeReactTime = new FloatField(v2SecondMalCannonDiv, "React time", "v2SecondMalCannonSnipeReactTime", 0.2f, 0f, float.MaxValue);
+            v2SecondMalCannonSnipeMaxDistanceToPlayer = new FloatField(v2SecondMalCannonDiv, "Max distance to player", "v2SecondMalCannonSnipeMaxDistanceToPlayer", 20f, 0f, float.MaxValue);
+            v2SecondMalCannonSnipeMinDistanceToV2 = new FloatField(v2SecondMalCannonDiv, "Min distance to V2", "v2SecondMalCannonSnipeMinDistanceToV2", 0f, 0f, float.MaxValue);
             ConfigDivision v2SecondSnipeDiv = new ConfigDivision(v2SecondPanel, "v2SecondSnipeDiv");
             new ConfigHeader(v2SecondPanel, "Grenade Snipe");
             v2SecondCoreSnipeToggle = new BoolField(v2SecondPanel, "Enabled", "v2SecondCoreSnipeToggle", true);
@@ -1395,8 +1405,8 @@ namespace Ultrapain
                 v2SecondSnipeDiv.interactable = e.value;
             };
             v2SecondCoreSnipeToggle.TriggerValueChangeEvent();
-            v2SecondCoreSnipeMaxDistanceToPlayer = new FloatField(v2SecondSnipeDiv, "Max distance to player", "v2SecondCoreSnipeMaxDistanceToPlayer", 15f);
-            v2SecondCoreSnipeMinDistanceToV2 = new FloatField(v2SecondSnipeDiv, "Min distance to V2", "v2SecondCoreSnipeMinDistanceToV2", 0f);
+            v2SecondCoreSnipeMaxDistanceToPlayer = new FloatField(v2SecondSnipeDiv, "Max distance to player", "v2SecondCoreSnipeMaxDistanceToPlayer", 15f, 0f, float.MaxValue);
+            v2SecondCoreSnipeMinDistanceToV2 = new FloatField(v2SecondSnipeDiv, "Min distance to V2", "v2SecondCoreSnipeMinDistanceToV2", 0f, 0f, float.MaxValue);
             v2SecondCoreSnipeReactionTime = new FloatField(v2SecondSnipeDiv, "Reaction time", "v2SecondCoreSnipeReactionTime", 0.2f, 0f, 5f);
 
             new ConfigHeader(v2SecondPanel, "Sharpshooter");
@@ -1410,9 +1420,9 @@ namespace Ultrapain
             };
             v2SecondSharpshooterChance = new FloatSliderField(v2SecondSharpShooterDiv, "Chance", "v2SecondSharpshooterChance", new System.Tuple<float, float>(0, 100), 50, 1);
             v2SecondSharpshooterAutoaimAngle = new FloatSliderField(v2SecondSharpShooterDiv, "Autoaim angle maximum", "v2SecondSharpshooterAutoaimAngle", new System.Tuple<float, float>(0, 180), 30, 1);
-            v2SecondSharpshooterReflections = new IntField(v2SecondSharpShooterDiv, "Ricochet count", "v2SecondSharpshooterReflections", 2);
-            v2SecondSharpshooterDamage = new FloatField(v2SecondSharpShooterDiv, "Damage multiplier", "v2SecondSharpshooterDamage", 1f);
-            v2SecondSharpshooterSpeed = new FloatField(v2SecondSharpShooterDiv, "Speed multiplier", "v2SecondSharpshooterSpeed", 1f);
+            v2SecondSharpshooterReflections = new IntField(v2SecondSharpShooterDiv, "Ricochet count", "v2SecondSharpshooterReflections", 2, 0, int.MaxValue);
+            v2SecondSharpshooterDamage = new FloatField(v2SecondSharpShooterDiv, "Damage multiplier", "v2SecondSharpshooterDamage", 1f, 0f, float.MaxValue);
+            v2SecondSharpshooterSpeed = new FloatField(v2SecondSharpShooterDiv, "Speed multiplier", "v2SecondSharpshooterSpeed", 1f, 0f, float.MaxValue);
             v2SecondSharpshooterToggle.TriggerValueChangeEvent();
 
             // Sisyphean Insurrectionist (yeah don't judge)
@@ -1426,9 +1436,9 @@ namespace Ultrapain
                 dirtyField = true;
             };
             sisyInstBoulderShockwave.TriggerValueChangeEvent();
-            sisyInstBoulderShockwaveSize = new FloatField(sisyInstShockwaveDiv, "Shockwave size", "sisyInstBoulderShockwaveSize", 1f);
-            sisyInstBoulderShockwaveSpeed = new FloatField(sisyInstShockwaveDiv, "Shockwave speed", "sisyInstBoulderShockwaveSpeed", 35f);
-            sisyInstBoulderShockwaveDamage = new IntField(sisyInstShockwaveDiv, "Shockwave damage", "sisyInstBoulderShockwaveDamage", 10);
+            sisyInstBoulderShockwaveSize = new FloatField(sisyInstShockwaveDiv, "Shockwave size", "sisyInstBoulderShockwaveSize", 1f, 0f, float.MaxValue);
+            sisyInstBoulderShockwaveSpeed = new FloatField(sisyInstShockwaveDiv, "Shockwave speed", "sisyInstBoulderShockwaveSpeed", 35f, 0f, float.MaxValue);
+            sisyInstBoulderShockwaveDamage = new IntField(sisyInstShockwaveDiv, "Shockwave damage", "sisyInstBoulderShockwaveDamage", 10, 0, int.MaxValue);
             new ConfigHeader(sisyInstPanel, "Jump Shockwave Tweak");
             ConfigDivision sisyInstJumpShockwaveDiv = new ConfigDivision(sisyInstPanel, "sisyInstJumpShockwaveDiv");
             sisyInstJumpShockwave = new BoolField(sisyInstPanel, "Enabled", "sisyInstJumpShockwave", true);
@@ -1439,14 +1449,14 @@ namespace Ultrapain
                 dirtyField = true;
             };
             sisyInstJumpShockwave.TriggerValueChangeEvent();
-            sisyInstJumpShockwaveSize = new FloatField(sisyInstJumpShockwaveDiv, "Shockwave size", "sisyInstJumpShockwaveSize", 2f);
+            sisyInstJumpShockwaveSize = new FloatField(sisyInstJumpShockwaveDiv, "Shockwave size", "sisyInstJumpShockwaveSize", 2f, 0f, float.MaxValue);
             sisyInstJumpShockwaveSize.presetLoadPriority = 1;
             sisyInstJumpShockwaveSize.onValueChange += (FloatField.FloatValueChangeEvent e) =>
             {
                 GameObject shockwave = SisyphusInstructionist_Start.shockwave;
                 shockwave.transform.localScale = new Vector3(shockwave.transform.localScale.x, 20 * ConfigManager.sisyInstBoulderShockwaveSize.value, shockwave.transform.localScale.z);
             };
-            sisyInstJumpShockwaveSpeed = new FloatField(sisyInstJumpShockwaveDiv, "Shockwave speed", "sisyInstJumpShockwaveSpeed", 35f);
+            sisyInstJumpShockwaveSpeed = new FloatField(sisyInstJumpShockwaveDiv, "Shockwave speed", "sisyInstJumpShockwaveSpeed", 35f, 0f, float.MaxValue);
             sisyInstJumpShockwaveSpeed.presetLoadPriority = 1;
             sisyInstJumpShockwaveSpeed.onValueChange += (FloatField.FloatValueChangeEvent e) =>
             {
@@ -1454,7 +1464,7 @@ namespace Ultrapain
                 PhysicalShockwave comp = shockwave.GetComponent<PhysicalShockwave>();
                 comp.speed = e.value;
             };
-            sisyInstJumpShockwaveDamage = new IntField(sisyInstJumpShockwaveDiv, "Shockwave damage", "sisyInstJumpShockwaveDamage", 15);
+            sisyInstJumpShockwaveDamage = new IntField(sisyInstJumpShockwaveDiv, "Shockwave damage", "sisyInstJumpShockwaveDamage", 15, 0, int.MaxValue);
             sisyInstJumpShockwaveDamage.presetLoadPriority = 1;
             sisyInstJumpShockwaveDamage.onValueChange += (IntField.IntValueChangeEvent e) =>
             {
@@ -1472,8 +1482,8 @@ namespace Ultrapain
                 dirtyField = true;
             };
             sisyInstStrongerExplosion.TriggerValueChangeEvent();
-            sisyInstStrongerExplosionSizeMulti = new FloatField(sisyInstExplosionDiv, "Size multiplier", "sisyInstStrongerExplosionSizeMulti", 0.5f);
-            sisyInstStrongerExplosionDamageMulti = new FloatField(sisyInstExplosionDiv, "Damage multiplier", "sisyInstStrongerExplosionDamageMulti", 0.5f);
+            sisyInstStrongerExplosionSizeMulti = new FloatField(sisyInstExplosionDiv, "Size multiplier", "sisyInstStrongerExplosionSizeMulti", 0.5f, 0f, float.MaxValue);
+            sisyInstStrongerExplosionDamageMulti = new FloatField(sisyInstExplosionDiv, "Damage multiplier", "sisyInstStrongerExplosionDamageMulti", 0.5f, 0f, float.MaxValue);
 
             leviathanSecondPhaseBegin = new BoolField(leviathanPanel, "Start at the second phase", "leviathanSecondPhaseBegin", true); ;
             new ConfigHeader(leviathanPanel, "Mixed Projectile Burst");
@@ -1489,8 +1499,8 @@ namespace Ultrapain
             leviathanProjectileBlueChance = new FloatSliderField(leviathanMixProjectileDiv, "Blue projectile", "leviathanProjectileBlueChance", new System.Tuple<float, float>(0, 100), 40f);
             leviathanProjectileYellowChance = new FloatSliderField(leviathanMixProjectileDiv, "Yellow projectile", "leviathanProjectileYellowChance", new System.Tuple<float, float>(0, 100), 10f);
             new ConfigHeader(leviathanPanel, "Projectile Burst Tweaker");
-            leviathanProjectileCount = new IntField(leviathanPanel, "Projectile count", "leviathanProjectileCount", 80);
-            leviathanProjectileDensity = new FloatField(leviathanPanel, "Projectiles per second", "leviathanProjectileDensity", 25);
+            leviathanProjectileCount = new IntField(leviathanPanel, "Projectile count", "leviathanProjectileCount", 80, 1, int.MaxValue);
+            leviathanProjectileDensity = new FloatField(leviathanPanel, "Projectiles per second", "leviathanProjectileDensity", 25, 1f, float.MaxValue);
             leviathanProjectileFriendlyFireDamageMultiplier = new FloatSliderField(leviathanPanel, "Projectile friendly fire damage%", "leviathanProjectileFriendlyFireDamageMultiplier", new System.Tuple<float, float>(0, 100), 5f);
             new ConfigHeader(leviathanPanel, "Charged Attack");
             ConfigDivision leviathanChargedDiv = new ConfigDivision(leviathanPanel, "leviathanChargedDiv");
@@ -1503,9 +1513,9 @@ namespace Ultrapain
             leviathanChargeAttack.TriggerValueChangeEvent();
             leviathanChargeChance = new FloatSliderField(leviathanChargedDiv, "Chance", "leviathanChargeChance", new System.Tuple<float, float>(0, 100), 25);
             leviathanChargeCount = new IntField(leviathanChargedDiv, "Number of charges shot", "leviathanChargeCount", 3, 1, int.MaxValue);
-            leviathanChargeDelay = new FloatField(leviathanChargedDiv, "Delay between shots", "leviathanChargeDelay", 0.75f);
-            leviathanChargeSizeMulti = new FloatField(leviathanChargedDiv, "Explosion size multiplier", "leviathanChargeSizeMulti", 1.5f);
-            leviathanChargeDamageMulti = new FloatField(leviathanChargedDiv, "Explosion damage multiplier", "leviathanChargeDamageMulti", 1f);
+            leviathanChargeDelay = new FloatField(leviathanChargedDiv, "Delay between shots", "leviathanChargeDelay", 0.75f, 0f, float.MaxValue);
+            leviathanChargeSizeMulti = new FloatField(leviathanChargedDiv, "Explosion size multiplier", "leviathanChargeSizeMulti", 1.5f, 0f, float.MaxValue);
+            leviathanChargeDamageMulti = new FloatField(leviathanChargedDiv, "Explosion damage multiplier", "leviathanChargeDamageMulti", 1f, 0f, float.MaxValue);
             leviathanChargeHauntRocketRiding = new BoolField(leviathanChargedDiv, "Target ridden rockets", "leviathanChargeHauntRocketRiding", true);
             new ConfigHeader(leviathanPanel, "Tail Swing Combo");
             leviathanTailComboCount = new IntField(leviathanPanel, "Tail swing count", "leviathanTailComboCount", 3, 1, int.MaxValue);
@@ -1514,6 +1524,9 @@ namespace Ultrapain
             //config.LogDuplicateGUID();
             Plugin.PatchAll();
             dirtyField = false;
+
+            if (config.firstTime)
+                AddMissingPresets();
         }
 
         private static void SwordsMachineSecondPhaseMode_onValueChange(EnumField<SwordsMachineSecondPhase>.EnumValueChangeEvent data)
