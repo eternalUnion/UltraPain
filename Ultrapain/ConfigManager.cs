@@ -17,10 +17,31 @@ namespace Ultrapain
     {
         public static PluginConfigurator config = null;
 
-        public static string[] customPresetNames = new string[]
+        public static void AddMissingPresets()
         {
-            "System Overload"
-        };
+            string presetFolder = Path.Combine(Plugin.workingDir, "defaultpresets");
+            if (!Directory.Exists(presetFolder))
+            {
+                Debug.LogWarning("UltraPain misses the default preset folder at " + presetFolder);
+                return;
+            }
+
+            foreach (string filePath in Directory.GetFiles(presetFolder))
+            {
+                if (!filePath.EndsWith(".config"))
+                {
+                    Debug.LogWarning($"Incorrect file format at {filePath}. Extension must be .config");
+                    continue;
+                }
+
+                string fileName = Path.GetFileName(filePath);
+                fileName = fileName.Substring(0, fileName.Length - 7);
+                if (string.IsNullOrWhiteSpace(fileName))
+                    continue;
+
+                config.TryAddPreset(fileName, fileName, filePath);
+            }
+        }
 
         // ROOT PANEL
         public static BoolField enemyTweakToggle;
@@ -486,19 +507,8 @@ namespace Ultrapain
             memePanel = new ConfigPanel(config.rootPanel, "Memes", "memePanel");
 
             new ConfigHeader(config.rootPanel, "Danger Zone");
-            ButtonField resetDefaultPresets = new ButtonField(config.rootPanel, "Add missing default presets", "addMissingDefaultPresets");
-            resetDefaultPresets.onClick += () =>
-            {
-                foreach (string presetName in customPresetNames)
-                    config.DeletePreset(presetName);
-
-                foreach(string presetName in customPresetNames)
-                {
-                    string presetPath = Path.Combine(Plugin.workingDir, "defaultpresets", $"{presetName}.config");
-                    if (File.Exists(presetPath))
-                        config.TryAddPreset(presetName, presetName, presetPath);
-                }
-            };
+            ButtonField addMissingDefaultPresets = new ButtonField(config.rootPanel, "Add missing default presets", "addMissingDefaultPresets");
+            addMissingDefaultPresets.onClick += AddMissingPresets;
 
             // MEME PANEL
             enrageSfxToggle = new BoolField(memePanel, "Enrage SFX\n(volume warning)", "enrageSfxToggle", false);
@@ -1514,6 +1524,9 @@ namespace Ultrapain
             //config.LogDuplicateGUID();
             Plugin.PatchAll();
             dirtyField = false;
+
+            if (config.firstTime)
+                AddMissingPresets();
         }
 
         private static void SwordsMachineSecondPhaseMode_onValueChange(EnumField<SwordsMachineSecondPhase>.EnumValueChangeEvent data)
