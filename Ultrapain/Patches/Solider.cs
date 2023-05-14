@@ -50,36 +50,41 @@ namespace Ultrapain.Patches
             {
                 counter.remainingShots -= 1;
 
-                ___anim.Play("Shoot", 0, Plugin.SoliderShootAnimationStart / 2f);
-                ___anim.fireEvents = true;
-                __instance.DamageStart();
-
-                ___coolDown = 0;
-
-                if(counter.remainingShots == 0 && ConfigManager.soliderShootGrenadeToggle.value)
+                if (counter.remainingShots != 0)
                 {
-                    GameObject grenade = GameObject.Instantiate(Plugin.shotgunGrenade.gameObject, ___currentProjectile.transform.position, ___currentProjectile.transform.rotation);
-                    grenade.transform.Translate(Vector3.forward * 0.5f);
+                    ___anim.Play("Shoot", 0, Plugin.SoliderShootAnimationStart / 2f);
+                    ___anim.fireEvents = true;
+                    __instance.DamageStart();
 
-                    Vector3 targetPos = Plugin.PredictPlayerPosition(__instance.GetComponent<Collider>(), ___eid.totalSpeedModifier);
-                    grenade.transform.LookAt(targetPos);
-
-                    Rigidbody rb = grenade.GetComponent<Rigidbody>();
-                    //rb.maxAngularVelocity = 10000;
-                    //foreach (Rigidbody r in grenade.GetComponentsInChildren<Rigidbody>())
-                    //    r.maxAngularVelocity = 10000;
-                    rb.AddForce(grenade.transform.forward * Plugin.SoliderGrenadeForce);
-                    //rb.velocity = ___currentProjectile.transform.forward * Plugin.instance.SoliderGrenadeForce;
-                    rb.useGravity = false;
-
-                    grenade.GetComponent<Grenade>().enemy = true;
-                    grenade.GetComponent<Grenade>().CanCollideWithPlayer(true);
-                    grenade.AddComponent<SoliderGrenadeFlag>();
+                    ___coolDown = 0;
                 }
-                return;
+                else
+                {
+                    counter.remainingShots = ConfigManager.soliderShootCount.value;
+                    if (ConfigManager.soliderShootGrenadeToggle.value)
+                    {
+                        GameObject grenade = GameObject.Instantiate(Plugin.shotgunGrenade.gameObject, ___currentProjectile.transform.position, ___currentProjectile.transform.rotation);
+                        grenade.transform.Translate(Vector3.forward * 0.5f);
+
+                        Vector3 targetPos = Plugin.PredictPlayerPosition(__instance.GetComponent<Collider>(), ___eid.totalSpeedModifier);
+                        grenade.transform.LookAt(targetPos);
+
+                        Rigidbody rb = grenade.GetComponent<Rigidbody>();
+                        //rb.maxAngularVelocity = 10000;
+                        //foreach (Rigidbody r in grenade.GetComponentsInChildren<Rigidbody>())
+                        //    r.maxAngularVelocity = 10000;
+                        rb.AddForce(grenade.transform.forward * Plugin.SoliderGrenadeForce);
+                        //rb.velocity = ___currentProjectile.transform.forward * Plugin.instance.SoliderGrenadeForce;
+                        rb.useGravity = false;
+
+                        grenade.GetComponent<Grenade>().enemy = true;
+                        grenade.GetComponent<Grenade>().CanCollideWithPlayer(true);
+                        grenade.AddComponent<SoliderGrenadeFlag>();
+                    }
+                }
             }
 
-            counter.remainingShots = ConfigManager.soliderShootCount.value;
+            //counter.remainingShots = ConfigManager.soliderShootCount.value;
         }
     }
 
