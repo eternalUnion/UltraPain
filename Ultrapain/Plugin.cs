@@ -26,7 +26,7 @@ namespace Ultrapain
     {
         public const string PLUGIN_GUID = "com.eternalUnion.ultraPain";
         public const string PLUGIN_NAME = "Ultra Pain";
-        public const string PLUGIN_VERSION = "1.0.0";
+        public const string PLUGIN_VERSION = "1.0.1";
 
         public static Plugin instance;
 
@@ -445,7 +445,7 @@ namespace Ultrapain
             {
                 harmonyTweaks.Patch(GetMethod<SwordsMachine>("Knockdown"), prefix: GetHarmonyMethod(GetMethod<SwordsMachine_Knockdown_Patch>("Prefix")), postfix: GetHarmonyMethod(GetMethod<SwordsMachine_Knockdown_Patch>("Postfix")));
                 harmonyTweaks.Patch(GetMethod<SwordsMachine>("Down"), postfix: GetHarmonyMethod(GetMethod<SwordsMachine_Down_Patch>("Postfix")), prefix: GetHarmonyMethod(GetMethod<SwordsMachine_Down_Patch>("Prefix")));
-                harmonyTweaks.Patch(GetMethod<SwordsMachine>("SetSpeed"), prefix: GetHarmonyMethod(GetMethod<SwordsMachine_SetSpeed_Patch>("Prefix")));
+                //harmonyTweaks.Patch(GetMethod<SwordsMachine>("SetSpeed"), prefix: GetHarmonyMethod(GetMethod<SwordsMachine_SetSpeed_Patch>("Prefix")));
                 harmonyTweaks.Patch(GetMethod<SwordsMachine>("EndFirstPhase"), postfix: GetHarmonyMethod(GetMethod<SwordsMachine_EndFirstPhase_Patch>("Postfix")), prefix: GetHarmonyMethod(GetMethod<SwordsMachine_EndFirstPhase_Patch>("Prefix")));
             }
             if (ConfigManager.swordsMachineExplosiveSwordToggle.value)
