@@ -2,6 +2,7 @@
 using System;
 using System.Linq;
 using System.Reflection;
+using ULTRAKILL.Cheats;
 using UnityEngine;
 
 namespace Ultrapain.Patches
@@ -52,7 +53,7 @@ namespace Ultrapain.Patches
             if (__instance.secondEncounter)
                 return true;
 
-            if (!__instance.active || ___escaping)
+            if (!__instance.active || ___escaping || BlindEnemies.Blind)
                 return true;
 
             V2FirstFlag flag = __instance.GetComponent<V2FirstFlag>();
