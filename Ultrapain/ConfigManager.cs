@@ -531,6 +531,10 @@ namespace Ultrapain
             rocketBoostStyleBuilder.currentFormat = new PluginConfig.API.Fields.CharacterInfo() { color = Color.green };
             rocketBoostStyleBuilder += "ROCKET BOOST";
             rocketBoostStyleText = new FormattedStringField(rocketBoostDiv, "Style text", "rocketBoostStyleText", rocketBoostStyleBuilder.Build());
+            rocketBoostStyleText.onValueChange += (FormattedStringField.FormattedStringValueChangeEvent e) =>
+            {
+                Plugin.StyleIDs.UpdateID(rocketBoostStyleText.guid, e.formattedString.formattedString);
+            };
             rocketBoostStylePoints = new IntField(rocketBoostDiv, "Style points", "rocketBoostStylePoints", 10);
 
             new ConfigHeader(playerPanel, "Rocket Grabbing\r\n<size=16>(Can pull yourself to frozen rockets)</size>");
@@ -556,6 +560,10 @@ namespace Ultrapain
             grenadeBoostStyleBuilder.currentFormat = new PluginConfig.API.Fields.CharacterInfo() { color = Color.cyan };
             grenadeBoostStyleBuilder += "FISTFUL OF 'NADE";
             grenadeBoostStyleText = new FormattedStringField(grenadeBoostDiv, "Style text", "grenadeBoostStyleText", grenadeBoostStyleBuilder.Build());
+            grenadeBoostStyleText.onValueChange += (FormattedStringField.FormattedStringValueChangeEvent e) =>
+            {
+                Plugin.StyleIDs.UpdateID(grenadeBoostStyleText.guid, e.formattedString.formattedString);
+            };
             grenadeBoostStylePoints = new IntField(grenadeBoostDiv, "Style points", "grenadeBoostStylePoints", 10);
 
             new ConfigHeader(playerPanel, "Orbital Strike", 26);
@@ -575,6 +583,10 @@ namespace Ultrapain
             orbStrikeRevolverBuilder.currentFormat = new PluginConfig.API.Fields.CharacterInfo() { color = Color.red };
             orbStrikeRevolverBuilder += "ORBITALSTRIKE";
             orbStrikeRevolverStyleText = new FormattedStringField(orbStrikeDiv, "Style text", "orbStrikeRevolverStyleText", orbStrikeRevolverBuilder.Build());
+            orbStrikeRevolverStyleText.onValueChange += (FormattedStringField.FormattedStringValueChangeEvent e) =>
+            {
+                Plugin.StyleIDs.UpdateID(orbStrikeRevolverStyleText.guid, e.formattedString.formattedString);
+            };
             orbStrikeRevolverStylePoint = new IntField(orbStrikeDiv, "Style point", "orbStrikeRevolverStylePoint", 20);
             new ConfigHeader(orbStrikeDiv, "--Grenade Explosion Boost--", 12);
             ConfigDivision orbStrikeRevolverGrenadeDiv = new ConfigDivision(orbStrikeDiv, "orbStrikeRevolverGrenadeDiv");
@@ -606,6 +618,10 @@ namespace Ultrapain
             orbStrikeRevolverChargedBuilder.currentFormat.color = Color.cyan;
             orbStrikeRevolverChargedBuilder += "ZAP";
             orbStrikeRevolverChargedStyleText = new FormattedStringField(orbStrikeDiv, "Style text", "orbStrikeRevolverChargedStyleText", orbStrikeRevolverChargedBuilder.Build());
+            orbStrikeRevolverChargedStyleText.onValueChange += (FormattedStringField.FormattedStringValueChangeEvent e) =>
+            {
+                Plugin.StyleIDs.UpdateID(orbStrikeRevolverChargedStyleText.guid, e.formattedString.formattedString);
+            };
             orbStrikeRevolverChargedStylePoint = new IntField(orbStrikeDiv, "Style point", "orbStrikeRevolverChargedStylePoint", 30);
             new ConfigHeader(orbStrikeDiv, "--Grenade Explosion Boost--", 12);
             ConfigDivision orbStrikeRevolverChargedGrenadeDiv = new ConfigDivision(orbStrikeDiv, "orbStrikeRevolverGrenadeDiv");
@@ -640,6 +656,10 @@ namespace Ultrapain
             orbStrikeElectricCannonBuilder.currentFormat.color = Color.cyan;
             orbStrikeElectricCannonBuilder += "ZAP";
             orbStrikeElectricCannonStyleText = new FormattedStringField(orbStrikeDiv, "Style text", "orbStrikeElectricCannonStyleText", orbStrikeElectricCannonBuilder.Build());
+            orbStrikeElectricCannonStyleText.onValueChange += (FormattedStringField.FormattedStringValueChangeEvent e) =>
+            {
+                Plugin.StyleIDs.UpdateID(orbStrikeElectricCannonStyleText.guid, e.formattedString.formattedString);
+            };
             orbStrikeElectricCannonStylePoint = new IntField(orbStrikeDiv, "Style point", "orbStrikeElectricCannonStylePoint", 50);
             new ConfigHeader(orbStrikeDiv, "--Grenade Explosion Boost--", 12);
             ConfigDivision orbStrikeElectricCannonGrenadeDiv = new ConfigDivision(orbStrikeDiv, "orbStrikeRevolverGrenadeDiv");
@@ -672,6 +692,10 @@ namespace Ultrapain
             orbStrikeMaliciousBuilder.currentFormat.color = new Color(0x80 / 255f, 0, 0);
             orbStrikeMaliciousBuilder += "NUKE";
             orbStrikeMaliciousCannonStyleText = new FormattedStringField(orbStrikeDiv, "Style text", "orbStrikeMaliciousCannonStyleText", orbStrikeMaliciousBuilder.Build());
+            orbStrikeMaliciousCannonStyleText.onValueChange += (FormattedStringField.FormattedStringValueChangeEvent e) =>
+            {
+                Plugin.StyleIDs.UpdateID(orbStrikeMaliciousCannonStyleText.guid, e.formattedString.formattedString);
+            };
             orbStrikeMaliciousCannonStylePoint = new IntField(orbStrikeDiv, "Style point", "orbStrikeMaliciousCannonStylePoint", 70);
             new ConfigHeader(orbStrikeDiv, "--Grenade Explosion Boost--", 12);
             ConfigDivision orbStrikeMaliciousCannonGrenadeDiv = new ConfigDivision(orbStrikeDiv, "orbStrikeMaliciousCannonGrenadeDiv");

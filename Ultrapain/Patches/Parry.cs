@@ -189,7 +189,7 @@ namespace Ultrapain.Patches
                         lastTime = Time.time;
                         flag.bigExplosionOverride = true;
 
-                        MonoSingleton<StyleHUD>.Instance.AddPoints(ConfigManager.grenadeBoostStylePoints.value, Plugin.StyleIDs.fistfulOfNades, MonoSingleton<GunControl>.Instance.currentWeapon, null);
+                        MonoSingleton<StyleHUD>.Instance.AddPoints(ConfigManager.grenadeBoostStylePoints.value, ConfigManager.grenadeBoostStyleText.guid, MonoSingleton<GunControl>.Instance.currentWeapon, null);
                     }
                 }
             }
@@ -216,7 +216,7 @@ namespace Ultrapain.Patches
                 {
                     flag.registeredStyle = true;
                     lastTime = Time.time;
-                    MonoSingleton<StyleHUD>.Instance.AddPoints(ConfigManager.rocketBoostStylePoints.value, Plugin.StyleIDs.rocketBoost, flag.weapon, null, flag.parryCount);
+                    MonoSingleton<StyleHUD>.Instance.AddPoints(ConfigManager.rocketBoostStylePoints.value, ConfigManager.rocketBoostStyleText.guid, flag.weapon, null, flag.parryCount);
                 }
             }
 

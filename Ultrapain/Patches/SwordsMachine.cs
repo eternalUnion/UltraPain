@@ -58,7 +58,7 @@ namespace Ultrapain.Patches
             }
             else
             {
-                if (ConfigManager.swordsMachineSecondPhaseMode.value == ConfigManager.SwordsMachineSecondPhase.Skip)
+                if (ConfigManager.swordsMachineSecondPhaseMode.value == ConfigManager.SwordsMachineSecondPhase.Skip && __instance.secondPhasePosTarget == null && __instance.secondPhasePosTarget == null)
                     return false;
             }
 
@@ -92,7 +92,7 @@ namespace Ultrapain.Patches
     {
         static bool Prefix(SwordsMachine __instance)
         {
-            if (ConfigManager.swordsMachineSecondPhaseMode.value == ConfigManager.SwordsMachineSecondPhase.Skip)
+            if (ConfigManager.swordsMachineSecondPhaseMode.value == ConfigManager.SwordsMachineSecondPhase.Skip && __instance.secondPhasePosTarget == null)
                 return false;
             return true;
         }
@@ -121,7 +121,7 @@ namespace Ultrapain.Patches
     {
         static bool Prefix(SwordsMachine __instance)
         {
-            if (ConfigManager.swordsMachineSecondPhaseMode.value == ConfigManager.SwordsMachineSecondPhase.Skip)
+            if (ConfigManager.swordsMachineSecondPhaseMode.value == ConfigManager.SwordsMachineSecondPhase.Skip && __instance.secondPhasePosTarget == null)
                 return false;
             return true;
         }
