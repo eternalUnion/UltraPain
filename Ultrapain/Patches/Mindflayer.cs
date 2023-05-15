@@ -71,10 +71,26 @@ namespace Ultrapain.Patches
             componentInChildren.target = MonoSingleton<PlayerTracker>.Instance.GetTarget();
             componentInChildren.safeEnemyType = EnemyType.Mindflayer;
             componentInChildren.damage *= ___eid.totalDamageModifier;
+            componentInChildren.sourceWeapon = __instance.gameObject;
             counter.shotsLeft -= 1;
             __instance.Invoke("ShootProjectiles", ConfigManager.mindflayerShootDelay.value / ___eid.totalSpeedModifier);
 
             return false;
+        }
+    }
+
+    class EnemyIdentifier_DeliverDamage_MF
+    {
+        static bool Prefix(EnemyIdentifier __instance, ref float __3, GameObject __6)
+        {
+            if (__instance.enemyType != EnemyType.Mindflayer)
+                return true;
+
+            if (__6 == null || __6.GetComponent<Mindflayer>() == null)
+                return true;
+
+            __3 *= ConfigManager.mindflayerProjectileSelfDamageMultiplier.value / 100f;
+            return true;
         }
     }
 

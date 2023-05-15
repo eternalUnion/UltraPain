@@ -251,6 +251,7 @@ namespace Ultrapain
         public static BoolField mindflayerShootTweakToggle;
         public static IntField mindflayerShootAmount;
         public static FloatField mindflayerShootDelay;
+        public static FloatSliderField mindflayerProjectileSelfDamageMultiplier;
         public static BoolField mindflayerTeleportComboToggle;
 
         // SCHISM
@@ -957,6 +958,7 @@ namespace Ultrapain
             mindflayerShootTweakToggle.TriggerValueChangeEvent();
             mindflayerShootAmount = new IntField(mindflayerShootTweakDiv, "Projectile amount", "mindflayerShootProjectileAmount", 20, 0, int.MaxValue);
             mindflayerShootDelay = new FloatField(mindflayerShootTweakDiv, "Delay between shots", "mindflayerShootProjectileDelay", 0.02f, 0f, float.MaxValue);
+            mindflayerProjectileSelfDamageMultiplier = new FloatSliderField(mindflayerShootTweakDiv, "Friendly fire damage percent", "mindflayerProjectileSelfDamageMultiplier", new Tuple<float, float>(0f, 100f), 25f, 1);
             new ConfigHeader(mindflayerPanel, "Melee Combo");
             ConfigDivision mindflayerMeleeDiv = new ConfigDivision(mindflayerPanel, "mindflayerMeleeDiv");
             mindflayerTeleportComboToggle = new BoolField(mindflayerPanel, "Enabled", "mindflayerMeleeCombo", true);
