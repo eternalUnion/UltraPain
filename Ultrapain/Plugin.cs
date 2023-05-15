@@ -104,7 +104,9 @@ namespace Ultrapain
         public static GameObject ferryman;
         public static GameObject minosPrime;
         //public static GameObject maliciousFace;
+        public static Turret turret;
 
+        public static GameObject turretFinalFlash;
         public static GameObject enrageEffect;
         public static GameObject v2flashUnparryable;
         public static GameObject ricochetSfx;
@@ -207,6 +209,10 @@ namespace Ultrapain
             ricochetSfx = LoadObject<GameObject>("Assets/Particles/SoundBubbles/Ricochet.prefab");
             //Assets/Particles/Flashes/Flash.prefab
             parryableFlash = LoadObject<GameObject>("Assets/Particles/Flashes/Flash.prefab");
+            //Assets/Prefabs/Enemies/Turret.prefab
+            turret = LoadObject<GameObject>("Assets/Prefabs/Enemies/Turret.prefab").GetComponent<Turret>();
+            //Assets/Particles/Flashes/GunFlashDistant.prefab
+            turretFinalFlash = LoadObject<GameObject>("Assets/Particles/Flashes/GunFlashDistant.prefab");
 
             //Assets/Prefabs/Effects/Charge Effect.prefab
             chargeEffect = LoadObject<GameObject>("Assets/Prefabs/Effects/Charge Effect.prefab");
@@ -419,6 +425,7 @@ namespace Ultrapain
 
             harmonyTweaks.Patch(GetMethod<Drone>("Start"), postfix: GetHarmonyMethod(GetMethod<Drone_Start_Patch>("Postfix")));
             harmonyTweaks.Patch(GetMethod<Drone>("Shoot"), prefix: GetHarmonyMethod(GetMethod<Drone_Shoot_Patch>("Prefix")));
+            harmonyTweaks.Patch(GetMethod<Drone>("PlaySound"), prefix: GetHarmonyMethod(GetMethod<Drone_PlaySound_Patch>("Prefix")));
 
             harmonyTweaks.Patch(GetMethod<Ferryman>("Start"), postfix: GetHarmonyMethod(GetMethod<FerrymanStart>("Postfix")));
             if(ConfigManager.ferrymanComboToggle.value)
