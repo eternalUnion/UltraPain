@@ -167,6 +167,10 @@ namespace Ultrapain
         public static EnumField<EnemyType> eidStatEditorSelector;
         public static Dictionary<EnemyType, EidStatContainer> enemyStats = new Dictionary<EnemyType, EidStatContainer>();
 
+        // SCREWDRIVER
+        public static BoolField screwDriverSplitToggle;
+        public static IntField screwDriverCoinSplitCount;
+
         // CERBERUS
         public static BoolField cerberusDashToggle;
         public static IntField cerberusTotalDashCount;
@@ -729,6 +733,17 @@ namespace Ultrapain
             orbStrikeMaliciousCannonExplosion.TriggerValueChangeEvent();
             orbStrikeMaliciousCannonExplosionSizeMultiplier = new FloatField(orbStrikeMaliciousCannonExplosionDiv, "Size multiplier", "orbStrikeMaliciousCannonExplosionSizeMultiplier", 1.3f, 0f, float.MaxValue);
             orbStrikeMaliciousCannonExplosionDamageMultiplier = new FloatField(orbStrikeMaliciousCannonExplosionDiv, "Damage multiplier", "orbStrikeMaliciousCannonExplosionDamageMultiplier", 1f, 0f, float.MaxValue);
+
+            // SCREWDRIVER
+            new ConfigHeader(playerPanel, "Screw Driver Splitting");
+            ConfigDivision screwDriverSplitDiv = new ConfigDivision(playerPanel, "screwDriverSplitDiv");
+            screwDriverSplitToggle = new BoolField(playerPanel, "Enabled", "screwDriverSplitToggle", true);
+            screwDriverSplitToggle.onValueChange += (BoolField.BoolValueChangeEvent e) =>
+            {
+                screwDriverSplitDiv.interactable = e.value;
+                dirtyField = true;
+            };
+            screwDriverCoinSplitCount = new IntField(screwDriverSplitDiv, "Coin split count", "screwDriverCoinSplitCount", 5, 2, int.MaxValue);
 
             // ENEMY PANEL
             globalEnemyPanel = new ConfigPanel(enemyPanel, "Global enemy tweaks", "globalEnemyPanel");

@@ -99,6 +99,7 @@ namespace Ultrapain
         public static GameObject explosionWaveKnuckleblaster;
         public static GameObject chargeEffect;
         public static GameObject maliciousFaceProjectile;
+        public static GameObject coin;
 
         //public static GameObject idol;
         public static GameObject ferryman;
@@ -207,6 +208,8 @@ namespace Ultrapain
             ricochetSfx = LoadObject<GameObject>("Assets/Particles/SoundBubbles/Ricochet.prefab");
             //Assets/Particles/Flashes/Flash.prefab
             parryableFlash = LoadObject<GameObject>("Assets/Particles/Flashes/Flash.prefab");
+            //Assets/Prefabs/Attacks and Projectiles/Coin.prefab
+            coin = LoadObject<GameObject>("Assets/Prefabs/Attacks and Projectiles/Coin.prefab");
 
             //Assets/Prefabs/Effects/Charge Effect.prefab
             chargeEffect = LoadObject<GameObject>("Assets/Prefabs/Effects/Charge Effect.prefab");
@@ -602,6 +605,9 @@ namespace Ultrapain
 
                 harmonyTweaks.Patch(GetMethod<Explosion>("Collide"), prefix: GetHarmonyMethod(GetMethod<Explosion_CollideOrbital>("Prefix")));
             }
+
+            if(ConfigManager.screwDriverSplitToggle.value)
+                harmonyTweaks.Patch(GetMethod<Harpoon>("OnTriggerEnter"), prefix: GetHarmonyMethod(GetMethod<Harpoon_OnTriggerEnter_Patch>("Prefix")));
         }
 
         private static void PatchAllMemes()
