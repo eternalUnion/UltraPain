@@ -26,7 +26,7 @@ namespace Ultrapain
     {
         public const string PLUGIN_GUID = "com.eternalUnion.ultraPain";
         public const string PLUGIN_NAME = "Ultra Pain";
-        public const string PLUGIN_VERSION = "1.0.1";
+        public const string PLUGIN_VERSION = "1.0.2";
 
         public static Plugin instance;
 
@@ -225,7 +225,9 @@ namespace Ultrapain
             ScenePatchCheck();
 
             string mainMenuSceneName = "b3e7f2f8052488a45b35549efb98d902";
-            if (SceneManager.GetActiveScene().name == mainMenuSceneName)
+            string bootSequenceSceneName = "4f8ecffaa98c2614f89922daf31fa22d";
+            string currentSceneName = SceneManager.GetActiveScene().name;
+            if (currentSceneName == mainMenuSceneName)
             {
                 LoadPrefabs();
 
@@ -268,6 +270,58 @@ namespace Ultrapain
                 evt.triggers.Add(trigger2);
 
                 foreach(EventTrigger trigger in difficultySelect.GetComponentsInChildren<EventTrigger>())
+                {
+                    if (trigger.gameObject == ultrapainButton)
+                        continue;
+
+                    EventTrigger.Entry closeTrigger = new EventTrigger.Entry() { eventID = EventTriggerType.PointerEnter };
+                    closeTrigger.callback.AddListener((BaseEventData data) => info.SetActive(false));
+                    trigger.triggers.Add(closeTrigger);
+                }
+            }
+            else if(currentSceneName == bootSequenceSceneName)
+            {
+                LoadPrefabs();
+
+                //Canvas/Difficulty Select (1)/Violent
+                Transform difficultySelect = SceneManager.GetActiveScene().GetRootGameObjects().Where(obj => obj.name == "Canvas").First().transform.Find("Intro/Difficulty Select");
+                GameObject ultrapainButton = GameObject.Instantiate(difficultySelect.Find("Violent").gameObject, difficultySelect);
+                currentDifficultyButton = ultrapainButton;
+
+                ultrapainButton.transform.Find("Name").GetComponent<Text>().text = ConfigManager.pluginName.value;
+                ultrapainButton.GetComponent<DifficultySelectButton>().difficulty = 5;
+                RectTransform ultrapainTrans = ultrapainButton.GetComponent<RectTransform>();
+                ultrapainTrans.anchoredPosition = new Vector2(20f, -104f);
+
+                //Canvas/Difficulty Select (1)/Violent Info
+                GameObject info = GameObject.Instantiate(difficultySelect.Find("Violent Info").gameObject, difficultySelect);
+                currentDifficultyPanel = info;
+                currentDifficultyInfoText = info.transform.Find("Text").GetComponent<Text>();
+                currentDifficultyInfoText.text = ConfigManager.pluginInfo.value;
+                Text currentDifficultyHeaderText = info.transform.Find("Title (1)").GetComponent<Text>();
+                currentDifficultyHeaderText.text = $"--{ConfigManager.pluginName.value}--";
+                currentDifficultyHeaderText.resizeTextForBestFit = true;
+                currentDifficultyHeaderText.horizontalOverflow = HorizontalWrapMode.Wrap;
+                currentDifficultyHeaderText.verticalOverflow = VerticalWrapMode.Truncate;
+                info.SetActive(false);
+
+                EventTrigger evt = ultrapainButton.GetComponent<EventTrigger>();
+                evt.triggers.Clear();
+
+                /*EventTrigger.TriggerEvent activate = new EventTrigger.TriggerEvent();
+                activate.AddListener((BaseEventData data) => info.SetActive(true));
+                EventTrigger.TriggerEvent deactivate = new EventTrigger.TriggerEvent();
+                activate.AddListener((BaseEventData data) => info.SetActive(false));*/
+
+                EventTrigger.Entry trigger1 = new EventTrigger.Entry() { eventID = EventTriggerType.PointerEnter };
+                trigger1.callback.AddListener((BaseEventData data) => info.SetActive(true));
+                EventTrigger.Entry trigger2 = new EventTrigger.Entry() { eventID = EventTriggerType.PointerExit };
+                trigger2.callback.AddListener((BaseEventData data) => info.SetActive(false));
+
+                evt.triggers.Add(trigger1);
+                evt.triggers.Add(trigger2);
+
+                foreach (EventTrigger trigger in difficultySelect.GetComponentsInChildren<EventTrigger>())
                 {
                     if (trigger.gameObject == ultrapainButton)
                         continue;

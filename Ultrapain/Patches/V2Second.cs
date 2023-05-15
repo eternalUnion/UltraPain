@@ -446,9 +446,9 @@ namespace Ultrapain.Patches
             V2SecondFlag flag = __instance.gameObject.AddComponent<V2SecondFlag>();
             flag.v2collider = __instance.GetComponent<Collider>();
 
-            ___eid.enemyType = EnemyType.V2Second;
+            /*___eid.enemyType = EnemyType.V2Second;
             ___eid.UpdateBuffs();
-            machineV2.SetValue(__instance.GetComponent<Machine>(), __instance);
+            machineV2.SetValue(__instance.GetComponent<Machine>(), __instance);*/
 
             GameObject player = SceneManager.GetActiveScene().GetRootGameObjects().Where(obj => obj.name == "Player").FirstOrDefault();
             if (player == null)
