@@ -548,6 +548,12 @@ namespace Ultrapain
 
                 harmonyTweaks.Patch(GetMethod<Explosion>("Collide"), prefix: GetHarmonyMethod(GetMethod<Explosion_CollideOrbital>("Prefix")));
             }
+
+            if (ConfigManager.rocketParryToggle.value)
+            {
+                harmonyTweaks.Patch(GetMethod<RocketLauncher>("Shoot"), prefix: GetHarmonyMethod(GetMethod<RocketLauncher_Shoot_Patch>("Prefix")), postfix: GetHarmonyMethod(GetMethod<RocketLauncher_Shoot_Patch>("Postfix")));
+                harmonyTweaks.Patch(GetMethod<Grenade>("Explode"), prefix: GetHarmonyMethod(GetMethod<Grenade_Explode_RocketParry>("Prefix")), postfix: GetHarmonyMethod(GetMethod<Grenade_Explode_RocketParry>("Postfix")));
+            }
         }
 
         private static void PatchAllMemes()

@@ -10,6 +10,7 @@ using System;
 using BepInEx.Configuration;
 using System.IO;
 using PluginConfig.API.Functionals;
+using static Ultrapain.ConfigManager;
 
 namespace Ultrapain
 {
@@ -118,6 +119,20 @@ namespace Ultrapain
         public static BoolField orbStrikeMaliciousCannonExplosion;
         public static FloatField orbStrikeMaliciousCannonExplosionDamageMultiplier;
         public static FloatField orbStrikeMaliciousCannonExplosionSizeMultiplier;
+
+        // ROCKET PARRY
+        public static BoolField rocketParryToggle;
+        public static FloatField rocketParryDirectDamage;
+        public static FloatField rocketParryMaxDistance;
+        public enum RocketParryExplosionType
+        {
+            NoEffect,
+            NormalExplosion,
+            BigExplosion
+        }
+        public static EnumField<RocketParryExplosionType> rocketParryExplosionType;
+        public static FloatField rocketParryExplosionSizeMultiplier;
+        public static FloatField rocketParryExplosionDamageMultiplier;
 
         // ENEMY PANEL
         public static ConfigPanel globalEnemyPanel;
@@ -729,6 +744,32 @@ namespace Ultrapain
             orbStrikeMaliciousCannonExplosion.TriggerValueChangeEvent();
             orbStrikeMaliciousCannonExplosionSizeMultiplier = new FloatField(orbStrikeMaliciousCannonExplosionDiv, "Size multiplier", "orbStrikeMaliciousCannonExplosionSizeMultiplier", 1.3f, 0f, float.MaxValue);
             orbStrikeMaliciousCannonExplosionDamageMultiplier = new FloatField(orbStrikeMaliciousCannonExplosionDiv, "Damage multiplier", "orbStrikeMaliciousCannonExplosionDamageMultiplier", 1f, 0f, float.MaxValue);
+
+            // ROCKET PARRY
+            new ConfigHeader(playerPanel, "Rocket Parry");
+            ConfigDivision rocketParryDiv = new ConfigDivision(playerPanel, "rocketParryDiv");
+            rocketParryToggle = new BoolField(playerPanel, "Enabled", "rocketParryToggle", true);
+            rocketParryToggle.presetLoadPriority = 1;
+            rocketParryToggle.onValueChange += (BoolField.BoolValueChangeEvent e) =>
+            {
+                rocketParryDiv.interactable = e.value;
+                dirtyField = true;
+            };
+            rocketParryToggle.TriggerValueChangeEvent();
+            rocketParryDirectDamage = new FloatField(rocketParryDiv, "Direct damage", "rocketParryDirectDamage", 4f, 0f, float.MaxValue);
+            rocketParryMaxDistance = new FloatField(rocketParryDiv, "Max distance", "rocketParryMaxDistance", 4f, 1f, float.MaxValue);
+            rocketParryExplosionType = new EnumField<RocketParryExplosionType>(rocketParryDiv, "Rocket explosion", "rocketParryExplosionType", RocketParryExplosionType.NoEffect);
+            rocketParryExplosionType.SetEnumDisplayName(RocketParryExplosionType.NoEffect, "No effect");
+            rocketParryExplosionType.SetEnumDisplayName(RocketParryExplosionType.NormalExplosion, "Normal explosion");
+            rocketParryExplosionType.SetEnumDisplayName(RocketParryExplosionType.BigExplosion, "Big explosion");
+            rocketParryExplosionSizeMultiplier = new FloatField(rocketParryDiv, "Size multiplier", "rocketParryExplosionSizeMultiplier", 1f, 0f, float.MaxValue);
+            rocketParryExplosionDamageMultiplier = new FloatField(rocketParryDiv, "Damage multiplier", "rocketParryExplosionDamageMultiplier", 1f, 0f, float.MaxValue);
+            rocketParryExplosionType.onValueChange += (EnumField<RocketParryExplosionType>.EnumValueChangeEvent e) =>
+            {
+                rocketParryExplosionSizeMultiplier.hidden = e.value == RocketParryExplosionType.NoEffect;
+                rocketParryExplosionDamageMultiplier.hidden = e.value == RocketParryExplosionType.NoEffect;
+            };
+            rocketParryExplosionType.TriggerValueChangeEvent();
 
             // ENEMY PANEL
             globalEnemyPanel = new ConfigPanel(enemyPanel, "Global enemy tweaks", "globalEnemyPanel");
