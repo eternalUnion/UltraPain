@@ -10,6 +10,7 @@ using System;
 using BepInEx.Configuration;
 using System.IO;
 using PluginConfig.API.Functionals;
+using static Ultrapain.ConfigManager;
 
 namespace Ultrapain
 {
@@ -142,6 +143,7 @@ namespace Ultrapain
         public static ConfigPanel v2SecondPanel;
         public static ConfigPanel sisyInstPanel;
         public static ConfigPanel leviathanPanel;
+        public static ConfigPanel idolPanel;
 
         // GLOBAL ENEMY CONFIG
         public static BoolField friendlyFireDamageOverrideToggle;
@@ -405,6 +407,19 @@ namespace Ultrapain
         public static BoolField leviathanChargeHauntRocketRiding;
 
         public static IntField leviathanTailComboCount;
+
+        // IDOL
+        public static BoolField idolExplosionToggle;
+        public enum IdolExplosionType
+        {
+            Normal,
+            Big,
+            Ligthning,
+            Sand
+        }
+        public static EnumField<IdolExplosionType> idolExplodionType;
+        public static FloatField idolExplosionSizeMultiplier;
+        public static FloatField idolExplosionDamageMultiplier;
 
 
         /////////// ADD MEEEE
@@ -738,6 +753,7 @@ namespace Ultrapain
             schismPanel = new ConfigPanel(enemyPanel, "Schism", "schismPanel");
             soliderPanel = new ConfigPanel(enemyPanel, "Soldier", "soliderPanel");
             dronePanel = new ConfigPanel(enemyPanel, "Drone", "dronePanel");
+            idolPanel = new ConfigPanel(enemyPanel, "Idol", "idolPanel");
             streetCleanerPanel = new ConfigPanel(enemyPanel, "Streetcleaner", "streetCleanerPanel");
             virtuePanel = new ConfigPanel(enemyPanel, "Virtue", "virtuePanel");
             stalkerPanel = new ConfigPanel(enemyPanel, "Stalker", "stalkerPanel");
@@ -1519,6 +1535,30 @@ namespace Ultrapain
             leviathanChargeHauntRocketRiding = new BoolField(leviathanChargedDiv, "Target ridden rockets", "leviathanChargeHauntRocketRiding", true);
             new ConfigHeader(leviathanPanel, "Tail Swing Combo");
             leviathanTailComboCount = new IntField(leviathanPanel, "Tail swing count", "leviathanTailComboCount", 3, 1, int.MaxValue);
+
+            // IDOL
+            new ConfigHeader(idolPanel, "Explode on break");
+            ConfigDivision idolExplosionDiv = new ConfigDivision(idolPanel, "idolExplosionDiv");
+            idolExplosionToggle = new BoolField(idolPanel, "Enabled", "idolExplosionToggle", true);
+            idolExplosionToggle.onValueChange += (BoolField.BoolValueChangeEvent e) =>
+            {
+                idolExplosionDiv.interactable = e.value;
+                dirtyField = true;
+            };
+            idolExplosionToggle.TriggerValueChangeEvent();
+            idolExplodionType = new EnumField<IdolExplosionType>(idolExplosionDiv, "Explosion type", "idolExplosionType", IdolExplosionType.Ligthning);
+            idolExplodionType.SetEnumDisplayName(IdolExplosionType.Normal, "Normal explosion");
+            idolExplodionType.SetEnumDisplayName(IdolExplosionType.Big, "Big explosion");
+            idolExplodionType.SetEnumDisplayName(IdolExplosionType.Ligthning, "Lightning bolt");
+            idolExplodionType.SetEnumDisplayName(IdolExplosionType.Sand, "Sand explosion");
+            idolExplosionSizeMultiplier = new FloatField(idolExplosionDiv, "Explosion size multiplier", "idolExplosionSizeMultiplier", 1f, 0f, float.MaxValue);
+            idolExplosionDamageMultiplier = new FloatField(idolExplosionDiv, "Explosion damage multiplier", "idolExplosionDamageMultiplier", 1f, 0f, float.MaxValue);
+            idolExplodionType.onValueChange += (EnumField<IdolExplosionType>.EnumValueChangeEvent e) =>
+            {
+                idolExplosionSizeMultiplier.interactable = e.value != IdolExplosionType.Sand;
+                idolExplosionDamageMultiplier.interactable = e.value != IdolExplosionType.Sand;
+            };
+            idolExplodionType.TriggerValueChangeEvent();
 
             config.Flush();
             //config.LogDuplicateGUID();
