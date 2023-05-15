@@ -170,6 +170,7 @@ namespace Ultrapain
         // SCREWDRIVER
         public static BoolField screwDriverSplitToggle;
         public static IntField screwDriverCoinSplitCount;
+        public static IntField screwDriverGrenadeSplitCount;
 
         // CERBERUS
         public static BoolField cerberusDashToggle;
@@ -744,6 +745,7 @@ namespace Ultrapain
                 dirtyField = true;
             };
             screwDriverCoinSplitCount = new IntField(screwDriverSplitDiv, "Coin split count", "screwDriverCoinSplitCount", 5, 2, int.MaxValue);
+            screwDriverGrenadeSplitCount = new IntField(screwDriverSplitDiv, "Grenade split count", "screwDriverGrenadeSplitCount", 5);
 
             // ENEMY PANEL
             globalEnemyPanel = new ConfigPanel(enemyPanel, "Global enemy tweaks", "globalEnemyPanel");
