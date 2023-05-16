@@ -415,11 +415,13 @@ namespace Ultrapain
             Normal,
             Big,
             Ligthning,
+            Sisyphean,
             Sand
         }
         public static EnumField<IdolExplosionType> idolExplodionType;
         public static FloatField idolExplosionSizeMultiplier;
         public static FloatField idolExplosionDamageMultiplier;
+        public static FloatSliderField idolExplosionEnemyDamagePercent;
 
 
         /////////// ADD MEEEE
@@ -1550,6 +1552,7 @@ namespace Ultrapain
             idolExplodionType.SetEnumDisplayName(IdolExplosionType.Normal, "Normal explosion");
             idolExplodionType.SetEnumDisplayName(IdolExplosionType.Big, "Big explosion");
             idolExplodionType.SetEnumDisplayName(IdolExplosionType.Ligthning, "Lightning bolt");
+            idolExplodionType.SetEnumDisplayName(IdolExplosionType.Sisyphean, "Sisyphus prime explosion");
             idolExplodionType.SetEnumDisplayName(IdolExplosionType.Sand, "Sand explosion");
             idolExplosionSizeMultiplier = new FloatField(idolExplosionDiv, "Explosion size multiplier", "idolExplosionSizeMultiplier", 1f, 0f, float.MaxValue);
             idolExplosionDamageMultiplier = new FloatField(idolExplosionDiv, "Explosion damage multiplier", "idolExplosionDamageMultiplier", 1f, 0f, float.MaxValue);
@@ -1559,6 +1562,7 @@ namespace Ultrapain
                 idolExplosionDamageMultiplier.interactable = e.value != IdolExplosionType.Sand;
             };
             idolExplodionType.TriggerValueChangeEvent();
+            idolExplosionEnemyDamagePercent = new FloatSliderField(idolExplosionDiv, "Enemy damage percent", "idolExplosionEnemyDamagePercent", new Tuple<float, float>(0f, 100f), 0f, 1);
 
             config.Flush();
             //config.LogDuplicateGUID();

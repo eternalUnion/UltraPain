@@ -29,6 +29,10 @@ namespace Ultrapain.Patches
                 case ConfigManager.IdolExplosionType.Ligthning:
                     tempExplosion = Plugin.lightningStrikeExplosive;
                     break;
+
+                case ConfigManager.IdolExplosionType.Sisyphean:
+                    tempExplosion = Plugin.sisyphiusPrimeExplosion;
+                    break;
             }
 
             GameObject explosion = GameObject.Instantiate(tempExplosion, __instance.gameObject.transform.position, Quaternion.identity);
@@ -40,6 +44,7 @@ namespace Ultrapain.Patches
                 exp.maxSize *= ConfigManager.idolExplosionSizeMultiplier.value;
                 exp.speed *= ConfigManager.idolExplosionSizeMultiplier.value;
                 exp.damage = (int)(exp.damage * ConfigManager.idolExplosionDamageMultiplier.value);
+                exp.enemyDamageMultiplier = ConfigManager.idolExplosionEnemyDamagePercent.value / 100f;
             }
         }
     }
