@@ -99,6 +99,7 @@ namespace Ultrapain
         public static GameObject explosionWaveKnuckleblaster;
         public static GameObject chargeEffect;
         public static GameObject maliciousFaceProjectile;
+        public static GameObject fireParticle;
 
         //public static GameObject idol;
         public static GameObject ferryman;
@@ -207,6 +208,8 @@ namespace Ultrapain
             ricochetSfx = LoadObject<GameObject>("Assets/Particles/SoundBubbles/Ricochet.prefab");
             //Assets/Particles/Flashes/Flash.prefab
             parryableFlash = LoadObject<GameObject>("Assets/Particles/Flashes/Flash.prefab");
+            //Assets/Particles/Fire.prefab
+            fireParticle = LoadObject<GameObject>("Assets/Particles/Fire.prefab");
 
             //Assets/Prefabs/Effects/Charge Effect.prefab
             chargeEffect = LoadObject<GameObject>("Assets/Prefabs/Effects/Charge Effect.prefab");
@@ -489,7 +492,7 @@ namespace Ultrapain
                 harmonyTweaks.Patch(GetMethod<ZombieProjectiles>("DamageEnd"), prefix: GetHarmonyMethod(GetMethod<DamageEnd>("Prefix")));
             }
 
-            if(ConfigManager.streetCleanerCoinsIgnoreWeakPointToggle.value)
+            if(ConfigManager.streetCleanerCoinsIgnoreWeakPointToggle.value || ConfigManager.streetCleanerFireRemainToggle.value)
                 harmonyTweaks.Patch(GetMethod<Streetcleaner>("Start"), postfix: GetHarmonyMethod(GetMethod<StreetCleaner_Start_Patch>("Postfix")));
             if(ConfigManager.streetCleanerPredictiveDodgeToggle.value)
                 harmonyTweaks.Patch(GetMethod<BulletCheck>("OnTriggerEnter"), postfix: GetHarmonyMethod(GetMethod<BulletCheck_OnTriggerEnter_Patch>("Postfix")));

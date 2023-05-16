@@ -91,5 +91,10 @@ namespace Ultrapain
 
             return null;
         }
+
+        public static Vector3 RandomVector(float range)
+        {
+            return new Vector3(UnityEngine.Random.Range(-range, range), UnityEngine.Random.Range(-range, range), UnityEngine.Random.Range(-range, range));
+        }
     }
 }

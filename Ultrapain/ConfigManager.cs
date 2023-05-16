@@ -278,6 +278,9 @@ namespace Ultrapain
         // STREET CLEANER
         public static BoolField streetCleanerPredictiveDodgeToggle;
         public static BoolField streetCleanerCoinsIgnoreWeakPointToggle;
+        public static BoolField streetCleanerFireRemainToggle;
+        public static FloatField streetCleanerFireRemainFrequency;
+        public static FloatField streetCleanerFireRemainDuration;
 
         // SWORDS MACHINE
         public enum SwordsMachineSecondPhase
@@ -1050,6 +1053,17 @@ namespace Ultrapain
             {
                 dirtyField = true;
             };
+            new ConfigHeader(streetCleanerPanel, "Fire Remains On Ground");
+            ConfigDivision streetCleanerRemainDiv = new ConfigDivision(streetCleanerPanel, "streetCleanerRemainDiv");
+            streetCleanerFireRemainToggle = new BoolField(streetCleanerPanel, "Enabled", "streetCleanerFireRemainToggle", true);
+            streetCleanerFireRemainToggle.onValueChange += (BoolField.BoolValueChangeEvent e) =>
+            {
+                streetCleanerRemainDiv.interactable = e.value;
+                dirtyField = true;
+            };
+            streetCleanerFireRemainToggle.TriggerValueChangeEvent();
+            streetCleanerFireRemainFrequency = new FloatField(streetCleanerRemainDiv, "Fire zone spawn frequency", "streetCleanerFireRemainFrequency", 4f, 1f, float.MaxValue);
+            streetCleanerFireRemainDuration = new FloatField(streetCleanerRemainDiv, "Fire zone duration", "streetCleanerFireRemainDuration", 5f, 0f, float.MaxValue);
 
             // SWORDS MACHINE
             new ConfigHeader(swordsMachinePanel, "Knockback Modifier");

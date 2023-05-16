@@ -1,4 +1,5 @@
 ﻿using HarmonyLib;
+using PluginConfig.API;
 using UnityEngine;
 
 namespace Ultrapain.Patches
@@ -7,7 +8,11 @@ namespace Ultrapain.Patches
     {
         static void Postfix(Streetcleaner __instance, ref EnemyIdentifier ___eid)
         {
-            ___eid.weakPoint = null;
+            if (ConfigManager.streetCleanerCoinsIgnoreWeakPointToggle.value)
+                ___eid.weakPoint = null;
+
+            if(ConfigManager.streetCleanerFireRemainToggle.value)
+                __instance.gameObject.AddComponent<StreetCleanerFireZoneSpawner>();
         }
     }
 
@@ -96,6 +101,138 @@ namespace Ultrapain.Patches
                 Rigidbody rb = __0.GetComponent<Rigidbody>();
                 rb.velocity = Vector3.zero;
                 rb.AddForce(__0.transform.forward * 20000f /* * ___eid.totalSpeedModifier */);
+            }
+        }
+    }
+
+    class CustomFizeZoneComp : MonoBehaviour
+    {
+        float playerHurtCooldown = 0f;
+        public float totalDamageModifier;
+
+        void OnTriggerStay(Collider other)
+        {
+            if (playerHurtCooldown == 0f && other.gameObject.tag == "Player")
+            {
+                playerHurtCooldown = 0.5f;
+                if (MonoSingleton<PlayerTracker>.Instance.playerType == PlayerType.Platformer)
+                {
+                    MonoSingleton<PlatformerMovement>.Instance.Burn(false);
+                    return;
+                }
+                MonoSingleton<NewMovement>.Instance.GetHurt((int)(20f * totalDamageModifier), true, 1f, false, false);
+                return;
+            }
+            else
+            {
+                Flammable component = other.GetComponent<Flammable>();
+                if (component != null && !component.playerOnly)
+                {
+                    component.Burn(10f, false);
+                }
+            }
+
+            playerHurtCooldown = Mathf.MoveTowards(playerHurtCooldown, 0f, Time.deltaTime);
+        }
+    }
+
+    class StreetCleanerFireZoneSpawner : MonoBehaviour
+    {
+        float timeSinceLastSpawn = 0f;
+        public Streetcleaner sc;
+        public EnemyIdentifier eid;
+
+        void Start()
+        {
+            if (sc == null)
+                sc = GetComponent<Streetcleaner>();
+            if (eid == null)
+                eid = GetComponent<EnemyIdentifier>();
+        }
+
+        static Vector3[] localFireSpawnPoses = new Vector3[]
+        {
+            new Vector3(0, 0, 0),
+            new Vector3(2f, 0, 2f),
+            new Vector3(2f, 0, -2f),
+            new Vector3(-2f, 0, 2f),
+            new Vector3(-2f, 0, -2f),
+            new Vector3(3f, 0, 0),
+            new Vector3(-3f, 0, 0),
+            new Vector3(0, 0, 3f),
+            new Vector3(0, 0, -3f),
+        };
+        static float horizontalVariation = 0.25f;
+        static LayerMask envMask = new LayerMask() { value = (1 << 8) | (1 << 24) };
+
+        static GameObject _customFlame;
+        static GameObject customFlame
+        {
+            get
+            {
+                if(_customFlame == null)
+                {
+                    _customFlame = GameObject.Instantiate(Plugin.fireParticle, new Vector3(1000000, 1000000, 1000000), Quaternion.identity);
+                    _customFlame.SetActive(false);
+
+                    GameObject.Destroy(_customFlame.GetComponent<ExplosionController>());
+                }
+
+                return _customFlame;
+            }
+        }
+
+        void Update()
+        {
+            if(!sc.damaging)
+            {
+                timeSinceLastSpawn = 0f;
+            }
+            else
+            {
+                if (timeSinceLastSpawn == 0f)
+                {
+                    GameObject fireZone = new GameObject();
+                    fireZone.transform.position = transform.position + transform.forward * 10f;
+
+                    BoxCollider fireCol = fireZone.AddComponent<BoxCollider>();
+                    fireCol.size = new Vector3(8f, 2f, 8f);
+                    fireCol.isTrigger = true;
+
+                    Rigidbody rb = fireZone.AddComponent<Rigidbody>();
+                    rb.isKinematic = true;
+
+                    foreach(Vector3 pos in localFireSpawnPoses)
+                    {
+                        GameObject flame = GameObject.Instantiate(customFlame, fireZone.transform);
+                        flame.transform.localPosition = pos + UnityUtils.RandomVector(horizontalVariation);
+                        flame.SetActive(true);
+
+                        RaycastHit hit;
+                        if (Physics.Raycast(flame.transform.position, Vector3.down, out hit, 5f, envMask))
+                            flame.transform.position = new Vector3(flame.transform.position.x, hit.point.y + 0.5f, flame.transform.position.z);
+                        else if (Physics.Raycast(flame.transform.position, Vector3.up, out hit, 5f, envMask))
+                            flame.transform.position = new Vector3(flame.transform.position.x, hit.point.y + 0.5f, flame.transform.position.z);
+                        else if(pos == Vector3.zero)
+                        {
+                            GameObject.Destroy(fireZone);
+                            return;
+                        }
+                        else
+                        {
+                            GameObject.Destroy(flame);
+                        }
+                    }
+
+                    fireZone.AddComponent<RemoveOnTime>().time = ConfigManager.streetCleanerFireRemainDuration.value;
+
+                    CustomFizeZoneComp comp = fireZone.AddComponent<CustomFizeZoneComp>();
+                    comp.totalDamageModifier = eid.totalDamageModifier;
+
+                    timeSinceLastSpawn = 1f / ConfigManager.streetCleanerFireRemainFrequency.value;
+                }
+                else
+                    timeSinceLastSpawn = Mathf.MoveTowards(timeSinceLastSpawn, 0f, Time.deltaTime);
             }
         }
     }
