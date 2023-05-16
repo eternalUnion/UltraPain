@@ -178,6 +178,8 @@ namespace Ultrapain
         public static BoolField droneExplosionBeamToggle;
         public static BoolField droneSentryBeamToggle;
         public static FloatField droneSentryBeamDamage;
+        public static BoolField droneHomeToggle;
+        public static FloatField droneHomeTurnSpeed;
 
         // FILTH
         public static BoolField filthExplodeToggle;
@@ -852,6 +854,15 @@ namespace Ultrapain
             };
             droneSentryBeamToggle.TriggerValueChangeEvent();
             droneSentryBeamDamage = new FloatField(droneSentryBeamDiv, "Sentry beam damage", "droneSentryBeamDamage", 2f, 0f, float.MaxValue);
+            new ConfigHeader(dronePanel, "Homing Drone After Death");
+            droneHomeToggle = new BoolField(dronePanel, "Enabled", "droneHomeToggle", true);
+            droneHomeToggle.onValueChange += (BoolField.BoolValueChangeEvent e) =>
+            {
+                droneHomeTurnSpeed.interactable = e.value;
+                dirtyField = true;
+            };
+            droneHomeTurnSpeed = new FloatField(dronePanel, "Turn speed", "droneHomeTurnSpeed", 360f, 0f, float.MaxValue);
+            droneHomeToggle.TriggerValueChangeEvent();
 
             // FILTH
             new ConfigHeader(filthPanel, "Explode On Hit");
