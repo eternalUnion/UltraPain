@@ -185,6 +185,10 @@ namespace Ultrapain
         public static FloatField droneSentryBeamDelay;
         public static FloatSliderField droneSentryBeamChance;
         public static FloatField droneSentryBeamDamage;
+        public static BoolField droneDrawSentryBeamLine;
+        public static ColorField droneSentryBeamLineNormalColor;
+        public static ColorField droneSentryBeamLineWarningColor;
+        public static FloatField droneSentryBeamLineIndicatorDelay;
 
         // FILTH
         public static BoolField filthExplodeToggle;
@@ -852,9 +856,10 @@ namespace Ultrapain
                 droneProjectileDiv.interactable = e.value;
             };
             droneProjectileToggle.TriggerValueChangeEvent();
-            droneProjectileDelay = new FloatField(droneProjectileDiv, "Projectile shoot delay", "droneProjectileDelay", 0.75f);
+            droneProjectileDelay = new FloatField(droneProjectileDiv, "Projectile shoot delay", "droneProjectileDelay", 0.75f, 0f, float.MaxValue);
             droneProjectileChance = new FloatSliderField(droneProjectileDiv, "Projectile shoot chance", "droneProjectileChance", new Tuple<float, float>(0, 100), 50f, 1);
 
+            new ConfigHeader(dronePanel, "-------");
             ConfigDivision droneExplosionBeamDiv = new ConfigDivision(dronePanel, "droneExplosionBeamDiv");
             droneExplosionBeamToggle = new BoolField(dronePanel, "Can shoot explosions", "droneExplosionBeamToggle", true);
             droneExplosionBeamToggle.onValueChange += (BoolField.BoolValueChangeEvent e) =>
@@ -863,9 +868,10 @@ namespace Ultrapain
                 droneExplosionBeamDiv.interactable = e.value;
             };
             droneExplosionBeamToggle.TriggerValueChangeEvent();
-            droneExplosionBeamDelay = new FloatField(droneExplosionBeamDiv, "Explosion beam delay", "droneExplosionBeamDelay", 0.75f);
+            droneExplosionBeamDelay = new FloatField(droneExplosionBeamDiv, "Explosion beam delay", "droneExplosionBeamDelay", 0.75f, 0f, float.MaxValue);
             droneExplosionBeamChance = new FloatSliderField(droneExplosionBeamDiv, "Explosion beam chance", "droneExplosionBeamChance", new Tuple<float, float>(0, 100), 30f, 1);
 
+            new ConfigHeader(dronePanel, "-------");
             ConfigDivision droneSentryBeamDiv = new ConfigDivision(dronePanel, "droneSentryBeamDiv");
             droneSentryBeamToggle = new BoolField(dronePanel, "Can shoot sentry beam", "droneSentryBeamToggle", true);
             droneSentryBeamToggle.presetLoadPriority = 1;
@@ -876,8 +882,17 @@ namespace Ultrapain
             };
             droneSentryBeamToggle.TriggerValueChangeEvent();
             droneSentryBeamDamage = new FloatField(droneSentryBeamDiv, "Sentry beam damage", "droneSentryBeamDamage", 2f, 0f, float.MaxValue);
-            droneSentryBeamDelay = new FloatField(droneSentryBeamDiv, "Sentry beam delay", "droneSentryBeamDelay", 0.75f);
+            droneSentryBeamDelay = new FloatField(droneSentryBeamDiv, "Sentry beam delay", "droneSentryBeamDelay", 0.75f, 0f, float.MaxValue);
             droneSentryBeamChance = new FloatSliderField(droneSentryBeamDiv, "Sentry beam chance", "droneSentryBeamChance", new Tuple<float, float>(0, 100), 20f, 1);
+            ConfigDivision droneSentryBeamLineDiv = new ConfigDivision(droneSentryBeamDiv, "droneSentryBeamLineDiv");
+            droneDrawSentryBeamLine = new BoolField(droneSentryBeamDiv, "Draw sentry beam line", "droneDrawSentryBeamLine", true);
+            droneDrawSentryBeamLine.onValueChange += (BoolField.BoolValueChangeEvent e) =>
+            {
+                droneSentryBeamLineDiv.interactable = e.value;
+            };
+            droneSentryBeamLineNormalColor = new ColorField(droneSentryBeamLineDiv, "Normal color", "droneSentryBeamLineNormalColor", Drone_PlaySound_Patch.defaultLineColor);
+            droneSentryBeamLineWarningColor = new ColorField(droneSentryBeamLineDiv, "Warning color", "droneSentryBeamLineWarningColor", new Color(1, 1, 1));
+            droneSentryBeamLineIndicatorDelay = new FloatField(droneSentryBeamLineDiv, "Sentry beam warning delay", "droneSentryBeamLineIndicatorDelay", 0.5f, 0f, float.MaxValue);
 
             // FILTH
             new ConfigHeader(filthPanel, "Explode On Hit");

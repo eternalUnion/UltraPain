@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.ConstrainedExecution;
 using UnityEngine;
 
 namespace Ultrapain.Patches
@@ -22,6 +23,7 @@ namespace Ultrapain.Patches
     {
         static FieldInfo antennaFlashField = typeof(Turret).GetField("antennaFlash", BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Instance);
         static ParticleSystem antennaFlash;
+        public static Color defaultLineColor = new Color(1f, 0.44f, 0.74f);
 
         static bool Prefix(Drone __instance, EnemyIdentifier ___eid, AudioClip __0)
         {
@@ -75,8 +77,14 @@ namespace Ultrapain.Patches
                 else if (flag.currentMode == DroneFlag.Firemode.TurretBeam)
                 {
                     flag.attackDelay = ConfigManager.droneSentryBeamDelay.value;
+                    if(ConfigManager.droneDrawSentryBeamLine.value)
+                    {
+                        flag.lr.enabled = true;
+                        flag.SetLineColor(ConfigManager.droneSentryBeamLineNormalColor.value);
+                        flag.Invoke("LineRendererColorToWarning", Mathf.Max(0.01f, (flag.attackDelay / ___eid.totalSpeedModifier) - ConfigManager.droneSentryBeamLineIndicatorDelay.value));
+                    }
 
-                    if(flag.particleSystem == null)
+                    if (flag.particleSystem == null)
                     {
                         if (antennaFlash == null)
                             antennaFlash = (ParticleSystem)antennaFlashField.GetValue(Plugin.turret);
@@ -129,6 +137,8 @@ namespace Ultrapain.Patches
                     revBeam.ignoreEnemyType = EnemyType.Drone;
                 }
 
+                flag.lr.enabled = false;
+
                 return false;
             }
 
@@ -177,8 +187,50 @@ namespace Ultrapain.Patches
         }
 
         public ParticleSystem particleSystem;
+        public LineRenderer lr;
         public Firemode currentMode = Firemode.Projectile;
         private static Firemode[] allModes = Enum.GetValues(typeof(Firemode)) as Firemode[];
+
+        static FieldInfo turretAimLine = typeof(Turret).GetField("aimLine", BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Instance);
+        static Material whiteMat;
+        public void Awake()
+        {
+            lr = gameObject.AddComponent<LineRenderer>();
+            lr.enabled = false;
+            lr.receiveShadows = false;
+            lr.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
+            lr.startWidth = lr.endWidth = lr.widthMultiplier = 0.025f;
+
+            if (whiteMat == null)
+                whiteMat = ((LineRenderer)turretAimLine.GetValue(Plugin.turret)).material;
+
+            lr.material = whiteMat;
+        }
+
+        public void SetLineColor(Color c)
+        {
+            Gradient gradient = new Gradient();
+            GradientColorKey[] array = new GradientColorKey[1];
+            array[0].color = c;
+            GradientAlphaKey[] array2 = new GradientAlphaKey[1];
+            array2[0].alpha = 1f;
+            gradient.SetKeys(array, array2);
+            lr.colorGradient = gradient;
+        }
+
+        public void LineRendererColorToWarning()
+        {
+            SetLineColor(ConfigManager.droneSentryBeamLineWarningColor.value);
+        }
+
+        public void Update()
+        {
+            if(lr.enabled)
+            {
+                lr.SetPosition(0, transform.position);
+                lr.SetPosition(1, transform.position + transform.forward * 1000);
+            }
+        }
 
         public float attackDelay = -1;
     }
