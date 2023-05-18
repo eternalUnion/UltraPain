@@ -642,8 +642,11 @@ namespace Ultrapain.Patches
                                 RevolverBeam newBeam = GameObject.Instantiate(beam, beam.transform.position, Quaternion.identity);
                                 newBeam.hitEids.Add(__instance);
                                 newBeam.transform.LookAt(enemy.Item1.transform);
+                                GameObject.Destroy(newBeam.GetComponent<OrbitalStrikeFlag>());
                             }
                         }
+
+                        RevolverBeam_ExecuteHits.isOrbitalRay = false;
                     }
                 }
 
