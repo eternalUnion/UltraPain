@@ -1,5 +1,7 @@
 ﻿using HarmonyLib;
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 using UnityEngine;
 
@@ -32,33 +34,33 @@ namespace Ultrapain.Patches
                 if (flag == null)
                     return true;
 
-                flag.currentMode = DroneFlag.GetNextFireMode(flag.currentMode);
-                while (true)
-                {
-                    if (flag.currentMode == DroneFlag.Firemode.Explosive && !ConfigManager.droneExplosionBeamToggle.value)
-                    {
-                        flag.currentMode = DroneFlag.GetNextFireMode(flag.currentMode);
-                        continue;
-                    }
-                    if (flag.currentMode == DroneFlag.Firemode.TurretBeam && !ConfigManager.droneSentryBeamToggle.value)
-                    {
-                        flag.currentMode = DroneFlag.GetNextFireMode(flag.currentMode);
-                        continue;
-                    }
+                List<Tuple<DroneFlag.Firemode, float>> chances = new List<Tuple<DroneFlag.Firemode, float>>();
+                if (ConfigManager.droneProjectileToggle.value)
+                    chances.Add(new Tuple<DroneFlag.Firemode, float>(DroneFlag.Firemode.Projectile, ConfigManager.droneProjectileChance.value));
+                if (ConfigManager.droneExplosionBeamToggle.value)
+                    chances.Add(new Tuple<DroneFlag.Firemode, float>(DroneFlag.Firemode.Explosive, ConfigManager.droneExplosionBeamChance.value));
+                if (ConfigManager.droneSentryBeamToggle.value)
+                    chances.Add(new Tuple<DroneFlag.Firemode, float>(DroneFlag.Firemode.TurretBeam, ConfigManager.droneSentryBeamChance.value));
 
-                    break;
-                }
+                if (chances.Count == 0 || chances.Sum(item => item.Item2) <= 0)
+                    flag.currentMode = DroneFlag.Firemode.Projectile;
+                else
+                    flag.currentMode = UnityUtils.GetRandomFloatWeightedItem(chances, item => item.Item2).Item1;
 
                 if (flag.currentMode == DroneFlag.Firemode.Projectile)
-                    return true;
-
-                if (flag.currentMode == DroneFlag.Firemode.Explosive)
                 {
+                    flag.attackDelay = ConfigManager.droneProjectileDelay.value;
+                    return true;
+                }
+                else if (flag.currentMode == DroneFlag.Firemode.Explosive)
+                {
+                    flag.attackDelay = ConfigManager.droneExplosionBeamDelay.value;
+
                     GameObject chargeEffect = GameObject.Instantiate(Plugin.chargeEffect, __instance.transform);
                     chargeEffect.transform.localPosition = new Vector3(0, 0, 0.8f);
                     chargeEffect.transform.localScale = Vector3.zero;
 
-                    float duration = 0.75f / ___eid.totalSpeedModifier;
+                    float duration = ConfigManager.droneExplosionBeamDelay.value / ___eid.totalSpeedModifier;
                     RemoveOnTime remover = chargeEffect.AddComponent<RemoveOnTime>();
                     remover.time = duration;
                     CommonLinearScaler scaler = chargeEffect.AddComponent<CommonLinearScaler>();
@@ -70,9 +72,10 @@ namespace Ultrapain.Patches
 
                     return false;
                 }
-
-                if (flag.currentMode == DroneFlag.Firemode.TurretBeam)
+                else if (flag.currentMode == DroneFlag.Firemode.TurretBeam)
                 {
+                    flag.attackDelay = ConfigManager.droneSentryBeamDelay.value;
+
                     if(flag.particleSystem == null)
                     {
                         if (antennaFlash == null)
@@ -84,6 +87,7 @@ namespace Ultrapain.Patches
                     flag.particleSystem.Play();
                     GameObject flash = GameObject.Instantiate(Plugin.turretFinalFlash, __instance.transform);
                     GameObject.Destroy(flash.transform.Find("MuzzleFlash/muzzleflash").gameObject);
+                    return false;
                 }
             }
 
@@ -96,7 +100,7 @@ namespace Ultrapain.Patches
         static bool Prefix(Drone __instance, ref EnemyIdentifier ___eid)
         {
             DroneFlag flag = __instance.GetComponent<DroneFlag>();
-            if(flag == null)
+            if(flag == null || __instance.crashing)
                 return true;
 
             DroneFlag.Firemode mode = flag.currentMode;
@@ -133,6 +137,36 @@ namespace Ultrapain.Patches
         }
     }
 
+    class Drone_Update
+    {
+        static void Postfix(Drone __instance, EnemyIdentifier ___eid, ref float ___attackCooldown, int ___difficulty)
+        {
+            if (___eid.enemyType != EnemyType.Drone)
+                return;
+
+            DroneFlag flag = __instance.GetComponent<DroneFlag>();
+            if (flag == null || flag.attackDelay < 0)
+                return;
+
+            float attackSpeedDecay = (float)(___difficulty / 2);
+            if (___difficulty == 1)
+            {
+                attackSpeedDecay = 0.75f;
+            }
+            else if (___difficulty == 0)
+            {
+                attackSpeedDecay = 0.5f;
+            }
+            attackSpeedDecay *= ___eid.totalSpeedModifier;
+
+            float delay = flag.attackDelay / ___eid.totalSpeedModifier;
+            __instance.CancelInvoke("Shoot");
+            __instance.Invoke("Shoot", delay);
+            ___attackCooldown = UnityEngine.Random.Range(2f, 4f) + (flag.attackDelay - 0.75f) * attackSpeedDecay;
+            flag.attackDelay = -1;
+        }
+    }
+
     class DroneFlag : MonoBehaviour
     {
         public enum Firemode : int
@@ -146,15 +180,6 @@ namespace Ultrapain.Patches
         public Firemode currentMode = Firemode.Projectile;
         private static Firemode[] allModes = Enum.GetValues(typeof(Firemode)) as Firemode[];
 
-        public static Firemode GetNextFireMode(Firemode mode)
-        {
-            return (Enum.IsDefined(typeof(Firemode) ,(int)mode + 1)) ? (Firemode)((int)mode + 1) : (Firemode)(0);
-
-            /*int nextMode = Array.IndexOf(allModes, mode) + 1;
-            if (nextMode >= allModes.Length)
-                nextMode = 0;
-
-            return allModes[nextMode];*/
-        }
+        public float attackDelay = -1;
     }
 }
