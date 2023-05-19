@@ -142,6 +142,7 @@ namespace Ultrapain
         public static ConfigPanel v2SecondPanel;
         public static ConfigPanel sisyInstPanel;
         public static ConfigPanel leviathanPanel;
+        public static ConfigPanel somethingWickedPanel;
 
         // GLOBAL ENEMY CONFIG
         public static BoolField friendlyFireDamageOverrideToggle;
@@ -405,6 +406,9 @@ namespace Ultrapain
         public static BoolField leviathanChargeHauntRocketRiding;
 
         public static IntField leviathanTailComboCount;
+
+        // SOMETHING WICKED
+        public static BoolField somethingWickedSpear;
 
 
         /////////// ADD MEEEE
@@ -734,6 +738,7 @@ namespace Ultrapain
             globalEnemyPanel = new ConfigPanel(enemyPanel, "Global enemy tweaks", "globalEnemyPanel");
             new ConfigHeader(enemyPanel, "Common Enemies");
             filthPanel = new ConfigPanel(enemyPanel, "Filth", "filthPanel");
+            somethingWickedPanel = new ConfigPanel(enemyPanel, "Something Wicked", "somethingWickedPanel");
             strayPanel = new ConfigPanel(enemyPanel, "Stray", "strayPanel");
             schismPanel = new ConfigPanel(enemyPanel, "Schism", "schismPanel");
             soliderPanel = new ConfigPanel(enemyPanel, "Soldier", "soliderPanel");
@@ -1519,6 +1524,13 @@ namespace Ultrapain
             leviathanChargeHauntRocketRiding = new BoolField(leviathanChargedDiv, "Target ridden rockets", "leviathanChargeHauntRocketRiding", true);
             new ConfigHeader(leviathanPanel, "Tail Swing Combo");
             leviathanTailComboCount = new IntField(leviathanPanel, "Tail swing count", "leviathanTailComboCount", 3, 1, int.MaxValue);
+
+            // SOMETHING WICKED
+            somethingWickedSpear = new BoolField(somethingWickedPanel, "Throw hook", "somethingWickedSpear", true);
+            somethingWickedSpear.onValueChange += (BoolField.BoolValueChangeEvent e) =>
+            {
+                dirtyField = true;
+            };
 
             config.Flush();
             //config.LogDuplicateGUID();
