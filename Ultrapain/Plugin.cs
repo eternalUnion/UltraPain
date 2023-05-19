@@ -105,6 +105,7 @@ namespace Ultrapain
         public static GameObject ferryman;
         public static GameObject minosPrime;
         //public static GameObject maliciousFace;
+        public static GameObject somethingWicked;
 
         public static GameObject enrageEffect;
         public static GameObject v2flashUnparryable;
@@ -210,6 +211,8 @@ namespace Ultrapain
             parryableFlash = LoadObject<GameObject>("Assets/Particles/Flashes/Flash.prefab");
             //Assets/Prefabs/Attacks and Projectiles/Spear.prefab
             hideousMassSpear = LoadObject<GameObject>("Assets/Prefabs/Attacks and Projectiles/Spear.prefab");
+            //Assets/Prefabs/Enemies/Wicked.prefab
+            somethingWicked = LoadObject<GameObject>("Assets/Prefabs/Enemies/Wicked.prefab");
 
             //Assets/Prefabs/Effects/Charge Effect.prefab
             chargeEffect = LoadObject<GameObject>("Assets/Prefabs/Effects/Charge Effect.prefab");
@@ -565,11 +568,15 @@ namespace Ultrapain
             harmonyTweaks.Patch(GetMethod<LeviathanHead>("ProjectileBurstStart"), prefix: GetHarmonyMethod(GetMethod<Leviathan_ProjectileBurstStart>("Prefix")));
             harmonyTweaks.Patch(GetMethod<LeviathanHead>("FixedUpdate"), prefix: GetHarmonyMethod(GetMethod<Leviathan_FixedUpdate>("Prefix")));
 
-            // ADDME
             if (ConfigManager.somethingWickedSpear.value)
             {
                 harmonyTweaks.Patch(GetMethod<Wicked>("Start"), postfix: GetHarmonyMethod(GetMethod<SomethingWicked_Start>("Postfix")));
                 harmonyTweaks.Patch(GetMethod<Wicked>("GetHit"), postfix: GetHarmonyMethod(GetMethod<SomethingWicked_GetHit>("Postfix")));
+            }
+            if(ConfigManager.somethingWickedSpawnOn43.value)
+            {
+                harmonyTweaks.Patch(GetMethod<ObjectActivator>("Activate"), prefix: GetHarmonyMethod(GetMethod<ObjectActivator_Activate>("Prefix")));
+                harmonyTweaks.Patch(GetMethod<Wicked>("GetHit"), postfix: GetHarmonyMethod(GetMethod<JokeWicked_GetHit>("Postfix")));
             }
 
             // ADDME

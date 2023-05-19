@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 namespace Ultrapain.Patches
 {
@@ -82,6 +83,57 @@ namespace Ultrapain.Patches
 
             if (flag.spear != null)
                 GameObject.Destroy(flag.spear);
+        }
+    }
+
+    class JokeWicked : MonoBehaviour
+    {
+        void OnDestroy()
+        {
+            MusicManager.Instance.ForceStartMusic();
+        }
+    }
+
+    class JokeWicked_GetHit
+    {
+        static void Postfix(Wicked __instance)
+        {
+            if (__instance.GetComponent<JokeWicked>() == null)
+                return;
+
+            GameObject.Destroy(__instance.gameObject);
+        }
+    }
+
+    class ObjectActivator_Activate
+    {
+        static bool Prefix(ObjectActivator __instance)
+        {
+            if (SceneManager.GetActiveScene().name != "38748a67bc9e67a43956a92f87d1e742")
+                return true;
+
+            if(__instance.name == "Scream")
+            {
+                GameObject goreZone = new GameObject();
+                goreZone.AddComponent<GoreZone>();
+
+                Vector3 spawnPos = new Vector3(86.7637f, -39.9667f, 635.7572f);
+                if (Physics.Raycast(spawnPos + Vector3.up, Vector3.down, out RaycastHit hit, 100f, new LayerMask() { value = (1 << 8) | (1 << 24) }, QueryTriggerInteraction.Ignore))
+                    spawnPos = hit.point;
+
+                GameObject wicked = GameObject.Instantiate(Plugin.somethingWicked, spawnPos, Quaternion.identity, goreZone.transform); ;
+                wicked.AddComponent<JokeWicked>();
+
+                Wicked comp = wicked.GetComponent<Wicked>();
+                comp.patrolPoints = new Transform[] { __instance.transform };
+                wicked.AddComponent<JokeWicked>();
+            }
+            else if(__instance.name == "Hint 1")
+            {
+                return false;
+            }
+
+            return true;
         }
     }
 }

@@ -409,7 +409,7 @@ namespace Ultrapain
 
         // SOMETHING WICKED
         public static BoolField somethingWickedSpear;
-
+        public static BoolField somethingWickedSpawnOn43;
 
         /////////// ADD MEEEE
         // GABRIEL SECOND
@@ -1531,6 +1531,13 @@ namespace Ultrapain
             {
                 dirtyField = true;
             };
+            somethingWickedSpawnOn43 = new BoolField(somethingWickedPanel, "Spawn on 4-3", "somethingWickedSpawnOn43", true);
+            somethingWickedSpawnOn43.onValueChange += (BoolField.BoolValueChangeEvent e) =>
+            {
+                dirtyField = true;
+            };
+            // hehe
+            somethingWickedSpawnOn43.hidden = true;
 
             config.Flush();
             //config.LogDuplicateGUID();
