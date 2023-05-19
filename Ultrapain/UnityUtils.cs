@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Xml.Linq;
 using UnityEngine;
 
@@ -6,6 +8,8 @@ namespace Ultrapain
 {
     public static class UnityUtils
     {
+        public static LayerMask envLayer = new LayerMask() { value = (1 << 8) | (1 << 24) };
+
         public static List<T> InsertFill<T>(this List<T> list, int index, T obj)
         {
             if (index > list.Count)
@@ -90,6 +94,44 @@ namespace Ultrapain
             }
 
             return null;
+        }
+
+        public static List<Tuple<EnemyIdentifier, float>> GetClosestEnemies(Vector3 sourcePosition, int enemyCount, Func<EnemyIdentifier, bool> validator)
+        {
+            List<Tuple<EnemyIdentifier, float>> targetEnemies = new List<Tuple<EnemyIdentifier, float>>();
+
+            foreach (GameObject enemy in GameObject.FindGameObjectsWithTag("Enemy"))
+            {
+                float sqrMagnitude = (enemy.transform.position - sourcePosition).sqrMagnitude;
+                if (targetEnemies.Count < enemyCount || sqrMagnitude < targetEnemies.Last().Item2)
+                {
+                    EnemyIdentifier eid = enemy.GetComponent<EnemyIdentifier>();
+                    if (eid == null || eid.dead || eid.blessed)
+                        continue;
+
+                    if (Physics.Raycast(sourcePosition, enemy.transform.position - sourcePosition, out RaycastHit hit, Vector3.Distance(sourcePosition, enemy.transform.position) - 0.5f, envLayer))
+                        continue;
+
+                    if (!validator(eid))
+                        continue;
+
+                    if (targetEnemies.Count == 0)
+                    {
+                        targetEnemies.Add(new Tuple<EnemyIdentifier, float>(eid, sqrMagnitude));
+                        continue;
+                    }
+
+                    int insertionPoint = targetEnemies.Count;
+                    while (insertionPoint != 0 && targetEnemies[insertionPoint - 1].Item2 > sqrMagnitude)
+                        insertionPoint -= 1;
+
+                    targetEnemies.Insert(insertionPoint, new Tuple<EnemyIdentifier, float>(eid, sqrMagnitude));
+                    if (targetEnemies.Count > enemyCount)
+                        targetEnemies.RemoveAt(enemyCount);
+                }
+            }
+
+            return targetEnemies;
         }
     }
 }

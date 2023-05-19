@@ -606,6 +606,9 @@ namespace Ultrapain
                 harmonyTweaks.Patch(GetMethod<Explosion>("Collide"), prefix: GetHarmonyMethod(GetMethod<Explosion_CollideOrbital>("Prefix")));
             }
 
+            harmonyTweaks.Patch(GetMethod<Harpoon>("Start"), postfix: GetHarmonyMethod(GetMethod<Harpoon_Start>("Postfix")));
+            if(ConfigManager.screwDriverHomeToggle.value)
+                harmonyTweaks.Patch(GetMethod<Harpoon>("Punched"), postfix: GetHarmonyMethod(GetMethod<Harpoon_Punched>("Postfix")));
             if(ConfigManager.screwDriverSplitToggle.value)
                 harmonyTweaks.Patch(GetMethod<Harpoon>("OnTriggerEnter"), prefix: GetHarmonyMethod(GetMethod<Harpoon_OnTriggerEnter_Patch>("Prefix")));
         }

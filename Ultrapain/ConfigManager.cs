@@ -172,6 +172,10 @@ namespace Ultrapain
         public static IntField screwDriverCoinSplitCount;
         public static IntField screwDriverGrenadeSplitCount;
 
+        public static BoolField screwDriverHomeToggle;
+        public static BoolField screwDriverHomeDestroyMagnets;
+        public static FloatField screwDriverHomePierceDamage;
+
         // CERBERUS
         public static BoolField cerberusDashToggle;
         public static IntField cerberusTotalDashCount;
@@ -744,8 +748,21 @@ namespace Ultrapain
                 screwDriverSplitDiv.interactable = e.value;
                 dirtyField = true;
             };
+            screwDriverSplitToggle.TriggerValueChangeEvent();
             screwDriverCoinSplitCount = new IntField(screwDriverSplitDiv, "Coin split count", "screwDriverCoinSplitCount", 5, 2, int.MaxValue);
             screwDriverGrenadeSplitCount = new IntField(screwDriverSplitDiv, "Grenade split count", "screwDriverGrenadeSplitCount", 5);
+
+            new ConfigHeader(playerPanel, "Screw Driver Home To Magnet Enemies");
+            ConfigDivision screwDriverHomeDiv = new ConfigDivision(playerPanel, "screwDriverHomeDiv");
+            screwDriverHomeToggle = new BoolField(playerPanel, "Enabled", "screwDriverHomeToggle", true);
+            screwDriverHomeToggle.onValueChange += (BoolField.BoolValueChangeEvent e) =>
+            {
+                screwDriverHomeDiv.interactable = e.value;
+                dirtyField = true;
+            };
+            screwDriverHomeToggle.TriggerValueChangeEvent();
+            screwDriverHomeDestroyMagnets = new BoolField(screwDriverHomeDiv, "Destroy magnets on attach", "screwDriverHomeDestroyMagnets", true);
+            screwDriverHomePierceDamage = new FloatField(screwDriverHomeDiv, "Pierce damage", "screwDriverHomePierceDamage", 2f, 0f, float.MaxValue);
 
             // ENEMY PANEL
             globalEnemyPanel = new ConfigPanel(enemyPanel, "Global enemy tweaks", "globalEnemyPanel");

@@ -8,6 +8,107 @@ using UnityEngine.UIElements.UIR;
 
 namespace Ultrapain.Patches
 {
+    class DrillFlag : MonoBehaviour
+    {
+        public Harpoon drill;
+        public Rigidbody rb;
+        public List<Tuple<EnemyIdentifier, float>> targetEids = new List<Tuple<EnemyIdentifier, float>>();
+        public List<EnemyIdentifier> piercedEids = new List<EnemyIdentifier>();
+        public Transform currentTargetTrans;
+        public Collider currentTargetCol;
+        public EnemyIdentifier currentTargetEid;
+
+        void Awake()
+        {
+            if (drill == null)
+                drill = GetComponent<Harpoon>();
+            if (rb == null)
+                rb = GetComponent<Rigidbody>();
+        }
+
+        void Update()
+        {
+            if(targetEids != null)
+            {
+                if (currentTargetEid == null || currentTargetEid.dead || currentTargetEid.blessed || currentTargetEid.stuckMagnets.Count == 0)
+                {
+                    currentTargetEid = null;
+                    foreach (Tuple<EnemyIdentifier, float> item in targetEids)
+                    {
+                        EnemyIdentifier eid = item.Item1;
+                        if (eid == null || eid.dead || eid.blessed || eid.stuckMagnets.Count == 0)
+                            continue;
+                        currentTargetEid = eid;
+                        currentTargetTrans = eid.transform;
+                        if (currentTargetEid.gameObject.TryGetComponent(out Collider col))
+                            currentTargetCol = col;
+                        break;
+                    }
+                }
+
+                if(currentTargetEid != null)
+                {
+                    transform.LookAt(currentTargetCol == null ? currentTargetTrans.position : currentTargetCol.bounds.center);
+                    rb.velocity = transform.forward * 150f;
+                }
+                else
+                {
+                    targetEids.Clear();
+                }
+            }
+        }
+    }
+
+    class Harpoon_Start
+    {
+        static void Postfix(Harpoon __instance)
+        {
+            if (!__instance.drill)
+                return;
+            DrillFlag flag = __instance.gameObject.AddComponent<DrillFlag>();
+            flag.drill = __instance;
+        }
+    }
+
+    class Harpoon_Punched
+    {
+        static void Postfix(Harpoon __instance, EnemyIdentifierIdentifier ___target)
+        {
+            if (!__instance.drill)
+                return;
+
+            DrillFlag flag = __instance.GetComponent<DrillFlag>();
+            if (flag == null)
+                return;
+
+            if(___target != null && ___target.eid != null)
+                flag.targetEids = UnityUtils.GetClosestEnemies(__instance.transform.position, 3, enemy =>
+                {
+                    if (enemy == ___target.eid)
+                        return false;
+
+                    foreach (Magnet m in enemy.stuckMagnets)
+                    {
+                        if (m != null)
+                            return true;
+                    }
+
+                    return false;
+                });
+            else
+                flag.targetEids = UnityUtils.GetClosestEnemies(__instance.transform.position, 3, enemy =>
+                {
+                    foreach(Magnet m in enemy.stuckMagnets)
+                    {
+                        if (m != null)
+                            return true;
+                    }
+
+                    return false;
+                });
+        }
+    }
+
     class Harpoon_OnTriggerEnter_Patch
     {
         public static float forwardForce = 10f;
@@ -17,12 +118,59 @@ namespace Ultrapain.Patches
         private static Harpoon lastHarpoon;
         static bool Prefix(Harpoon __instance, Collider __0)
         {
-            if (!__instance.drill || __instance == lastHarpoon)
+            if (!__instance.drill)
                 return true;
+
+            if(__0.TryGetComponent(out EnemyIdentifierIdentifier eii))
+            {
+                if (eii.eid == null)
+                    return true;
+                EnemyIdentifier eid = eii.eid;
+
+                DrillFlag flag = __instance.GetComponent<DrillFlag>();
+                if (flag == null)
+                    return true;
+
+                if(flag.currentTargetEid != null)
+                {
+                    if(flag.currentTargetEid == eid)
+                    {
+                        flag.targetEids.Clear();
+                        flag.piercedEids.Clear();
+                        flag.currentTargetEid = null;
+                        flag.currentTargetTrans = null;
+                        flag.currentTargetCol = null;
+
+                        if(ConfigManager.screwDriverHomeDestroyMagnets.value)
+                        {
+                            foreach (Magnet h in eid.stuckMagnets)
+                                if (h != null)
+                                    GameObject.Destroy(h.gameObject);
+                            eid.stuckMagnets.Clear();
+                        }
+                        return true;
+                    }
+                    else if (!flag.piercedEids.Contains(eid))
+                    {
+                        if (ConfigManager.screwDriverHomePierceDamage.value > 0)
+                        {
+                            eid.hitter = "harpoon";
+                            eid.DeliverDamage(__0.gameObject, __instance.transform.forward, __instance.transform.position, ConfigManager.screwDriverHomePierceDamage.value, false, 0, null, false);
+                            flag.piercedEids.Add(eid);
+                        }
+                        return false;
+                    }
+
+                    return false;
+                }
+            }
 
             Coin sourceCoin = __0.gameObject.GetComponent<Coin>();
             if (sourceCoin != null)
             {
+                if (__instance == lastHarpoon)
+                    return true;
+
                 Quaternion currentRotation = Quaternion.Euler(0, __0.transform.eulerAngles.y, 0);
                 int totalCoinCount = ConfigManager.screwDriverCoinSplitCount.value;
                 float rotationPerIteration = 360f / totalCoinCount;
@@ -48,6 +196,9 @@ namespace Ultrapain.Patches
             Grenade sourceGrn = __0.GetComponent<Grenade>();
             if(sourceGrn != null)
             {
+                if (__instance == lastHarpoon)
+                    return true;
+
                 Quaternion currentRotation = Quaternion.Euler(0, __0.transform.eulerAngles.y, 0);
                 int totalGrenadeCount = ConfigManager.screwDriverCoinSplitCount.value;
                 float rotationPerIteration = 360f / totalGrenadeCount;
