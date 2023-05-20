@@ -3,7 +3,7 @@ name: Feature Request
 about: Post any ideas about the mod and it may get implemented
 title: "[FEATURE] Your idea goes here"
 labels: feature request
-assignees: eternalUnion
+assignees: eternalUnion, UntotenTheo
 
 ---
 
