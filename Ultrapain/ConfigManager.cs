@@ -119,6 +119,20 @@ namespace Ultrapain
         public static FloatField orbStrikeMaliciousCannonExplosionDamageMultiplier;
         public static FloatField orbStrikeMaliciousCannonExplosionSizeMultiplier;
 
+        // PLAYER STAT EDITOR
+        public static ConfigPanel playerStatEditorPanel;
+        public static FloatField staminaRegSpeedMulti;
+        public static FloatField chargedRevRegSpeedMulti;
+        public static FloatField coinRegSpeedMulti;
+        public static FloatField sharpshooterRegSpeedMulti;
+        public static FloatField nailgunAmmoRegSpeedMulti;
+        public static FloatField sawAmmoRegSpeedMulti;
+        public static FloatField nailgunHeatsinkRegSpeedMulti;
+        public static FloatField sawHeatsinkRegSpeedMulti;
+        public static FloatField railcannonRegSpeedMulti;
+        public static FloatField rocketFreezeRegSpeedMulti;
+        public static FloatField rocketCannonballRegSpeedMulti;
+
         // ENEMY PANEL
         public static ConfigPanel globalEnemyPanel;
         public static ConfigPanel cerberusPanel;
@@ -523,6 +537,45 @@ namespace Ultrapain
             };
 
             // PLAYER PANEL
+
+            // PLAYER STAT EDITOR
+            playerStatEditorPanel = new ConfigPanel(playerPanel, "Player stat editor", "playerStatEditorPanel");
+            new ConfigHeader(playerStatEditorPanel, "Movement");
+            staminaRegSpeedMulti = new FloatField(playerStatEditorPanel, "Stamina regen speed", "staminaRegSpeedMulti", 1f, 0.01f, float.MaxValue);
+            new ConfigHeader(playerStatEditorPanel, "Revolver");
+            chargedRevRegSpeedMulti = new FloatField(playerStatEditorPanel, "Charged revolver regen speed", "chargedRevRegSpeedMulti", 1f, 0.01f, float.MaxValue);
+            coinRegSpeedMulti = new FloatField(playerStatEditorPanel, "Coin regen speed", "coinRegSpeedMulti", 1f, 0.01f, float.MaxValue);
+            sharpshooterRegSpeedMulti = new FloatField(playerStatEditorPanel, "Sharpshooter regen speed", "sharpshooterRegSpeedMulti", 1f, 0.01f, float.MaxValue);
+            new ConfigHeader(playerStatEditorPanel, "Nailgun/Saw Launcher");
+            nailgunAmmoRegSpeedMulti = new FloatField(playerStatEditorPanel, "Nailgun ammo regen speed", "nailgunAmmoRegSpeedMulti", 1f, 0.01f, float.MaxValue);
+            nailgunHeatsinkRegSpeedMulti = new FloatField(playerStatEditorPanel, "Nailgun heatsink regen speed", "nailgunHeatsinkRegSpeedMulti", 1f, 0.01f, float.MaxValue);
+            sawAmmoRegSpeedMulti = new FloatField(playerStatEditorPanel, "Saw ammo regen speed", "sawAmmoRegSpeedMulti", 1f, 0.01f, float.MaxValue);
+            sawHeatsinkRegSpeedMulti = new FloatField(playerStatEditorPanel, "Saw heatsink regen speed", "sawHeatsinkRegSpeedMulti", 1f, 0.01f, float.MaxValue);
+            new ConfigHeader(playerStatEditorPanel, "Railcannon");
+            railcannonRegSpeedMulti = new FloatField(playerStatEditorPanel, "Railcannon charge speed", "railcannonRegSpeedMulti", 1f, 0.01f, float.MaxValue);
+            new ConfigHeader(playerStatEditorPanel, "Rocket Freeze/Cannonball");
+            rocketFreezeRegSpeedMulti = new FloatField(playerStatEditorPanel, "Rocket freeze regen speed", "rocketFreezeRegSpeedMulti", 1f, 0.01f, float.MaxValue);
+            rocketCannonballRegSpeedMulti = new FloatField(playerStatEditorPanel, "Cannonball regen speed", "rocketCannonballRegSpeedMulti", 1f, 0.01f, float.MaxValue);
+
+            void AddDirtyFlagToFloatFieldValueChange(FloatField field)
+            {
+                field.onValueChange += (FloatField.FloatValueChangeEvent e) =>
+                {
+                    dirtyField = true;
+                };
+            }
+            AddDirtyFlagToFloatFieldValueChange(staminaRegSpeedMulti);
+            AddDirtyFlagToFloatFieldValueChange(chargedRevRegSpeedMulti);
+            AddDirtyFlagToFloatFieldValueChange(coinRegSpeedMulti);
+            AddDirtyFlagToFloatFieldValueChange(sharpshooterRegSpeedMulti);
+            AddDirtyFlagToFloatFieldValueChange(nailgunAmmoRegSpeedMulti);
+            AddDirtyFlagToFloatFieldValueChange(nailgunHeatsinkRegSpeedMulti);
+            AddDirtyFlagToFloatFieldValueChange(sawAmmoRegSpeedMulti);
+            AddDirtyFlagToFloatFieldValueChange(sawHeatsinkRegSpeedMulti);
+            AddDirtyFlagToFloatFieldValueChange(railcannonRegSpeedMulti);
+            AddDirtyFlagToFloatFieldValueChange(rocketFreezeRegSpeedMulti);
+            AddDirtyFlagToFloatFieldValueChange(rocketCannonballRegSpeedMulti);
+
             new ConfigHeader(playerPanel, "Rocket Boosting");
             ConfigDivision rocketBoostDiv = new ConfigDivision(playerPanel, "rocketBoostDiv");
             rocketBoostToggle = new BoolField(playerPanel, "Enabled", "rocketBoostToggle", true);
