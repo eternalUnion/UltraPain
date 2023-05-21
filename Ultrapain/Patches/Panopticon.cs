@@ -156,4 +156,46 @@ namespace Ultrapain.Patches
             }
         }
     }
+
+    class Panopticon_SpawnFleshDrones
+    {
+        struct StateInfo
+        {
+            public GameObject template;
+            public bool changedToEye;
+        }
+
+        static bool Prefix(FleshPrison __instance, int ___difficulty, int ___currentDrone, out StateInfo __state)
+        {
+            __state = new StateInfo();
+            if (!__instance.altVersion)
+                return true;
+
+            if (___currentDrone % 2 == 0)
+            {
+                __state.template = __instance.skullDrone;
+                __state.changedToEye = true;
+                __instance.skullDrone = __instance.fleshDrone;
+            }
+            else
+            {
+                __state.template = __instance.fleshDrone;
+                __state.changedToEye = false;
+                __instance.fleshDrone = __instance.skullDrone;
+            }
+
+            return true;
+        }
+
+        static void Postfix(FleshPrison __instance, StateInfo __state)
+        {
+            if (!__instance.altVersion)
+                return;
+
+            if (__state.changedToEye)
+                __instance.skullDrone = __state.template;
+            else
+                __instance.fleshDrone = __state.template;
+        }
+    }
 }

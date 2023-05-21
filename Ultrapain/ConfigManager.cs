@@ -409,6 +409,7 @@ namespace Ultrapain
 
         // PANOPTICON
         public static BoolField panopticonFullPhase;
+        public static BoolField panopticonBalanceEyes;
         public static BoolField panopticonBlackholeProj;
         public static BoolField panopticonAxisBeam;
         public static FloatField panopticonAxisBeamSizeMulti;
@@ -1538,6 +1539,11 @@ namespace Ultrapain
             // PANOPTICON
             panopticonFullPhase = new BoolField(panopticonPanel, "Full fight", "panopticonFullPhase", true);
             panopticonFullPhase.onValueChange += (BoolField.BoolValueChangeEvent e) =>
+            {
+                dirtyField = true;
+            };
+            panopticonBalanceEyes = new BoolField(panopticonPanel, "Balance eyes", "panopticonBalanceEyes", true);
+            panopticonBalanceEyes.onValueChange += (BoolField.BoolValueChangeEvent e) =>
             {
                 dirtyField = true;
             };
