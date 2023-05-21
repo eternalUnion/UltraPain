@@ -99,6 +99,7 @@ namespace Ultrapain
         public static GameObject explosionWaveKnuckleblaster;
         public static GameObject chargeEffect;
         public static GameObject maliciousFaceProjectile;
+        public static GameObject sisyphusDestroyExplosion;
 
         //public static GameObject idol;
         public static GameObject ferryman;
@@ -207,6 +208,8 @@ namespace Ultrapain
             ricochetSfx = LoadObject<GameObject>("Assets/Particles/SoundBubbles/Ricochet.prefab");
             //Assets/Particles/Flashes/Flash.prefab
             parryableFlash = LoadObject<GameObject>("Assets/Particles/Flashes/Flash.prefab");
+            //Assets/Prefabs/Attacks and Projectiles/Explosions/Explosion Sisyphus Prime Charged.prefab
+            sisyphusDestroyExplosion = LoadObject<GameObject>("Assets/Prefabs/Attacks and Projectiles/Explosions/Explosion Sisyphus Prime Charged.prefab");
 
             //Assets/Prefabs/Effects/Charge Effect.prefab
             chargeEffect = LoadObject<GameObject>("Assets/Prefabs/Effects/Charge Effect.prefab");
@@ -568,6 +571,8 @@ namespace Ultrapain
                 harmonyTweaks.Patch(GetMethod<FleshPrison>("SpawnInsignia"), prefix: GetHarmonyMethod(GetMethod<Panopticon_SpawnInsignia>("Prefix")));
             if (ConfigManager.panopticonSpinAttackToggle.value)
                 harmonyTweaks.Patch(GetMethod<FleshPrison>("HomingProjectileAttack"), postfix: GetHarmonyMethod(GetMethod<Panopticon_HomingProjectileAttack>("Postfix")));
+            if (ConfigManager.panopticonBlackholeProj.value)
+                harmonyTweaks.Patch(GetMethod<FleshPrison>("SpawnBlackHole"), postfix: GetHarmonyMethod(GetMethod<Panopticon_SpawnBlackHole>("Postfix")));
 
             // ADDME
             /*
