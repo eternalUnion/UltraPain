@@ -24,9 +24,9 @@ namespace Ultrapain.Patches
         {
             insignias.Clear();
 
-            int projectileCount = ConfigManager.fleshPrisonSpinAttackCount.value;
+            int projectileCount = (prison.altVersion ? ConfigManager.panopticonSpinAttackCount.value : ConfigManager.fleshPrisonSpinAttackCount.value);
             float anglePerProjectile = 360f / projectileCount;
-            float distance = ConfigManager.fleshPrisonSpinAttackDistance.value;
+            float distance = (prison.altVersion ? ConfigManager.panopticonSpinAttackDistance.value : ConfigManager.fleshPrisonSpinAttackDistance.value);
 
             Vector3 currentNormal = Vector3.forward;
             for (int i = 0; i < projectileCount; i++)
@@ -40,9 +40,9 @@ namespace Ultrapain.Patches
                 comp.predictiveVersion = null;
                 comp.otherParent = transform;
                 comp.target = insignia.transform;
-                comp.windUpSpeedMultiplier = ConfigManager.fleshPrisonSpinAttackActivateSpeed.value * speedMod;
-                comp.damage = (int)(ConfigManager.fleshPrisonSpinAttackDamage.value * damageMod);
-                float size = Mathf.Abs(ConfigManager.fleshPrisonSpinAttackSize.value);
+                comp.windUpSpeedMultiplier = (prison.altVersion ? ConfigManager.panopticonSpinAttackActivateSpeed.value : ConfigManager.fleshPrisonSpinAttackActivateSpeed.value) * speedMod;
+                comp.damage = (int)((prison.altVersion ? ConfigManager.panopticonSpinAttackDamage.value : ConfigManager.fleshPrisonSpinAttackDamage.value) * damageMod);
+                float size = Mathf.Abs(prison.altVersion ? ConfigManager.panopticonSpinAttackSize.value : ConfigManager.fleshPrisonSpinAttackSize.value);
                 insignia.transform.localScale = new Vector3(size, insignia.transform.localScale.y, size);
                 insignias.Add(comp);
                 currentNormal = Quaternion.Euler(0, anglePerProjectile, 0) * currentNormal;
@@ -50,13 +50,16 @@ namespace Ultrapain.Patches
         }
 
         FieldInfo inAction;
+        public float anglePerSecond = 1f;
         void Start()
         {
             SpawnInsignias();
             inAction = typeof(FleshPrison).GetField("inAction", BindingFlags.Instance | BindingFlags.NonPublic);
+            anglePerSecond = prison.altVersion ? ConfigManager.panopticonSpinAttackTurnSpeed.value : ConfigManager.fleshPrisonSpinAttackTurnSpeed.value;
+            if (UnityEngine.Random.RandomRangeInt(0, 100) < 50)
+                anglePerSecond *= -1;
         }
 
-        public float anglePerSecond = ConfigManager.fleshPrisonSpinAttackTurnSpeed.value;
         bool markedForDestruction = false;
         void Update()
         {

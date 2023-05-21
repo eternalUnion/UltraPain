@@ -103,12 +103,31 @@ namespace Ultrapain.Patches
             gameObject.transform.rotation = yInsigniaRotation.targetRotation = yRot;
             zInsignia.transform.rotation = zInsigniaRotation.targetRotation = zRot;
 
+            xInsignia.transform.localScale *= ConfigManager.panopticonAxisBeamSizeMulti.value;
+            zInsignia.transform.localScale *= ConfigManager.panopticonAxisBeamSizeMulti.value;
+
             if (___fleshDroneCooldown < 1f)
             {
                 ___fleshDroneCooldown = 1f;
             }
 
             return false;
+        }
+    }
+
+    class Panopticon_HomingProjectileAttack
+    {
+        static void Postfix(FleshPrison __instance, EnemyIdentifier ___eid)
+        {
+            if (!__instance.altVersion)
+                return;
+
+            GameObject obj = new GameObject();
+            obj.transform.position = __instance.transform.position + Vector3.up;
+            FleshPrisonRotatingInsignia flag = obj.AddComponent<FleshPrisonRotatingInsignia>();
+            flag.prison = __instance;
+            flag.damageMod = ___eid.totalDamageModifier;
+            flag.speedMod = ___eid.totalSpeedModifier;
         }
     }
 }

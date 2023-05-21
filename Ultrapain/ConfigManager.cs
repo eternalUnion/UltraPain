@@ -410,6 +410,15 @@ namespace Ultrapain
         // PANOPTICON
         public static BoolField panopticonFullPhase;
         public static BoolField panopticonAxisBeam;
+        public static FloatField panopticonAxisBeamSizeMulti;
+
+        public static BoolField panopticonSpinAttackToggle;
+        public static IntField panopticonSpinAttackCount;
+        public static FloatField panopticonSpinAttackTurnSpeed;
+        public static FloatField panopticonSpinAttackActivateSpeed;
+        public static FloatField panopticonSpinAttackSize;
+        public static IntField panopticonSpinAttackDamage;
+        public static FloatField panopticonSpinAttackDistance;
 
         /////////// ADD MEEEE
         // GABRIEL SECOND
@@ -1535,7 +1544,27 @@ namespace Ultrapain
             panopticonAxisBeam.onValueChange += (BoolField.BoolValueChangeEvent e) =>
             {
                 dirtyField = true;
+                panopticonAxisBeamSizeMulti.interactable = e.value;
             };
+            panopticonAxisBeamSizeMulti = new FloatField(panopticonPanel, "Axis beam size multiplier", "panopticonAxisBeamSizeMulti", 0.5f, 0.1f, float.MaxValue);
+            panopticonAxisBeam.TriggerValueChangeEvent();
+
+            new ConfigHeader(panopticonPanel, "Spin Insignia");
+            ConfigDivision panopticonSpinInsigniaDiv = new ConfigDivision(panopticonPanel, "panopticonSpinInsigniaDiv");
+            panopticonSpinAttackToggle = new BoolField(panopticonPanel, "Enabled", "panopticonSpinAttackToggle", true);
+            panopticonSpinAttackToggle.presetLoadPriority = 1;
+            panopticonSpinAttackToggle.onValueChange += (BoolField.BoolValueChangeEvent e) =>
+            {
+                panopticonSpinInsigniaDiv.interactable = e.value;
+                dirtyField = true;
+            };
+            panopticonSpinAttackToggle.TriggerValueChangeEvent();
+            panopticonSpinAttackCount = new IntField(panopticonSpinInsigniaDiv, "Insignia count", "panopticonSpinAttackCount", 5, 1, int.MaxValue);
+            panopticonSpinAttackDamage = new IntField(panopticonSpinInsigniaDiv, "Insignia damage", "panopticonSpinAttackDamage", 10, 0, int.MaxValue);
+            panopticonSpinAttackSize = new FloatField(panopticonSpinInsigniaDiv, "Insignia size", "panopticonSpinAttackSize", 5f, 0f, float.MaxValue);
+            panopticonSpinAttackDistance = new FloatField(panopticonSpinInsigniaDiv, "Circle radius", "panopticonSpinAttackDistance", 60f, 0f, float.MaxValue);
+            panopticonSpinAttackTurnSpeed = new FloatField(panopticonSpinInsigniaDiv, "Turn speed", "panopticonSpinAttackTurnSpeed", 60f, 0f, float.MaxValue);
+            panopticonSpinAttackActivateSpeed = new FloatField(panopticonSpinInsigniaDiv, "Activasion speed", "panopticonSpinAttackActivateSpeed", 0.5f, 0f, float.MaxValue);
 
             config.Flush();
             //config.LogDuplicateGUID();
