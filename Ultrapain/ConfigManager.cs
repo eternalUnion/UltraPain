@@ -142,6 +142,7 @@ namespace Ultrapain
         public static ConfigPanel v2SecondPanel;
         public static ConfigPanel sisyInstPanel;
         public static ConfigPanel leviathanPanel;
+        public static ConfigPanel panopticonPanel;
 
         // GLOBAL ENEMY CONFIG
         public static BoolField friendlyFireDamageOverrideToggle;
@@ -406,6 +407,8 @@ namespace Ultrapain
 
         public static IntField leviathanTailComboCount;
 
+        // PANOPTICON
+        public static BoolField panopticonFullPhase;
 
         /////////// ADD MEEEE
         // GABRIEL SECOND
@@ -757,6 +760,7 @@ namespace Ultrapain
             new ConfigHeader(enemyPanel, "Prime Bosses");
             fleshPrisonPanel = new ConfigPanel(enemyPanel, "Flesh Prison", "fleshPrisonPanel");
             minosPrimePanel = new ConfigPanel(enemyPanel, "Minos Prime", "minosPrimePanel");
+            panopticonPanel = new ConfigPanel(enemyPanel, "Flesh Panopticon", "panopticonPanel");
 
             // GLOBAL ENEMY TWEAKS
             eidStatEditorPanel = new ConfigPanel(globalEnemyPanel, "Enemy stat editor", "eidStatEditorPanel");
@@ -1519,6 +1523,13 @@ namespace Ultrapain
             leviathanChargeHauntRocketRiding = new BoolField(leviathanChargedDiv, "Target ridden rockets", "leviathanChargeHauntRocketRiding", true);
             new ConfigHeader(leviathanPanel, "Tail Swing Combo");
             leviathanTailComboCount = new IntField(leviathanPanel, "Tail swing count", "leviathanTailComboCount", 3, 1, int.MaxValue);
+
+            // PANOPTICON
+            panopticonFullPhase = new BoolField(panopticonPanel, "Full fight", "panopticonFullPhase", true);
+            panopticonFullPhase.onValueChange += (BoolField.BoolValueChangeEvent e) =>
+            {
+                dirtyField = true;
+            };
 
             config.Flush();
             //config.LogDuplicateGUID();
