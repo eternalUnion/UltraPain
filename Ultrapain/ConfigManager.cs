@@ -409,6 +409,7 @@ namespace Ultrapain
 
         // PANOPTICON
         public static BoolField panopticonFullPhase;
+        public static BoolField panopticonAxisBeam;
 
         /////////// ADD MEEEE
         // GABRIEL SECOND
@@ -1527,6 +1528,11 @@ namespace Ultrapain
             // PANOPTICON
             panopticonFullPhase = new BoolField(panopticonPanel, "Full fight", "panopticonFullPhase", true);
             panopticonFullPhase.onValueChange += (BoolField.BoolValueChangeEvent e) =>
+            {
+                dirtyField = true;
+            };
+            panopticonAxisBeam = new BoolField(panopticonPanel, "3 axis insignia", "panopticonAxisBeam", true);
+            panopticonAxisBeam.onValueChange += (BoolField.BoolValueChangeEvent e) =>
             {
                 dirtyField = true;
             };
