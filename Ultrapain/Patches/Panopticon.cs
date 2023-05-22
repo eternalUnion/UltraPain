@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 using UnityEngine;
+using UnityEngine.UIElements;
 
 namespace Ultrapain.Patches
 {
@@ -103,8 +104,8 @@ namespace Ultrapain.Patches
             gameObject.transform.rotation = yInsigniaRotation.targetRotation = yRot;
             zInsignia.transform.rotation = zInsigniaRotation.targetRotation = zRot;
 
-            xInsignia.transform.localScale *= ConfigManager.panopticonAxisBeamSizeMulti.value;
-            zInsignia.transform.localScale *= ConfigManager.panopticonAxisBeamSizeMulti.value;
+            xInsignia.transform.localScale = new Vector3(xInsignia.transform.localScale.x * ConfigManager.panopticonAxisBeamSizeMulti.value, xInsignia.transform.localScale.y, xInsignia.transform.localScale.z * ConfigManager.panopticonAxisBeamSizeMulti.value);
+            zInsignia.transform.localScale = new Vector3(zInsignia.transform.localScale.x * ConfigManager.panopticonAxisBeamSizeMulti.value, zInsignia.transform.localScale.y, zInsignia.transform.localScale.z * ConfigManager.panopticonAxisBeamSizeMulti.value);
 
             if (___fleshDroneCooldown < 1f)
             {
