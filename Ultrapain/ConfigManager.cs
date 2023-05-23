@@ -48,6 +48,7 @@ namespace Ultrapain
         private static ConfigPanel enemyPanel;
         public static BoolField playerTweakToggle;
         private static ConfigPanel playerPanel;
+        private static ConfigPanel levelPanel;
         public static BoolField discordRichPresenceToggle;
         public static BoolField steamRichPresenceToggle;
         public static StringField pluginName;
@@ -58,6 +59,10 @@ namespace Ultrapain
         // MEME PANEL
         public static BoolField enrageSfxToggle;
         public static BoolField funnyDruidKnightSFXToggle;
+
+        // LEVEL PANEL
+        public static BoolField levelDeathPit;
+        public static BoolField levelDeathPitAud;
 
         // PLAYER PANEL
         public static BoolField rocketBoostToggle;
@@ -455,6 +460,9 @@ namespace Ultrapain
             };
             playerTweakToggle.TriggerValueChangeEvent();
 
+            new ConfigHeader(config.rootPanel, "Misc");
+            levelPanel = new ConfigPanel(config.rootPanel, "Level tweaks", "levelPanel");
+
             new ConfigHeader(config.rootPanel, "Difficulty Rich Presence Override", 20);
             discordRichPresenceToggle = new BoolField(config.rootPanel, "Discord rich presence", "discordRichPresenceToggle", false);
             discordRichPresenceToggle.onValueChange += (BoolField.BoolValueChangeEvent e) =>
@@ -509,6 +517,16 @@ namespace Ultrapain
             new ConfigHeader(config.rootPanel, "Danger Zone");
             ButtonField addMissingDefaultPresets = new ButtonField(config.rootPanel, "Add missing default presets", "addMissingDefaultPresets");
             addMissingDefaultPresets.onClick += AddMissingPresets;
+
+            // LEVEL PANEL
+            levelDeathPit = new BoolField(levelPanel, "Pit kills the player", "levelDeathPit", true);
+            levelDeathPit.onValueChange += (BoolField.BoolValueChangeEvent e) =>
+            {
+                dirtyField = true;
+                levelDeathPitAud.interactable = e.value;
+            };
+            levelDeathPitAud = new BoolField(levelPanel, "Play audio on pit death", "levelDeathPitAud", false);
+            levelDeathPit.TriggerValueChangeEvent();
 
             // MEME PANEL
             enrageSfxToggle = new BoolField(memePanel, "Enrage SFX\n(volume warning)", "enrageSfxToggle", false);

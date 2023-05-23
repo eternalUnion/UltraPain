@@ -17,6 +17,7 @@ using UnityEngine.AddressableAssets;
 using UnityEngine.AddressableAssets.ResourceLocators;
 using UnityEngine.ResourceManagement.ResourceLocations;
 using UnityEngine.UIElements;
+using UnityEngine.Networking;
 
 namespace Ultrapain
 {
@@ -54,6 +55,23 @@ namespace Ultrapain
             catch (Exception) { return default(T); }
             
             return Addressables.LoadAsset<T>(obj.Value.First()).WaitForCompletion();
+        }
+
+        public static AudioClip LoadAudioAsset(string relativePath, AudioType audType)
+        {
+            string fullPath = Path.Combine(workingDir, relativePath);
+            if (!File.Exists(fullPath))
+            {
+                Debug.LogWarning($"Could not find resource at {fullPath}");
+                return null;
+            }
+
+            UnityWebRequest req = UnityWebRequestMultimedia.GetAudioClip($"file:\\\\{fullPath}", audType);
+            req.SendWebRequest();
+            while (!req.isDone)
+                ;
+
+            return DownloadHandlerAudioClip.GetContent(req);
         }
 
         public static Vector3 PredictPlayerPosition(Collider safeCollider, float speedMod)
@@ -111,6 +129,7 @@ namespace Ultrapain
         public static GameObject parryableFlash;
 
         public static AudioClip cannonBallChargeAudio;
+        public static AudioClip deathPitFallAud;
 
         public static GameObject rocketLauncherAlt;
         public static GameObject maliciousRailcannon;
@@ -212,6 +231,9 @@ namespace Ultrapain
             chargeEffect = LoadObject<GameObject>("Assets/Prefabs/Effects/Charge Effect.prefab");
             //Assets/Prefabs/Attacks and Projectiles/Hitscan Beams/Malicious Beam.prefab
             maliciousFaceProjectile = LoadObject<GameObject>("Assets/Prefabs/Attacks and Projectiles/Hitscan Beams/Malicious Beam.prefab");
+
+            // assets/audio/pitFallDeath.wav
+            deathPitFallAud = LoadAudioAsset(Path.Combine("assets", "audio", "pitFallDeath.wav"), AudioType.WAV);
         }
 
         public static bool ultrapainDifficulty = false;
@@ -604,6 +626,15 @@ namespace Ultrapain
             }
         }
 
+        private static void PatchAllLevels()
+        {
+            if (ConfigManager.levelDeathPit.value)
+            {
+                harmonyTweaks.Patch(GetMethod<DeathZone>("Start"), postfix: GetHarmonyMethod(GetMethod<DeathZone_Start>("Postfix")));
+                harmonyTweaks.Patch(GetMethod<DeathZone>("GotHit"), prefix: GetHarmonyMethod(GetMethod<DeathZone_GotHit>("Prefix")));
+            }
+        }
+
         private static void PatchAllMemes()
         {
             if (ConfigManager.enrageSfxToggle.value)
@@ -647,6 +678,7 @@ namespace Ultrapain
 
             PatchAllEnemies();
             PatchAllPlayers();
+            PatchAllLevels();
             PatchAllMemes();
             methodsPatched = true;
         }
