@@ -268,6 +268,12 @@ namespace Ultrapain
 
         // STALKER
         public static BoolField stalkerSurviveExplosion;
+        public static BoolField stalkerSpreadHealthRad;
+        public static IntField stalkerSpreadHealthAddition;
+        public static BoolField stalkerSpreadDamageRad;
+        public static IntField stalkerSpreadDamageAddition;
+        public static BoolField stalkerSpreadSpeedRad;
+        public static IntField stalkerSpreadSpeedAddition;
 
         // STRAY
         public static BoolField strayShootToggle;
@@ -1012,10 +1018,13 @@ namespace Ultrapain
             // STALKER
             new ConfigHeader(stalkerPanel, "Survive Explosion");
             stalkerSurviveExplosion = new BoolField(stalkerPanel, "Enabled", "stalkerSurviveExplosion", true);
-            stalkerSurviveExplosion.onValueChange += (BoolField.BoolValueChangeEvent e) =>
-            {
-                dirtyField = true;
-            };
+            new ConfigHeader(stalkerPanel, "Spread Radiance");
+            stalkerSpreadHealthRad = new BoolField(stalkerPanel, "Spread health buff", "stalkerSpreadHealthRad", true);
+            stalkerSpreadHealthAddition = new IntField(stalkerPanel, "Spread health additional level", "stalkerSpreadHealthAddition", 1, 0, int.MaxValue);
+            stalkerSpreadDamageRad = new BoolField(stalkerPanel, "Spread damage buff", "stalkerSpreadDamageRad", true);
+            stalkerSpreadDamageAddition = new IntField(stalkerPanel, "Spread damage additional level", "stalkerSpreadDamageAddition", 1, 0, int.MaxValue);
+            stalkerSpreadSpeedRad = new BoolField(stalkerPanel, "Spread health buff", "stalkerSpreadSpeedRad", true);
+            stalkerSpreadSpeedAddition = new IntField(stalkerPanel, "Spread health additional level", "stalkerSpreadSpeedAddition", 1, 0, int.MaxValue);
 
             // STRAY
             new ConfigHeader(strayPanel, "Shoot Tweak");
