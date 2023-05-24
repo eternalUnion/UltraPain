@@ -1,5 +1,8 @@
 ﻿using HarmonyLib;
 using Sandbox;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.AI;
 
@@ -79,7 +82,8 @@ namespace Ultrapain.Patches
         static void Postfix(MinosPrime __instance, Animator ___anim)
         {
             string stateName = ___anim.GetCurrentAnimatorClipInfo(0)[0].clip.name;
-            if (stateName == "Combo")
+            MinosPrimeFlag flag = __instance.GetComponent<MinosPrimeFlag>();
+            if (stateName == "Combo" || (flag != null && flag.throwingProjectile))
                 return;
 
             Transform player = MonoSingleton<PlayerTracker>.Instance.GetPlayer();
@@ -112,6 +116,164 @@ namespace Ultrapain.Patches
         static void TeleportPostfix(MinosPrime __instance, Animator ___anim, Vector3 __0, Vector3 __1)
         {
             DrawTrail(__instance, ___anim, __1, __0);
+        }
+    }
+
+    class MinosPrimeFlag : MonoBehaviour
+    {
+        void Start()
+        {
+
+        }
+
+        public void ComboExplosion()
+        {
+            GameObject explosion = Instantiate(Plugin.lightningStrikeExplosive, transform.position, Quaternion.identity);
+            foreach(Explosion e in explosion.GetComponentsInChildren<Explosion>())
+            {
+                e.toIgnore.Add(EnemyType.MinosPrime);
+                e.maxSize *= ConfigManager.minosPrimeComboExplosionSize.value;
+                e.speed *= ConfigManager.minosPrimeComboExplosionSize.value;
+                e.damage = (int)(e.damage * ConfigManager.minosPrimeComboExplosionDamage.value);
+            }
+        }
+
+        public void BigExplosion()
+        {
+            GameObject explosion = Instantiate(Plugin.lightningStrikeExplosive, transform.position, Quaternion.identity);
+            foreach (Explosion e in explosion.GetComponentsInChildren<Explosion>())
+            {
+                e.toIgnore.Add(EnemyType.MinosPrime);
+                e.maxSize *= ConfigManager.minosPrimeExplosionSize.value;
+                e.speed *= ConfigManager.minosPrimeExplosionSize.value;
+                e.damage = (int)(e.damage * ConfigManager.minosPrimeExplosionDamage.value);
+            }
+        }
+
+        public bool throwingProjectile = false;
+        public string plannedAttack = "";
+
+        public bool explosionAttack = false;
+    }
+
+    class MinosPrime_Start
+    {
+        static void Postfix(MinosPrime __instance, Animator ___anim, ref bool ___enraged)
+        {
+            if (ConfigManager.minosPrimeEarlyPhaseToggle.value)
+                ___enraged = true;
+            __instance.gameObject.AddComponent<MinosPrimeFlag>();
+
+            if (ConfigManager.minosPrimeComboExplosionToggle.value)
+            {
+                AnimationClip boxing = ___anim.runtimeAnimatorController.animationClips.Where(item => item.name == "Boxing").First();
+                List<UnityEngine.AnimationEvent> boxingEvents = boxing.events.ToList();
+                boxingEvents.Insert(15, new UnityEngine.AnimationEvent() { time = 2.4f, functionName = "ComboExplosion", messageOptions = SendMessageOptions.RequireReceiver });
+                boxing.events = boxingEvents.ToArray();
+            }
+        }
+    }
+
+    class MinosPrime_StopAction
+    {
+        static void Postfix(MinosPrime __instance, EnemyIdentifier ___eid)
+        {
+            MinosPrimeFlag flag = __instance.GetComponent<MinosPrimeFlag>();
+            if (flag == null)
+                return;
+
+            if (flag.plannedAttack != "")
+            {
+                __instance.SendMessage(flag.plannedAttack);
+                flag.plannedAttack = "";
+            }
+        }
+    }
+
+    // aka JUDGEMENT
+    class MinosPrime_Dropkick
+    {
+        static bool Prefix(MinosPrime __instance, EnemyIdentifier ___eid, ref bool ___inAction, Animator ___anim)
+        {
+            MinosPrimeFlag flag = __instance.GetComponent<MinosPrimeFlag>();
+            if (flag == null)
+                return true;
+
+            if (!flag.throwingProjectile)
+            {
+                if (ConfigManager.minosPrimeExplosionToggle.value
+                    && UnityEngine.Random.Range(0, 99.9f) < ConfigManager.minosPrimeExplosionChance.value)
+                {
+                    __instance.TeleportAnywhere();
+                    ___inAction = true;
+                    flag.explosionAttack = true;
+                    ___anim.speed = ___eid.totalSpeedModifier * ConfigManager.minosPrimeExplosionWindupSpeed.value;
+                    ___anim.Play("Outro", 0, 0.5f);
+                    __instance.PlayVoice(new AudioClip[] { __instance.phaseChangeVoice });
+
+                    return false;
+                }
+
+                if (ConfigManager.minosPrimeComboToggle.value)
+                {
+                    flag.throwingProjectile = true;
+                    flag.plannedAttack = "Dropkick";
+                    __instance.SendMessage("ProjectilePunch");
+                }
+
+                return false;
+            }
+            else
+            {
+                if (ConfigManager.minosPrimeComboToggle.value)
+                {
+                    flag.plannedAttack = "ProjectilePunch";
+                    flag.throwingProjectile = false;
+                }
+            }
+
+            return true;
+        }
+    }
+
+    // aka PREPARE THYSELF
+    class MinosPrime_Combo
+    {
+        static float timing = 3f;
+
+        static void Postfix(MinosPrime __instance, EnemyIdentifier ___eid)
+        {
+            if (!ConfigManager.minosPrimeComboToggle.value)
+                return;
+
+            MinosPrimeFlag flag = __instance.GetComponent<MinosPrimeFlag>();
+            if (flag == null)
+                return;
+
+            flag.plannedAttack = "Uppercut";
+        }
+    }
+
+    class MinosPrime_Ascend
+    {
+        static bool Prefix(MinosPrime __instance, EnemyIdentifier ___eid, Animator ___anim, ref bool ___vibrating)
+        {
+            if (___eid.health <= 0)
+                return true;
+
+            MinosPrimeFlag flag = __instance.GetComponent<MinosPrimeFlag>();
+            if (flag == null)
+                return true;
+
+            if (!flag.explosionAttack)
+                return true;
+
+            ___anim.speed = ___eid.totalSpeedModifier;
+            ___vibrating = false;
+            flag.explosionAttack = false;
+            flag.BigExplosion();
+            __instance.Invoke("Uppercut", 0.5f);
+            return false;
         }
     }
 }

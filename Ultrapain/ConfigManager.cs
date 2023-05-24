@@ -313,11 +313,23 @@ namespace Ultrapain
         public static FloatField fleshPrisonSpinAttackDistance;
 
         // MINOS PRIME
+        public static BoolField minosPrimeEarlyPhaseToggle;
+        public static BoolField minosPrimeComboToggle;
         public static BoolField minosPrimeRandomTeleportToggle;
         public static FloatField minosPrimeRandomTeleportMinDistance;
         public static FloatField minosPrimeRandomTeleportMaxDistance;
         public static BoolField minosPrimeTeleportTrail;
         public static FloatField minosPrimeTeleportTrailDuration;
+
+        public static BoolField minosPrimeExplosionToggle;
+        public static FloatSliderField minosPrimeExplosionChance;
+        public static FloatField minosPrimeExplosionWindupSpeed;
+        public static FloatField minosPrimeExplosionSize;
+        public static FloatField minosPrimeExplosionDamage;
+
+        public static BoolField minosPrimeComboExplosionToggle;
+        public static FloatField minosPrimeComboExplosionSize;
+        public static FloatField minosPrimeComboExplosionDamage;
 
         // V2 - FIRST
         public static BoolField v2FirstKnuckleBlasterToggle;
@@ -1271,6 +1283,8 @@ namespace Ultrapain
             fleshPrisonSpinAttackActivateSpeed = new FloatField(fleshPrionSpinAttackDiv, "Activasion speed", "fleshPrisonSpinAttackActivateSpeed", 0.5f, 0f, float.MaxValue);
 
             // MINOS PRIME
+            minosPrimeEarlyPhaseToggle = new BoolField(minosPrimePanel, "Start with phase 2", "minosPrimeEarlyPhaseToggle", true);
+            minosPrimeComboToggle = new BoolField(minosPrimePanel, "Faster combos", "minosPrimeComboToggle", true);
             new ConfigHeader(minosPrimePanel, "Random Teleport Before Shoot");
             ConfigDivision minosPrimeRandomTeleportDiv = new ConfigDivision(minosPrimePanel, "minosPrimeRandomTeleportDiv");
             minosPrimeRandomTeleportToggle = new BoolField(minosPrimePanel, "Enabled", "minosPrimeRandomTeleportToggle", true);
@@ -1291,6 +1305,31 @@ namespace Ultrapain
                 dirtyField = true;
             };
             minosPrimeTeleportTrailDuration = new FloatField(minosPrimePanel, "Duration", "minosPrimeTeleportTrailDuration", 0.5f, 0, float.PositiveInfinity);
+
+            new ConfigHeader(minosPrimePanel, "Combo Explosion Finish");
+            minosPrimeComboExplosionToggle = new BoolField(minosPrimePanel, "Enabled", "minosPrimeComboExplosionToggle", true);
+            minosPrimeComboExplosionSize = new FloatField(minosPrimePanel, "Explosion size multiplier", "minosPrimeComboExplosionSize", 1f, 0f, float.MaxValue);
+            minosPrimeComboExplosionDamage = new FloatField(minosPrimePanel, "Explosion damage multiplier", "minosPrimeComboExplosionDamage", 1f, 0f, float.MaxValue);
+            minosPrimeComboExplosionToggle.onValueChange += (BoolField.BoolValueChangeEvent e) =>
+            {
+                minosPrimeComboExplosionSize.interactable = e.value;
+                minosPrimeComboExplosionDamage.interactable = e.value;
+            };
+            minosPrimeComboExplosionToggle.TriggerValueChangeEvent();
+
+            new ConfigHeader(minosPrimePanel, "Big Explosion Attack");
+            minosPrimeExplosionToggle = new BoolField(minosPrimePanel, "Enabled", "minosPrimeExplosionToggle", true);
+            minosPrimeExplosionChance = new FloatSliderField(minosPrimePanel, "Percent chance", "minosPrimeExplosionChance", new Tuple<float, float>(0, 100), 50, 1);
+            minosPrimeExplosionWindupSpeed = new FloatField(minosPrimePanel, "Windup speed", "minosPrimeExplosionWindupSpeed", 5f, 1f, float.MaxValue);
+            minosPrimeExplosionSize = new FloatField(minosPrimePanel, "Explosion size multiplier", "minosPrimeExplosionSize", 2f, 0f, float.MaxValue);
+            minosPrimeExplosionDamage = new FloatField(minosPrimePanel, "Explosion damage multiplier", "minosPrimeExplosionDamage", 1f, 0f, float.MaxValue);
+            minosPrimeExplosionToggle.onValueChange += (BoolField.BoolValueChangeEvent e) =>
+            {
+                minosPrimeExplosionChance.interactable = e.value;
+                minosPrimeExplosionSize.interactable = e.value;
+                minosPrimeExplosionDamage.interactable = e.value;
+            };
+            minosPrimeExplosionToggle.TriggerValueChangeEvent();
 
             // V2 - FIRST
             new ConfigHeader(v2FirstPanel, "Knuckleblaster");
