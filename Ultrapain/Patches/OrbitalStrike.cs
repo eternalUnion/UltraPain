@@ -13,12 +13,14 @@ namespace Ultrapain.Patches
         public CoinChainList chainList;
         public bool isOrbitalRay = false;
         public bool exploded = false;
+        public float activasionDistance;
     }
 
     public class CoinChainList : MonoBehaviour
     {
         public List<Coin> chainList = new List<Coin>();
         public bool isOrbitalStrike = false;
+        public float activasionDistance;
     }
 
     class Punch_BlastCheck
@@ -43,7 +45,7 @@ namespace Ultrapain.Patches
     {
         static bool Prefix(Explosion __instance, Collider __0, List<Collider> ___hitColliders)
         {
-            if (___hitColliders.Contains(__0) || __instance.transform.parent.GetComponent<OrbitalStrikeFlag>() == null)
+            if (___hitColliders.Contains(__0)/* || __instance.transform.parent.GetComponent<OrbitalStrikeFlag>() == null*/)
                 return true;
 
             Coin coin = __0.GetComponent<Coin>();
@@ -103,11 +105,15 @@ namespace Ultrapain.Patches
             {
                 Coin lastCoin = flag.chainList.LastOrDefault();
                 float distance = Vector3.Distance(__instance.transform.position, lastCoin.transform.position);
-                if (distance >= 20f)
+                if (distance >= ConfigManager.orbStrikeMinDistance.value)
                 {
                     flag.isOrbitalStrike = true;
+                    flag.activasionDistance = distance;
                     if (orbitalBeamFlag != null)
+                    {
                         orbitalBeamFlag.isOrbitalRay = true;
+                        orbitalBeamFlag.activasionDistance = distance;
+                    }
                     Debug.Log("Coin valid for orbital strike");
                 }
             }
@@ -472,7 +478,14 @@ namespace Ultrapain.Patches
             public OrbitalExplosionInfo info = null;
         }
 
-        static bool Prefix(EnemyIdentifier __instance, out StateInfo __state, Vector3 __2)
+        static float CalculateExtraDamage(float distance)
+        {
+            float deltaDistance = (distance - ConfigManager.orbStrikeMinDistance.value) * 0.002f;
+            float additionalDamage = ConfigManager.orbStrikeExtraDamage.value * (deltaDistance / (deltaDistance + 1f));
+            return Mathf.Max(0, additionalDamage);
+        }
+
+        static bool Prefix(EnemyIdentifier __instance, out StateInfo __state, Vector3 __2, ref float __3)
         {
             //if (Coin_ReflectRevolver.shootingCoin == lastExplosiveCoin)
             //    return true;
@@ -499,11 +512,18 @@ namespace Ultrapain.Patches
                 {
                     causeExplosion = true;
                 }
+
+                __3 += CalculateExtraDamage(list.activasionDistance);
+                Debug.Log("Extra damage from orbital: " + CalculateExtraDamage(list.activasionDistance));
             }
-            else if(RevolverBeam_ExecuteHits.isOrbitalRay && RevolverBeam_ExecuteHits.orbitalBeam != null)
+            else if (RevolverBeam_ExecuteHits.isOrbitalRay && RevolverBeam_ExecuteHits.orbitalBeam != null)
             {
-                if(RevolverBeam_ExecuteHits.orbitalBeamFlag != null && !RevolverBeam_ExecuteHits.orbitalBeamFlag.exploded)
+                if (RevolverBeam_ExecuteHits.orbitalBeamFlag != null && !RevolverBeam_ExecuteHits.orbitalBeamFlag.exploded)
+                {
                     causeExplosion = true;
+                    __3 += CalculateExtraDamage(RevolverBeam_ExecuteHits.orbitalBeamFlag.activasionDistance);
+                    Debug.Log("Extra damage from orbital: " + CalculateExtraDamage(RevolverBeam_ExecuteHits.orbitalBeamFlag.activasionDistance));
+                }
             }
 
             if(causeExplosion)
