@@ -133,6 +133,10 @@ namespace Ultrapain
         public static FloatField rocketFreezeRegSpeedMulti;
         public static FloatField rocketCannonballRegSpeedMulti;
 
+        public static IntField maxPlayerHp;
+        public static IntField playerHpSupercharge;
+        public static FloatSliderField hardDamagePercent;
+
         // ENEMY PANEL
         public static ConfigPanel globalEnemyPanel;
         public static ConfigPanel cerberusPanel;
@@ -542,6 +546,10 @@ namespace Ultrapain
             playerStatEditorPanel = new ConfigPanel(playerPanel, "Player stat editor", "playerStatEditorPanel");
             new ConfigHeader(playerStatEditorPanel, "Movement");
             staminaRegSpeedMulti = new FloatField(playerStatEditorPanel, "Stamina regen speed", "staminaRegSpeedMulti", 1f, 0.01f, float.MaxValue);
+            new ConfigHeader(playerStatEditorPanel, "Stats");
+            maxPlayerHp = new IntField(playerStatEditorPanel, "Max HP", "maxPlayerHp", 100, 1, int.MaxValue);
+            playerHpSupercharge = new IntField(playerStatEditorPanel, "Max overcharge HP", "playerHpSupercharge", 200, 1, int.MaxValue);
+            hardDamagePercent = new FloatSliderField(playerStatEditorPanel, "Hard damage taken percent", "hardDamagePercent", new Tuple<float, float>(0, 100), 100);
             new ConfigHeader(playerStatEditorPanel, "Revolver");
             chargedRevRegSpeedMulti = new FloatField(playerStatEditorPanel, "Charged revolver regen speed", "chargedRevRegSpeedMulti", 1f, 0.01f, float.MaxValue);
             coinRegSpeedMulti = new FloatField(playerStatEditorPanel, "Coin regen speed", "coinRegSpeedMulti", 1f, 0.01f, float.MaxValue);
@@ -564,7 +572,24 @@ namespace Ultrapain
                     dirtyField = true;
                 };
             }
+            void AddDirtyFlagToFloatSliderFieldValueChange(FloatSliderField field)
+            {
+                field.onValueChange += (FloatSliderField.FloatSliderValueChangeEvent e) =>
+                {
+                    dirtyField = true;
+                };
+            }
+            void AddDirtyFlagToIntFieldValueChange(IntField field)
+            {
+                field.onValueChange += (IntField.IntValueChangeEvent e) =>
+                {
+                    dirtyField = true;
+                };
+            }
             AddDirtyFlagToFloatFieldValueChange(staminaRegSpeedMulti);
+            AddDirtyFlagToIntFieldValueChange(maxPlayerHp);
+            AddDirtyFlagToIntFieldValueChange(playerHpSupercharge);
+            AddDirtyFlagToFloatSliderFieldValueChange(hardDamagePercent);
             AddDirtyFlagToFloatFieldValueChange(chargedRevRegSpeedMulti);
             AddDirtyFlagToFloatFieldValueChange(coinRegSpeedMulti);
             AddDirtyFlagToFloatFieldValueChange(sharpshooterRegSpeedMulti);

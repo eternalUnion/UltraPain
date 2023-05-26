@@ -1,5 +1,10 @@
-﻿using System;
+﻿using HarmonyLib;
+using Mono.Cecil;
+using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Reflection;
+using System.Reflection.Emit;
 using System.Text;
 using UnityEngine;
 
@@ -89,6 +94,219 @@ namespace Ultrapain.Patches
                 __instance.rocketCannonballCharge = Mathf.Min(1f, __instance.rocketCannonballCharge + __0 * 0.125f * (ConfigManager.rocketCannonballRegSpeedMulti.value - 1f));
 
             return true;
+        }
+    }
+
+    class NewMovement_GetHurt
+    {
+        static bool Prefix(NewMovement __instance, out float __state)
+        {
+            __state = __instance.antiHp;
+            return true;
+        }
+
+        static void Postfix(NewMovement __instance, float __state)
+        {
+            float deltaAnti = __instance.antiHp - __state;
+            if (deltaAnti <= 0)
+                return;
+
+            deltaAnti *= ConfigManager.hardDamagePercent.normalizedValue;
+            __instance.antiHp = __state + deltaAnti;
+        }
+
+        static FieldInfo hpField = typeof(NewMovement).GetField("hp");
+
+        static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions)
+        {
+            List<CodeInstruction> code = new List<CodeInstruction>(instructions);
+
+            for (int i = 0; i < code.Count; i++)
+            {
+                if (code[i].opcode == OpCodes.Ldfld && (FieldInfo)code[i].operand == hpField)
+                {
+                    i += 1;
+                    if (code[i].opcode == OpCodes.Ldc_I4_S)
+                    {
+                        code[i] = new CodeInstruction(OpCodes.Ldc_I4, (Int32)ConfigManager.maxPlayerHp.value);
+                    }
+                }
+                else if (code[i].opcode == OpCodes.Ldc_R4 && (Single)code[i].operand == (Single)99f)
+                {
+                    code[i] = new CodeInstruction(OpCodes.Ldc_R4, (Single)(ConfigManager.maxPlayerHp.value - 1));
+                }
+            }
+
+            return code.AsEnumerable();
+        }
+    }
+
+    class HookArm_FixedUpdate
+    {
+        static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions)
+        {
+            List<CodeInstruction> code = new List<CodeInstruction>(instructions);
+
+            for (int i = 0; i < code.Count; i++)
+            {
+                if (code[i].opcode == OpCodes.Ldc_R4 && (Single)code[i].operand == 66f)
+                {
+                    code[i] = new CodeInstruction(OpCodes.Ldc_R4, (Single)(66f * (ConfigManager.maxPlayerHp.value / 100f)));
+                }
+                else if (code[i].opcode == OpCodes.Ldc_R4 && (Single)code[i].operand == 50f)
+                {
+                    code[i] = new CodeInstruction(OpCodes.Ldc_R4, (Single)(ConfigManager.maxPlayerHp.value / 2));
+                }
+            }
+
+            return code.AsEnumerable();
+        }
+    }
+
+    class NewMovement_ForceAntiHP
+    {
+        static FieldInfo hpField = typeof(NewMovement).GetField("hp");
+
+        static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions)
+        {
+            List<CodeInstruction> code = new List<CodeInstruction>(instructions);
+
+            for (int i = 0; i < code.Count; i++)
+            {
+                if (code[i].opcode == OpCodes.Ldfld && (FieldInfo)code[i].operand == hpField)
+                {
+                    i += 1;
+                    if (i < code.Count && code[i].opcode == OpCodes.Ldc_I4_S && (SByte)code[i].operand == (SByte)100)
+                    {
+                        code[i] = new CodeInstruction(OpCodes.Ldc_I4, (Int32)ConfigManager.maxPlayerHp.value);
+                    }
+                }
+                else if (code[i].opcode == OpCodes.Ldarg_1)
+                {
+                    i += 2;
+                    if (i < code.Count && code[i].opcode == OpCodes.Ldc_R4 && (Single)code[i].operand == 99f)
+                    {
+                        code[i] = new CodeInstruction(OpCodes.Ldc_R4, (Single)(ConfigManager.maxPlayerHp.value - 1));
+                    }
+                }
+                else if (code[i].opcode == OpCodes.Ldc_R4 && (Single)code[i].operand == 100f)
+                {
+                    code[i] = new CodeInstruction(OpCodes.Ldc_R4, (Single)ConfigManager.maxPlayerHp.value);
+                }
+                else if (code[i].opcode == OpCodes.Ldc_R4 && (Single)code[i].operand == 50f)
+                {
+                    code[i] = new CodeInstruction(OpCodes.Ldc_R4, (Single)ConfigManager.maxPlayerHp.value / 2);
+                }
+                else if (code[i].opcode == OpCodes.Ldc_I4_S && (SByte)code[i].operand == (SByte)100)
+                {
+                    code[i] = new CodeInstruction(OpCodes.Ldc_I4, (Int32)ConfigManager.maxPlayerHp.value);
+                }
+            }
+
+            return code.AsEnumerable();
+        }
+    }
+
+    class NewMovement_GetHealth
+    {
+        static bool Prefix(NewMovement __instance, int __0, bool __1, ref AudioSource ___greenHpAud, Canvas ___fullHud)
+        {
+            if (__instance.dead || __instance.exploded)
+                return false;
+
+            int maxHp = Mathf.RoundToInt(ConfigManager.maxPlayerHp.value - __instance.antiHp);
+            int maxDelta = maxHp - __instance.hp;
+            if (maxDelta <= 0)
+                return true;
+
+            if (!__1 && __0 > 5 && MonoSingleton<PrefsManager>.Instance.GetBoolLocal("bloodEnabled", false))
+            {
+                GameObject.Instantiate<GameObject>(__instance.scrnBlood, ___fullHud.transform);
+            }
+
+            __instance.hp = Mathf.Min(maxHp, __instance.hp + __0);
+            __instance.hpFlash.Flash(1f);
+
+            if (!__1 && __0 > 5)
+            {
+                if (___greenHpAud == null)
+                {
+                    ___greenHpAud = __instance.hpFlash.GetComponent<AudioSource>();
+                }
+                ___greenHpAud.Play();
+            }
+
+            return false;
+        }
+    }
+
+    class NewMovement_SuperCharge
+    {
+        static bool Prefix(NewMovement __instance)
+        {
+            __instance.hp = Mathf.Max(ConfigManager.maxPlayerHp.value, ConfigManager.playerHpSupercharge.value);
+            return false;
+        }
+    }
+
+    class NewMovement_Respawn
+    {
+        static void Postfix(NewMovement __instance)
+        {
+            __instance.hp = ConfigManager.maxPlayerHp.value;
+        }
+    }
+
+    class NewMovement_Start
+    {
+        static void Postfix(NewMovement __instance)
+        {
+            __instance.hp = ConfigManager.maxPlayerHp.value;
+        }
+    }
+
+    class HealthBarTracker : MonoBehaviour
+    {
+        public static List<HealthBarTracker> instances = new List<HealthBarTracker>();
+        private HealthBar hb;
+
+        private void Awake()
+        {
+            if (hb == null)
+                hb = GetComponent<HealthBar>();
+
+            instances.Add(this);
+
+            for (int i = instances.Count - 1; i >= 0; i--)
+            {
+                if (instances[i] == null)
+                    instances.RemoveAt(i);
+            }
+        }
+
+        private void OnDestroy()
+        {
+            if (instances.Contains(this))
+                instances.Remove(this);
+        }
+
+        public void SetSliderRange()
+        {
+            if (hb == null)
+                hb = GetComponent<HealthBar>();
+
+            hb.hpSliders[0].maxValue = hb.afterImageSliders[0].maxValue = ConfigManager.maxPlayerHp.value;
+            hb.hpSliders[1].minValue = hb.afterImageSliders[1].minValue = ConfigManager.maxPlayerHp.value;
+            hb.hpSliders[1].maxValue = hb.afterImageSliders[1].maxValue = Mathf.Max(ConfigManager.maxPlayerHp.value, ConfigManager.playerHpSupercharge.value);
+            hb.antiHpSlider.maxValue = ConfigManager.maxPlayerHp.value;
+        }
+    }
+
+    class HealthBar_Start
+    {
+        static void Postfix(HealthBar __instance)
+        {
+            __instance.gameObject.AddComponent<HealthBarTracker>().SetSliderRange();
         }
     }
 }
