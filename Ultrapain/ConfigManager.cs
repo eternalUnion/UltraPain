@@ -251,6 +251,8 @@ namespace Ultrapain
         public static BoolField mindflayerShootTweakToggle;
         public static IntField mindflayerShootAmount;
         public static FloatField mindflayerShootDelay;
+        public static FloatField mindflayerShootInitialSpeed;
+        public static FloatField mindflayerShootTurnSpeed;
         public static FloatSliderField mindflayerProjectileSelfDamageMultiplier;
         public static BoolField mindflayerTeleportComboToggle;
 
@@ -958,6 +960,8 @@ namespace Ultrapain
             mindflayerShootTweakToggle.TriggerValueChangeEvent();
             mindflayerShootAmount = new IntField(mindflayerShootTweakDiv, "Projectile amount", "mindflayerShootProjectileAmount", 20, 0, int.MaxValue);
             mindflayerShootDelay = new FloatField(mindflayerShootTweakDiv, "Delay between shots", "mindflayerShootProjectileDelay", 0.02f, 0f, float.MaxValue);
+            mindflayerShootInitialSpeed = new FloatField(mindflayerShootTweakDiv, "Initial speed", "mindflayerShootInitialSpeed", 10f, 0f, float.MaxValue);
+            mindflayerShootTurnSpeed = new FloatField(mindflayerShootTweakDiv, "Turn speed", "mindflayerShootTurnSpeed", 1f, 0f, float.MaxValue);
             mindflayerProjectileSelfDamageMultiplier = new FloatSliderField(mindflayerShootTweakDiv, "Friendly fire damage percent", "mindflayerProjectileSelfDamageMultiplier", new Tuple<float, float>(0f, 100f), 25f, 1);
             new ConfigHeader(mindflayerPanel, "Melee Combo");
             ConfigDivision mindflayerMeleeDiv = new ConfigDivision(mindflayerPanel, "mindflayerMeleeDiv");

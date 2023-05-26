@@ -66,8 +66,8 @@ namespace Ultrapain.Patches
             int shotCount = ConfigManager.mindflayerShootAmount.value - counter.shotsLeft;
             componentInChildren.transform.position += componentInChildren.transform.forward * Mathf.Clamp(initialProjectileDistance + shotCount * distancePerProjShot, 0, maxProjDistance);
 
-            componentInChildren.speed = 10f * ___eid.totalSpeedModifier;
-            //componentInChildren.turnSpeed = 150f;
+            componentInChildren.speed = ConfigManager.mindflayerShootInitialSpeed.value * ___eid.totalSpeedModifier;
+            componentInChildren.turningSpeedMultiplier = ConfigManager.mindflayerShootTurnSpeed.value;
             componentInChildren.target = MonoSingleton<PlayerTracker>.Instance.GetTarget();
             componentInChildren.safeEnemyType = EnemyType.Mindflayer;
             componentInChildren.damage *= ___eid.totalDamageModifier;
@@ -200,7 +200,7 @@ namespace Ultrapain.Patches
 
     class MindflayerPatch : MonoBehaviour
     {
-        public int shotsLeft = 20;
+        public int shotsLeft = ConfigManager.mindflayerShootAmount.value;
         public int swingComboLeft = 2;
     }
 }
