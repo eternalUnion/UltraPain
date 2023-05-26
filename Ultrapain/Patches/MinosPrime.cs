@@ -254,6 +254,43 @@ namespace Ultrapain.Patches
         }
     }
 
+    // aka DIE
+    class MinosPrime_RiderKick
+    {
+        static bool Prefix(MinosPrime __instance, ref bool ___previouslyRiderKicked)
+        {
+            if (UnityEngine.Random.Range(0, 99.9f) > ConfigManager.minosPrimeCrushAttackChance.value)
+                return true;
+
+            ___previouslyRiderKicked = true;
+
+            Vector3 vector = MonoSingleton<PlayerTracker>.Instance.PredictPlayerPosition(0.5f);
+            Transform target = MonoSingleton<PlayerTracker>.Instance.GetPlayer();
+            if (vector.y < target.position.y)
+            {
+                vector.y = target.position.y;
+            }
+
+            __instance.Teleport(vector + Vector3.up * 25f, __instance.transform.position);
+            __instance.SendMessage("DropAttack");
+            return false;
+        }
+    }
+
+    // End of PREPARE THYSELF
+    class MinosPrime_ProjectileCharge
+    {
+        static bool Prefix(MinosPrime __instance, Animator ___anim)
+        {
+            string clipname = ___anim.GetCurrentAnimatorClipInfo(0)[0].clip.name;
+            if (clipname != "Combo" || UnityEngine.Random.Range(0, 99.9f) > ConfigManager.minosPrimeComboExplosiveEndChance.value)
+                return true;
+
+            ___anim.Play("Dropkick", 0, (1.0815f - 0.4279f) / 2.65f);
+            return false;
+        }
+    }
+
     class MinosPrime_Ascend
     {
         static bool Prefix(MinosPrime __instance, EnemyIdentifier ___eid, Animator ___anim, ref bool ___vibrating)
@@ -274,6 +311,26 @@ namespace Ultrapain.Patches
             flag.BigExplosion();
             __instance.Invoke("Uppercut", 0.5f);
             return false;
+        }
+    }
+
+    class MinosPrime_Death
+    {
+        static bool Prefix(MinosPrime __instance, Animator ___anim, ref bool ___vibrating)
+        {
+            MinosPrimeFlag flag = __instance.GetComponent<MinosPrimeFlag>();
+            if (flag == null)
+                return true;
+
+            if (!flag.explosionAttack)
+                return true;
+
+            flag.explosionAttack = false;
+            ___vibrating = false;
+            ___anim.speed = 1f;
+            ___anim.Play("Walk", 0, 0f);
+
+            return true;
         }
     }
 }

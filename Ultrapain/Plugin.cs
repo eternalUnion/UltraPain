@@ -465,6 +465,11 @@ namespace Ultrapain
             harmonyTweaks.Patch(GetMethod<MinosPrime>("Combo"), postfix: GetHarmonyMethod(GetMethod<MinosPrime_Combo>("Postfix")));
             harmonyTweaks.Patch(GetMethod<MinosPrime>("StopAction"), postfix: GetHarmonyMethod(GetMethod<MinosPrime_StopAction>("Postfix")));
             harmonyTweaks.Patch(GetMethod<MinosPrime>("Ascend"), prefix: GetHarmonyMethod(GetMethod<MinosPrime_Ascend>("Prefix")));
+            harmonyTweaks.Patch(GetMethod<MinosPrime>("Death"), prefix: GetHarmonyMethod(GetMethod<MinosPrime_Death>("Prefix")));
+            if (ConfigManager.minosPrimeCrushAttackToggle.value)
+                harmonyTweaks.Patch(GetMethod<MinosPrime>("RiderKick"), prefix: GetHarmonyMethod(GetMethod<MinosPrime_RiderKick>("Prefix")));
+            if (ConfigManager.minosPrimeComboExplosiveEndToggle.value)
+                harmonyTweaks.Patch(GetMethod<MinosPrime>("ProjectileCharge"), prefix: GetHarmonyMethod(GetMethod<MinosPrime_ProjectileCharge>("Prefix")));
 
             if (ConfigManager.schismSpreadAttackToggle.value)
                 harmonyTweaks.Patch(GetMethod<ZombieProjectiles>("ShootProjectile"), postfix: GetHarmonyMethod(GetMethod<ZombieProjectile_ShootProjectile_Patch>("Postfix")));
