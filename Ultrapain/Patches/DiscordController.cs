@@ -1,5 +1,7 @@
 ﻿using Discord;
 using HarmonyLib;
+using System.Text.RegularExpressions;
+
 
 namespace Ultrapain.Patches
 {
@@ -8,7 +10,14 @@ namespace Ultrapain.Patches
         static bool Prefix(DiscordController __instance, ref Activity ___cachedActivity)
         {
             if (___cachedActivity.State != null && ___cachedActivity.State == "DIFFICULTY: UKMD")
-                ___cachedActivity.State = $"DIFFICULTY: {ConfigManager.pluginName.value}";
+            {
+                Regex rich = new Regex(@"<[^>]*>");
+                string text = $"DIFFICULTY: {ConfigManager.pluginName.value}";
+                if (rich.IsMatch(text))
+                {
+                    ___cachedActivity.State = rich.Replace(text, string.Empty);
+                }
+            }
             return true;
         }
     }
