@@ -17,6 +17,10 @@ namespace Ultrapain.Patches
                 {
                     ___cachedActivity.State = rich.Replace(text, string.Empty);
                 }
+                else
+                {
+                    ___cachedActivity.State = text;
+                }
             }
             return true;
         }
