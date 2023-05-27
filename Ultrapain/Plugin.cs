@@ -111,6 +111,7 @@ namespace Ultrapain
         public static GameObject parryableFlash;
 
         public static AudioClip cannonBallChargeAudio;
+        public static Material gabrielFakeMat;
 
         public static GameObject rocketLauncherAlt;
         public static GameObject maliciousRailcannon;
@@ -207,6 +208,8 @@ namespace Ultrapain
             ricochetSfx = LoadObject<GameObject>("Assets/Particles/SoundBubbles/Ricochet.prefab");
             //Assets/Particles/Flashes/Flash.prefab
             parryableFlash = LoadObject<GameObject>("Assets/Particles/Flashes/Flash.prefab");
+            //Assets/Materials/GabrielFake.mat
+            gabrielFakeMat = LoadObject<Material>("Assets/Materials/GabrielFake.mat");
 
             //Assets/Prefabs/Effects/Charge Effect.prefab
             chargeEffect = LoadObject<GameObject>("Assets/Prefabs/Effects/Charge Effect.prefab");
