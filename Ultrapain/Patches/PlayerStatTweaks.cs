@@ -151,11 +151,11 @@ namespace Ultrapain.Patches
             {
                 if (code[i].opcode == OpCodes.Ldc_R4 && (Single)code[i].operand == 66f)
                 {
-                    code[i] = new CodeInstruction(OpCodes.Ldc_R4, (Single)(66f * (ConfigManager.maxPlayerHp.value / 100f)));
+                    code[i] = new CodeInstruction(OpCodes.Ldc_R4, (Single)(66f * (ConfigManager.maxPlayerHp.value / 100f) * ConfigManager.whiplashHardDamageSpeed.value));
                 }
                 else if (code[i].opcode == OpCodes.Ldc_R4 && (Single)code[i].operand == 50f)
                 {
-                    code[i] = new CodeInstruction(OpCodes.Ldc_R4, (Single)(ConfigManager.maxPlayerHp.value / 2));
+                    code[i] = new CodeInstruction(OpCodes.Ldc_R4, (Single)(ConfigManager.whiplashHardDamageCap.value));
                 }
             }
 

@@ -136,6 +136,8 @@ namespace Ultrapain
         public static IntField maxPlayerHp;
         public static IntField playerHpSupercharge;
         public static FloatSliderField hardDamagePercent;
+        public static IntField whiplashHardDamageCap;
+        public static FloatField whiplashHardDamageSpeed;
 
         // ENEMY PANEL
         public static ConfigPanel globalEnemyPanel;
@@ -550,6 +552,8 @@ namespace Ultrapain
             maxPlayerHp = new IntField(playerStatEditorPanel, "Max HP", "maxPlayerHp", 100, 1, int.MaxValue);
             playerHpSupercharge = new IntField(playerStatEditorPanel, "Max overcharge HP", "playerHpSupercharge", 200, 1, int.MaxValue);
             hardDamagePercent = new FloatSliderField(playerStatEditorPanel, "Hard damage taken percent", "hardDamagePercent", new Tuple<float, float>(0, 100), 100);
+            whiplashHardDamageCap = new IntField(playerStatEditorPanel, "Whiplash hard damage cap", "whiplashHardDamageCap", 50, 0, int.MaxValue);
+            whiplashHardDamageSpeed = new FloatField(playerStatEditorPanel, "Whiplash hard damage speed multiplier", "whiplashHardDamageSpeed", 1f, 0.01f, float.MaxValue);
             new ConfigHeader(playerStatEditorPanel, "Revolver");
             chargedRevRegSpeedMulti = new FloatField(playerStatEditorPanel, "Charged revolver regen speed", "chargedRevRegSpeedMulti", 1f, 0.01f, float.MaxValue);
             coinRegSpeedMulti = new FloatField(playerStatEditorPanel, "Coin regen speed", "coinRegSpeedMulti", 1f, 0.01f, float.MaxValue);
@@ -590,6 +594,8 @@ namespace Ultrapain
             AddDirtyFlagToIntFieldValueChange(maxPlayerHp);
             AddDirtyFlagToIntFieldValueChange(playerHpSupercharge);
             AddDirtyFlagToFloatSliderFieldValueChange(hardDamagePercent);
+            AddDirtyFlagToIntFieldValueChange(whiplashHardDamageCap);
+            AddDirtyFlagToFloatFieldValueChange(whiplashHardDamageSpeed);
             AddDirtyFlagToFloatFieldValueChange(chargedRevRegSpeedMulti);
             AddDirtyFlagToFloatFieldValueChange(coinRegSpeedMulti);
             AddDirtyFlagToFloatFieldValueChange(sharpshooterRegSpeedMulti);
