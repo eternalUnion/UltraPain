@@ -163,6 +163,19 @@ namespace Ultrapain
             }
         }
 
+        public static Dictionary<EnemyType, float> defaultEnemyHealth = new Dictionary<EnemyType, float>()
+        {
+            { EnemyType.MinosPrime, 2f }
+        };
+        public static Dictionary<EnemyType, float> defaultEnemySpeed = new Dictionary<EnemyType, float>()
+        {
+            { EnemyType.MinosPrime, 1.2f }
+        };
+        public static Dictionary<EnemyType, float> defaultEnemyDamage = new Dictionary<EnemyType, float>()
+        {
+
+        };
+
         public static ConfigPanel eidStatEditorPanel;
         public static EnumField<EnemyType> eidStatEditorSelector;
         public static Dictionary<EnemyType, EidStatContainer> enemyStats = new Dictionary<EnemyType, EidStatContainer>();
@@ -796,9 +809,9 @@ namespace Ultrapain
             foreach(EnemyType eid in Enum.GetValues(typeof(EnemyType)))
             {
                 EidStatContainer container = new EidStatContainer();
-                container.health = new FloatField(eidStatEditorPanel, "Health multiplier", $"eid_{eid}_health", 1f, 0.01f, float.MaxValue);
-                container.damage = new FloatField(eidStatEditorPanel, "Damage multiplier", $"eid_{eid}_damage", 1f, 0.01f, float.MaxValue);
-                container.speed = new FloatField(eidStatEditorPanel, "Speed multiplier", $"eid_{eid}_speed", 1f, 0.01f, float.MaxValue);
+                container.health = new FloatField(eidStatEditorPanel, "Health multiplier", $"eid_{eid}_health", defaultEnemyHealth.ContainsKey(eid) ? defaultEnemyHealth[eid] : 1f , 0.01f, float.MaxValue);
+                container.damage = new FloatField(eidStatEditorPanel, "Damage multiplier", $"eid_{eid}_damage", defaultEnemyDamage.ContainsKey(eid) ? defaultEnemyDamage[eid] : 1f, 0.01f, float.MaxValue);
+                container.speed = new FloatField(eidStatEditorPanel, "Speed multiplier", $"eid_{eid}_speed", defaultEnemySpeed.ContainsKey(eid) ? defaultEnemySpeed[eid] : 1f, 0.01f, float.MaxValue);
                 enemyStats.Add(eid, container);
             }
 
@@ -1310,7 +1323,7 @@ namespace Ultrapain
                 minosPrimeTeleportTrailDuration.hidden = e.value;
                 dirtyField = true;
             };
-            minosPrimeTeleportTrailDuration = new FloatField(minosPrimePanel, "Duration", "minosPrimeTeleportTrailDuration", 0.5f, 0, float.PositiveInfinity);
+            minosPrimeTeleportTrailDuration = new FloatField(minosPrimePanel, "Duration", "minosPrimeTeleportTrailDuration", 1f, 0, float.PositiveInfinity);
 
             new ConfigHeader(minosPrimePanel, "Combo Explosive Finish");
             minosPrimeComboExplosionToggle = new BoolField(minosPrimePanel, "Enabled", "minosPrimeComboExplosionToggle", true);
