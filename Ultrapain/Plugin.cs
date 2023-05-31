@@ -116,6 +116,8 @@ namespace Ultrapain
         public static Sprite blueRevolverSprite;
         public static Sprite greenRevolverSprite;
         public static Sprite redRevolverSprite;
+        public static Sprite blueShotgunSprite;
+        public static Sprite greenShotgunSprite;
 
         public static GameObject rocketLauncherAlt;
         public static GameObject maliciousRailcannon;
@@ -218,6 +220,10 @@ namespace Ultrapain
             greenRevolverSprite = LoadObject<Sprite>("Assets/Textures/UI/RevolverSpecial.png");
             //Assets/Textures/UI/RevolverSharp.png
             redRevolverSprite = LoadObject<Sprite>("Assets/Textures/UI/RevolverSharp.png");
+            //Assets/Textures/UI/Shotgun.png
+            blueShotgunSprite = LoadObject<Sprite>("Assets/Textures/UI/Shotgun.png");
+            //Assets/Textures/UI/Shotgun1.png
+            greenShotgunSprite = LoadObject<Sprite>("Assets/Textures/UI/Shotgun1.png");
 
             //Assets/Prefabs/Effects/Charge Effect.prefab
             chargeEffect = LoadObject<GameObject>("Assets/Prefabs/Effects/Charge Effect.prefab");
@@ -639,6 +645,7 @@ namespace Ultrapain
 
             // ADDME
             harmonyTweaks.Patch(GetMethod<Revolver>("Shoot"), transpiler: GetHarmonyMethod(GetMethod<Revolver_Shoot>("Transpiler")));
+            harmonyTweaks.Patch(GetMethod<Shotgun>("Shoot"), transpiler: GetHarmonyMethod(GetMethod<Shotgun_Shoot>("Transpiler")), prefix: GetHarmonyMethod(GetMethod<Shotgun_Shoot>("Prefix")), postfix: GetHarmonyMethod(GetMethod<Shotgun_Shoot>("Postfix")));
 
             if (ConfigManager.hardDamagePercent.normalizedValue != 1)
                 harmonyTweaks.Patch(GetMethod<NewMovement>("GetHurt"), prefix: GetHarmonyMethod(GetMethod<NewMovement_GetHurt>("Prefix")), postfix: GetHarmonyMethod(GetMethod<NewMovement_GetHurt>("Postfix")));

@@ -3,11 +3,17 @@ using System;
 using System.Collections.Generic;
 using System.Reflection.Emit;
 using System.Text;
+using UnityEngine;
 
 namespace Ultrapain
 {
     public static class ILUtils
     {
+        public static string TurnInstToString(CodeInstruction inst)
+        {
+            return $"{inst.opcode}{(inst.operand == null ? "" : $" : ({inst.operand.GetType()}){inst.operand}")}";
+        }
+
         public static OpCode LoadLocalOpcode(int localIndex)
         {
             if (localIndex == 0)
@@ -65,7 +71,9 @@ namespace Ultrapain
 
         public static CodeInstruction StoreLocalInstruction(int localIndex)
         {
-            return new CodeInstruction(StoreLocalOpcode(localIndex));
+            if (localIndex <= 3)
+                return new CodeInstruction(StoreLocalOpcode(localIndex));
+            return new CodeInstruction(StoreLocalOpcode(localIndex), localIndex);
         }
 
         public static CodeInstruction StoreLocalInstruction(object localIndex)
@@ -93,6 +101,56 @@ namespace Ultrapain
                 return inst.operand;
 
             return null;
+        }
+
+        public static bool IsConstI4LoadWithOperand(OpCode code)
+        {
+            return code == OpCodes.Ldc_I4_S || code == OpCodes.Ldc_I4 || code == OpCodes.Ldc_I8;
+        }
+
+        public static int GetI4LoadOperand(CodeInstruction code)
+        {
+            if (code.opcode == OpCodes.Ldc_I4_S)
+                return (sbyte)code.operand;
+            if (code.opcode == OpCodes.Ldc_I4)
+                return (int)code.operand;
+
+            if (code.opcode == OpCodes.Ldc_I4_0)
+                return 0;
+            if (code.opcode == OpCodes.Ldc_I4_1)
+                return 1;
+            if (code.opcode == OpCodes.Ldc_I4_2)
+                return 2;
+            if (code.opcode == OpCodes.Ldc_I4_3)
+                return 3;
+            if (code.opcode == OpCodes.Ldc_I4_4)
+                return 4;
+            if (code.opcode == OpCodes.Ldc_I4_5)
+                return 5;
+            if (code.opcode == OpCodes.Ldc_I4_6)
+                return 6;
+            if (code.opcode == OpCodes.Ldc_I4_7)
+                return 7;
+            if (code.opcode == OpCodes.Ldc_I4_8)
+                return 8;
+            if (code.opcode == OpCodes.Ldc_I4_M1)
+                return -1;
+
+            throw new ArgumentException($"{code.opcode} is not a valid i4 load constant opcode");
+        }
+
+        private static OpCode[] efficientI4 = new OpCode[] { OpCodes.Ldc_I4_M1, OpCodes.Ldc_I4_0, OpCodes.Ldc_I4_1, OpCodes.Ldc_I4_2, OpCodes.Ldc_I4_3, OpCodes.Ldc_I4_4, OpCodes.Ldc_I4_5, OpCodes.Ldc_I4_6, OpCodes.Ldc_I4_7, OpCodes.Ldc_I4_8 };
+        // Get an efficient version of constant i4 load opcode which does not require an operand
+        public static bool TryEfficientLoadI4(int value, out OpCode efficientOpcode)
+        {
+            if (value <= 8 && value >= -1)
+            {
+                efficientOpcode = efficientI4[value + 1];
+                return true;
+            }
+
+            efficientOpcode = OpCodes.Ldc_I4;
+            return false;
         }
 
         public static bool IsCodeSequence(List<CodeInstruction> code, int index, List<CodeInstruction> seq)
