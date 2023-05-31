@@ -16,6 +16,11 @@ Describe steps to reproduce the issue. If the way of reproducing the issue is un
 * Step 2:
 * ...
 
+# Plugin versions
+* UltraPain - (version here)
+* PluginConfigurator - (version here)
+* Others...
+
 # Console logs
 Put any abnormal console log (warnings/error) here. [How to open the console](https://docs.bepinex.dev/articles/user_guide/troubleshooting.html)
 
