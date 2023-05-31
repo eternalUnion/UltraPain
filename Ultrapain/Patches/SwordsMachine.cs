@@ -34,7 +34,11 @@ namespace Ultrapain.Patches
         private void Update()
         {
             if (speedingUp)
+            {
+                if (anim == null)
+                    anim = sm.GetComponent<Animator>();
                 anim.speed = speed;
+            }
         }
     }
 
@@ -51,40 +55,11 @@ namespace Ultrapain.Patches
     {
         static bool Prefix(SwordsMachine __instance, bool __0)
         {
-            if (__0 == true)
-            {
-                __instance.Enrage();
-                return false;
-            }
-            else
-            {
-                if (ConfigManager.swordsMachineSecondPhaseMode.value == ConfigManager.SwordsMachineSecondPhase.Skip && __instance.secondPhasePosTarget == null && __instance.secondPhasePosTarget == null)
-                    return false;
-            }
-
-            return true;
-        }
-
-        static void Postfix(SwordsMachine __instance, EnemyIdentifier ___eid, bool __0, Animator ___anim)
-        {
+            __instance.Enrage();
             if (!__0)
-            {
-                if (ConfigManager.swordsMachineSecondPhaseMode.value != ConfigManager.SwordsMachineSecondPhase.SpeedUp || __instance.secondPhasePosTarget != null)
-                    return;
+                __instance.SwordCatch();
 
-                SwordsMachineFlag flag = __instance.GetComponent<SwordsMachineFlag>();
-                if (flag == null)
-                {
-                    flag = __instance.gameObject.AddComponent<SwordsMachineFlag>();
-                    flag.sm = __instance;
-                }
-                flag.speedingUp = true;
-                flag.speed = (1f * ___eid.totalSpeedModifier) * ConfigManager.swordsMachineSecondPhaseSpeed.value;
-                ___anim.speed = flag.speed;
-
-                AnimatorClipInfo clipInfo = ___anim.GetCurrentAnimatorClipInfo(0)[0];
-                flag.Invoke("ResetAnimSpeed", clipInfo.clip.length / flag.speed);
-            }
+            return false;
         }
     }
 
