@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using HarmonyLib;
+using System.Collections.Generic;
+using System.Reflection;
 using System.Xml.Linq;
 using UnityEngine;
 
@@ -91,5 +93,8 @@ namespace Ultrapain
 
             return null;
         }
+
+        public const BindingFlags instanceFlag = BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Instance;
+        public const BindingFlags staticFlag = BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Static;
     }
 }

@@ -17,6 +17,7 @@ using UnityEngine.AddressableAssets;
 using UnityEngine.AddressableAssets.ResourceLocators;
 using UnityEngine.ResourceManagement.ResourceLocations;
 using UnityEngine.UIElements;
+using PluginConfig.API;
 
 namespace Ultrapain
 {
@@ -111,6 +112,10 @@ namespace Ultrapain
         public static GameObject parryableFlash;
 
         public static AudioClip cannonBallChargeAudio;
+
+        public static Sprite blueRevolverSprite;
+        public static Sprite greenRevolverSprite;
+        public static Sprite redRevolverSprite;
 
         public static GameObject rocketLauncherAlt;
         public static GameObject maliciousRailcannon;
@@ -207,6 +212,12 @@ namespace Ultrapain
             ricochetSfx = LoadObject<GameObject>("Assets/Particles/SoundBubbles/Ricochet.prefab");
             //Assets/Particles/Flashes/Flash.prefab
             parryableFlash = LoadObject<GameObject>("Assets/Particles/Flashes/Flash.prefab");
+            //Assets/Textures/UI/SingleRevolver.png
+            blueRevolverSprite = LoadObject<Sprite>("Assets/Textures/UI/SingleRevolver.png");
+            //Assets/Textures/UI/RevolverSpecial.png
+            greenRevolverSprite = LoadObject<Sprite>("Assets/Textures/UI/RevolverSpecial.png");
+            //Assets/Textures/UI/RevolverSharp.png
+            redRevolverSprite = LoadObject<Sprite>("Assets/Textures/UI/RevolverSharp.png");
 
             //Assets/Prefabs/Effects/Charge Effect.prefab
             chargeEffect = LoadObject<GameObject>("Assets/Prefabs/Effects/Charge Effect.prefab");
@@ -626,6 +637,9 @@ namespace Ultrapain
                 harmonyTweaks.Patch(GetMethod<NewMovement>("ForceAntiHP"), transpiler: GetHarmonyMethod(GetMethod<NewMovement_ForceAntiHP>("Transpiler")));
             }
 
+            // ADDME
+            harmonyTweaks.Patch(GetMethod<Revolver>("Shoot"), transpiler: GetHarmonyMethod(GetMethod<Revolver_Shoot>("Transpiler")));
+
             if (ConfigManager.hardDamagePercent.normalizedValue != 1)
                 harmonyTweaks.Patch(GetMethod<NewMovement>("GetHurt"), prefix: GetHarmonyMethod(GetMethod<NewMovement_GetHurt>("Prefix")), postfix: GetHarmonyMethod(GetMethod<NewMovement_GetHurt>("Postfix")));
 
@@ -756,6 +770,7 @@ namespace Ultrapain
             harmonyBase.Patch(GetMethod<DifficultyTitle>("Check"), postfix: GetHarmonyMethod(GetMethod<DifficultyTitle_Check_Patch>("Postfix")));
             harmonyBase.Patch(typeof(PrefsManager).GetConstructor(new Type[0]), postfix: GetHarmonyMethod(GetMethod<PrefsManager_Ctor>("Postfix")));
             harmonyBase.Patch(GetMethod<PrefsManager>("EnsureValid"), prefix: GetHarmonyMethod(GetMethod<PrefsManager_EnsureValid>("Prefix")));
+            LoadPrefabs();
             ConfigManager.Initialize();
 
             SceneManager.activeSceneChanged += OnSceneChange;
