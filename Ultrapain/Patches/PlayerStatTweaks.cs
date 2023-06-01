@@ -311,6 +311,51 @@ namespace Ultrapain.Patches
         }
     }
 
+    // Core eject
+    class Shotgun_ShootSinks
+    {
+        public static void ModifyCoreEject(GameObject core)
+        {
+            GrenadeExplosionOverride ovr = core.AddComponent<GrenadeExplosionOverride>();
+
+            ovr.normalMod = true;
+            ovr.normalDamage = (float)ConfigManager.shotgunCoreExplosionDamage.value / 35f;
+            ovr.normalSize = (float)ConfigManager.shotgunCoreExplosionSize.value / 6f * ConfigManager.shotgunCoreExplosionSpeed.value;
+            ovr.normalPlayerDamageOverride = ConfigManager.shotgunCoreExplosionPlayerDamage.value;
+
+            ovr.superMod = true;
+            ovr.superDamage = (float)ConfigManager.shotgunCoreExplosionDamage.value / 35f;
+            ovr.superSize = (float)ConfigManager.shotgunCoreExplosionSize.value / 6f * ConfigManager.shotgunCoreExplosionSpeed.value;
+            ovr.superPlayerDamageOverride = ConfigManager.shotgunCoreExplosionPlayerDamage.value;
+        }
+
+        static FieldInfo f_Grenade_sourceWeapon = typeof(Grenade).GetField("sourceWeapon", UnityUtils.instanceFlag);
+        static MethodInfo m_Shotgun_ShootSinks_ModifyCoreEject = typeof(Shotgun_ShootSinks).GetMethod("ModifyCoreEject", UnityUtils.staticFlag);
+
+        static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions)
+        {
+            List<CodeInstruction> code = new List<CodeInstruction>(instructions);
+
+            for (int i = 0; i < code.Count; i++)
+            {
+                if (code[i].opcode == OpCodes.Stfld && code[i].OperandIs(f_Grenade_sourceWeapon))
+                {
+                    i += 1;
+
+                    // Add arg 0
+                    code.Insert(i, new CodeInstruction(OpCodes.Dup));
+                    i += 1;
+                    // Call mod method
+                    code.Insert(i, new CodeInstruction(OpCodes.Call, m_Shotgun_ShootSinks_ModifyCoreEject));
+
+                    break;
+                }
+            }
+
+            return code.AsEnumerable();
+        }
+    }
+
     class NailGun_Update
     {
         static bool Prefix(Nailgun __instance, ref float ___heatSinks)
