@@ -356,6 +356,146 @@ namespace Ultrapain.Patches
         }
     }
 
+    class Nailgun_Shoot
+    {
+        static FieldInfo f_Nailgun_heatSinks = typeof(Nailgun).GetField("heatSinks", UnityUtils.instanceFlag);
+        static FieldInfo f_Nailgun_heatUp = typeof(Nailgun).GetField("heatUp", UnityUtils.instanceFlag);
+        
+        public static void ModifyNail(Nailgun inst, GameObject nail)
+        {
+            Nail comp = nail.GetComponent<Nail>();
+
+            if (inst.altVersion)
+            {
+                // Blue saw launcher
+                if (inst.variation == 1)
+                {
+                    comp.damage = ConfigManager.sawBlueDamage.value;
+                    comp.hitAmount = ConfigManager.sawBlueHitAmount.value;
+                }
+                // Green saw launcher
+                else
+                {
+                    comp.damage = ConfigManager.sawGreenDamage.value;
+                    float maxHit = ConfigManager.sawGreenHitAmount.value;
+                    float heatSinks = (float)f_Nailgun_heatSinks.GetValue(inst);
+                    float heatUp = (float)f_Nailgun_heatUp.GetValue(inst);
+
+                    if (heatSinks >= 1)
+                        comp.hitAmount = Mathf.Lerp(maxHit, Mathf.Max(1f, maxHit), (maxHit - 2f) * heatUp);
+                    else
+                        comp.hitAmount = 1f;
+                }
+            }
+            else
+            {
+                // Blue nailgun
+                if (inst.variation == 1)
+                {
+                    comp.damage = ConfigManager.nailgunBlueDamage.value;
+                }
+                else
+                {
+                    if (comp.heated)
+                        comp.damage = ConfigManager.nailgunGreenBurningDamage.value;
+                    else
+                        comp.damage = ConfigManager.nailgunGreenDamage.value;
+                }
+            }
+        }
+
+        static FieldInfo f_Nailgun_nail = typeof(Nailgun).GetField("nail", UnityUtils.instanceFlag);
+        static MethodInfo m_Nailgun_Shoot_ModifyNail = typeof(Nailgun_Shoot).GetMethod("ModifyNail", UnityUtils.staticFlag);
+        static MethodInfo m_Transform_set_forward = typeof(Transform).GetProperty("forward", UnityUtils.instanceFlag).GetSetMethod();
+
+        static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions)
+        {
+            List<CodeInstruction> code = new List<CodeInstruction>(instructions);
+
+            CodeInstruction localObjectStoreInst = null;
+
+            for (int i = 0; i < code.Count; i++)
+            {
+                if (code[i].opcode == OpCodes.Ldfld && code[i].OperandIs(f_Nailgun_nail))
+                {
+                    for (; i < code.Count; i++)
+                        if (ILUtils.IsStoreLocalOpcode(code[i].opcode))
+                            break;
+
+                    localObjectStoreInst = code[i];
+                }
+            }
+
+            Debug.Log($"Nail local reference: {ILUtils.TurnInstToString(localObjectStoreInst)}");
+
+            int insertIndex = 0;
+            for (int i = 0; i < code.Count; i++)
+            {
+                if (code[i].opcode == OpCodes.Callvirt && code[i].OperandIs(m_Transform_set_forward))
+                {
+                    insertIndex = i + 1;
+                    break;
+                }
+            }
+
+            // Push instance reference
+            code.Insert(insertIndex, new CodeInstruction(OpCodes.Ldarg_0));
+            insertIndex += 1;
+            // Push local nail object
+            code.Insert(insertIndex, new CodeInstruction(ILUtils.GetLoadLocalFromStoreLocal(localObjectStoreInst.opcode), localObjectStoreInst.operand));
+            insertIndex += 1;
+            // Call the method
+            code.Insert(insertIndex, new CodeInstruction(OpCodes.Call, m_Nailgun_Shoot_ModifyNail));
+
+            return code.AsEnumerable();
+        }
+    }
+
+    class Nailgun_SuperSaw
+    {
+        public static void ModifySupersaw(GameObject supersaw)
+        {
+            Nail saw = supersaw.GetComponent<Nail>();
+
+            saw.damage = ConfigManager.sawGreenBurningDamage.value;
+            saw.hitAmount = ConfigManager.sawGreenBurningHitAmount.value;
+        }
+
+        static FieldInfo f_Nailgun_heatedNail = typeof(Nailgun).GetField("heatedNail", UnityUtils.instanceFlag);
+        static MethodInfo m_Nailgun_SuperSaw_ModifySupersaw = typeof(Nailgun_SuperSaw).GetMethod("ModifySupersaw", UnityUtils.staticFlag);
+
+        static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions)
+        {
+            List<CodeInstruction> code = new List<CodeInstruction>(instructions);
+
+            CodeInstruction localObjectStoreInst = null;
+
+            for (int i = 0; i < code.Count; i++)
+            {
+                if (code[i].opcode == OpCodes.Ldfld && code[i].OperandIs(f_Nailgun_heatedNail))
+                {
+                    for (; i < code.Count; i++)
+                        if (ILUtils.IsStoreLocalOpcode(code[i].opcode))
+                            break;
+
+                    localObjectStoreInst = code[i];
+                }
+            }
+
+            Debug.Log($"Supersaw local reference: {ILUtils.TurnInstToString(localObjectStoreInst)}");
+
+            int insertIndex = code.Count - 1;
+
+            // Push local nail object
+            code.Insert(insertIndex, new CodeInstruction(ILUtils.GetLoadLocalFromStoreLocal(localObjectStoreInst.opcode), localObjectStoreInst.operand));
+            insertIndex += 1;
+            // Call the method
+            code.Insert(insertIndex, new CodeInstruction(OpCodes.Call, m_Nailgun_SuperSaw_ModifySupersaw));
+
+            return code.AsEnumerable();
+        }
+    }
+
     class NailGun_Update
     {
         static bool Prefix(Nailgun __instance, ref float ___heatSinks)

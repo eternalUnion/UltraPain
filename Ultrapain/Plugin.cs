@@ -118,6 +118,10 @@ namespace Ultrapain
         public static Sprite redRevolverSprite;
         public static Sprite blueShotgunSprite;
         public static Sprite greenShotgunSprite;
+        public static Sprite blueNailgunSprite;
+        public static Sprite greenNailgunSprite;
+        public static Sprite blueSawLauncherSprite;
+        public static Sprite greenSawLauncherSprite;
 
         public static GameObject rocketLauncherAlt;
         public static GameObject maliciousRailcannon;
@@ -224,6 +228,14 @@ namespace Ultrapain
             blueShotgunSprite = LoadObject<Sprite>("Assets/Textures/UI/Shotgun.png");
             //Assets/Textures/UI/Shotgun1.png
             greenShotgunSprite = LoadObject<Sprite>("Assets/Textures/UI/Shotgun1.png");
+            //Assets/Textures/UI/Nailgun2.png
+            blueNailgunSprite = LoadObject<Sprite>("Assets/Textures/UI/Nailgun2.png");
+            //Assets/Textures/UI/NailgunOverheat.png
+            greenNailgunSprite = LoadObject<Sprite>("Assets/Textures/UI/NailgunOverheat.png");
+            //Assets/Textures/UI/SawbladeLauncher.png
+            blueSawLauncherSprite = LoadObject<Sprite>("Assets/Textures/UI/SawbladeLauncher.png");
+            //Assets/Textures/UI/SawbladeLauncherOverheat.png
+            greenSawLauncherSprite = LoadObject<Sprite>("Assets/Textures/UI/SawbladeLauncherOverheat.png");
 
             //Assets/Prefabs/Effects/Charge Effect.prefab
             chargeEffect = LoadObject<GameObject>("Assets/Prefabs/Effects/Charge Effect.prefab");
@@ -647,7 +659,9 @@ namespace Ultrapain
             harmonyTweaks.Patch(GetMethod<Revolver>("Shoot"), transpiler: GetHarmonyMethod(GetMethod<Revolver_Shoot>("Transpiler")));
             harmonyTweaks.Patch(GetMethod<Shotgun>("Shoot"), transpiler: GetHarmonyMethod(GetMethod<Shotgun_Shoot>("Transpiler")), prefix: GetHarmonyMethod(GetMethod<Shotgun_Shoot>("Prefix")), postfix: GetHarmonyMethod(GetMethod<Shotgun_Shoot>("Postfix")));
             harmonyTweaks.Patch(GetMethod<Shotgun>("ShootSinks"), transpiler: GetHarmonyMethod(GetMethod<Shotgun_ShootSinks>("Transpiler")));
-
+            harmonyTweaks.Patch(GetMethod<Nailgun>("Shoot"), transpiler: GetHarmonyMethod(GetMethod<Nailgun_Shoot>("Transpiler")));
+            harmonyTweaks.Patch(GetMethod<Nailgun>("SuperSaw"), transpiler: GetHarmonyMethod(GetMethod<Nailgun_SuperSaw>("Transpiler")));
+            
             if (ConfigManager.hardDamagePercent.normalizedValue != 1)
                 harmonyTweaks.Patch(GetMethod<NewMovement>("GetHurt"), prefix: GetHarmonyMethod(GetMethod<NewMovement_GetHurt>("Prefix")), postfix: GetHarmonyMethod(GetMethod<NewMovement_GetHurt>("Postfix")));
 

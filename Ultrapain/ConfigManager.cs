@@ -63,8 +63,8 @@ namespace Ultrapain
             if (deltaPos > 0)
             {
                 txt.GetComponent<RectTransform>().anchoredPosition = new Vector2(textAnchorX + deltaPos, 0);
-                inputRect.anchoredPosition = new Vector2(fieldAnchorX + deltaPos / 2, fieldAnchorY);
-                inputRect.sizeDelta = new Vector2(fieldSizeX - deltaPos / 2, inputRect.sizeDelta.y);
+                inputRect.anchoredPosition = new Vector2(fieldAnchorX + deltaPos, fieldAnchorY);
+                inputRect.sizeDelta = new Vector2(fieldSizeX - deltaPos, inputRect.sizeDelta.y);
             }
             else
             {
@@ -296,11 +296,17 @@ namespace Ultrapain
         public static IntField shotgunGreenExplosionDamage;
         public static IntField shotgunGreenExplosionPlayerDamage;
 
-        // NAILGUN
-        public static FloatField nailgunFireRate;
-        public static FloatField nailgunDamageMulti;
-        public static FloatField sawFireRate;
-        public static FloatField sawDamageMulti;
+        // NAILGUN/SAW LAUNCHER
+        public static FloatField nailgunBlueDamage;
+        public static FloatField nailgunGreenDamage;
+        public static FloatField nailgunGreenBurningDamage;
+
+        public static FloatField sawBlueDamage;
+        public static FloatField sawBlueHitAmount;
+        public static FloatField sawGreenDamage;
+        public static FloatField sawGreenHitAmount;
+        public static FloatField sawGreenBurningDamage;
+        public static FloatField sawGreenBurningHitAmount;
 
         public static FloatField nailgunAmmoRegSpeedMulti;
         public static FloatField sawAmmoRegSpeedMulti;
@@ -841,11 +847,42 @@ namespace Ultrapain
             shotgunGreenExplosionPlayerDamage = new IntField(playerStatEditorPanel, "Explosion player damage", "shotgunGreenExplosionPlayerDamage", 50, 0, int.MaxValue);
                 new ImageInputField(shotgunGreenExplosionPlayerDamage, Plugin.greenShotgunSprite, Color.green);
 
+            // NAILGUN/SAW LAUNCHER
             new ConfigHeader(playerStatEditorPanel, "Nailgun/Saw Launcher");
+            nailgunBlueDamage = new FloatField(playerStatEditorPanel, "Bullet damage", "nailgunBlueDamage", 0.205f, 0f, float.MaxValue);
+                new ImageInputField(nailgunBlueDamage, Plugin.blueNailgunSprite, Color.cyan);
+            nailgunGreenDamage = new FloatField(playerStatEditorPanel, "Bullet damage", "nailgunGreenDamage", 0.185f, 0f, float.MaxValue);
+                new ImageInputField(nailgunGreenDamage, Plugin.greenNailgunSprite, Color.green);
+            nailgunGreenBurningDamage = new FloatField(playerStatEditorPanel, "Burning bullet damage", "nailgunGreenBurningDamage", 0.185f, 0f, float.MaxValue);
+                new ImageInputField(nailgunGreenBurningDamage, Plugin.greenNailgunSprite, Color.green);
+
+            new SpaceField(playerStatEditorPanel);
+
+            sawBlueDamage = new FloatField(playerStatEditorPanel, "Saw damage", "sawBlueDamage", 0.75f, 0f, float.MaxValue);
+                new ImageInputField(sawBlueDamage, Plugin.blueSawLauncherSprite, Color.cyan);
+            sawBlueHitAmount = new FloatField(playerStatEditorPanel, "Saw durability", "sawBlueHitAmount", 3.9f, 0f, float.MaxValue);
+                new ImageInputField(sawBlueHitAmount, Plugin.blueSawLauncherSprite, Color.cyan);
+            sawGreenDamage = new FloatField(playerStatEditorPanel, "Weak saw damage", "sawGreenDamage", 0.6f, 0f, float.MaxValue);
+                new ImageInputField(sawGreenDamage, Plugin.greenSawLauncherSprite, Color.green);
+            sawGreenHitAmount = new FloatField(playerStatEditorPanel, "Weak saw durability", "sawGreenHitAmount", 3f, 0f, float.MaxValue);
+                new ImageInputField(sawGreenHitAmount, Plugin.greenSawLauncherSprite, Color.green);
+            sawGreenBurningDamage = new FloatField(playerStatEditorPanel, "Super saw damage", "sawGreenBurningDamage", 1f, 0f, float.MaxValue);
+                new ImageInputField(sawGreenBurningDamage, Plugin.greenSawLauncherSprite, Color.green);
+            sawGreenBurningHitAmount = new FloatField(playerStatEditorPanel, "Super saw durability", "sawGreenBurningHitAmount", 20.9f, 0f, float.MaxValue);
+                new ImageInputField(sawGreenBurningHitAmount, Plugin.greenSawLauncherSprite, Color.green);
+
+            new SpaceField(playerStatEditorPanel);
+
             nailgunAmmoRegSpeedMulti = new FloatField(playerStatEditorPanel, "Nailgun ammo regen speed", "nailgunAmmoRegSpeedMulti", 1f, 0.01f, float.MaxValue);
+                new ImageInputField(nailgunAmmoRegSpeedMulti, Plugin.blueNailgunSprite, Color.cyan);
             nailgunHeatsinkRegSpeedMulti = new FloatField(playerStatEditorPanel, "Nailgun heatsink regen speed", "nailgunHeatsinkRegSpeedMulti", 1f, 0.01f, float.MaxValue);
+                new ImageInputField(nailgunHeatsinkRegSpeedMulti, Plugin.greenNailgunSprite, Color.green);
             sawAmmoRegSpeedMulti = new FloatField(playerStatEditorPanel, "Saw ammo regen speed", "sawAmmoRegSpeedMulti", 1f, 0.01f, float.MaxValue);
+                new ImageInputField(sawAmmoRegSpeedMulti, Plugin.blueSawLauncherSprite, Color.cyan);
             sawHeatsinkRegSpeedMulti = new FloatField(playerStatEditorPanel, "Saw heatsink regen speed", "sawHeatsinkRegSpeedMulti", 1f, 0.01f, float.MaxValue);
+                new ImageInputField(sawHeatsinkRegSpeedMulti, Plugin.greenSawLauncherSprite, Color.green);
+            
+            // RAILCANNON
             new ConfigHeader(playerStatEditorPanel, "Railcannon");
             railcannonRegSpeedMulti = new FloatField(playerStatEditorPanel, "Railcannon charge speed", "railcannonRegSpeedMulti", 1f, 0.01f, float.MaxValue);
             new ConfigHeader(playerStatEditorPanel, "Rocket Freeze/Cannonball");
@@ -926,6 +963,17 @@ namespace Ultrapain
             AddDirtyFlagToFloatFieldValueChange(shotgunGreenExplosionSpeed);
             AddDirtyFlagToIntFieldValueChange(shotgunGreenExplosionDamage);
             AddDirtyFlagToIntFieldValueChange(shotgunGreenExplosionPlayerDamage);
+
+            AddDirtyFlagToFloatFieldValueChange(nailgunBlueDamage);
+            AddDirtyFlagToFloatFieldValueChange(nailgunGreenDamage);
+            AddDirtyFlagToFloatFieldValueChange(nailgunGreenBurningDamage);
+
+            AddDirtyFlagToFloatFieldValueChange(sawBlueDamage);
+            AddDirtyFlagToFloatFieldValueChange(sawBlueHitAmount);
+            AddDirtyFlagToFloatFieldValueChange(sawGreenDamage);
+            AddDirtyFlagToFloatFieldValueChange(sawGreenHitAmount);
+            AddDirtyFlagToFloatFieldValueChange(sawGreenBurningDamage);
+            AddDirtyFlagToFloatFieldValueChange(sawGreenBurningHitAmount);
 
             AddDirtyFlagToFloatFieldValueChange(nailgunAmmoRegSpeedMulti);
             AddDirtyFlagToFloatFieldValueChange(nailgunHeatsinkRegSpeedMulti);
