@@ -336,6 +336,15 @@ namespace Ultrapain
         public static FloatSliderField hardDamagePercent;
         public static IntField whiplashHardDamageCap;
         public static FloatField whiplashHardDamageSpeed;
+        public static BoolField playerHpDeltaToggle;
+        public static IntField playerHpDeltaAmount;
+        public static IntField playerHpDeltaLimit;
+        public static FloatField playerHpDeltaDelay;
+        public static BoolField playerHpDeltaHurtAudio;
+        public static BoolField playerHpDeltaCalm;
+        public static BoolField playerHpDeltaCombat;
+        public static BoolField playerHpDeltaCybergrind;
+        public static BoolField playerHpDeltaSandbox;
 
         // ENEMY PANEL
         public static ConfigPanel globalEnemyPanel;
@@ -743,17 +752,56 @@ namespace Ultrapain
             // PLAYER PANEL
 
             // PLAYER STAT EDITOR
-
-            // REVOLVER
             playerStatEditorPanel = new ConfigPanel(playerPanel, "Player stat editor", "playerStatEditorPanel");
+            
+            // MOVEMENT
             new ConfigHeader(playerStatEditorPanel, "Movement");
             staminaRegSpeedMulti = new FloatField(playerStatEditorPanel, "Stamina regen speed", "staminaRegSpeedMulti", 1f, 0.01f, float.MaxValue);
+            
+            // HEALTH
             new ConfigHeader(playerStatEditorPanel, "Health");
             maxPlayerHp = new IntField(playerStatEditorPanel, "Max HP", "maxPlayerHp", 100, 1, int.MaxValue);
             playerHpSupercharge = new IntField(playerStatEditorPanel, "Max overcharge HP", "playerHpSupercharge", 200, 1, int.MaxValue);
+
+            new SpaceField(playerStatEditorPanel);
+            
             hardDamagePercent = new FloatSliderField(playerStatEditorPanel, "Hard damage taken percent", "hardDamagePercent", new Tuple<float, float>(0, 100), 100);
             whiplashHardDamageCap = new IntField(playerStatEditorPanel, "Whiplash hard damage cap", "whiplashHardDamageCap", 50, 0, int.MaxValue);
             whiplashHardDamageSpeed = new FloatField(playerStatEditorPanel, "Whiplash hard damage speed multiplier", "whiplashHardDamageSpeed", 1f, 0.01f, float.MaxValue);
+
+            new SpaceField(playerStatEditorPanel);
+
+            ConfigDivision deltaHpDiv = new ConfigDivision(playerStatEditorPanel, "deltaHpDiv");
+            playerHpDeltaToggle = new BoolField(playerStatEditorPanel, "HP regen/decay", "playerHpDeltaToggle", false);
+            playerHpDeltaToggle.onValueChange += (BoolField.BoolValueChangeEvent e) =>
+            {
+                if (NewMovement_DeltaHpComp.instance != null)
+                    NewMovement_DeltaHpComp.instance.UpdateEnabled();
+
+                deltaHpDiv.interactable = e.value;
+                dirtyField = true;
+            };
+            playerHpDeltaToggle.TriggerValueChangeEvent();
+            playerHpDeltaAmount = new IntField(deltaHpDiv, "HP regen/decay amount", "playerHpDeltaAmount", -1);
+            playerHpDeltaDelay = new FloatField(deltaHpDiv, "Delay", "playerHpDeltaDelay", 2f, 0.01f, float.MaxValue);
+            playerHpDeltaLimit = new IntField(deltaHpDiv, "Max regen/min decay limit", "playerHpDeltaLimit", 50);
+            playerHpDeltaHurtAudio = new BoolField(deltaHpDiv, "Hurt audio on decay", "playerHpDeltaHurtAudio", false);
+            playerHpDeltaCalm = new BoolField(deltaHpDiv, "Active during calm phase", "playerHpDeltaCalm", false);
+            playerHpDeltaCombat = new BoolField(deltaHpDiv, "Active during combat", "playerHpDeltaCombat", true);
+            playerHpDeltaCybergrind = new BoolField(deltaHpDiv, "Active in cybergrind", "playerHpDeltaCybergrind", true);
+            playerHpDeltaCybergrind.onValueChange += (BoolField.BoolValueChangeEvent e) =>
+            {
+                if (NewMovement_DeltaHpComp.instance != null)
+                    NewMovement_DeltaHpComp.instance.UpdateEnabled();
+            };
+            playerHpDeltaSandbox = new BoolField(deltaHpDiv, "Active in sandbox", "playerHpDeltaSandbox", false);
+            playerHpDeltaSandbox.onValueChange += (BoolField.BoolValueChangeEvent e) =>
+            {
+                if (NewMovement_DeltaHpComp.instance != null)
+                    NewMovement_DeltaHpComp.instance.UpdateEnabled();
+            };
+
+            // REVOLVER
             new ConfigHeader(playerStatEditorPanel, "Revolver");
             revolverDamage = new FloatField(playerStatEditorPanel, "Revolver damage", "revolverDamageMulti", 1f, 0.01f, float.MaxValue);
                 new ImageInputField(revolverDamage, Plugin.blueRevolverSprite, Color.white);

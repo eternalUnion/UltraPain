@@ -721,10 +721,119 @@ namespace Ultrapain.Patches
         }
     }
 
+    class NewMovement_DeltaHpComp : MonoBehaviour
+    {
+        public static NewMovement_DeltaHpComp instance;
+        private NewMovement player;
+        private AudioSource hurtAud;
+
+        private bool levelMap = false;
+
+        private void Awake()
+        {
+            instance = this;
+            player = NewMovement.Instance;
+            hurtAud = player.hurtScreen.GetComponent<AudioSource>();
+            levelMap = SceneHelper.CurrentLevelNumber > 0;
+
+            UpdateEnabled();
+        }
+
+        public void UpdateEnabled()
+        {
+            if (!ConfigManager.playerHpDeltaToggle.value)
+                enabled = false;
+
+            if (SceneHelper.CurrentScene == "uk_construct")
+                enabled = ConfigManager.playerHpDeltaSandbox.value;
+            else if (SceneHelper.CurrentScene == "Endless")
+                enabled = ConfigManager.playerHpDeltaCybergrind.value;
+            else
+            {
+                enabled = SceneHelper.CurrentLevelNumber > 0;
+            }
+        }
+
+        public void ResetCooldown()
+        {
+            deltaCooldown = ConfigManager.playerHpDeltaDelay.value;
+        }
+
+        public float deltaCooldown = ConfigManager.playerHpDeltaDelay.value;
+        public void Update()
+        {
+            if (player.dead || !ConfigManager.playerHpDeltaToggle.value || !StatsManager.Instance.timer)
+            {
+                ResetCooldown();
+                return;
+            }
+
+            if (levelMap)
+            {
+                // Calm
+                if (MusicManager.Instance.requestedThemes == 0)
+                {
+                    if (!ConfigManager.playerHpDeltaCalm.value)
+                    {
+                        ResetCooldown();
+                        return;
+                    }
+                }
+                // Combat
+                else
+                {
+                    if (!ConfigManager.playerHpDeltaCombat.value)
+                    {
+                        ResetCooldown();
+                        return;
+                    }
+
+                }
+            }
+
+            deltaCooldown = Mathf.MoveTowards(deltaCooldown, 0f, Time.deltaTime);
+            if (deltaCooldown == 0f)
+            {
+                ResetCooldown();
+                int deltaHp = ConfigManager.playerHpDeltaAmount.value;
+                int limit = ConfigManager.playerHpDeltaLimit.value;
+
+                if (deltaHp == 0)
+                    return;
+
+                if (deltaHp > 0)
+                {
+                    if (player.hp > limit)
+                        return;
+
+                    player.GetHealth(deltaHp, true);
+                }
+                else
+                {
+                    if (player.hp < limit)
+                        return;
+
+                    if (player.hp - deltaHp <= 0)
+                        player.GetHurt(-deltaHp, false, 0, false, false);
+                    else
+                    {
+                        player.hp += deltaHp;
+                        if (ConfigManager.playerHpDeltaHurtAudio.value)
+                        {
+                            hurtAud.pitch = UnityEngine.Random.Range(0.8f, 1f);
+                            hurtAud.PlayOneShot(hurtAud.clip);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
     class NewMovement_Start
     {
         static void Postfix(NewMovement __instance)
         {
+            __instance.gameObject.AddComponent<NewMovement_DeltaHpComp>();
             __instance.hp = ConfigManager.maxPlayerHp.value;
         }
     }

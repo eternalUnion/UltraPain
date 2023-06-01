@@ -644,7 +644,7 @@ namespace Ultrapain
             if(ConfigManager.staminaRegSpeedMulti.value != 1)
                 harmonyTweaks.Patch(GetMethod<NewMovement>("Update"), prefix: GetHarmonyMethod(GetMethod<NewMovement_Update>("Prefix")));
             
-            if(ConfigManager.maxPlayerHp.value != 100 || ConfigManager.playerHpSupercharge.value != 200 || ConfigManager.whiplashHardDamageCap.value != 50 || ConfigManager.whiplashHardDamageSpeed.value != 1)
+            if(ConfigManager.playerHpDeltaToggle.value || ConfigManager.maxPlayerHp.value != 100 || ConfigManager.playerHpSupercharge.value != 200 || ConfigManager.whiplashHardDamageCap.value != 50 || ConfigManager.whiplashHardDamageSpeed.value != 1)
             {
                 harmonyTweaks.Patch(GetMethod<NewMovement>("GetHealth"), prefix: GetHarmonyMethod(GetMethod<NewMovement_GetHealth>("Prefix")));
                 harmonyTweaks.Patch(GetMethod<NewMovement>("SuperCharge"), prefix: GetHarmonyMethod(GetMethod<NewMovement_SuperCharge>("Prefix")));
