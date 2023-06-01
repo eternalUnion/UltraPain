@@ -68,16 +68,19 @@ namespace Ultrapain.Patches
         public float harmlessSize = 1f;
         public float harmlessSpeed = 1f;
         public float harmlessDamage = 1f;
+        public int harmlessPlayerDamageOverride = -1;
 
         public bool normalMod = false;
         public float normalSize = 1f;
         public float normalSpeed = 1f;
         public float normalDamage = 1f;
+        public int normalPlayerDamageOverride = -1;
 
         public bool superMod = false;
         public float superSize = 1f;
         public float superSpeed = 1f;
         public float superDamage = 1f;
+        public int superPlayerDamageOverride = -1;
 
         struct StateInfo
         {
@@ -108,6 +111,7 @@ namespace Ultrapain.Patches
                     exp.damage = (int)(exp.damage * flag.harmlessDamage);
                     exp.maxSize *= flag.harmlessSize;
                     exp.speed *= flag.harmlessSize * flag.harmlessSpeed;
+                    exp.playerDamageOverride = flag.harmlessPlayerDamageOverride;
                 }
             }
 
@@ -119,6 +123,7 @@ namespace Ultrapain.Patches
                     exp.damage = (int)(exp.damage * flag.normalDamage);
                     exp.maxSize *= flag.normalSize;
                     exp.speed *= flag.normalSize * flag.normalSpeed;
+                    exp.playerDamageOverride = flag.normalPlayerDamageOverride;
                 }
             }
 
@@ -130,6 +135,7 @@ namespace Ultrapain.Patches
                     exp.damage = (int)(exp.damage * flag.superDamage);
                     exp.maxSize *= flag.superSize;
                     exp.speed *= flag.superSize * flag.superSpeed;
+                    exp.playerDamageOverride = flag.superPlayerDamageOverride;
                 }
             }
 
