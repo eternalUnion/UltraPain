@@ -563,6 +563,11 @@ namespace Ultrapain
             harmonyTweaks.Patch(GetMethod<LeviathanHead>("FixedUpdate"), prefix: GetHarmonyMethod(GetMethod<Leviathan_FixedUpdate>("Prefix")));
 
             // ADDME
+            harmonyTweaks.Patch(GetMethod<SisyphusPrime>("Start"), postfix: GetHarmonyMethod(GetMethod<SisyphusPrime_Start>("Postfix")));
+            if (ConfigManager.sisPrimeUnparryablePhase1.value || ConfigManager.sisPrimeUnparryablePhase2.value)
+                harmonyTweaks.Patch(GetMethod<SisyphusPrime>("Parryable"), prefix: GetHarmonyMethod(GetMethod<SisyphusPrime_Parryable>("Prefix")));
+
+            // ADDME
             /*
             harmonyTweaks.Patch(GetMethod<GabrielSecond>("Start"), postfix: GetHarmonyMethod(GetMethod<GabrielSecond_Start>("Postfix")));
             harmonyTweaks.Patch(GetMethod<GabrielSecond>("BasicCombo"), postfix: GetHarmonyMethod(GetMethod<GabrielSecond_BasicCombo>("Postfix")));

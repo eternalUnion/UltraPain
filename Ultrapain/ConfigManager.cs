@@ -142,6 +142,7 @@ namespace Ultrapain
         public static ConfigPanel v2SecondPanel;
         public static ConfigPanel sisyInstPanel;
         public static ConfigPanel leviathanPanel;
+        public static ConfigPanel sisPrimePanel;
 
         // GLOBAL ENEMY CONFIG
         public static BoolField friendlyFireDamageOverrideToggle;
@@ -383,6 +384,11 @@ namespace Ultrapain
         public static BoolField sisyInstStrongerExplosion;
         public static FloatField sisyInstStrongerExplosionSizeMulti;
         public static FloatField sisyInstStrongerExplosionDamageMulti;
+
+        // SISYPHUS PRIME
+        public static BoolField sisPrimeEarlyPhase2;
+        public static BoolField sisPrimeUnparryablePhase1;
+        public static BoolField sisPrimeUnparryablePhase2;
 
         // ADD ME
         // LEVIATHAN
@@ -757,6 +763,7 @@ namespace Ultrapain
             new ConfigHeader(enemyPanel, "Prime Bosses");
             fleshPrisonPanel = new ConfigPanel(enemyPanel, "Flesh Prison", "fleshPrisonPanel");
             minosPrimePanel = new ConfigPanel(enemyPanel, "Minos Prime", "minosPrimePanel");
+            sisPrimePanel = new ConfigPanel(enemyPanel, "Sisyphus Prime", "sisPrimePanel");
 
             // GLOBAL ENEMY TWEAKS
             eidStatEditorPanel = new ConfigPanel(globalEnemyPanel, "Enemy stat editor", "eidStatEditorPanel");
@@ -1521,6 +1528,19 @@ namespace Ultrapain
             leviathanChargeHauntRocketRiding = new BoolField(leviathanChargedDiv, "Target ridden rockets", "leviathanChargeHauntRocketRiding", true);
             new ConfigHeader(leviathanPanel, "Tail Swing Combo");
             leviathanTailComboCount = new IntField(leviathanPanel, "Tail swing count", "leviathanTailComboCount", 3, 1, int.MaxValue);
+
+            // SISYPHUS PRIME
+            sisPrimeEarlyPhase2 = new BoolField(sisPrimePanel, "Early phase 2", "sisPrimeEarlyPhase2", true);
+            sisPrimeUnparryablePhase1 = new BoolField(sisPrimePanel, "Unparryable on phase 1", "sisPrimeUnparryablePhase1", false);
+            sisPrimeUnparryablePhase1.onValueChange += (BoolField.BoolValueChangeEvent e) =>
+            {
+                dirtyField = true;
+            };
+            sisPrimeUnparryablePhase2 = new BoolField(sisPrimePanel, "Unparryable on phase 2", "sisPrimeUnparryablePhase2", true);
+            sisPrimeUnparryablePhase2.onValueChange += (BoolField.BoolValueChangeEvent e) =>
+            {
+                dirtyField = true;
+            };
 
             config.Flush();
             //config.LogDuplicateGUID();
