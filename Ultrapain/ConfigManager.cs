@@ -422,6 +422,12 @@ namespace Ultrapain
         public static IntField panopticonSpinAttackDamage;
         public static FloatField panopticonSpinAttackDistance;
 
+        public static BoolField panopticonBlueProjToggle;
+        public static IntField panopticonBlueProjCount;
+        public static FloatField panopticonBlueProjDamage;
+        public static FloatField panopticonBlueProjTurnSpeed;
+        public static FloatField panopticonBlueProjInitialSpeed;
+
         /////////// ADD MEEEE
         // GABRIEL SECOND
         public static BoolField gabriSecondP1Chaos;
@@ -1577,6 +1583,20 @@ namespace Ultrapain
             panopticonSpinAttackDistance = new FloatField(panopticonSpinInsigniaDiv, "Circle radius", "panopticonSpinAttackDistance", 60f, 0f, float.MaxValue);
             panopticonSpinAttackTurnSpeed = new FloatField(panopticonSpinInsigniaDiv, "Turn speed", "panopticonSpinAttackTurnSpeed", 60f, 0f, float.MaxValue);
             panopticonSpinAttackActivateSpeed = new FloatField(panopticonSpinInsigniaDiv, "Activasion speed", "panopticonSpinAttackActivateSpeed", 0.5f, 0f, float.MaxValue);
+
+            new ConfigHeader(panopticonPanel, "Blue Orb Attack");
+            ConfigDivision panopticonBlueProjDiv = new ConfigDivision(panopticonPanel, "panopticonBlueProjDiv");
+            panopticonBlueProjToggle = new BoolField(panopticonPanel, "Enabled", "panopticonBlueProjToggle", true);
+            panopticonBlueProjToggle.onValueChange += (BoolField.BoolValueChangeEvent e) =>
+            {
+                panopticonBlueProjDiv.interactable = e.value;
+                dirtyField = true;
+            };
+            panopticonBlueProjToggle.TriggerValueChangeEvent();
+            panopticonBlueProjCount = new IntField(panopticonBlueProjDiv, "Projectile count", "panopticonBlueProjCount", 3, 1, int.MaxValue);
+            panopticonBlueProjDamage = new FloatField(panopticonBlueProjDiv, "Projectile damage", "panopticonBlueProjDiv", 5, 0, float.MaxValue);
+            panopticonBlueProjTurnSpeed = new FloatField(panopticonBlueProjDiv, "Projectile turn speed multiplier", "panopticonBlueProjTurnSpeed", 1f, 0f, float.MaxValue);
+            panopticonBlueProjInitialSpeed = new FloatField(panopticonBlueProjDiv, "Projectile initial speed", "panopticonBlueProjInitialSpeed", 0f, 0f, float.MaxValue);
 
             config.Flush();
             //config.LogDuplicateGUID();

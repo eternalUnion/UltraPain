@@ -1,5 +1,10 @@
-﻿using System;
+﻿using HarmonyLib;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
+using System.Reflection;
+using System.Reflection.Emit;
 using System.Text;
 using UnityEngine;
 using UnityEngine.UIElements;
@@ -197,6 +202,59 @@ namespace Ultrapain.Patches
                 __instance.skullDrone = __state.template;
             else
                 __instance.fleshDrone = __state.template;
+        }
+    }
+
+    class Panopticon_BlueProjectile
+    {
+        public static void BlueProjectileSpawn(FleshPrison instance)
+        {
+            if (!instance.altVersion || !ConfigManager.panopticonBlueProjToggle.value)
+                return;
+
+            int count = ConfigManager.panopticonBlueProjCount.value;
+            float deltaAngle = 360f / (count + 1);
+            float currentAngle = deltaAngle;
+
+            for (int i = 0; i < count; i++)
+            {
+                GameObject proj = GameObject.Instantiate(Plugin.homingProjectile, instance.rotationBone.position + instance.rotationBone.up * 16f, instance.rotationBone.rotation);
+                proj.transform.position += proj.transform.forward * 5f;
+                proj.transform.RotateAround(instance.transform.position, Vector3.up, currentAngle);
+                currentAngle += deltaAngle;
+                Projectile comp = proj.GetComponent<Projectile>();
+                comp.safeEnemyType = EnemyType.FleshPanopticon;
+                comp.target = instance.target;
+                comp.damage = ConfigManager.panopticonBlueProjDamage.value * instance.eid.totalDamageModifier;
+                comp.turningSpeedMultiplier *= ConfigManager.panopticonBlueProjTurnSpeed.value;
+                comp.speed = ConfigManager.panopticonBlueProjInitialSpeed.value;
+            }
+        }
+
+        static MethodInfo m_Panopticon_BlueProjectile_BlueProjectileSpawn = typeof(Panopticon_BlueProjectile).GetMethod("BlueProjectileSpawn", BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static);
+        static MethodInfo m_GameObject_GetComponent_Projectile = typeof(GameObject).GetMethod("GetComponent", new Type[0]).MakeGenericMethod(new Type[1] { typeof(Projectile) });
+
+        static IEnumerable Transpiler(IEnumerable<CodeInstruction> instructions)
+        {
+            List<CodeInstruction> code = new List<CodeInstruction>(instructions);
+
+            for (int i = 0; i < code.Count; i++)
+            {
+                if (code[i].opcode == OpCodes.Callvirt && code[i].OperandIs(m_GameObject_GetComponent_Projectile))
+                {
+                    i += 2;
+
+                    // Push instance reference
+                    code.Insert(i, new CodeInstruction(OpCodes.Ldarg_0));
+                    i += 1;
+                    // Call the method
+                    code.Insert(i, new CodeInstruction(OpCodes.Call, m_Panopticon_BlueProjectile_BlueProjectileSpawn));
+
+                    break;
+                }
+            }
+
+            return code.AsEnumerable();
         }
     }
 }
