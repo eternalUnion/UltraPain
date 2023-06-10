@@ -58,6 +58,8 @@ namespace Ultrapain
         // MEME PANEL
         public static BoolField enrageSfxToggle;
         public static BoolField funnyDruidKnightSFXToggle;
+        public static BoolField obamapticonToggle;
+        public static StringField obamapticonName;
 
         // PLAYER PANEL
         public static BoolField rocketBoostToggle;
@@ -542,6 +544,12 @@ namespace Ultrapain
             {
                 dirtyField = true;
             };
+            obamapticonToggle = new BoolField(memePanel, "OBAMAPTICON", "obamapticonToggle", false);
+            obamapticonToggle.onValueChange += (BoolField.BoolValueChangeEvent e) =>
+            {
+                dirtyField = true;
+            };
+            obamapticonName = new StringField(memePanel, "OBAMAPTICON name", "obamapticonName", "OBAMAPTICON");
 
             // PLAYER PANEL
             new ConfigHeader(playerPanel, "Rocket Boosting");

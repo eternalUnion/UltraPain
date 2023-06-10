@@ -631,6 +631,9 @@ namespace Ultrapain
                 harmonyTweaks.Patch(GetMethod<Mandalore>("FullerBurst"), prefix: GetHarmonyMethod(GetMethod<DruidKnight_FullerBurst>("Prefix")));
                 harmonyTweaks.Patch(GetMethod<Drone>("Explode"), prefix: GetHarmonyMethod(GetMethod<Drone_Explode>("Prefix")), postfix: GetHarmonyMethod(GetMethod<Drone_Explode>("Postfix")));
             }
+
+            if (ConfigManager.obamapticonToggle.value)
+                harmonyTweaks.Patch(GetMethod<FleshPrison>("Start"), postfix: GetHarmonyMethod(GetMethod<Obamapticon_Start>("Postfix")), prefix: GetHarmonyMethod(GetMethod<Obamapticon_Start>("Prefix")));
         }
 
         public static bool methodsPatched = false;
@@ -675,6 +678,7 @@ namespace Ultrapain
         public static AudioClip druidKnightFullerAutoAud;
         public static AudioClip druidKnightDeathAud;
         public static AudioClip enrageAudioCustom;
+        public static GameObject obamapticon;
 
         public void Awake()
         {
@@ -690,6 +694,7 @@ namespace Ultrapain
                 druidKnightFullerAutoAud = bundle.LoadAsset<AudioClip>("assets/ultrapain/druidknight/fullerauto.wav");
                 druidKnightDeathAud = bundle.LoadAsset<AudioClip>("assets/ultrapain/druidknight/death.wav");
                 enrageAudioCustom = bundle.LoadAsset<AudioClip>("assets/ultrapain/sfx/enraged.wav");
+                obamapticon = bundle.LoadAsset<GameObject>("assets/ultrapain/panopticon/obamapticon.prefab");
             }
             catch (Exception e)
             {
