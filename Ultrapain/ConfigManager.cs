@@ -58,6 +58,8 @@ namespace Ultrapain
         // MEME PANEL
         public static BoolField enrageSfxToggle;
         public static BoolField funnyDruidKnightSFXToggle;
+        public static BoolField fleshObamiumToggle;
+        public static StringField fleshObamiumName;
         public static BoolField obamapticonToggle;
         public static StringField obamapticonName;
 
@@ -544,6 +546,12 @@ namespace Ultrapain
             {
                 dirtyField = true;
             };
+            fleshObamiumToggle = new BoolField(memePanel, "FLESH OBAMIUM", "fleshObamiumToggle", false);
+            fleshObamiumToggle.onValueChange += (BoolField.BoolValueChangeEvent e) =>
+            {
+                dirtyField = true;
+            };
+            fleshObamiumName = new StringField(memePanel, "FLESH OBAMIUM name", "fleshObamiumName", "FLESH OBAMIUM");
             obamapticonToggle = new BoolField(memePanel, "OBAMAPTICON", "obamapticonToggle", false);
             obamapticonToggle.onValueChange += (BoolField.BoolValueChangeEvent e) =>
             {
