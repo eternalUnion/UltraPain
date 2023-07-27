@@ -13,12 +13,22 @@ namespace Ultrapain.Patches
         public CoinChainList chainList;
         public bool isOrbitalRay = false;
         public bool exploded = false;
+        public float activasionDistance;
+    }
+
+    public class Coin_Start
+    {
+        static void Postfix(Coin __instance)
+        {
+            __instance.gameObject.AddComponent<OrbitalStrikeFlag>();
+        }
     }
 
     public class CoinChainList : MonoBehaviour
     {
         public List<Coin> chainList = new List<Coin>();
         public bool isOrbitalStrike = false;
+        public float activasionDistance;
     }
 
     class Punch_BlastCheck
@@ -43,7 +53,7 @@ namespace Ultrapain.Patches
     {
         static bool Prefix(Explosion __instance, Collider __0, List<Collider> ___hitColliders)
         {
-            if (___hitColliders.Contains(__0) || __instance.transform.parent.GetComponent<OrbitalStrikeFlag>() == null)
+            if (___hitColliders.Contains(__0)/* || __instance.transform.parent.GetComponent<OrbitalStrikeFlag>() == null*/)
                 return true;
 
             Coin coin = __0.GetComponent<Coin>();
@@ -103,11 +113,15 @@ namespace Ultrapain.Patches
             {
                 Coin lastCoin = flag.chainList.LastOrDefault();
                 float distance = Vector3.Distance(__instance.transform.position, lastCoin.transform.position);
-                if (distance >= 20f)
+                if (distance >= ConfigManager.orbStrikeMinDistance.value)
                 {
                     flag.isOrbitalStrike = true;
+                    flag.activasionDistance = distance;
                     if (orbitalBeamFlag != null)
+                    {
                         orbitalBeamFlag.isOrbitalRay = true;
+                        orbitalBeamFlag.activasionDistance = distance;
+                    }
                     Debug.Log("Coin valid for orbital strike");
                 }
             }
@@ -472,7 +486,7 @@ namespace Ultrapain.Patches
             public OrbitalExplosionInfo info = null;
         }
 
-        static bool Prefix(EnemyIdentifier __instance, out StateInfo __state, Vector3 __2)
+        static bool Prefix(EnemyIdentifier __instance, out StateInfo __state, Vector3 __2, ref float __3)
         {
             //if (Coin_ReflectRevolver.shootingCoin == lastExplosiveCoin)
             //    return true;
@@ -500,10 +514,12 @@ namespace Ultrapain.Patches
                     causeExplosion = true;
                 }
             }
-            else if(RevolverBeam_ExecuteHits.isOrbitalRay && RevolverBeam_ExecuteHits.orbitalBeam != null)
+            else if (RevolverBeam_ExecuteHits.isOrbitalRay && RevolverBeam_ExecuteHits.orbitalBeam != null)
             {
-                if(RevolverBeam_ExecuteHits.orbitalBeamFlag != null && !RevolverBeam_ExecuteHits.orbitalBeamFlag.exploded)
+                if (RevolverBeam_ExecuteHits.orbitalBeamFlag != null && !RevolverBeam_ExecuteHits.orbitalBeamFlag.exploded)
+                {
                     causeExplosion = true;
+                }
             }
 
             if(causeExplosion)
@@ -610,6 +626,43 @@ namespace Ultrapain.Patches
                     {
                         // UNUSED
                         causeExplosion = false;
+                    }
+                    // MALICIOUS BEAM
+                    else if (beam.beamType == BeamType.MaliciousFace)
+                    {
+                        GameObject explosion = GameObject.Instantiate(Plugin.sisyphiusPrimeExplosion, /*__instance.gameObject.transform.position*/__2, Quaternion.identity);
+                        foreach (Explosion exp in explosion.GetComponentsInChildren<Explosion>())
+                        {
+                            exp.enemy = false;
+                            exp.hitterWeapon = "";
+                            exp.maxSize *= ConfigManager.maliciousChargebackExplosionSizeMultiplier.value;
+                            exp.speed *= ConfigManager.maliciousChargebackExplosionSizeMultiplier.value;
+                            exp.damage = (int)(exp.damage * ConfigManager.maliciousChargebackExplosionDamageMultiplier.value);
+                        }
+
+                        OrbitalExplosionInfo info = explosion.AddComponent<OrbitalExplosionInfo>();
+                        info.id = ConfigManager.maliciousChargebackStyleText.guid;
+                        info.points = ConfigManager.maliciousChargebackStylePoint.value;
+                        __state.info = info;
+                    }
+                    // SENTRY BEAM
+                    else if (beam.beamType == BeamType.Enemy)
+                    {
+                        StyleHUD.Instance.AddPoints(ConfigManager.sentryChargebackStylePoint.value, ConfigManager.sentryChargebackStyleText.formattedString);
+
+                        if (ConfigManager.sentryChargebackExtraBeamCount.value > 0)
+                        {
+                            List<Tuple<EnemyIdentifier, float>> enemies = UnityUtils.GetClosestEnemies(__2, ConfigManager.sentryChargebackExtraBeamCount.value, UnityUtils.doNotCollideWithPlayerValidator);
+                            foreach (Tuple<EnemyIdentifier, float> enemy in enemies)
+                            {
+                                RevolverBeam newBeam = GameObject.Instantiate(beam, beam.transform.position, Quaternion.identity);
+                                newBeam.hitEids.Add(__instance);
+                                newBeam.transform.LookAt(enemy.Item1.transform);
+                                GameObject.Destroy(newBeam.GetComponent<OrbitalStrikeFlag>());
+                            }
+                        }
+
+                        RevolverBeam_ExecuteHits.isOrbitalRay = false;
                     }
                 }
 
