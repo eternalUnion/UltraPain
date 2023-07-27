@@ -293,6 +293,7 @@ namespace Ultrapain
         public static BoolField virtueTweakNormalAttackToggle;
         public static EnumField<VirtueAttackType> virtueNormalAttackType;
 
+        public static FloatField virtueNormalInsigniaLastMulti;
         public static BoolField virtueNormalInsigniaXtoggle;
         public static FloatField virtueNormalInsigniaXsize;
         public static IntField virtueNormalInsigniaXdamage;
@@ -309,6 +310,7 @@ namespace Ultrapain
         public static BoolField virtueTweakEnragedAttackToggle;
         public static EnumField<VirtueAttackType> virtueEnragedAttackType;
 
+        public static FloatField virtueEnragedInsigniaLastMulti;
         public static BoolField virtueEnragedInsigniaXtoggle;
         public static FloatField virtueEnragedInsigniaXsize;
         public static IntField virtueEnragedInsigniaXdamage;
@@ -1460,6 +1462,7 @@ namespace Ultrapain
             virtueNormalAttackType = new EnumField<VirtueAttackType>(virtueTweakNormalAttackDiv, "Attack type", "virtueNormalAttackType", VirtueAttackType.Insignia);
 
             ConfigDivision virtueNormalInsigniaDiv = new ConfigDivision(virtueTweakNormalAttackDiv, "virtueNormalInsigniaDiv");
+            virtueNormalInsigniaLastMulti = new FloatField(virtueNormalInsigniaDiv, "Insignia last multiplier", "virtueNormalInsigniaLastMulti", 1f, 0.1f, float.MaxValue);
             ConfigDivision virtueNormalYInsigniaDiv = new ConfigDivision(virtueNormalInsigniaDiv, "virtueNormalYInsigniaDiv");
             new ConfigHeader(virtueNormalInsigniaDiv, "Vertical Insignia", 12);
             virtueNormalInsigniaYtoggle = new BoolField(virtueNormalInsigniaDiv, "Enabled", "virtueNormalInsigniaYtoggle", true);
@@ -1530,6 +1533,7 @@ namespace Ultrapain
             virtueEnragedAttackType = new EnumField<VirtueAttackType>(virtueTweakEnragedAttackDiv, "Attack type", "virtueEnragedAttackType", VirtueAttackType.Insignia);
 
             ConfigDivision virtueEnragedInsigniaDiv = new ConfigDivision(virtueTweakEnragedAttackDiv, "virtueEnragedInsigniaDiv");
+            virtueEnragedInsigniaLastMulti = virtueNormalInsigniaLastMulti = new FloatField(virtueEnragedInsigniaDiv, "Insignia last multiplier", "virtueEnragedInsigniaLastMulti", 1f, 0.1f, float.MaxValue);
             ConfigHeader virtueEnragedYInsigniaHeader = new ConfigHeader(virtueEnragedInsigniaDiv, "Vertical Insignia", 12);
             ConfigDivision virtueEnragedYInsigniaDiv = new ConfigDivision(virtueEnragedInsigniaDiv, "virtueEnragedYInsigniaDiv");
             virtueEnragedInsigniaYtoggle = new BoolField(virtueEnragedInsigniaDiv, "Enabled", "virtueEnragedInsigniaYtoggle", true);
