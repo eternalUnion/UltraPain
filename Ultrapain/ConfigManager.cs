@@ -11,6 +11,7 @@ using BepInEx.Configuration;
 using System.IO;
 using PluginConfig.API.Functionals;
 using System.Text;
+using static Ultrapain.ConfigManager;
 
 namespace Ultrapain
 {
@@ -59,6 +60,10 @@ namespace Ultrapain
         // MEME PANEL
         public static BoolField enrageSfxToggle;
         public static BoolField funnyDruidKnightSFXToggle;
+        public static BoolField fleshObamiumToggle;
+        public static StringField fleshObamiumName;
+        public static BoolField obamapticonToggle;
+        public static StringField obamapticonName;
 
         // PLAYER PANEL
         public static BoolField rocketBoostToggle;
@@ -143,6 +148,8 @@ namespace Ultrapain
         public static ConfigPanel v2SecondPanel;
         public static ConfigPanel sisyInstPanel;
         public static ConfigPanel leviathanPanel;
+        public static ConfigPanel panopticonPanel;
+        public static ConfigPanel idolPanel;
 
         // GLOBAL ENEMY CONFIG
         public static BoolField friendlyFireDamageOverrideToggle;
@@ -232,6 +239,8 @@ namespace Ultrapain
         public static BoolField droneExplosionBeamToggle;
         public static BoolField droneSentryBeamToggle;
         public static FloatField droneSentryBeamDamage;
+        public static BoolField droneHomeToggle;
+        public static FloatField droneHomeTurnSpeed;
 
         // FILTH
         public static BoolField filthExplodeToggle;
@@ -460,6 +469,41 @@ namespace Ultrapain
 
         public static IntField leviathanTailComboCount;
 
+        // PANOPTICON
+        public static BoolField panopticonFullPhase;
+        public static BoolField panopticonBalanceEyes;
+        public static BoolField panopticonBlackholeProj;
+        public static BoolField panopticonAxisBeam;
+        public static FloatField panopticonAxisBeamSizeMulti;
+
+        public static BoolField panopticonSpinAttackToggle;
+        public static IntField panopticonSpinAttackCount;
+        public static FloatField panopticonSpinAttackTurnSpeed;
+        public static FloatField panopticonSpinAttackActivateSpeed;
+        public static FloatField panopticonSpinAttackSize;
+        public static IntField panopticonSpinAttackDamage;
+        public static FloatField panopticonSpinAttackDistance;
+
+        public static BoolField panopticonBlueProjToggle;
+        public static IntField panopticonBlueProjCount;
+        public static FloatField panopticonBlueProjDamage;
+        public static FloatField panopticonBlueProjTurnSpeed;
+        public static FloatField panopticonBlueProjInitialSpeed;
+      
+        // IDOL
+        public static BoolField idolExplosionToggle;
+        public enum IdolExplosionType
+        {
+            Normal,
+            Big,
+            Ligthning,
+            Sisyphean,
+            Sand
+        }
+        public static EnumField<IdolExplosionType> idolExplodionType;
+        public static FloatField idolExplosionSizeMultiplier;
+        public static FloatField idolExplosionDamageMultiplier;
+        public static FloatSliderField idolExplosionEnemyDamagePercent;
 
         /////////// ADD MEEEE
         // GABRIEL SECOND
@@ -575,6 +619,18 @@ namespace Ultrapain
             {
                 dirtyField = true;
             };
+            fleshObamiumToggle = new BoolField(memePanel, "FLESH OBAMIUM", "fleshObamiumToggle", false);
+            fleshObamiumToggle.onValueChange += (BoolField.BoolValueChangeEvent e) =>
+            {
+                dirtyField = true;
+            };
+            fleshObamiumName = new StringField(memePanel, "FLESH OBAMIUM name", "fleshObamiumName", "FLESH OBAMIUM");
+            obamapticonToggle = new BoolField(memePanel, "OBAMAPTICON", "obamapticonToggle", false);
+            obamapticonToggle.onValueChange += (BoolField.BoolValueChangeEvent e) =>
+            {
+                dirtyField = true;
+            };
+            obamapticonName = new StringField(memePanel, "OBAMAPTICON name", "obamapticonName", "OBAMAPTICON");
 
             // PLAYER PANEL
             new ConfigHeader(playerPanel, "Rocket Boosting");
@@ -792,6 +848,7 @@ namespace Ultrapain
             schismPanel = new ConfigPanel(enemyPanel, "Schism", "schismPanel");
             soliderPanel = new ConfigPanel(enemyPanel, "Soldier", "soliderPanel");
             dronePanel = new ConfigPanel(enemyPanel, "Drone", "dronePanel");
+            idolPanel = new ConfigPanel(enemyPanel, "Idol", "idolPanel");
             streetCleanerPanel = new ConfigPanel(enemyPanel, "Streetcleaner", "streetCleanerPanel");
             virtuePanel = new ConfigPanel(enemyPanel, "Virtue", "virtuePanel");
             stalkerPanel = new ConfigPanel(enemyPanel, "Stalker", "stalkerPanel");
@@ -811,13 +868,14 @@ namespace Ultrapain
             new ConfigHeader(enemyPanel, "Prime Bosses");
             fleshPrisonPanel = new ConfigPanel(enemyPanel, "Flesh Prison", "fleshPrisonPanel");
             minosPrimePanel = new ConfigPanel(enemyPanel, "Minos Prime", "minosPrimePanel");
+            panopticonPanel = new ConfigPanel(enemyPanel, "Flesh Panopticon", "panopticonPanel");
 
             // GLOBAL ENEMY TWEAKS
             eidStatEditorPanel = new ConfigPanel(globalEnemyPanel, "Enemy stat editor", "eidStatEditorPanel");
 
             eidStatEditorSelector = new EnumField<EnemyType>(eidStatEditorPanel, "Selected enemy", "eidStatEditorSelector", EnemyType.Filth);
             eidStatEditorSelector.SetEnumDisplayName(EnemyType.V2Second, "V2 Second");
-            eidStatEditorSelector.SetEnumDisplayName(EnemyType.Sisyphus, "Sisyphean Insurrectionist");
+            eidStatEditorSelector.SetEnumDisplayName(EnemyType.Sisyphus, "Sisyphean Ins.");
             eidStatEditorSelector.SetEnumDisplayName(EnemyType.SisyphusPrime, "Sisyphus Prime");
             eidStatEditorSelector.SetEnumDisplayName(EnemyType.CancerousRodent, "Cancerous Rodent");
             eidStatEditorSelector.SetEnumDisplayName(EnemyType.FleshPanopticon, "Flesh Panopticon");
@@ -826,10 +884,14 @@ namespace Ultrapain
             eidStatEditorSelector.SetEnumDisplayName(EnemyType.HideousMass, "Hideous Mass");
             eidStatEditorSelector.SetEnumDisplayName(EnemyType.MaliciousFace, "Malicious Face");
             eidStatEditorSelector.SetEnumDisplayName(EnemyType.Mandalore, "Druid Knight");
+            eidStatEditorSelector.SetEnumDisplayName(EnemyType.Minos, "Minos Corpse");
             eidStatEditorSelector.SetEnumDisplayName(EnemyType.MinosPrime, "Minos Prime");
             eidStatEditorSelector.SetEnumDisplayName(EnemyType.VeryCancerousRodent, "Very Cancerous Rodent");
             eidStatEditorSelector.SetEnumDisplayName(EnemyType.Wicked, "Something Wicked");
+            eidStatEditorSelector.SetEnumDisplayName(EnemyType.Turret, "Sentry");
+            
             new ConfigHeader(eidStatEditorPanel, "Base Stat Editor");
+            
             foreach(EnemyType eid in Enum.GetValues(typeof(EnemyType)))
             {
                 EidStatContainer container = new EidStatContainer();
@@ -1053,6 +1115,15 @@ namespace Ultrapain
             };
             droneSentryBeamToggle.TriggerValueChangeEvent();
             droneSentryBeamDamage = new FloatField(droneSentryBeamDiv, "Sentry beam damage", "droneSentryBeamDamage", 2f, 0f, float.MaxValue);
+            new ConfigHeader(dronePanel, "Homing Drone After Death");
+            droneHomeToggle = new BoolField(dronePanel, "Enabled", "droneHomeToggle", true);
+            droneHomeToggle.onValueChange += (BoolField.BoolValueChangeEvent e) =>
+            {
+                droneHomeTurnSpeed.interactable = e.value;
+                dirtyField = true;
+            };
+            droneHomeTurnSpeed = new FloatField(dronePanel, "Turn speed", "droneHomeTurnSpeed", 360f, 0f, float.MaxValue);
+            droneHomeToggle.TriggerValueChangeEvent();
 
             // FILTH
             new ConfigHeader(filthPanel, "Explode On Hit");
@@ -1720,6 +1791,88 @@ namespace Ultrapain
             leviathanChargeHauntRocketRiding = new BoolField(leviathanChargedDiv, "Target ridden rockets", "leviathanChargeHauntRocketRiding", true);
             new ConfigHeader(leviathanPanel, "Tail Swing Combo");
             leviathanTailComboCount = new IntField(leviathanPanel, "Tail swing count", "leviathanTailComboCount", 3, 1, int.MaxValue);
+
+            // PANOPTICON
+            panopticonFullPhase = new BoolField(panopticonPanel, "Full fight", "panopticonFullPhase", true);
+            panopticonFullPhase.onValueChange += (BoolField.BoolValueChangeEvent e) =>
+            {
+                dirtyField = true;
+            };
+            panopticonBalanceEyes = new BoolField(panopticonPanel, "Balance eyes", "panopticonBalanceEyes", true);
+            panopticonBalanceEyes.onValueChange += (BoolField.BoolValueChangeEvent e) =>
+            {
+                dirtyField = true;
+            };
+            panopticonBlackholeProj = new BoolField(panopticonPanel, "Throw projectile after blackhole", "panopticonBlackholeProj", true);
+            panopticonBlackholeProj.onValueChange += (BoolField.BoolValueChangeEvent e) =>
+            {
+                dirtyField = true;
+            };
+            panopticonAxisBeam = new BoolField(panopticonPanel, "3 axis insignia", "panopticonAxisBeam", true);
+            panopticonAxisBeam.onValueChange += (BoolField.BoolValueChangeEvent e) =>
+            {
+                dirtyField = true;
+                panopticonAxisBeamSizeMulti.interactable = e.value;
+            };
+            panopticonAxisBeamSizeMulti = new FloatField(panopticonPanel, "Axis beam size multiplier", "panopticonAxisBeamSizeMulti", 0.5f, 0.1f, float.MaxValue);
+            panopticonAxisBeam.TriggerValueChangeEvent();
+
+            new ConfigHeader(panopticonPanel, "Spin Insignia");
+            ConfigDivision panopticonSpinInsigniaDiv = new ConfigDivision(panopticonPanel, "panopticonSpinInsigniaDiv");
+            panopticonSpinAttackToggle = new BoolField(panopticonPanel, "Enabled", "panopticonSpinAttackToggle", true);
+            panopticonSpinAttackToggle.presetLoadPriority = 1;
+            panopticonSpinAttackToggle.onValueChange += (BoolField.BoolValueChangeEvent e) =>
+            {
+                panopticonSpinInsigniaDiv.interactable = e.value;
+                dirtyField = true;
+            };
+            panopticonSpinAttackToggle.TriggerValueChangeEvent();
+            panopticonSpinAttackCount = new IntField(panopticonSpinInsigniaDiv, "Insignia count", "panopticonSpinAttackCount", 5, 1, int.MaxValue);
+            panopticonSpinAttackDamage = new IntField(panopticonSpinInsigniaDiv, "Insignia damage", "panopticonSpinAttackDamage", 10, 0, int.MaxValue);
+            panopticonSpinAttackSize = new FloatField(panopticonSpinInsigniaDiv, "Insignia size", "panopticonSpinAttackSize", 5f, 0f, float.MaxValue);
+            panopticonSpinAttackDistance = new FloatField(panopticonSpinInsigniaDiv, "Circle radius", "panopticonSpinAttackDistance", 60f, 0f, float.MaxValue);
+            panopticonSpinAttackTurnSpeed = new FloatField(panopticonSpinInsigniaDiv, "Turn speed", "panopticonSpinAttackTurnSpeed", 60f, 0f, float.MaxValue);
+            panopticonSpinAttackActivateSpeed = new FloatField(panopticonSpinInsigniaDiv, "Activasion speed", "panopticonSpinAttackActivateSpeed", 0.5f, 0f, float.MaxValue);
+
+            new ConfigHeader(panopticonPanel, "Blue Orb Attack");
+            ConfigDivision panopticonBlueProjDiv = new ConfigDivision(panopticonPanel, "panopticonBlueProjDiv");
+            panopticonBlueProjToggle = new BoolField(panopticonPanel, "Enabled", "panopticonBlueProjToggle", true);
+            panopticonBlueProjToggle.onValueChange += (BoolField.BoolValueChangeEvent e) =>
+            {
+                panopticonBlueProjDiv.interactable = e.value;
+                dirtyField = true;
+            };
+            panopticonBlueProjToggle.TriggerValueChangeEvent();
+            panopticonBlueProjCount = new IntField(panopticonBlueProjDiv, "Projectile count", "panopticonBlueProjCount", 3, 1, int.MaxValue);
+            panopticonBlueProjDamage = new FloatField(panopticonBlueProjDiv, "Projectile damage", "panopticonBlueProjDiv", 5, 0, float.MaxValue);
+            panopticonBlueProjTurnSpeed = new FloatField(panopticonBlueProjDiv, "Projectile turn speed multiplier", "panopticonBlueProjTurnSpeed", 1f, 0f, float.MaxValue);
+            panopticonBlueProjInitialSpeed = new FloatField(panopticonBlueProjDiv, "Projectile initial speed", "panopticonBlueProjInitialSpeed", 0f, 0f, float.MaxValue);
+
+            // IDOL
+            new ConfigHeader(idolPanel, "Explode on break");
+            ConfigDivision idolExplosionDiv = new ConfigDivision(idolPanel, "idolExplosionDiv");
+            idolExplosionToggle = new BoolField(idolPanel, "Enabled", "idolExplosionToggle", true);
+            idolExplosionToggle.onValueChange += (BoolField.BoolValueChangeEvent e) =>
+            {
+                idolExplosionDiv.interactable = e.value;
+                dirtyField = true;
+            };
+            idolExplosionToggle.TriggerValueChangeEvent();
+            idolExplodionType = new EnumField<IdolExplosionType>(idolExplosionDiv, "Explosion type", "idolExplosionType", IdolExplosionType.Ligthning);
+            idolExplodionType.SetEnumDisplayName(IdolExplosionType.Normal, "Normal explosion");
+            idolExplodionType.SetEnumDisplayName(IdolExplosionType.Big, "Big explosion");
+            idolExplodionType.SetEnumDisplayName(IdolExplosionType.Ligthning, "Lightning bolt");
+            idolExplodionType.SetEnumDisplayName(IdolExplosionType.Sisyphean, "Sisyphus prime explosion");
+            idolExplodionType.SetEnumDisplayName(IdolExplosionType.Sand, "Sand explosion");
+            idolExplosionSizeMultiplier = new FloatField(idolExplosionDiv, "Explosion size multiplier", "idolExplosionSizeMultiplier", 1f, 0f, float.MaxValue);
+            idolExplosionDamageMultiplier = new FloatField(idolExplosionDiv, "Explosion damage multiplier", "idolExplosionDamageMultiplier", 1f, 0f, float.MaxValue);
+            idolExplodionType.onValueChange += (EnumField<IdolExplosionType>.EnumValueChangeEvent e) =>
+            {
+                idolExplosionSizeMultiplier.interactable = e.value != IdolExplosionType.Sand;
+                idolExplosionDamageMultiplier.interactable = e.value != IdolExplosionType.Sand;
+            };
+            idolExplodionType.TriggerValueChangeEvent();
+            idolExplosionEnemyDamagePercent = new FloatSliderField(idolExplosionDiv, "Enemy damage percent", "idolExplosionEnemyDamagePercent", new Tuple<float, float>(0f, 100f), 0f, 1);
 
             config.Flush();
             //config.LogDuplicateGUID();
