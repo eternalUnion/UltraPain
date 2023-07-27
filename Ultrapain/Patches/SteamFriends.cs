@@ -1,5 +1,6 @@
-﻿using HarmonyLib;
+using HarmonyLib;
 using Steamworks;
+using System.Text.RegularExpressions;
 
 namespace Ultrapain.Patches
 {
@@ -10,7 +11,17 @@ namespace Ultrapain.Patches
             if (__1.ToLower() != "ukmd")
                 return true;
 
-            __1 = ConfigManager.pluginName.value;
+            Regex rich = new Regex(@"<[^>]*>");
+            string text = ConfigManager.pluginName.value;
+            if (rich.IsMatch(text))
+            {
+                __1 = rich.Replace(text, string.Empty);
+            }
+            else
+            {
+                __1 = text;
+            }
+
             return true;
         }
     }

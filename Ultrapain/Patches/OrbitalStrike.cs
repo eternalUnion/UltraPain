@@ -611,6 +611,43 @@ namespace Ultrapain.Patches
                         // UNUSED
                         causeExplosion = false;
                     }
+                    // MALICIOUS BEAM
+                    else if (beam.beamType == BeamType.MaliciousFace)
+                    {
+                        GameObject explosion = GameObject.Instantiate(Plugin.sisyphiusPrimeExplosion, /*__instance.gameObject.transform.position*/__2, Quaternion.identity);
+                        foreach (Explosion exp in explosion.GetComponentsInChildren<Explosion>())
+                        {
+                            exp.enemy = false;
+                            exp.hitterWeapon = "";
+                            exp.maxSize *= ConfigManager.maliciousChargebackExplosionSizeMultiplier.value;
+                            exp.speed *= ConfigManager.maliciousChargebackExplosionSizeMultiplier.value;
+                            exp.damage = (int)(exp.damage * ConfigManager.maliciousChargebackExplosionDamageMultiplier.value);
+                        }
+
+                        OrbitalExplosionInfo info = explosion.AddComponent<OrbitalExplosionInfo>();
+                        info.id = ConfigManager.maliciousChargebackStyleText.guid;
+                        info.points = ConfigManager.maliciousChargebackStylePoint.value;
+                        __state.info = info;
+                    }
+                    // SENTRY BEAM
+                    else if (beam.beamType == BeamType.Enemy)
+                    {
+                        StyleHUD.Instance.AddPoints(ConfigManager.sentryChargebackStylePoint.value, ConfigManager.sentryChargebackStyleText.formattedString);
+
+                        if (ConfigManager.sentryChargebackExtraBeamCount.value > 0)
+                        {
+                            List<Tuple<EnemyIdentifier, float>> enemies = UnityUtils.GetClosestEnemies(__2, ConfigManager.sentryChargebackExtraBeamCount.value, true);
+                            foreach (Tuple<EnemyIdentifier, float> enemy in enemies)
+                            {
+                                RevolverBeam newBeam = GameObject.Instantiate(beam, beam.transform.position, Quaternion.identity);
+                                newBeam.hitEids.Add(__instance);
+                                newBeam.transform.LookAt(enemy.Item1.transform);
+                                GameObject.Destroy(newBeam.GetComponent<OrbitalStrikeFlag>());
+                            }
+                        }
+
+                        RevolverBeam_ExecuteHits.isOrbitalRay = false;
+                    }
                 }
 
                 if (causeExplosion && RevolverBeam_ExecuteHits.orbitalBeamFlag != null)

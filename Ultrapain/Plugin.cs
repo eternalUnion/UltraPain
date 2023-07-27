@@ -26,7 +26,7 @@ namespace Ultrapain
     {
         public const string PLUGIN_GUID = "com.eternalUnion.ultraPain";
         public const string PLUGIN_NAME = "Ultra Pain";
-        public const string PLUGIN_VERSION = "1.0.2";
+        public const string PLUGIN_VERSION = "1.0.3";
 
         public static Plugin instance;
 
@@ -85,6 +85,8 @@ namespace Ultrapain
         public static GameObject lightningStrikeExplosive;
         public static GameObject lighningStrikeWindup;
         public static GameObject explosion;
+        public static GameObject bigExplosion;
+        public static GameObject sandExplosion;
         public static GameObject virtueInsignia;
         public static GameObject rocket;
         public static GameObject revolverBullet;
@@ -100,18 +102,22 @@ namespace Ultrapain
         public static GameObject chargeEffect;
         public static GameObject maliciousFaceProjectile;
         public static GameObject coin;
+        public static GameObject sisyphusDestroyExplosion;
 
         //public static GameObject idol;
         public static GameObject ferryman;
         public static GameObject minosPrime;
         //public static GameObject maliciousFace;
+        public static Turret turret;
 
+        public static GameObject turretFinalFlash;
         public static GameObject enrageEffect;
         public static GameObject v2flashUnparryable;
         public static GameObject ricochetSfx;
         public static GameObject parryableFlash;
 
         public static AudioClip cannonBallChargeAudio;
+        public static Material gabrielFakeMat;
 
         public static GameObject rocketLauncherAlt;
         public static GameObject maliciousRailcannon;
@@ -166,6 +172,10 @@ namespace Ultrapain
             ferryman = LoadObject<GameObject>("Assets/Prefabs/Enemies/Ferryman.prefab");
             // Assets/Prefabs/Attacks and Projectiles/Explosions/Explosion.prefab
             explosion = LoadObject<GameObject>("Assets/Prefabs/Attacks and Projectiles/Explosions/Explosion.prefab");
+            //Assets/Prefabs/Attacks and Projectiles/Explosions/Explosion Super.prefab
+            bigExplosion = LoadObject<GameObject>("Assets/Prefabs/Attacks and Projectiles/Explosions/Explosion Super.prefab");
+            //Assets/Prefabs/Attacks and Projectiles/Explosions/Explosion Sand.prefab
+            sandExplosion = LoadObject<GameObject>("Assets/Prefabs/Attacks and Projectiles/Explosions/Explosion Sand.prefab");
             // Assets/Prefabs/Attacks and Projectiles/Virtue Insignia.prefab
             virtueInsignia = LoadObject<GameObject>("Assets/Prefabs/Attacks and Projectiles/Virtue Insignia.prefab");
             // Assets/Prefabs/Attacks and Projectiles/Projectile Explosive HH.prefab
@@ -210,7 +220,14 @@ namespace Ultrapain
             parryableFlash = LoadObject<GameObject>("Assets/Particles/Flashes/Flash.prefab");
             //Assets/Prefabs/Attacks and Projectiles/Coin.prefab
             coin = LoadObject<GameObject>("Assets/Prefabs/Attacks and Projectiles/Coin.prefab");
-
+            //Assets/Materials/GabrielFake.mat
+            gabrielFakeMat = LoadObject<Material>("Assets/Materials/GabrielFake.mat");
+            //Assets/Prefabs/Enemies/Turret.prefab
+            turret = LoadObject<GameObject>("Assets/Prefabs/Enemies/Turret.prefab").GetComponent<Turret>();
+            //Assets/Particles/Flashes/GunFlashDistant.prefab
+            turretFinalFlash = LoadObject<GameObject>("Assets/Particles/Flashes/GunFlashDistant.prefab");
+            //Assets/Prefabs/Attacks and Projectiles/Explosions/Explosion Sisyphus Prime Charged.prefab
+            sisyphusDestroyExplosion = LoadObject<GameObject>("Assets/Prefabs/Attacks and Projectiles/Explosions/Explosion Sisyphus Prime Charged.prefab");
             //Assets/Prefabs/Effects/Charge Effect.prefab
             chargeEffect = LoadObject<GameObject>("Assets/Prefabs/Effects/Charge Effect.prefab");
             //Assets/Prefabs/Attacks and Projectiles/Hitscan Beams/Malicious Beam.prefab
@@ -356,6 +373,8 @@ namespace Ultrapain
                 MonoSingleton<StyleHUD>.Instance.RegisterStyleItem(ConfigManager.orbStrikeRevolverChargedStyleText.guid, ConfigManager.orbStrikeRevolverChargedStyleText.formattedString);
                 MonoSingleton<StyleHUD>.Instance.RegisterStyleItem(ConfigManager.orbStrikeElectricCannonStyleText.guid, ConfigManager.orbStrikeElectricCannonStyleText.formattedString);
                 MonoSingleton<StyleHUD>.Instance.RegisterStyleItem(ConfigManager.orbStrikeMaliciousCannonStyleText.guid, ConfigManager.orbStrikeMaliciousCannonStyleText.formattedString);
+                MonoSingleton<StyleHUD>.Instance.RegisterStyleItem(ConfigManager.maliciousChargebackStyleText.guid, ConfigManager.maliciousChargebackStyleText.formattedString);
+                MonoSingleton<StyleHUD>.Instance.RegisterStyleItem(ConfigManager.sentryChargebackStyleText.guid, ConfigManager.sentryChargebackStyleText.formattedString);
 
                 registered = true;
                 Debug.Log("Registered all style ids");
@@ -422,6 +441,13 @@ namespace Ultrapain
 
             harmonyTweaks.Patch(GetMethod<Drone>("Start"), postfix: GetHarmonyMethod(GetMethod<Drone_Start_Patch>("Postfix")));
             harmonyTweaks.Patch(GetMethod<Drone>("Shoot"), prefix: GetHarmonyMethod(GetMethod<Drone_Shoot_Patch>("Prefix")));
+            harmonyTweaks.Patch(GetMethod<Drone>("PlaySound"), prefix: GetHarmonyMethod(GetMethod<Drone_PlaySound_Patch>("Prefix")));
+            harmonyTweaks.Patch(GetMethod<Drone>("Update"), postfix: GetHarmonyMethod(GetMethod<Drone_Update>("Postfix")));
+            if(ConfigManager.droneHomeToggle.value)
+            {
+                harmonyTweaks.Patch(GetMethod<Drone>("Death"), prefix: GetHarmonyMethod(GetMethod<Drone_Death_Patch>("Prefix")));
+                harmonyTweaks.Patch(GetMethod<Drone>("GetHurt"), prefix: GetHarmonyMethod(GetMethod<Drone_GetHurt_Patch>("Prefix")));
+            }
 
             harmonyTweaks.Patch(GetMethod<Ferryman>("Start"), postfix: GetHarmonyMethod(GetMethod<FerrymanStart>("Postfix")));
             if(ConfigManager.ferrymanComboToggle.value)
@@ -451,7 +477,10 @@ namespace Ultrapain
 
             harmonyTweaks.Patch(GetMethod<Mindflayer>("Start"), postfix: GetHarmonyMethod(GetMethod<Mindflayer_Start_Patch>("Postfix")));
             if (ConfigManager.mindflayerShootTweakToggle.value)
+            {
                 harmonyTweaks.Patch(GetMethod<Mindflayer>("ShootProjectiles"), prefix: GetHarmonyMethod(GetMethod<Mindflayer_ShootProjectiles_Patch>("Prefix")));
+                harmonyTweaks.Patch(GetMethod<EnemyIdentifier>("DeliverDamage"), prefix: GetHarmonyMethod(GetMethod<EnemyIdentifier_DeliverDamage_MF>("Prefix")));
+            }
             if (ConfigManager.mindflayerTeleportComboToggle.value)
             {
                 harmonyTweaks.Patch(GetMethod<SwingCheck2>("CheckCollision"), postfix: GetHarmonyMethod(GetMethod<SwingCheck2_CheckCollision_Patch>("Postfix")), prefix: GetHarmonyMethod(GetMethod<SwingCheck2_CheckCollision_Patch>("Prefix")));
@@ -463,6 +492,16 @@ namespace Ultrapain
                 harmonyTweaks.Patch(GetMethod<MinosPrime>("ProjectileCharge"), postfix: GetHarmonyMethod(GetMethod<MinosPrimeCharge>("Postfix")));
             if (ConfigManager.minosPrimeTeleportTrail.value)
                 harmonyTweaks.Patch(GetMethod<MinosPrime>("Teleport"), postfix: GetHarmonyMethod(GetMethod<MinosPrimeCharge>("TeleportPostfix")));
+            harmonyTweaks.Patch(GetMethod<MinosPrime>("Start"), postfix: GetHarmonyMethod(GetMethod<MinosPrime_Start>("Postfix")));
+            harmonyTweaks.Patch(GetMethod<MinosPrime>("Dropkick"), prefix: GetHarmonyMethod(GetMethod<MinosPrime_Dropkick>("Prefix")));
+            harmonyTweaks.Patch(GetMethod<MinosPrime>("Combo"), postfix: GetHarmonyMethod(GetMethod<MinosPrime_Combo>("Postfix")));
+            harmonyTweaks.Patch(GetMethod<MinosPrime>("StopAction"), postfix: GetHarmonyMethod(GetMethod<MinosPrime_StopAction>("Postfix")));
+            harmonyTweaks.Patch(GetMethod<MinosPrime>("Ascend"), prefix: GetHarmonyMethod(GetMethod<MinosPrime_Ascend>("Prefix")));
+            harmonyTweaks.Patch(GetMethod<MinosPrime>("Death"), prefix: GetHarmonyMethod(GetMethod<MinosPrime_Death>("Prefix")));
+            if (ConfigManager.minosPrimeCrushAttackToggle.value)
+                harmonyTweaks.Patch(GetMethod<MinosPrime>("RiderKick"), prefix: GetHarmonyMethod(GetMethod<MinosPrime_RiderKick>("Prefix")));
+            if (ConfigManager.minosPrimeComboExplosiveEndToggle.value)
+                harmonyTweaks.Patch(GetMethod<MinosPrime>("ProjectileCharge"), prefix: GetHarmonyMethod(GetMethod<MinosPrime_ProjectileCharge>("Prefix")));
 
             if (ConfigManager.schismSpreadAttackToggle.value)
                 harmonyTweaks.Patch(GetMethod<ZombieProjectiles>("ShootProjectile"), postfix: GetHarmonyMethod(GetMethod<ZombieProjectile_ShootProjectile_Patch>("Postfix")));
@@ -479,8 +518,8 @@ namespace Ultrapain
                 harmonyTweaks.Patch(GetMethod<Grenade>("Explode"), postfix: GetHarmonyMethod(GetMethod<Grenade_Explode_Patch>("Postfix")), prefix: GetHarmonyMethod(GetMethod<Grenade_Explode_Patch>("Prefix")));
             }
 
-            if (ConfigManager.stalkerSurviveExplosion.value)
-                harmonyTweaks.Patch(GetMethod<Stalker>("SandExplode"), prefix: GetHarmonyMethod(GetMethod<Stalker_SandExplode_Patch>("Prefix")));
+            harmonyTweaks.Patch(GetMethod<Stalker>("SandExplode"), prefix: GetHarmonyMethod(GetMethod<Stalker_SandExplode_Patch>("Prefix")));
+            harmonyTweaks.Patch(GetMethod<SandificationZone>("Enter"), postfix: GetHarmonyMethod(GetMethod<SandificationZone_Enter_Patch>("Postfix")));
 
             if (ConfigManager.strayCoinsIgnoreWeakPointToggle.value)
                 harmonyTweaks.Patch(GetMethod<ZombieProjectiles>("SpawnProjectile"), postfix: GetHarmonyMethod(GetMethod<Swing>("Postfix")));
@@ -565,6 +604,22 @@ namespace Ultrapain
             harmonyTweaks.Patch(GetMethod<LeviathanHead>("ProjectileBurstStart"), prefix: GetHarmonyMethod(GetMethod<Leviathan_ProjectileBurstStart>("Prefix")));
             harmonyTweaks.Patch(GetMethod<LeviathanHead>("FixedUpdate"), prefix: GetHarmonyMethod(GetMethod<Leviathan_FixedUpdate>("Prefix")));
 
+            if (ConfigManager.panopticonFullPhase.value)
+                harmonyTweaks.Patch(GetMethod<FleshPrison>("Start"), postfix: GetHarmonyMethod(GetMethod<Panopticon_Start>("Postfix")));
+            if (ConfigManager.panopticonAxisBeam.value)
+                harmonyTweaks.Patch(GetMethod<FleshPrison>("SpawnInsignia"), prefix: GetHarmonyMethod(GetMethod<Panopticon_SpawnInsignia>("Prefix")));
+            if (ConfigManager.panopticonSpinAttackToggle.value)
+                harmonyTweaks.Patch(GetMethod<FleshPrison>("HomingProjectileAttack"), postfix: GetHarmonyMethod(GetMethod<Panopticon_HomingProjectileAttack>("Postfix")));
+            if (ConfigManager.panopticonBlackholeProj.value)
+                harmonyTweaks.Patch(GetMethod<FleshPrison>("SpawnBlackHole"), postfix: GetHarmonyMethod(GetMethod<Panopticon_SpawnBlackHole>("Postfix")));
+            if (ConfigManager.panopticonBalanceEyes.value)
+                harmonyTweaks.Patch(GetMethod<FleshPrison>("SpawnFleshDrones"), prefix: GetHarmonyMethod(GetMethod<Panopticon_SpawnFleshDrones>("Prefix")), postfix: GetHarmonyMethod(GetMethod<Panopticon_SpawnFleshDrones>("Postfix")));
+            if (ConfigManager.panopticonBlueProjToggle.value)
+                harmonyTweaks.Patch(GetMethod<FleshPrison>("Update"), transpiler: GetHarmonyMethod(GetMethod<Panopticon_BlueProjectile>("Transpiler")));
+
+            if (ConfigManager.idolExplosionToggle.value)
+                harmonyTweaks.Patch(GetMethod<Idol>("Death"), postfix: GetHarmonyMethod(GetMethod<Idol_Death_Patch>("Postfix")));
+
             // ADDME
             /*
             harmonyTweaks.Patch(GetMethod<GabrielSecond>("Start"), postfix: GetHarmonyMethod(GetMethod<GabrielSecond_Start>("Postfix")));
@@ -624,6 +679,11 @@ namespace Ultrapain
                 harmonyTweaks.Patch(GetMethod<Mandalore>("FullerBurst"), prefix: GetHarmonyMethod(GetMethod<DruidKnight_FullerBurst>("Prefix")));
                 harmonyTweaks.Patch(GetMethod<Drone>("Explode"), prefix: GetHarmonyMethod(GetMethod<Drone_Explode>("Prefix")), postfix: GetHarmonyMethod(GetMethod<Drone_Explode>("Postfix")));
             }
+
+            if (ConfigManager.fleshObamiumToggle.value)
+                harmonyTweaks.Patch(GetMethod<FleshPrison>("Start"), postfix: GetHarmonyMethod(GetMethod<FleshObamium_Start>("Postfix")), prefix: GetHarmonyMethod(GetMethod<FleshObamium_Start>("Prefix")));
+            if (ConfigManager.obamapticonToggle.value)
+                harmonyTweaks.Patch(GetMethod<FleshPrison>("Start"), postfix: GetHarmonyMethod(GetMethod<Obamapticon_Start>("Postfix")), prefix: GetHarmonyMethod(GetMethod<Obamapticon_Start>("Prefix")));
         }
 
         public static bool methodsPatched = false;
@@ -668,6 +728,8 @@ namespace Ultrapain
         public static AudioClip druidKnightFullerAutoAud;
         public static AudioClip druidKnightDeathAud;
         public static AudioClip enrageAudioCustom;
+        public static GameObject fleshObamium;
+        public static GameObject obamapticon;
 
         public void Awake()
         {
@@ -683,6 +745,8 @@ namespace Ultrapain
                 druidKnightFullerAutoAud = bundle.LoadAsset<AudioClip>("assets/ultrapain/druidknight/fullerauto.wav");
                 druidKnightDeathAud = bundle.LoadAsset<AudioClip>("assets/ultrapain/druidknight/death.wav");
                 enrageAudioCustom = bundle.LoadAsset<AudioClip>("assets/ultrapain/sfx/enraged.wav");
+                fleshObamium = bundle.LoadAsset<GameObject>("assets/ultrapain/fleshprison/fleshobamium.prefab");
+                obamapticon = bundle.LoadAsset<GameObject>("assets/ultrapain/panopticon/obamapticon.prefab");
             }
             catch (Exception e)
             {
