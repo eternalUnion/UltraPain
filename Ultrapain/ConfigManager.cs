@@ -824,6 +824,9 @@ namespace Ultrapain
                 return;
 
             config = PluginConfigurator.Create("ULTRAPAIN", Plugin.PLUGIN_GUID);
+            string iconPath = Path.Combine(Plugin.workingDir, "icon.png");
+            if (File.Exists(iconPath))
+                config.SetIconWithURL(iconPath);
             config.postConfigChange += () =>
             {
                 if (dirtyField)

@@ -8,11 +8,11 @@
     <Version>1.0.3</Version>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <LangVersion>latest</LangVersion>
-	<BaseOutputPath>D:\Games\ULTRAKILL-CG\ULTRAKILL\BepInEx\plugins\UltraPain</BaseOutputPath>
+	<BaseOutputPath>C:\Users\User\Documents\Ultrakill\ULTRAKILL\BepInEx\plugins\UltraPain</BaseOutputPath>
 
 	<AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
 	<AppendRuntimeIdentifierToOutputPath>false</AppendRuntimeIdentifierToOutputPath>
-	<OutputPath>D:\Games\ULTRAKILL-CG\ULTRAKILL\BepInEx\plugins\UltraPain</OutputPath>
+	<OutputPath>C:\Users\User\Documents\Ultrakill\ULTRAKILL\BepInEx\plugins\UltraPain</OutputPath>
 	<ProduceReferenceAssembly>True</ProduceReferenceAssembly>
   </PropertyGroup>
 
