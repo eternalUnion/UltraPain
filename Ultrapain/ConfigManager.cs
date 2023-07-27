@@ -1795,7 +1795,7 @@ namespace Ultrapain
             };
             droneProjectileToggle.TriggerValueChangeEvent();
             droneProjectileDelay = new FloatField(droneProjectileDiv, "Projectile shoot delay", "droneProjectileDelay", 0.75f, 0f, float.MaxValue);
-            droneProjectileChance = new FloatSliderField(droneProjectileDiv, "Projectile shoot chance", "droneProjectileChance", new Tuple<float, float>(0, 100), 50f, 1);
+            droneProjectileChance = new FloatSliderField(droneProjectileDiv, "Projectile shoot chance", "droneProjectileChance", new Tuple<float, float>(0, 100), 30f, 1);
 
             new ConfigHeader(dronePanel, "-------");
             droneExplosionBeamToggle = new BoolField(dronePanel, "Can shoot explosions", "droneExplosionBeamToggle", true);
@@ -1807,7 +1807,7 @@ namespace Ultrapain
             };
             droneExplosionBeamToggle.TriggerValueChangeEvent();
             droneExplosionBeamDelay = new FloatField(droneExplosionBeamDiv, "Explosion beam delay", "droneExplosionBeamDelay", 0.75f, 0f, float.MaxValue);
-            droneExplosionBeamChance = new FloatSliderField(droneExplosionBeamDiv, "Explosion beam chance", "droneExplosionBeamChance", new Tuple<float, float>(0, 100), 30f, 1);
+            droneExplosionBeamChance = new FloatSliderField(droneExplosionBeamDiv, "Explosion beam chance", "droneExplosionBeamChance", new Tuple<float, float>(0, 100), 35f, 1);
 
             new ConfigHeader(dronePanel, "-------");
             droneSentryBeamToggle = new BoolField(dronePanel, "Can shoot sentry beam", "droneSentryBeamToggle", true);
@@ -1821,7 +1821,7 @@ namespace Ultrapain
             droneSentryBeamToggle.TriggerValueChangeEvent();
             droneSentryBeamDamage = new FloatField(droneSentryBeamDiv, "Sentry beam damage", "droneSentryBeamDamage", 2f, 0f, float.MaxValue);
             droneSentryBeamDelay = new FloatField(droneSentryBeamDiv, "Sentry beam delay", "droneSentryBeamDelay", 0.75f, 0f, float.MaxValue);
-            droneSentryBeamChance = new FloatSliderField(droneSentryBeamDiv, "Sentry beam chance", "droneSentryBeamChance", new Tuple<float, float>(0, 100), 20f, 1);
+            droneSentryBeamChance = new FloatSliderField(droneSentryBeamDiv, "Sentry beam chance", "droneSentryBeamChance", new Tuple<float, float>(0, 100), 35f, 1);
             droneDrawSentryBeamLine = new BoolField(droneSentryBeamDiv, "Draw sentry beam line", "droneDrawSentryBeamLine", true);
             ConfigDivision droneSentryBeamLineDiv = new ConfigDivision(droneSentryBeamDiv, "droneSentryBeamLineDiv");
             droneDrawSentryBeamLine.onValueChange += (BoolField.BoolValueChangeEvent e) =>
@@ -1839,7 +1839,7 @@ namespace Ultrapain
                 droneHomeTurnSpeed.interactable = e.value;
                 dirtyField = true;
             };
-            droneHomeTurnSpeed = new FloatField(dronePanel, "Turn speed", "droneHomeTurnSpeed", 360f, 0f, float.MaxValue);
+            droneHomeTurnSpeed = new FloatField(dronePanel, "Turn speed", "droneHomeTurnSpeed", 150f, 0f, float.MaxValue);
             droneHomeToggle.TriggerValueChangeEvent();
             
             // FILTH
