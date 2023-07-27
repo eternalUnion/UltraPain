@@ -10,11 +10,135 @@ using System;
 using BepInEx.Configuration;
 using System.IO;
 using PluginConfig.API.Functionals;
+using System.Reflection;
 using System.Text;
 using static Ultrapain.ConfigManager;
 
 namespace Ultrapain
 {
+    // Adds an image next to the given input field
+    public class ImageInputField : CustomConfigField
+    {
+        public Sprite sprite;
+        public Color color;
+        public ConfigField field;
+        private GameObject currentUI;
+        private Image currentImage;
+
+        private static FieldInfo f_IntField_currentUi = typeof(IntField).GetField("currentUi", UnityUtils.instanceFlag);
+        private static FieldInfo f_FloatField_currentUi = typeof(FloatField).GetField("currentUi", UnityUtils.instanceFlag);
+        private static FieldInfo f_StringField_currentUi = typeof(StringField).GetField("currentUi", UnityUtils.instanceFlag);
+
+        private const float textAnchorX = 40f;
+        private const float fieldAnchorX = 230f;
+        private const float fieldAnchorY = -30f;
+        private const float fieldSizeX = 270f;
+
+        public ImageInputField(ConfigField field, Sprite sprite, Color color) : base(field.parentPanel, 0, 0)
+        {
+            this.field = field;
+            this.sprite = sprite;
+            this.color = color;
+
+            if (currentImage != null)
+            {
+                currentImage.sprite = sprite;
+                currentImage.color = color;
+
+                SetSize();
+            }
+        }
+
+        private void SetSize()
+        {
+            RectTransform imgRect = currentImage.GetComponent<RectTransform>();
+
+            float horizontalLength = sprite == null ? 100f : sprite.rect.width * (40f / sprite.rect.height);
+            imgRect.sizeDelta = new Vector2(horizontalLength, 40f);
+            imgRect.anchoredPosition = new Vector2(10f, 0f);
+
+            Text txt = currentUI.GetComponentInChildren<Text>();
+            InputField input = currentUI.GetComponentInChildren<InputField>();
+            RectTransform inputRect = input.GetComponent<RectTransform>();
+
+            float deltaPos = horizontalLength - 20f;
+            if (deltaPos > 0)
+            {
+                txt.GetComponent<RectTransform>().anchoredPosition = new Vector2(textAnchorX + deltaPos, 0);
+                inputRect.anchoredPosition = new Vector2(fieldAnchorX + deltaPos, fieldAnchorY);
+                inputRect.sizeDelta = new Vector2(fieldSizeX - deltaPos, inputRect.sizeDelta.y);
+            }
+            else
+            {
+                txt.GetComponent<RectTransform>().anchoredPosition = new Vector2(textAnchorX, 0);
+                inputRect.anchoredPosition = new Vector2(fieldAnchorX, fieldAnchorY);
+                inputRect.sizeDelta = new Vector2(fieldSizeX, inputRect.sizeDelta.y);
+            }
+        }
+
+        protected override void OnCreateUI(RectTransform fieldUI)
+        {
+            GameObject.Destroy(fieldUI.gameObject);
+
+            GameObject ui = null;
+            if (field is IntField intField)
+                ui = (GameObject)f_IntField_currentUi.GetValue(intField);
+            else if (field is FloatField floatField)
+                ui = (GameObject)f_FloatField_currentUi.GetValue(floatField);
+            else if (field is StringField stringField)
+                ui = (GameObject)f_StringField_currentUi.GetValue(stringField);
+            else
+                throw new Exception("Image field expected given field to be int, float or string field");
+
+            currentUI = ui;
+
+            if (ui == null)
+            {
+                Debug.LogWarning("Could not find float field ui");
+                return;
+            }
+
+            GameObject img = new GameObject();
+            RectTransform imgRect = img.AddComponent<RectTransform>();
+            imgRect.SetParent(ui.transform);
+            imgRect.localScale = Vector3.one;
+            imgRect.pivot = new Vector2(0f, 0.5f);
+            imgRect.anchorMax = imgRect.anchorMin = new Vector2(0f, 0.5f);
+            
+            Image imgComp = currentImage = img.AddComponent<Image>();
+            imgComp.sprite = sprite;
+            imgComp.color = color;
+
+            SetSize();
+        }
+    }
+
+    // Separates fields by a small space
+    public class SpaceField : CustomConfigField
+    {
+        public const float defaultSpace = 10f;
+
+        public float space = defaultSpace;
+        public RectTransform currentUI;
+
+        public SpaceField(ConfigPanel panel, float space) : base(panel)
+        {
+            this.space = space;
+
+            if (currentUI != null)
+                currentUI.sizeDelta = new Vector2(currentUI.sizeDelta.x, space);
+        }
+
+        public SpaceField(ConfigPanel panel) : this(panel, defaultSpace) { }
+
+        protected override void OnCreateUI(RectTransform fieldUI)
+        {
+            currentUI = fieldUI;
+
+            fieldUI.sizeDelta = new Vector2(fieldUI.sizeDelta.x, space);
+        }
+    }
+
     public static class ConfigManager
     {
         public static PluginConfigurator config = null;
@@ -66,6 +190,109 @@ namespace Ultrapain
         public static StringField obamapticonName;
 
         // PLAYER PANEL
+        
+        // PLAYER STAT EDITOR
+        // MOVEMENT
+        public static ConfigPanel playerStatEditorPanel;
+        public static FloatField staminaRegSpeedMulti;
+
+        // REVOLVER
+        public static FloatField revolverDamage;
+        public static FloatField revolverAltDamage;
+        public static FloatField revolverFireRate;
+        public static FloatField revolverAltFireRate;
+
+        public static FloatField coinRegSpeedMulti;
+
+        public static FloatField chargedRevRegSpeedMulti;
+        public static FloatField chargedRevDamage;
+        public static FloatField chargedAltRevDamage;
+        public static IntField chargedRevTotalHits;
+        public static IntField chargedAltRevTotalHits;
+        public static IntField chargedRevMaxHitsPerTarget;
+        public static IntField chargedAltRevMaxHitsPerTarget;
+
+        public static FloatField sharpshooterRegSpeedMulti;
+        public static FloatField sharpshooterDamage;
+        public static FloatField sharpshooterAltDamage;
+        public static IntField sharpshooterMaxHitsPerTarget;
+        public static IntField sharpshooterAltMaxHitsPerTarget;
+
+        // SHOTGUN
+        public static IntField shotgunBluePelletCount;
+        public static FloatField shotgunBlueDamagePerPellet;
+        public static FloatField shotgunBlueSpreadAngle;
+
+        public static FloatField shotgunCoreExplosionSize;
+        public static FloatField shotgunCoreExplosionSpeed;
+        public static IntField shotgunCoreExplosionDamage;
+        public static IntField shotgunCoreExplosionPlayerDamage;
+
+        public static IntField shotgunGreenPump1Count;
+        public static FloatField shotgunGreenPump1Damage;
+        public static FloatField shotgunGreenPump1Spread;
+        public static IntField shotgunGreenPump2Count;
+        public static FloatField shotgunGreenPump2Damage;
+        public static FloatField shotgunGreenPump2Spread;
+        public static IntField shotgunGreenPump3Count;
+        public static FloatField shotgunGreenPump3Damage;
+        public static FloatField shotgunGreenPump3Spread;
+
+        public static FloatField shotgunGreenExplosionSize;
+        public static FloatField shotgunGreenExplosionSpeed;
+        public static IntField shotgunGreenExplosionDamage;
+        public static IntField shotgunGreenExplosionPlayerDamage;
+
+        // NAILGUN/SAW LAUNCHER
+        public static FloatField nailgunBlueDamage;
+        public static FloatField nailgunGreenDamage;
+        public static FloatField nailgunGreenBurningDamage;
+
+        public static FloatField sawBlueDamage;
+        public static FloatField sawBlueHitAmount;
+        public static FloatField sawGreenDamage;
+        public static FloatField sawGreenHitAmount;
+        public static FloatField sawGreenBurningDamage;
+        public static FloatField sawGreenBurningHitAmount;
+
+        public static FloatField nailgunAmmoRegSpeedMulti;
+        public static FloatField sawAmmoRegSpeedMulti;
+        public static FloatField nailgunHeatsinkRegSpeedMulti;
+        public static FloatField sawHeatsinkRegSpeedMulti;
+
+        // RAILCANNON
+        public static FloatField railcannonRegSpeedMulti;
+        public static FloatField electricCannonDamageMulti;
+        public static FloatField malCannonExpSizeMulti;
+        public static FloatField malCannonExpDamageMulti;
+        public static FloatField screwdriverDamageMulti;
+        public static FloatField screwdriverLengthMulti;
+
+        // ROCKET LAUNCHER
+        public static FloatField rocketExpSizeMulti;
+        public static FloatField rocketExpDamageMulti;
+        public static FloatField rocketExpSuperSizeMulti;
+        public static FloatField rocketExpSuperDamageMulti;
+
+        public static FloatField rocketFreezeRegSpeedMulti;
+        public static FloatField rocketCannonballRegSpeedMulti;
+
+        // PLAYER HEALTH
+        public static IntField maxPlayerHp;
+        public static IntField playerHpSupercharge;
+        public static FloatSliderField hardDamagePercent;
+        public static IntField whiplashHardDamageCap;
+        public static FloatField whiplashHardDamageSpeed;
+        public static BoolField playerHpDeltaToggle;
+        public static IntField playerHpDeltaAmount;
+        public static IntField playerHpDeltaLimit;
+        public static FloatField playerHpDeltaDelay;
+        public static BoolField playerHpDeltaHurtAudio;
+        public static BoolField playerHpDeltaCalm;
+        public static BoolField playerHpDeltaCombat;
+        public static BoolField playerHpDeltaCybergrind;
+        public static BoolField playerHpDeltaSandbox;
+      
         public static BoolField rocketBoostToggle;
         public static BoolField rocketBoostAlwaysExplodesToggle;
         public static FloatField rocketBoostDamageMultiplierPerHit;
@@ -124,7 +351,7 @@ namespace Ultrapain
         public static BoolField orbStrikeMaliciousCannonExplosion;
         public static FloatField orbStrikeMaliciousCannonExplosionDamageMultiplier;
         public static FloatField orbStrikeMaliciousCannonExplosionSizeMultiplier;
-
+        
         // MALICIOUS CHARGEBACK
         public static FormattedStringField maliciousChargebackStyleText;
         public static IntField maliciousChargebackStylePoint;
@@ -707,6 +934,290 @@ namespace Ultrapain
             obamapticonName = new StringField(memePanel, "OBAMAPTICON name", "obamapticonName", "OBAMAPTICON");
 
             // PLAYER PANEL
+
+            // PLAYER STAT EDITOR
+            playerStatEditorPanel = new ConfigPanel(playerPanel, "Player stat editor", "playerStatEditorPanel");
+            
+            // MOVEMENT
+            new ConfigHeader(playerStatEditorPanel, "Movement");
+            staminaRegSpeedMulti = new FloatField(playerStatEditorPanel, "Stamina regen speed", "staminaRegSpeedMulti", 1f, 0.01f, float.MaxValue);
+            
+            // HEALTH
+            new ConfigHeader(playerStatEditorPanel, "Health");
+            maxPlayerHp = new IntField(playerStatEditorPanel, "Max HP", "maxPlayerHp", 100, 1, int.MaxValue);
+            playerHpSupercharge = new IntField(playerStatEditorPanel, "Max overcharge HP", "playerHpSupercharge", 200, 1, int.MaxValue);
+
+            new SpaceField(playerStatEditorPanel);
+            
+            hardDamagePercent = new FloatSliderField(playerStatEditorPanel, "Hard damage taken percent", "hardDamagePercent", new Tuple<float, float>(0, 100), 100);
+            whiplashHardDamageCap = new IntField(playerStatEditorPanel, "Whiplash hard damage cap", "whiplashHardDamageCap", 50, 0, int.MaxValue);
+            whiplashHardDamageSpeed = new FloatField(playerStatEditorPanel, "Whiplash hard damage speed multiplier", "whiplashHardDamageSpeed", 1f, 0.01f, float.MaxValue);
+
+            new SpaceField(playerStatEditorPanel);
+
+            ConfigDivision deltaHpDiv = new ConfigDivision(playerStatEditorPanel, "deltaHpDiv");
+            playerHpDeltaToggle = new BoolField(playerStatEditorPanel, "HP regen/decay", "playerHpDeltaToggle", false);
+            playerHpDeltaToggle.onValueChange += (BoolField.BoolValueChangeEvent e) =>
+            {
+                if (NewMovement_DeltaHpComp.instance != null)
+                    NewMovement_DeltaHpComp.instance.UpdateEnabled();
+
+                deltaHpDiv.interactable = e.value;
+                dirtyField = true;
+            };
+            playerHpDeltaToggle.TriggerValueChangeEvent();
+            playerHpDeltaAmount = new IntField(deltaHpDiv, "HP regen/decay amount", "playerHpDeltaAmount", -1);
+            playerHpDeltaDelay = new FloatField(deltaHpDiv, "Delay", "playerHpDeltaDelay", 2f, 0.01f, float.MaxValue);
+            playerHpDeltaLimit = new IntField(deltaHpDiv, "Max regen/min decay limit", "playerHpDeltaLimit", 50);
+            playerHpDeltaHurtAudio = new BoolField(deltaHpDiv, "Hurt audio on decay", "playerHpDeltaHurtAudio", false);
+            playerHpDeltaCalm = new BoolField(deltaHpDiv, "Active during calm phase", "playerHpDeltaCalm", false);
+            playerHpDeltaCombat = new BoolField(deltaHpDiv, "Active during combat", "playerHpDeltaCombat", true);
+            playerHpDeltaCybergrind = new BoolField(deltaHpDiv, "Active in cybergrind", "playerHpDeltaCybergrind", true);
+            playerHpDeltaCybergrind.onValueChange += (BoolField.BoolValueChangeEvent e) =>
+            {
+                if (NewMovement_DeltaHpComp.instance != null)
+                    NewMovement_DeltaHpComp.instance.UpdateEnabled();
+            };
+            playerHpDeltaSandbox = new BoolField(deltaHpDiv, "Active in sandbox", "playerHpDeltaSandbox", false);
+            playerHpDeltaSandbox.onValueChange += (BoolField.BoolValueChangeEvent e) =>
+            {
+                if (NewMovement_DeltaHpComp.instance != null)
+                    NewMovement_DeltaHpComp.instance.UpdateEnabled();
+            };
+
+            // REVOLVER
+            new ConfigHeader(playerStatEditorPanel, "Revolver");
+            revolverDamage = new FloatField(playerStatEditorPanel, "Revolver damage", "revolverDamageMulti", 1f, 0.01f, float.MaxValue);
+                new ImageInputField(revolverDamage, Plugin.blueRevolverSprite, Color.white);
+            revolverAltDamage = new FloatField(playerStatEditorPanel, "Alt revolver damage", "revolverAltDamageMulti", 1.25f, 0.01f, float.MaxValue);
+                new ImageInputField(revolverAltDamage, Plugin.blueRevolverSprite, Color.white);
+            
+            chargedRevDamage = new FloatField(playerStatEditorPanel, "Charged revolver damage", "chargedRevDamage", 1f, 0f, float.MaxValue);
+                new ImageInputField(chargedRevDamage, Plugin.blueRevolverSprite, Color.cyan);
+            chargedAltRevDamage = new FloatField(playerStatEditorPanel, "Charged alt revolver damage", "chargedAltRevDamage", 1.25f, 0f, float.MaxValue);
+                new ImageInputField(chargedAltRevDamage, Plugin.blueRevolverSprite, Color.cyan);
+            chargedRevTotalHits = new IntField(playerStatEditorPanel, "Charged revolver total hits", "chargedRevTotalHits", 3, 1, int.MaxValue);
+                new ImageInputField(chargedRevTotalHits, Plugin.blueRevolverSprite, Color.cyan);
+            chargedAltRevTotalHits = new IntField(playerStatEditorPanel, "Charged alt revolver total hits", "chargedAltRevTotalHits", 6, 1, int.MaxValue);
+                new ImageInputField(chargedAltRevTotalHits, Plugin.blueRevolverSprite, Color.cyan);
+            chargedRevMaxHitsPerTarget = new IntField(playerStatEditorPanel, "Charged revolver max hits per target", "chargedRevMaxHitsPerTarget", 3, 1, int.MaxValue);
+                new ImageInputField(chargedRevMaxHitsPerTarget, Plugin.blueRevolverSprite, Color.cyan);
+            chargedAltRevMaxHitsPerTarget = new IntField(playerStatEditorPanel, "Charged alt revolver max hits per target", "chargedAltRevMaxHitsPerTarget", 4, 1, int.MaxValue);
+                new ImageInputField(chargedAltRevMaxHitsPerTarget, Plugin.blueRevolverSprite, Color.cyan);
+            
+            sharpshooterDamage = new FloatField(playerStatEditorPanel, "Sharpshooter damage", "sharpshooterDamage", 1f, 0f, float.MaxValue);
+                new ImageInputField(sharpshooterDamage, Plugin.redRevolverSprite, Color.red);
+            sharpshooterAltDamage = new FloatField(playerStatEditorPanel, "Sharpshooter alt damage", "sharpshooterAltDamage", 1.25f, 0f, float.MaxValue);
+                new ImageInputField(sharpshooterAltDamage, Plugin.redRevolverSprite, Color.red);
+            sharpshooterMaxHitsPerTarget = new IntField(playerStatEditorPanel, "Sharpshooter max hits per target", "sharpshooterMaxHitsPerTarget", 1, 1, int.MaxValue);
+                new ImageInputField(sharpshooterMaxHitsPerTarget, Plugin.redRevolverSprite, Color.red);
+            sharpshooterAltMaxHitsPerTarget = new IntField(playerStatEditorPanel, "Sharpshooter alt max hits per target", "sharpshooterAltMaxHitsPerTarget", 2, 1, int.MaxValue);
+                new ImageInputField(sharpshooterAltMaxHitsPerTarget, Plugin.redRevolverSprite, Color.red);
+            
+            chargedRevRegSpeedMulti = new FloatField(playerStatEditorPanel, "Charged revolver regen speed", "chargedRevRegSpeedMulti", 1f, 0.01f, float.MaxValue);
+                new ImageInputField(chargedRevRegSpeedMulti, Plugin.blueRevolverSprite, Color.cyan);
+            coinRegSpeedMulti = new FloatField(playerStatEditorPanel, "Coin regen speed", "coinRegSpeedMulti", 1f, 0.01f, float.MaxValue);
+                new ImageInputField(coinRegSpeedMulti, Plugin.greenRevolverSprite, Color.green);
+            sharpshooterRegSpeedMulti = new FloatField(playerStatEditorPanel, "Sharpshooter regen speed", "sharpshooterRegSpeedMulti", 1f, 0.01f, float.MaxValue);
+                new ImageInputField(sharpshooterRegSpeedMulti, Plugin.redRevolverSprite, Color.red);
+
+            // SHOTGUN
+            new ConfigHeader(playerStatEditorPanel, "Shotgun");
+            shotgunBluePelletCount = new IntField(playerStatEditorPanel, "Pellet count", "shotgunBluePelletCount", 12, 1, int.MaxValue);
+                new ImageInputField(shotgunBluePelletCount, Plugin.blueShotgunSprite, Color.cyan);
+            shotgunBlueSpreadAngle = new FloatField(playerStatEditorPanel, "Pellet spread angle", "shotgunBlueSpreadAngle", 10f, 0f, 180f);
+                new ImageInputField(shotgunBlueSpreadAngle, Plugin.blueShotgunSprite, Color.cyan);
+            shotgunBlueDamagePerPellet = new FloatField(playerStatEditorPanel, "Damage per pellet", "shotgunBlueDamagePerPellet", 1, 0, float.MaxValue);
+                new ImageInputField(shotgunBlueDamagePerPellet, Plugin.blueShotgunSprite, Color.cyan);
+
+            new SpaceField(playerStatEditorPanel);
+
+            shotgunCoreExplosionSize = new FloatField(playerStatEditorPanel, "Core explosion size", "shotgunCoreExplosionSize", 6, 0, float.MaxValue);
+                new ImageInputField(shotgunCoreExplosionSize, Plugin.blueShotgunSprite, Color.cyan);
+            shotgunCoreExplosionSpeed = new FloatField(playerStatEditorPanel, "Core explosion fade speed", "shotgunCoreExplosionSpeed", 1, 0.01f, float.MaxValue);
+                new ImageInputField(shotgunCoreExplosionSpeed, Plugin.blueShotgunSprite, Color.cyan);
+            shotgunCoreExplosionDamage = new IntField(playerStatEditorPanel, "Core explosion enemy damage", "shotgunCoreExplosionDamage", 35, 0, int.MaxValue);
+                new ImageInputField(shotgunCoreExplosionDamage, Plugin.blueShotgunSprite, Color.cyan);
+            shotgunCoreExplosionPlayerDamage = new IntField(playerStatEditorPanel, "Core explosion player damage", "shotgunCoreExplosionPlayerDamage", 35, 0, int.MaxValue);
+                new ImageInputField(shotgunCoreExplosionPlayerDamage, Plugin.blueShotgunSprite, Color.cyan);
+
+            new SpaceField(playerStatEditorPanel);
+
+            shotgunGreenPump1Count = new IntField(playerStatEditorPanel, "Pump 1 pellet count", "shotgunGreenPump1Count", 10, 1, int.MaxValue);
+                new ImageInputField(shotgunGreenPump1Count, Plugin.greenShotgunSprite, Color.green);
+            shotgunGreenPump1Spread = new FloatField(playerStatEditorPanel, "Pump 1 spread angle", "shotgunGreenPump1Spread", 10f / 1.5f, 0f, 180f);
+                new ImageInputField(shotgunGreenPump1Spread, Plugin.greenShotgunSprite, Color.green);
+            shotgunGreenPump1Damage = new FloatField(playerStatEditorPanel, "Pump 1 damage per pellet", "shotgunGreenPump1Damage", 1f, 0f, float.MaxValue);
+                new ImageInputField(shotgunGreenPump1Damage, Plugin.greenShotgunSprite, Color.green);
+
+            new SpaceField(playerStatEditorPanel);
+
+            shotgunGreenPump2Count = new IntField(playerStatEditorPanel, "Pump 2 pellet count", "shotgunGreenPump2Count", 16, 1, int.MaxValue);
+                new ImageInputField(shotgunGreenPump2Count, Plugin.greenShotgunSprite, Color.green);
+            shotgunGreenPump2Spread = new FloatField(playerStatEditorPanel, "Pump 2 spread angle", "shotgunGreenPump2Spread", 10f, 0f, 180f);
+                new ImageInputField(shotgunGreenPump2Spread, Plugin.greenShotgunSprite, Color.green);
+            shotgunGreenPump2Damage = new FloatField(playerStatEditorPanel, "Pump 2 damage per pellet", "shotgunGreenPump2Damage", 1f, 0f, float.MaxValue);
+                new ImageInputField(shotgunGreenPump2Damage, Plugin.greenShotgunSprite, Color.green);
+
+            new SpaceField(playerStatEditorPanel);
+
+            shotgunGreenPump3Count = new IntField(playerStatEditorPanel, "Pump 3 pellet count", "shotgunGreenPump3Count", 24, 1, int.MaxValue);
+                new ImageInputField(shotgunGreenPump3Count, Plugin.greenShotgunSprite, Color.green);
+            shotgunGreenPump3Spread = new FloatField(playerStatEditorPanel, "Pump 3 spread angle", "shotgunGreenPump3Spread", 20f, 0f, 180f);
+                new ImageInputField(shotgunGreenPump3Spread, Plugin.greenShotgunSprite, Color.green);
+            shotgunGreenPump3Damage = new FloatField(playerStatEditorPanel, "Pump 3 damage per pellet", "shotgunGreenPump3Damage", 1f, 0f, float.MaxValue);
+                new ImageInputField(shotgunGreenPump3Damage, Plugin.greenShotgunSprite, Color.green);
+
+            new SpaceField(playerStatEditorPanel);
+
+            shotgunGreenExplosionSize = new FloatField(playerStatEditorPanel, "Explosion size", "shotgunGreenExplosionSize", 9, 0, float.MaxValue);
+                new ImageInputField(shotgunGreenExplosionSize, Plugin.greenShotgunSprite, Color.green);
+            shotgunGreenExplosionSpeed = new FloatField(playerStatEditorPanel, "Explosion fade speed", "shotgunGreenExplosionSpeed", 1, 0.01f, float.MaxValue);
+                new ImageInputField(shotgunGreenExplosionSpeed, Plugin.greenShotgunSprite, Color.green);
+            shotgunGreenExplosionDamage = new IntField(playerStatEditorPanel, "Explosion enemy damage", "shotgunGreenExplosionDamage", 50, 0, int.MaxValue);
+                new ImageInputField(shotgunGreenExplosionDamage, Plugin.greenShotgunSprite, Color.green);
+            shotgunGreenExplosionPlayerDamage = new IntField(playerStatEditorPanel, "Explosion player damage", "shotgunGreenExplosionPlayerDamage", 50, 0, int.MaxValue);
+                new ImageInputField(shotgunGreenExplosionPlayerDamage, Plugin.greenShotgunSprite, Color.green);
+
+            // NAILGUN/SAW LAUNCHER
+            new ConfigHeader(playerStatEditorPanel, "Nailgun/Saw Launcher");
+            nailgunBlueDamage = new FloatField(playerStatEditorPanel, "Bullet damage", "nailgunBlueDamage", 0.205f, 0f, float.MaxValue);
+                new ImageInputField(nailgunBlueDamage, Plugin.blueNailgunSprite, Color.cyan);
+            nailgunGreenDamage = new FloatField(playerStatEditorPanel, "Bullet damage", "nailgunGreenDamage", 0.185f, 0f, float.MaxValue);
+                new ImageInputField(nailgunGreenDamage, Plugin.greenNailgunSprite, Color.green);
+            nailgunGreenBurningDamage = new FloatField(playerStatEditorPanel, "Burning bullet damage", "nailgunGreenBurningDamage", 0.185f, 0f, float.MaxValue);
+                new ImageInputField(nailgunGreenBurningDamage, Plugin.greenNailgunSprite, Color.green);
+
+            new SpaceField(playerStatEditorPanel);
+
+            sawBlueDamage = new FloatField(playerStatEditorPanel, "Saw damage", "sawBlueDamage", 0.75f, 0f, float.MaxValue);
+                new ImageInputField(sawBlueDamage, Plugin.blueSawLauncherSprite, Color.cyan);
+            sawBlueHitAmount = new FloatField(playerStatEditorPanel, "Saw durability", "sawBlueHitAmount", 3.9f, 0f, float.MaxValue);
+                new ImageInputField(sawBlueHitAmount, Plugin.blueSawLauncherSprite, Color.cyan);
+            sawGreenDamage = new FloatField(playerStatEditorPanel, "Weak saw damage", "sawGreenDamage", 0.6f, 0f, float.MaxValue);
+                new ImageInputField(sawGreenDamage, Plugin.greenSawLauncherSprite, Color.green);
+            sawGreenHitAmount = new FloatField(playerStatEditorPanel, "Weak saw durability", "sawGreenHitAmount", 3f, 0f, float.MaxValue);
+                new ImageInputField(sawGreenHitAmount, Plugin.greenSawLauncherSprite, Color.green);
+            sawGreenBurningDamage = new FloatField(playerStatEditorPanel, "Super saw damage", "sawGreenBurningDamage", 1f, 0f, float.MaxValue);
+                new ImageInputField(sawGreenBurningDamage, Plugin.greenSawLauncherSprite, Color.green);
+            sawGreenBurningHitAmount = new FloatField(playerStatEditorPanel, "Super saw durability", "sawGreenBurningHitAmount", 20.9f, 0f, float.MaxValue);
+                new ImageInputField(sawGreenBurningHitAmount, Plugin.greenSawLauncherSprite, Color.green);
+
+            new SpaceField(playerStatEditorPanel);
+
+            nailgunAmmoRegSpeedMulti = new FloatField(playerStatEditorPanel, "Nailgun ammo regen speed", "nailgunAmmoRegSpeedMulti", 1f, 0.01f, float.MaxValue);
+                new ImageInputField(nailgunAmmoRegSpeedMulti, Plugin.blueNailgunSprite, Color.cyan);
+            nailgunHeatsinkRegSpeedMulti = new FloatField(playerStatEditorPanel, "Nailgun heatsink regen speed", "nailgunHeatsinkRegSpeedMulti", 1f, 0.01f, float.MaxValue);
+                new ImageInputField(nailgunHeatsinkRegSpeedMulti, Plugin.greenNailgunSprite, Color.green);
+            sawAmmoRegSpeedMulti = new FloatField(playerStatEditorPanel, "Saw ammo regen speed", "sawAmmoRegSpeedMulti", 1f, 0.01f, float.MaxValue);
+                new ImageInputField(sawAmmoRegSpeedMulti, Plugin.blueSawLauncherSprite, Color.cyan);
+            sawHeatsinkRegSpeedMulti = new FloatField(playerStatEditorPanel, "Saw heatsink regen speed", "sawHeatsinkRegSpeedMulti", 1f, 0.01f, float.MaxValue);
+                new ImageInputField(sawHeatsinkRegSpeedMulti, Plugin.greenSawLauncherSprite, Color.green);
+            
+            // RAILCANNON
+            new ConfigHeader(playerStatEditorPanel, "Railcannon");
+            railcannonRegSpeedMulti = new FloatField(playerStatEditorPanel, "Railcannon charge speed", "railcannonRegSpeedMulti", 1f, 0.01f, float.MaxValue);
+            new ConfigHeader(playerStatEditorPanel, "Rocket Freeze/Cannonball");
+            rocketFreezeRegSpeedMulti = new FloatField(playerStatEditorPanel, "Rocket freeze regen speed", "rocketFreezeRegSpeedMulti", 1f, 0.01f, float.MaxValue);
+            rocketCannonballRegSpeedMulti = new FloatField(playerStatEditorPanel, "Cannonball regen speed", "rocketCannonballRegSpeedMulti", 1f, 0.01f, float.MaxValue);
+
+            void AddDirtyFlagToFloatFieldValueChange(FloatField field)
+            {
+                field.onValueChange += (FloatField.FloatValueChangeEvent e) =>
+                {
+                    dirtyField = true;
+                };
+            }
+            void AddDirtyFlagToFloatSliderFieldValueChange(FloatSliderField field)
+            {
+                field.onValueChange += (FloatSliderField.FloatSliderValueChangeEvent e) =>
+                {
+                    dirtyField = true;
+                };
+            }
+            void AddDirtyFlagToIntFieldValueChange(IntField field)
+            {
+                field.onValueChange += (IntField.IntValueChangeEvent e) =>
+                {
+                    dirtyField = true;
+                };
+            }
+
+            AddDirtyFlagToFloatFieldValueChange(staminaRegSpeedMulti);
+
+            AddDirtyFlagToIntFieldValueChange(maxPlayerHp);
+            AddDirtyFlagToIntFieldValueChange(playerHpSupercharge);
+            AddDirtyFlagToFloatSliderFieldValueChange(hardDamagePercent);
+            AddDirtyFlagToIntFieldValueChange(whiplashHardDamageCap);
+            AddDirtyFlagToFloatFieldValueChange(whiplashHardDamageSpeed);
+
+            AddDirtyFlagToFloatFieldValueChange(revolverDamage);
+            AddDirtyFlagToFloatFieldValueChange(revolverAltDamage);
+
+            AddDirtyFlagToFloatFieldValueChange(chargedRevDamage);
+            AddDirtyFlagToFloatFieldValueChange(chargedAltRevDamage);
+            AddDirtyFlagToIntFieldValueChange(chargedRevTotalHits);
+            AddDirtyFlagToIntFieldValueChange(chargedAltRevTotalHits);
+            AddDirtyFlagToIntFieldValueChange(chargedRevMaxHitsPerTarget);
+            AddDirtyFlagToIntFieldValueChange(chargedAltRevMaxHitsPerTarget);
+
+            AddDirtyFlagToFloatFieldValueChange(sharpshooterDamage);
+            AddDirtyFlagToFloatFieldValueChange(sharpshooterAltDamage);
+            AddDirtyFlagToIntFieldValueChange(sharpshooterMaxHitsPerTarget);
+            AddDirtyFlagToIntFieldValueChange(sharpshooterAltMaxHitsPerTarget);
+
+            AddDirtyFlagToFloatFieldValueChange(chargedRevRegSpeedMulti);
+            AddDirtyFlagToFloatFieldValueChange(coinRegSpeedMulti);
+            AddDirtyFlagToFloatFieldValueChange(sharpshooterRegSpeedMulti);
+
+            AddDirtyFlagToIntFieldValueChange(shotgunBluePelletCount);
+            AddDirtyFlagToFloatFieldValueChange(shotgunBlueSpreadAngle);
+            AddDirtyFlagToFloatFieldValueChange(shotgunBlueDamagePerPellet);
+
+            AddDirtyFlagToFloatFieldValueChange(shotgunCoreExplosionSize);
+            AddDirtyFlagToFloatFieldValueChange(shotgunCoreExplosionSpeed);
+            AddDirtyFlagToIntFieldValueChange(shotgunCoreExplosionDamage);
+            AddDirtyFlagToIntFieldValueChange(shotgunCoreExplosionPlayerDamage);
+
+            AddDirtyFlagToIntFieldValueChange(shotgunGreenPump1Count);
+            AddDirtyFlagToFloatFieldValueChange(shotgunGreenPump1Spread);
+            AddDirtyFlagToFloatFieldValueChange(shotgunGreenPump1Damage);
+
+            AddDirtyFlagToIntFieldValueChange(shotgunGreenPump2Count);
+            AddDirtyFlagToFloatFieldValueChange(shotgunGreenPump2Spread);
+            AddDirtyFlagToFloatFieldValueChange(shotgunGreenPump2Damage);
+
+            AddDirtyFlagToIntFieldValueChange(shotgunGreenPump3Count);
+            AddDirtyFlagToFloatFieldValueChange(shotgunGreenPump3Spread);
+            AddDirtyFlagToFloatFieldValueChange(shotgunGreenPump3Damage);
+
+            AddDirtyFlagToFloatFieldValueChange(shotgunGreenExplosionSize);
+            AddDirtyFlagToFloatFieldValueChange(shotgunGreenExplosionSpeed);
+            AddDirtyFlagToIntFieldValueChange(shotgunGreenExplosionDamage);
+            AddDirtyFlagToIntFieldValueChange(shotgunGreenExplosionPlayerDamage);
+
+            AddDirtyFlagToFloatFieldValueChange(nailgunBlueDamage);
+            AddDirtyFlagToFloatFieldValueChange(nailgunGreenDamage);
+            AddDirtyFlagToFloatFieldValueChange(nailgunGreenBurningDamage);
+
+            AddDirtyFlagToFloatFieldValueChange(sawBlueDamage);
+            AddDirtyFlagToFloatFieldValueChange(sawBlueHitAmount);
+            AddDirtyFlagToFloatFieldValueChange(sawGreenDamage);
+            AddDirtyFlagToFloatFieldValueChange(sawGreenHitAmount);
+            AddDirtyFlagToFloatFieldValueChange(sawGreenBurningDamage);
+            AddDirtyFlagToFloatFieldValueChange(sawGreenBurningHitAmount);
+
+            AddDirtyFlagToFloatFieldValueChange(nailgunAmmoRegSpeedMulti);
+            AddDirtyFlagToFloatFieldValueChange(nailgunHeatsinkRegSpeedMulti);
+
+            AddDirtyFlagToFloatFieldValueChange(sawAmmoRegSpeedMulti);
+            AddDirtyFlagToFloatFieldValueChange(sawHeatsinkRegSpeedMulti);
+
+            AddDirtyFlagToFloatFieldValueChange(railcannonRegSpeedMulti);
+
+            AddDirtyFlagToFloatFieldValueChange(rocketFreezeRegSpeedMulti);
+            AddDirtyFlagToFloatFieldValueChange(rocketCannonballRegSpeedMulti);
+
             new ConfigHeader(playerPanel, "Rocket Boosting");
             ConfigDivision rocketBoostDiv = new ConfigDivision(playerPanel, "rocketBoostDiv");
             rocketBoostToggle = new BoolField(playerPanel, "Enabled", "rocketBoostToggle", true);

@@ -17,6 +17,7 @@ using UnityEngine.AddressableAssets;
 using UnityEngine.AddressableAssets.ResourceLocators;
 using UnityEngine.ResourceManagement.ResourceLocations;
 using UnityEngine.UIElements;
+using PluginConfig.API;
 
 namespace Ultrapain
 {
@@ -119,6 +120,16 @@ namespace Ultrapain
         public static AudioClip cannonBallChargeAudio;
         public static Material gabrielFakeMat;
 
+        public static Sprite blueRevolverSprite;
+        public static Sprite greenRevolverSprite;
+        public static Sprite redRevolverSprite;
+        public static Sprite blueShotgunSprite;
+        public static Sprite greenShotgunSprite;
+        public static Sprite blueNailgunSprite;
+        public static Sprite greenNailgunSprite;
+        public static Sprite blueSawLauncherSprite;
+        public static Sprite greenSawLauncherSprite;
+
         public static GameObject rocketLauncherAlt;
         public static GameObject maliciousRailcannon;
 
@@ -218,6 +229,24 @@ namespace Ultrapain
             ricochetSfx = LoadObject<GameObject>("Assets/Particles/SoundBubbles/Ricochet.prefab");
             //Assets/Particles/Flashes/Flash.prefab
             parryableFlash = LoadObject<GameObject>("Assets/Particles/Flashes/Flash.prefab");
+            //Assets/Textures/UI/SingleRevolver.png
+            blueRevolverSprite = LoadObject<Sprite>("Assets/Textures/UI/SingleRevolver.png");
+            //Assets/Textures/UI/RevolverSpecial.png
+            greenRevolverSprite = LoadObject<Sprite>("Assets/Textures/UI/RevolverSpecial.png");
+            //Assets/Textures/UI/RevolverSharp.png
+            redRevolverSprite = LoadObject<Sprite>("Assets/Textures/UI/RevolverSharp.png");
+            //Assets/Textures/UI/Shotgun.png
+            blueShotgunSprite = LoadObject<Sprite>("Assets/Textures/UI/Shotgun.png");
+            //Assets/Textures/UI/Shotgun1.png
+            greenShotgunSprite = LoadObject<Sprite>("Assets/Textures/UI/Shotgun1.png");
+            //Assets/Textures/UI/Nailgun2.png
+            blueNailgunSprite = LoadObject<Sprite>("Assets/Textures/UI/Nailgun2.png");
+            //Assets/Textures/UI/NailgunOverheat.png
+            greenNailgunSprite = LoadObject<Sprite>("Assets/Textures/UI/NailgunOverheat.png");
+            //Assets/Textures/UI/SawbladeLauncher.png
+            blueSawLauncherSprite = LoadObject<Sprite>("Assets/Textures/UI/SawbladeLauncher.png");
+            //Assets/Textures/UI/SawbladeLauncherOverheat.png
+            greenSawLauncherSprite = LoadObject<Sprite>("Assets/Textures/UI/SawbladeLauncherOverheat.png");
             //Assets/Prefabs/Attacks and Projectiles/Coin.prefab
             coin = LoadObject<GameObject>("Assets/Prefabs/Attacks and Projectiles/Coin.prefab");
             //Assets/Materials/GabrielFake.mat
@@ -660,7 +689,47 @@ namespace Ultrapain
 
                 harmonyTweaks.Patch(GetMethod<Explosion>("Collide"), prefix: GetHarmonyMethod(GetMethod<Explosion_CollideOrbital>("Prefix")));
             }
+            
+            if(ConfigManager.chargedRevRegSpeedMulti.value != 1)
+                harmonyTweaks.Patch(GetMethod<Revolver>("Update"), prefix: GetHarmonyMethod(GetMethod<Revolver_Update>("Prefix")));
+            if(ConfigManager.coinRegSpeedMulti.value != 1 || ConfigManager.sharpshooterRegSpeedMulti.value != 1
+                || ConfigManager.railcannonRegSpeedMulti.value != 1 || ConfigManager.rocketFreezeRegSpeedMulti.value != 1
+                || ConfigManager.rocketCannonballRegSpeedMulti.value != 1 || ConfigManager.nailgunAmmoRegSpeedMulti.value != 1
+                || ConfigManager.sawAmmoRegSpeedMulti.value != 1)
+                harmonyTweaks.Patch(GetMethod<WeaponCharges>("Charge"), prefix: GetHarmonyMethod(GetMethod<WeaponCharges_Charge>("Prefix")));
+            if(ConfigManager.nailgunHeatsinkRegSpeedMulti.value != 1 || ConfigManager.sawHeatsinkRegSpeedMulti.value != 1)
+                harmonyTweaks.Patch(GetMethod<Nailgun>("Update"), prefix: GetHarmonyMethod(GetMethod<NailGun_Update>("Prefix")));
+            if(ConfigManager.staminaRegSpeedMulti.value != 1)
+                harmonyTweaks.Patch(GetMethod<NewMovement>("Update"), prefix: GetHarmonyMethod(GetMethod<NewMovement_Update>("Prefix")));
+            
+            if(ConfigManager.playerHpDeltaToggle.value || ConfigManager.maxPlayerHp.value != 100 || ConfigManager.playerHpSupercharge.value != 200 || ConfigManager.whiplashHardDamageCap.value != 50 || ConfigManager.whiplashHardDamageSpeed.value != 1)
+            {
+                harmonyTweaks.Patch(GetMethod<NewMovement>("GetHealth"), prefix: GetHarmonyMethod(GetMethod<NewMovement_GetHealth>("Prefix")));
+                harmonyTweaks.Patch(GetMethod<NewMovement>("SuperCharge"), prefix: GetHarmonyMethod(GetMethod<NewMovement_SuperCharge>("Prefix")));
+                harmonyTweaks.Patch(GetMethod<NewMovement>("Respawn"), postfix: GetHarmonyMethod(GetMethod<NewMovement_Respawn>("Postfix")));
+                harmonyTweaks.Patch(GetMethod<NewMovement>("Start"), postfix: GetHarmonyMethod(GetMethod<NewMovement_Start>("Postfix")));
+                harmonyTweaks.Patch(GetMethod<NewMovement>("GetHurt"), transpiler: GetHarmonyMethod(GetMethod<NewMovement_GetHurt>("Transpiler")));
+                harmonyTweaks.Patch(GetMethod<HookArm>("FixedUpdate"), transpiler: GetHarmonyMethod(GetMethod<HookArm_FixedUpdate>("Transpiler")));
+                harmonyTweaks.Patch(GetMethod<NewMovement>("ForceAntiHP"), transpiler: GetHarmonyMethod(GetMethod<NewMovement_ForceAntiHP>("Transpiler")));
+            }
 
+            // ADDME
+            harmonyTweaks.Patch(GetMethod<Revolver>("Shoot"), transpiler: GetHarmonyMethod(GetMethod<Revolver_Shoot>("Transpiler")));
+            harmonyTweaks.Patch(GetMethod<Shotgun>("Shoot"), transpiler: GetHarmonyMethod(GetMethod<Shotgun_Shoot>("Transpiler")), prefix: GetHarmonyMethod(GetMethod<Shotgun_Shoot>("Prefix")), postfix: GetHarmonyMethod(GetMethod<Shotgun_Shoot>("Postfix")));
+            harmonyTweaks.Patch(GetMethod<Shotgun>("ShootSinks"), transpiler: GetHarmonyMethod(GetMethod<Shotgun_ShootSinks>("Transpiler")));
+            harmonyTweaks.Patch(GetMethod<Nailgun>("Shoot"), transpiler: GetHarmonyMethod(GetMethod<Nailgun_Shoot>("Transpiler")));
+            harmonyTweaks.Patch(GetMethod<Nailgun>("SuperSaw"), transpiler: GetHarmonyMethod(GetMethod<Nailgun_SuperSaw>("Transpiler")));
+            
+            if (ConfigManager.hardDamagePercent.normalizedValue != 1)
+                harmonyTweaks.Patch(GetMethod<NewMovement>("GetHurt"), prefix: GetHarmonyMethod(GetMethod<NewMovement_GetHurt>("Prefix")), postfix: GetHarmonyMethod(GetMethod<NewMovement_GetHurt>("Postfix")));
+
+            harmonyTweaks.Patch(GetMethod<HealthBar>("Start"), postfix: GetHarmonyMethod(GetMethod<HealthBar_Start>("Postfix")));
+            foreach (HealthBarTracker hb in HealthBarTracker.instances)
+            {
+                if (hb != null)
+                    hb.SetSliderRange();
+            }
+            
             harmonyTweaks.Patch(GetMethod<Harpoon>("Start"), postfix: GetHarmonyMethod(GetMethod<Harpoon_Start>("Postfix")));
             if(ConfigManager.screwDriverHomeToggle.value)
                 harmonyTweaks.Patch(GetMethod<Harpoon>("Punched"), postfix: GetHarmonyMethod(GetMethod<Harpoon_Punched>("Postfix")));
@@ -796,6 +865,8 @@ namespace Ultrapain
             harmonyBase.Patch(GetMethod<DifficultyTitle>("Check"), postfix: GetHarmonyMethod(GetMethod<DifficultyTitle_Check_Patch>("Postfix")));
             harmonyBase.Patch(typeof(PrefsManager).GetConstructor(new Type[0]), postfix: GetHarmonyMethod(GetMethod<PrefsManager_Ctor>("Postfix")));
             harmonyBase.Patch(GetMethod<PrefsManager>("EnsureValid"), prefix: GetHarmonyMethod(GetMethod<PrefsManager_EnsureValid>("Prefix")));
+            harmonyBase.Patch(GetMethod<Grenade>("Explode"), prefix: new HarmonyMethod(GetMethod<GrenadeExplosionOverride>("Prefix")), postfix: new HarmonyMethod(GetMethod<GrenadeExplosionOverride>("Postfix")));
+            LoadPrefabs();
             ConfigManager.Initialize();
 
             SceneManager.activeSceneChanged += OnSceneChange;
