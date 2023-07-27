@@ -478,13 +478,6 @@ namespace Ultrapain.Patches
             public OrbitalExplosionInfo info = null;
         }
 
-        static float CalculateExtraDamage(float distance)
-        {
-            float deltaDistance = (distance - ConfigManager.orbStrikeMinDistance.value) * 0.002f;
-            float additionalDamage = ConfigManager.orbStrikeExtraDamage.value * (deltaDistance / (deltaDistance + 1f));
-            return Mathf.Max(0, additionalDamage);
-        }
-
         static bool Prefix(EnemyIdentifier __instance, out StateInfo __state, Vector3 __2, ref float __3)
         {
             //if (Coin_ReflectRevolver.shootingCoin == lastExplosiveCoin)
@@ -512,17 +505,12 @@ namespace Ultrapain.Patches
                 {
                     causeExplosion = true;
                 }
-
-                __3 += CalculateExtraDamage(list.activasionDistance);
-                Debug.Log("Extra damage from orbital: " + CalculateExtraDamage(list.activasionDistance));
             }
             else if (RevolverBeam_ExecuteHits.isOrbitalRay && RevolverBeam_ExecuteHits.orbitalBeam != null)
             {
                 if (RevolverBeam_ExecuteHits.orbitalBeamFlag != null && !RevolverBeam_ExecuteHits.orbitalBeamFlag.exploded)
                 {
                     causeExplosion = true;
-                    __3 += CalculateExtraDamage(RevolverBeam_ExecuteHits.orbitalBeamFlag.activasionDistance);
-                    Debug.Log("Extra damage from orbital: " + CalculateExtraDamage(RevolverBeam_ExecuteHits.orbitalBeamFlag.activasionDistance));
                 }
             }
 
