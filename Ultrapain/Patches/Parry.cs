@@ -118,7 +118,7 @@ namespace Ultrapain.Patches
             }
             else
             {
-                if (flag != null && flag.bigExplosionOverride)
+                if (flag != null/* && flag.bigExplosionOverride*/)
                 {
                     __2 = true;
                     GameObject explosion = GameObject.Instantiate(__instance.superExplosion);

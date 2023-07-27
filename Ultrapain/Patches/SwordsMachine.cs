@@ -36,7 +36,14 @@ namespace Ultrapain.Patches
             if (speedingUp)
             {
                 if (anim == null)
+                {
                     anim = sm.GetComponent<Animator>();
+                    if (anim == null)
+                    {
+                        Destroy(this);
+                        return;
+                    }
+                }
                 anim.speed = speed;
             }
         }
