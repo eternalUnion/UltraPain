@@ -868,10 +868,13 @@ namespace Ultrapain.Patches
             if (hb == null)
                 hb = GetComponent<HealthBar>();
 
-            hb.hpSliders[0].maxValue = hb.afterImageSliders[0].maxValue = ConfigManager.maxPlayerHp.value;
-            hb.hpSliders[1].minValue = hb.afterImageSliders[1].minValue = ConfigManager.maxPlayerHp.value;
-            hb.hpSliders[1].maxValue = hb.afterImageSliders[1].maxValue = Mathf.Max(ConfigManager.maxPlayerHp.value, ConfigManager.playerHpSupercharge.value);
-            hb.antiHpSlider.maxValue = ConfigManager.maxPlayerHp.value;
+            if (hb.hpSliders.Length != 0)
+            {
+                hb.hpSliders[0].maxValue = hb.afterImageSliders[0].maxValue = ConfigManager.maxPlayerHp.value;
+                hb.hpSliders[1].minValue = hb.afterImageSliders[1].minValue = ConfigManager.maxPlayerHp.value;
+                hb.hpSliders[1].maxValue = hb.afterImageSliders[1].maxValue = Mathf.Max(ConfigManager.maxPlayerHp.value, ConfigManager.playerHpSupercharge.value);
+                hb.antiHpSlider.maxValue = ConfigManager.maxPlayerHp.value;
+            }
         }
     }
 
@@ -882,4 +885,41 @@ namespace Ultrapain.Patches
             __instance.gameObject.AddComponent<HealthBarTracker>().SetSliderRange();
         }
     }
+
+	class HealthBar_Update
+	{
+		static FieldInfo f_HealthBar_hp = typeof(HealthBar).GetField("hp", BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public);
+		static FieldInfo f_HealthBar_antiHp = typeof(HealthBar).GetField("antiHp", BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public);
+
+		static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions)
+		{
+			List<CodeInstruction> code = new List<CodeInstruction>(instructions);
+
+			for (int i = 0; i < code.Count; i++)
+			{
+				CodeInstruction inst = code[i];
+
+				if (inst.opcode == OpCodes.Ldc_R4 && code[i - 1].OperandIs(f_HealthBar_hp))
+				{
+					float operand = (Single)inst.operand;
+					if (operand == 30f)
+						code[i].operand = (Single)(ConfigManager.maxPlayerHp.value * 0.3f);
+					else if (operand == 50f)
+						code[i].operand = (Single)(ConfigManager.maxPlayerHp.value * 0.5f);
+				}
+				else if (inst.opcode == OpCodes.Ldstr)
+				{
+					string operand = (string)inst.operand;
+					if (operand == "/200")
+						code[i].operand = $"/{ConfigManager.playerHpSupercharge}";
+				}
+				else if (inst.opcode == OpCodes.Ldc_R4 && i + 2 < code.Count && code[i + 2].OperandIs(f_HealthBar_antiHp))
+				{
+					code[i].operand = (Single)ConfigManager.maxPlayerHp.value;
+				}
+			}
+
+			return code.AsEnumerable();
+		}
+	}
 }

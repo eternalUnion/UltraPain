@@ -724,7 +724,8 @@ namespace Ultrapain
                 harmonyTweaks.Patch(GetMethod<NewMovement>("GetHurt"), prefix: GetHarmonyMethod(GetMethod<NewMovement_GetHurt>("Prefix")), postfix: GetHarmonyMethod(GetMethod<NewMovement_GetHurt>("Postfix")));
 
             harmonyTweaks.Patch(GetMethod<HealthBar>("Start"), postfix: GetHarmonyMethod(GetMethod<HealthBar_Start>("Postfix")));
-            foreach (HealthBarTracker hb in HealthBarTracker.instances)
+			harmonyTweaks.Patch(GetMethod<HealthBar>("Update"), transpiler: GetHarmonyMethod(GetMethod<HealthBar_Update>("Transpiler")));
+			foreach (HealthBarTracker hb in HealthBarTracker.instances)
             {
                 if (hb != null)
                     hb.SetSliderRange();
