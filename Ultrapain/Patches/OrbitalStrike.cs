@@ -636,7 +636,7 @@ namespace Ultrapain.Patches
 
                         if (ConfigManager.sentryChargebackExtraBeamCount.value > 0)
                         {
-                            List<Tuple<EnemyIdentifier, float>> enemies = UnityUtils.GetClosestEnemies(__2, ConfigManager.sentryChargebackExtraBeamCount.value, true);
+                            List<Tuple<EnemyIdentifier, float>> enemies = UnityUtils.GetClosestEnemies(__2, ConfigManager.sentryChargebackExtraBeamCount.value, UnityUtils.doNotCollideWithPlayerValidator);
                             foreach (Tuple<EnemyIdentifier, float> enemy in enemies)
                             {
                                 RevolverBeam newBeam = GameObject.Instantiate(beam, beam.transform.position, Quaternion.identity);

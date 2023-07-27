@@ -82,7 +82,7 @@ namespace Ultrapain.Patches
                 return;
 
             if(___target != null && ___target.eid != null)
-                flag.targetEids = UnityUtils.GetClosestEnemies(__instance.transform.position, 3, enemy =>
+                flag.targetEids = UnityUtils.GetClosestEnemies(__instance.transform.position, 3, (sourcePos, enemy) =>
                 {
                     if (enemy == ___target.eid)
                         return false;
@@ -96,7 +96,7 @@ namespace Ultrapain.Patches
                     return false;
                 });
             else
-                flag.targetEids = UnityUtils.GetClosestEnemies(__instance.transform.position, 3, enemy =>
+                flag.targetEids = UnityUtils.GetClosestEnemies(__instance.transform.position, 3, (sourcePos, enemy) =>
                 {
                     foreach(Magnet m in enemy.stuckMagnets)
                     {
