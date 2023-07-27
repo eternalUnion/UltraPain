@@ -125,6 +125,18 @@ namespace Ultrapain
         public static FloatField orbStrikeMaliciousCannonExplosionDamageMultiplier;
         public static FloatField orbStrikeMaliciousCannonExplosionSizeMultiplier;
 
+        // MALICIOUS CHARGEBACK
+        public static FormattedStringField maliciousChargebackStyleText;
+        public static IntField maliciousChargebackStylePoint;
+        public static BoolField maliciousChargebackExplosionToggle;
+        public static FloatField maliciousChargebackExplosionSizeMultiplier;
+        public static FloatField maliciousChargebackExplosionDamageMultiplier;
+
+        // SENTRY CHARGEBACK
+        public static FormattedStringField sentryChargebackStyleText;
+        public static IntField sentryChargebackStylePoint;
+        public static IntField sentryChargebackExtraBeamCount;
+
         // ENEMY PANEL
         public static ConfigPanel globalEnemyPanel;
         public static ConfigPanel cerberusPanel;
@@ -853,6 +865,40 @@ namespace Ultrapain
             orbStrikeMaliciousCannonExplosion.TriggerValueChangeEvent();
             orbStrikeMaliciousCannonExplosionSizeMultiplier = new FloatField(orbStrikeMaliciousCannonExplosionDiv, "Size multiplier", "orbStrikeMaliciousCannonExplosionSizeMultiplier", 1.3f, 0f, float.MaxValue);
             orbStrikeMaliciousCannonExplosionDamageMultiplier = new FloatField(orbStrikeMaliciousCannonExplosionDiv, "Damage multiplier", "orbStrikeMaliciousCannonExplosionDamageMultiplier", 1f, 0f, float.MaxValue);
+
+            new ConfigHeader(orbStrikeDiv, "Malicious Beam Chargeback");
+            FormattedStringBuilder maliciousChargebackBuilder = new FormattedStringBuilder();
+            maliciousChargebackBuilder.currentFormat.color = new Color(0xff / 255f, 0xa5 / 255f, 0);
+            maliciousChargebackBuilder += "ULTRA";
+            maliciousChargebackBuilder.currentFormat.color = Color.red;
+            maliciousChargebackBuilder += "ORBITAL";
+            maliciousChargebackBuilder.currentFormat.color = Color.cyan;
+            maliciousChargebackBuilder += "CHARGEBACK";
+            maliciousChargebackStyleText = new FormattedStringField(orbStrikeDiv, "Style text", "maliciousChargebackStyleText", maliciousChargebackBuilder.Build());
+            maliciousChargebackStyleText.onValueChange += (FormattedStringField.FormattedStringValueChangeEvent e) =>
+            {
+                Plugin.StyleIDs.UpdateID(maliciousChargebackStyleText.guid, e.formattedString.formattedString);
+            };
+            maliciousChargebackStylePoint = new IntField(orbStrikeDiv, "Style point", "maliciousChargebackStylePoint", 100, 0, int.MaxValue);
+            ConfigDivision maliciousChargebackExplosionDiv = new ConfigDivision(orbStrikeDiv, "maliciousChargebackExplosionDiv");
+            maliciousChargebackExplosionToggle = new BoolField(orbStrikeDiv, "Explosion on hit", "maliciousChargebackExplosionToggle", true);
+            maliciousChargebackExplosionToggle.onValueChange += (BoolField.BoolValueChangeEvent e) =>
+            {
+                maliciousChargebackExplosionDiv.interactable = e.value;
+            };
+            maliciousChargebackExplosionToggle.TriggerValueChangeEvent();
+            maliciousChargebackExplosionSizeMultiplier = new FloatField(maliciousChargebackExplosionDiv, "Explosion size multiplier", "maliciousChargebackExplosionSizeMultiplier", 0.6f, 0.1f, float.MaxValue);
+            maliciousChargebackExplosionDamageMultiplier = new FloatField(maliciousChargebackExplosionDiv, "Explosion damage multiplier", "maliciousChargebackExplosionDamageMultiplier", 0.5f, 0.1f, float.MaxValue);
+
+            // SENTRY CHARGEBACK
+            new ConfigHeader(orbStrikeDiv, "Sentry Beam Chargeback");
+            sentryChargebackStyleText = new FormattedStringField(orbStrikeDiv, "Style text", "sentryChargebackStyleText", maliciousChargebackBuilder.Build());
+            sentryChargebackStyleText.onValueChange += (FormattedStringField.FormattedStringValueChangeEvent e) =>
+            {
+                Plugin.StyleIDs.UpdateID(sentryChargebackStyleText.guid, e.formattedString.formattedString);
+            };
+            sentryChargebackStylePoint = new IntField(orbStrikeDiv, "Style point", "sentryChargebackStylePoint", 100, 0, int.MaxValue);
+            sentryChargebackExtraBeamCount = new IntField(orbStrikeDiv, "Beam split count", "sentryChargebackExtraBeamCount", 5, 0, int.MaxValue);
 
             // ENEMY PANEL
             globalEnemyPanel = new ConfigPanel(enemyPanel, "Global enemy tweaks", "globalEnemyPanel");
