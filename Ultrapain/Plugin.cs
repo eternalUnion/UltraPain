@@ -85,6 +85,8 @@ namespace Ultrapain
         public static GameObject lightningStrikeExplosive;
         public static GameObject lighningStrikeWindup;
         public static GameObject explosion;
+        public static GameObject bigExplosion;
+        public static GameObject sandExplosion;
         public static GameObject virtueInsignia;
         public static GameObject rocket;
         public static GameObject revolverBullet;
@@ -165,6 +167,10 @@ namespace Ultrapain
             ferryman = LoadObject<GameObject>("Assets/Prefabs/Enemies/Ferryman.prefab");
             // Assets/Prefabs/Attacks and Projectiles/Explosions/Explosion.prefab
             explosion = LoadObject<GameObject>("Assets/Prefabs/Attacks and Projectiles/Explosions/Explosion.prefab");
+            //Assets/Prefabs/Attacks and Projectiles/Explosions/Explosion Super.prefab
+            bigExplosion = LoadObject<GameObject>("Assets/Prefabs/Attacks and Projectiles/Explosions/Explosion Super.prefab");
+            //Assets/Prefabs/Attacks and Projectiles/Explosions/Explosion Sand.prefab
+            sandExplosion = LoadObject<GameObject>("Assets/Prefabs/Attacks and Projectiles/Explosions/Explosion Sand.prefab");
             // Assets/Prefabs/Attacks and Projectiles/Virtue Insignia.prefab
             virtueInsignia = LoadObject<GameObject>("Assets/Prefabs/Attacks and Projectiles/Virtue Insignia.prefab");
             // Assets/Prefabs/Attacks and Projectiles/Projectile Explosive HH.prefab
@@ -566,6 +572,9 @@ namespace Ultrapain
             harmonyTweaks.Patch(GetMethod<LeviathanHead>("ProjectileBurst"), prefix: GetHarmonyMethod(GetMethod<Leviathan_ProjectileBurst>("Prefix")));
             harmonyTweaks.Patch(GetMethod<LeviathanHead>("ProjectileBurstStart"), prefix: GetHarmonyMethod(GetMethod<Leviathan_ProjectileBurstStart>("Prefix")));
             harmonyTweaks.Patch(GetMethod<LeviathanHead>("FixedUpdate"), prefix: GetHarmonyMethod(GetMethod<Leviathan_FixedUpdate>("Prefix")));
+
+            if (ConfigManager.idolExplosionToggle.value)
+                harmonyTweaks.Patch(GetMethod<Idol>("Death"), postfix: GetHarmonyMethod(GetMethod<Idol_Death_Patch>("Postfix")));
 
             // ADDME
             /*
