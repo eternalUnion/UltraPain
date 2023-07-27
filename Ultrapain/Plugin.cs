@@ -675,6 +675,7 @@ namespace Ultrapain
 
             if (ConfigManager.orbStrikeToggle.value)
             {
+                harmonyTweaks.Patch(GetMethod<Coin>("Start"), postfix: GetHarmonyMethod(GetMethod<Coin_Start>("Postfix")));
                 harmonyTweaks.Patch(GetMethod<Punch>("BlastCheck"), prefix: GetHarmonyMethod(GetMethod<Punch_BlastCheck>("Prefix")), postfix: GetHarmonyMethod(GetMethod<Punch_BlastCheck>("Postfix")));
                 harmonyTweaks.Patch(GetMethod<Explosion>("Collide"), prefix: GetHarmonyMethod(GetMethod<Explosion_Collide>("Prefix")));
                 harmonyTweaks.Patch(GetMethod<Coin>("DelayedReflectRevolver"), postfix: GetHarmonyMethod(GetMethod<Coin_DelayedReflectRevolver>("Postfix")));
