@@ -101,6 +101,7 @@ namespace Ultrapain
         public static GameObject explosionWaveKnuckleblaster;
         public static GameObject chargeEffect;
         public static GameObject maliciousFaceProjectile;
+        public static GameObject sisyphusDestroyExplosion;
 
         //public static GameObject idol;
         public static GameObject ferryman;
@@ -213,6 +214,8 @@ namespace Ultrapain
             ricochetSfx = LoadObject<GameObject>("Assets/Particles/SoundBubbles/Ricochet.prefab");
             //Assets/Particles/Flashes/Flash.prefab
             parryableFlash = LoadObject<GameObject>("Assets/Particles/Flashes/Flash.prefab");
+            //Assets/Prefabs/Attacks and Projectiles/Explosions/Explosion Sisyphus Prime Charged.prefab
+            sisyphusDestroyExplosion = LoadObject<GameObject>("Assets/Prefabs/Attacks and Projectiles/Explosions/Explosion Sisyphus Prime Charged.prefab");
 
             //Assets/Prefabs/Effects/Charge Effect.prefab
             chargeEffect = LoadObject<GameObject>("Assets/Prefabs/Effects/Charge Effect.prefab");
@@ -573,6 +576,19 @@ namespace Ultrapain
             harmonyTweaks.Patch(GetMethod<LeviathanHead>("ProjectileBurstStart"), prefix: GetHarmonyMethod(GetMethod<Leviathan_ProjectileBurstStart>("Prefix")));
             harmonyTweaks.Patch(GetMethod<LeviathanHead>("FixedUpdate"), prefix: GetHarmonyMethod(GetMethod<Leviathan_FixedUpdate>("Prefix")));
 
+            if (ConfigManager.panopticonFullPhase.value)
+                harmonyTweaks.Patch(GetMethod<FleshPrison>("Start"), postfix: GetHarmonyMethod(GetMethod<Panopticon_Start>("Postfix")));
+            if (ConfigManager.panopticonAxisBeam.value)
+                harmonyTweaks.Patch(GetMethod<FleshPrison>("SpawnInsignia"), prefix: GetHarmonyMethod(GetMethod<Panopticon_SpawnInsignia>("Prefix")));
+            if (ConfigManager.panopticonSpinAttackToggle.value)
+                harmonyTweaks.Patch(GetMethod<FleshPrison>("HomingProjectileAttack"), postfix: GetHarmonyMethod(GetMethod<Panopticon_HomingProjectileAttack>("Postfix")));
+            if (ConfigManager.panopticonBlackholeProj.value)
+                harmonyTweaks.Patch(GetMethod<FleshPrison>("SpawnBlackHole"), postfix: GetHarmonyMethod(GetMethod<Panopticon_SpawnBlackHole>("Postfix")));
+            if (ConfigManager.panopticonBalanceEyes.value)
+                harmonyTweaks.Patch(GetMethod<FleshPrison>("SpawnFleshDrones"), prefix: GetHarmonyMethod(GetMethod<Panopticon_SpawnFleshDrones>("Prefix")), postfix: GetHarmonyMethod(GetMethod<Panopticon_SpawnFleshDrones>("Postfix")));
+            if (ConfigManager.panopticonBlueProjToggle.value)
+                harmonyTweaks.Patch(GetMethod<FleshPrison>("Update"), transpiler: GetHarmonyMethod(GetMethod<Panopticon_BlueProjectile>("Transpiler")));
+
             if (ConfigManager.idolExplosionToggle.value)
                 harmonyTweaks.Patch(GetMethod<Idol>("Death"), postfix: GetHarmonyMethod(GetMethod<Idol_Death_Patch>("Postfix")));
 
@@ -629,6 +645,11 @@ namespace Ultrapain
                 harmonyTweaks.Patch(GetMethod<Mandalore>("FullerBurst"), prefix: GetHarmonyMethod(GetMethod<DruidKnight_FullerBurst>("Prefix")));
                 harmonyTweaks.Patch(GetMethod<Drone>("Explode"), prefix: GetHarmonyMethod(GetMethod<Drone_Explode>("Prefix")), postfix: GetHarmonyMethod(GetMethod<Drone_Explode>("Postfix")));
             }
+
+            if (ConfigManager.fleshObamiumToggle.value)
+                harmonyTweaks.Patch(GetMethod<FleshPrison>("Start"), postfix: GetHarmonyMethod(GetMethod<FleshObamium_Start>("Postfix")), prefix: GetHarmonyMethod(GetMethod<FleshObamium_Start>("Prefix")));
+            if (ConfigManager.obamapticonToggle.value)
+                harmonyTweaks.Patch(GetMethod<FleshPrison>("Start"), postfix: GetHarmonyMethod(GetMethod<Obamapticon_Start>("Postfix")), prefix: GetHarmonyMethod(GetMethod<Obamapticon_Start>("Prefix")));
         }
 
         public static bool methodsPatched = false;
@@ -673,6 +694,8 @@ namespace Ultrapain
         public static AudioClip druidKnightFullerAutoAud;
         public static AudioClip druidKnightDeathAud;
         public static AudioClip enrageAudioCustom;
+        public static GameObject fleshObamium;
+        public static GameObject obamapticon;
 
         public void Awake()
         {
@@ -688,6 +711,8 @@ namespace Ultrapain
                 druidKnightFullerAutoAud = bundle.LoadAsset<AudioClip>("assets/ultrapain/druidknight/fullerauto.wav");
                 druidKnightDeathAud = bundle.LoadAsset<AudioClip>("assets/ultrapain/druidknight/death.wav");
                 enrageAudioCustom = bundle.LoadAsset<AudioClip>("assets/ultrapain/sfx/enraged.wav");
+                fleshObamium = bundle.LoadAsset<GameObject>("assets/ultrapain/fleshprison/fleshobamium.prefab");
+                obamapticon = bundle.LoadAsset<GameObject>("assets/ultrapain/panopticon/obamapticon.prefab");
             }
             catch (Exception e)
             {

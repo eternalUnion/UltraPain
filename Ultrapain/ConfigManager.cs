@@ -59,6 +59,10 @@ namespace Ultrapain
         // MEME PANEL
         public static BoolField enrageSfxToggle;
         public static BoolField funnyDruidKnightSFXToggle;
+        public static BoolField fleshObamiumToggle;
+        public static StringField fleshObamiumName;
+        public static BoolField obamapticonToggle;
+        public static StringField obamapticonName;
 
         // PLAYER PANEL
         public static BoolField rocketBoostToggle;
@@ -143,6 +147,7 @@ namespace Ultrapain
         public static ConfigPanel v2SecondPanel;
         public static ConfigPanel sisyInstPanel;
         public static ConfigPanel leviathanPanel;
+        public static ConfigPanel panopticonPanel;
         public static ConfigPanel idolPanel;
 
         // GLOBAL ENEMY CONFIG
@@ -410,6 +415,27 @@ namespace Ultrapain
 
         public static IntField leviathanTailComboCount;
 
+        // PANOPTICON
+        public static BoolField panopticonFullPhase;
+        public static BoolField panopticonBalanceEyes;
+        public static BoolField panopticonBlackholeProj;
+        public static BoolField panopticonAxisBeam;
+        public static FloatField panopticonAxisBeamSizeMulti;
+
+        public static BoolField panopticonSpinAttackToggle;
+        public static IntField panopticonSpinAttackCount;
+        public static FloatField panopticonSpinAttackTurnSpeed;
+        public static FloatField panopticonSpinAttackActivateSpeed;
+        public static FloatField panopticonSpinAttackSize;
+        public static IntField panopticonSpinAttackDamage;
+        public static FloatField panopticonSpinAttackDistance;
+
+        public static BoolField panopticonBlueProjToggle;
+        public static IntField panopticonBlueProjCount;
+        public static FloatField panopticonBlueProjDamage;
+        public static FloatField panopticonBlueProjTurnSpeed;
+        public static FloatField panopticonBlueProjInitialSpeed;
+      
         // IDOL
         public static BoolField idolExplosionToggle;
         public enum IdolExplosionType
@@ -424,7 +450,6 @@ namespace Ultrapain
         public static FloatField idolExplosionSizeMultiplier;
         public static FloatField idolExplosionDamageMultiplier;
         public static FloatSliderField idolExplosionEnemyDamagePercent;
-
 
         /////////// ADD MEEEE
         // GABRIEL SECOND
@@ -540,6 +565,18 @@ namespace Ultrapain
             {
                 dirtyField = true;
             };
+            fleshObamiumToggle = new BoolField(memePanel, "FLESH OBAMIUM", "fleshObamiumToggle", false);
+            fleshObamiumToggle.onValueChange += (BoolField.BoolValueChangeEvent e) =>
+            {
+                dirtyField = true;
+            };
+            fleshObamiumName = new StringField(memePanel, "FLESH OBAMIUM name", "fleshObamiumName", "FLESH OBAMIUM");
+            obamapticonToggle = new BoolField(memePanel, "OBAMAPTICON", "obamapticonToggle", false);
+            obamapticonToggle.onValueChange += (BoolField.BoolValueChangeEvent e) =>
+            {
+                dirtyField = true;
+            };
+            obamapticonName = new StringField(memePanel, "OBAMAPTICON name", "obamapticonName", "OBAMAPTICON");
 
             // PLAYER PANEL
             new ConfigHeader(playerPanel, "Rocket Boosting");
@@ -777,6 +814,7 @@ namespace Ultrapain
             new ConfigHeader(enemyPanel, "Prime Bosses");
             fleshPrisonPanel = new ConfigPanel(enemyPanel, "Flesh Prison", "fleshPrisonPanel");
             minosPrimePanel = new ConfigPanel(enemyPanel, "Minos Prime", "minosPrimePanel");
+            panopticonPanel = new ConfigPanel(enemyPanel, "Flesh Panopticon", "panopticonPanel");
 
             // GLOBAL ENEMY TWEAKS
             eidStatEditorPanel = new ConfigPanel(globalEnemyPanel, "Enemy stat editor", "eidStatEditorPanel");
@@ -1550,6 +1588,62 @@ namespace Ultrapain
             leviathanChargeHauntRocketRiding = new BoolField(leviathanChargedDiv, "Target ridden rockets", "leviathanChargeHauntRocketRiding", true);
             new ConfigHeader(leviathanPanel, "Tail Swing Combo");
             leviathanTailComboCount = new IntField(leviathanPanel, "Tail swing count", "leviathanTailComboCount", 3, 1, int.MaxValue);
+
+            // PANOPTICON
+            panopticonFullPhase = new BoolField(panopticonPanel, "Full fight", "panopticonFullPhase", true);
+            panopticonFullPhase.onValueChange += (BoolField.BoolValueChangeEvent e) =>
+            {
+                dirtyField = true;
+            };
+            panopticonBalanceEyes = new BoolField(panopticonPanel, "Balance eyes", "panopticonBalanceEyes", true);
+            panopticonBalanceEyes.onValueChange += (BoolField.BoolValueChangeEvent e) =>
+            {
+                dirtyField = true;
+            };
+            panopticonBlackholeProj = new BoolField(panopticonPanel, "Throw projectile after blackhole", "panopticonBlackholeProj", true);
+            panopticonBlackholeProj.onValueChange += (BoolField.BoolValueChangeEvent e) =>
+            {
+                dirtyField = true;
+            };
+            panopticonAxisBeam = new BoolField(panopticonPanel, "3 axis insignia", "panopticonAxisBeam", true);
+            panopticonAxisBeam.onValueChange += (BoolField.BoolValueChangeEvent e) =>
+            {
+                dirtyField = true;
+                panopticonAxisBeamSizeMulti.interactable = e.value;
+            };
+            panopticonAxisBeamSizeMulti = new FloatField(panopticonPanel, "Axis beam size multiplier", "panopticonAxisBeamSizeMulti", 0.5f, 0.1f, float.MaxValue);
+            panopticonAxisBeam.TriggerValueChangeEvent();
+
+            new ConfigHeader(panopticonPanel, "Spin Insignia");
+            ConfigDivision panopticonSpinInsigniaDiv = new ConfigDivision(panopticonPanel, "panopticonSpinInsigniaDiv");
+            panopticonSpinAttackToggle = new BoolField(panopticonPanel, "Enabled", "panopticonSpinAttackToggle", true);
+            panopticonSpinAttackToggle.presetLoadPriority = 1;
+            panopticonSpinAttackToggle.onValueChange += (BoolField.BoolValueChangeEvent e) =>
+            {
+                panopticonSpinInsigniaDiv.interactable = e.value;
+                dirtyField = true;
+            };
+            panopticonSpinAttackToggle.TriggerValueChangeEvent();
+            panopticonSpinAttackCount = new IntField(panopticonSpinInsigniaDiv, "Insignia count", "panopticonSpinAttackCount", 5, 1, int.MaxValue);
+            panopticonSpinAttackDamage = new IntField(panopticonSpinInsigniaDiv, "Insignia damage", "panopticonSpinAttackDamage", 10, 0, int.MaxValue);
+            panopticonSpinAttackSize = new FloatField(panopticonSpinInsigniaDiv, "Insignia size", "panopticonSpinAttackSize", 5f, 0f, float.MaxValue);
+            panopticonSpinAttackDistance = new FloatField(panopticonSpinInsigniaDiv, "Circle radius", "panopticonSpinAttackDistance", 60f, 0f, float.MaxValue);
+            panopticonSpinAttackTurnSpeed = new FloatField(panopticonSpinInsigniaDiv, "Turn speed", "panopticonSpinAttackTurnSpeed", 60f, 0f, float.MaxValue);
+            panopticonSpinAttackActivateSpeed = new FloatField(panopticonSpinInsigniaDiv, "Activasion speed", "panopticonSpinAttackActivateSpeed", 0.5f, 0f, float.MaxValue);
+
+            new ConfigHeader(panopticonPanel, "Blue Orb Attack");
+            ConfigDivision panopticonBlueProjDiv = new ConfigDivision(panopticonPanel, "panopticonBlueProjDiv");
+            panopticonBlueProjToggle = new BoolField(panopticonPanel, "Enabled", "panopticonBlueProjToggle", true);
+            panopticonBlueProjToggle.onValueChange += (BoolField.BoolValueChangeEvent e) =>
+            {
+                panopticonBlueProjDiv.interactable = e.value;
+                dirtyField = true;
+            };
+            panopticonBlueProjToggle.TriggerValueChangeEvent();
+            panopticonBlueProjCount = new IntField(panopticonBlueProjDiv, "Projectile count", "panopticonBlueProjCount", 3, 1, int.MaxValue);
+            panopticonBlueProjDamage = new FloatField(panopticonBlueProjDiv, "Projectile damage", "panopticonBlueProjDiv", 5, 0, float.MaxValue);
+            panopticonBlueProjTurnSpeed = new FloatField(panopticonBlueProjDiv, "Projectile turn speed multiplier", "panopticonBlueProjTurnSpeed", 1f, 0f, float.MaxValue);
+            panopticonBlueProjInitialSpeed = new FloatField(panopticonBlueProjDiv, "Projectile initial speed", "panopticonBlueProjInitialSpeed", 0f, 0f, float.MaxValue);
 
             // IDOL
             new ConfigHeader(idolPanel, "Explode on break");
