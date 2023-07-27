@@ -223,15 +223,66 @@ namespace Ultrapain.Patches
             SetLineColor(ConfigManager.droneSentryBeamLineWarningColor.value);
         }
 
-        public void Update()
+        public float attackDelay = -1;
+        public bool homingTowardsPlayer = false;
+
+        Transform target;
+        Rigidbody rb;
+
+        private void Update()
         {
+            if(homingTowardsPlayer)
+            {
+                if(target == null)
+                    target = PlayerTracker.Instance.GetTarget();
+                if (rb == null)
+                    rb = GetComponent<Rigidbody>();
+
+                Quaternion to = Quaternion.LookRotation(target.position/* + MonoSingleton<PlayerTracker>.Instance.GetPlayerVelocity()*/ - transform.position);
+                transform.rotation = Quaternion.RotateTowards(transform.rotation, to, Time.deltaTime * ConfigManager.droneHomeTurnSpeed.value);
+                rb.velocity = transform.forward * rb.velocity.magnitude;
+            }
+            
             if(lr.enabled)
             {
                 lr.SetPosition(0, transform.position);
                 lr.SetPosition(1, transform.position + transform.forward * 1000);
             }
         }
+    }
 
-        public float attackDelay = -1;
+    class Drone_Death_Patch
+    {
+        static bool Prefix(Drone __instance, EnemyIdentifier ___eid)
+        {
+            if (___eid.enemyType != EnemyType.Drone || __instance.crashing)
+                return true;
+
+            DroneFlag flag = __instance.GetComponent<DroneFlag>();
+            if (flag == null)
+                return true;
+
+            if (___eid.hitter == "heavypunch" || ___eid.hitter == "punch")
+                return true;
+
+            flag.homingTowardsPlayer = true;
+            return true;
+        }
+    }
+
+    class Drone_GetHurt_Patch
+    {
+        static bool Prefix(Drone __instance, EnemyIdentifier ___eid, bool ___parried)
+        {
+            if((___eid.hitter == "shotgunzone" || ___eid.hitter == "punch") && !___parried)
+            {
+                DroneFlag flag = __instance.GetComponent<DroneFlag>();
+                if (flag == null)
+                    return true;
+                flag.homingTowardsPlayer = false;
+            }
+
+            return true;
+        }
     }
 }

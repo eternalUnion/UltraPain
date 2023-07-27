@@ -10,6 +10,8 @@ using System;
 using BepInEx.Configuration;
 using System.IO;
 using PluginConfig.API.Functionals;
+using System.Text;
+using static Ultrapain.ConfigManager;
 
 namespace Ultrapain
 {
@@ -58,6 +60,10 @@ namespace Ultrapain
         // MEME PANEL
         public static BoolField enrageSfxToggle;
         public static BoolField funnyDruidKnightSFXToggle;
+        public static BoolField fleshObamiumToggle;
+        public static StringField fleshObamiumName;
+        public static BoolField obamapticonToggle;
+        public static StringField obamapticonName;
 
         // PLAYER PANEL
         public static BoolField rocketBoostToggle;
@@ -142,6 +148,8 @@ namespace Ultrapain
         public static ConfigPanel v2SecondPanel;
         public static ConfigPanel sisyInstPanel;
         public static ConfigPanel leviathanPanel;
+        public static ConfigPanel panopticonPanel;
+        public static ConfigPanel idolPanel;
 
         // GLOBAL ENEMY CONFIG
         public static BoolField friendlyFireDamageOverrideToggle;
@@ -151,11 +159,14 @@ namespace Ultrapain
         public static FloatSliderField friendlyFireDamageOverrideMelee;
 
         // ENEMY STAT CONFIG
+        public static char resistanceSeparator = (char)1;
         public struct EidStatContainer
         {
             public FloatField health;
             public FloatField damage;
             public FloatField speed;
+            public StringField resistanceStr;
+            public Dictionary<string, float> resistanceDict;
 
             public void SetHidden(bool hidden)
             {
@@ -163,9 +174,59 @@ namespace Ultrapain
             }
         }
 
+        public enum HitterType
+        {
+            revolver,
+            coin,
+            shotgun,
+            shotgunzone,
+            nail,
+            harpoon,
+            sawblade,
+            railcannon,
+            drill,
+            cannonball,
+            punch,
+            heavypunch,
+            hook,
+            ground_slam,
+
+            explosion,
+            fire,
+            acid,
+            environment,
+            projectile
+        }
+        public static Dictionary<HitterType, string> hitterDisplayNames = new Dictionary<HitterType, string>()
+        {
+            { HitterType.revolver, "Revolver" },
+            { HitterType.coin, "Fistful of dollar" },
+            { HitterType.shotgun, "Shotgun pellet" },
+            { HitterType.shotgunzone, "Shotgun close" },
+            { HitterType.nail, "Nail" },
+            { HitterType.harpoon, "Magnet" },
+            { HitterType.sawblade, "Sawblade" },
+            { HitterType.railcannon, "Electric railcannon" },
+            { HitterType.drill, "Drill" },
+            { HitterType.cannonball, "Cannonball" },
+            { HitterType.punch, "Feedbacker" },
+            { HitterType.heavypunch, "Knuckleblaster" },
+            { HitterType.hook, "Whiplash hook" },
+            { HitterType.ground_slam, "Ground slam" },
+            { HitterType.explosion, "Explosion" },
+            { HitterType.fire, "Fire" },
+            { HitterType.acid, "Acid" },
+            { HitterType.environment, "Environment" },
+            { HitterType.projectile, "Projectile" },
+        };
+
         public static ConfigPanel eidStatEditorPanel;
         public static EnumField<EnemyType> eidStatEditorSelector;
         public static Dictionary<EnemyType, EidStatContainer> enemyStats = new Dictionary<EnemyType, EidStatContainer>();
+        public static EnumField<HitterType> eidResistanceSelector;
+        public static BoolField eidResistanceEnabled;
+        public static FloatField eidResistanceField;
+        public static ConfigHeader eidResistanceInfo;
 
         // CERBERUS
         public static BoolField cerberusDashToggle;
@@ -189,6 +250,8 @@ namespace Ultrapain
         public static ColorField droneSentryBeamLineNormalColor;
         public static ColorField droneSentryBeamLineWarningColor;
         public static FloatField droneSentryBeamLineIndicatorDelay;
+        public static BoolField droneHomeToggle;
+        public static FloatField droneHomeTurnSpeed;
 
         // FILTH
         public static BoolField filthExplodeToggle;
@@ -417,6 +480,41 @@ namespace Ultrapain
 
         public static IntField leviathanTailComboCount;
 
+        // PANOPTICON
+        public static BoolField panopticonFullPhase;
+        public static BoolField panopticonBalanceEyes;
+        public static BoolField panopticonBlackholeProj;
+        public static BoolField panopticonAxisBeam;
+        public static FloatField panopticonAxisBeamSizeMulti;
+
+        public static BoolField panopticonSpinAttackToggle;
+        public static IntField panopticonSpinAttackCount;
+        public static FloatField panopticonSpinAttackTurnSpeed;
+        public static FloatField panopticonSpinAttackActivateSpeed;
+        public static FloatField panopticonSpinAttackSize;
+        public static IntField panopticonSpinAttackDamage;
+        public static FloatField panopticonSpinAttackDistance;
+
+        public static BoolField panopticonBlueProjToggle;
+        public static IntField panopticonBlueProjCount;
+        public static FloatField panopticonBlueProjDamage;
+        public static FloatField panopticonBlueProjTurnSpeed;
+        public static FloatField panopticonBlueProjInitialSpeed;
+      
+        // IDOL
+        public static BoolField idolExplosionToggle;
+        public enum IdolExplosionType
+        {
+            Normal,
+            Big,
+            Ligthning,
+            Sisyphean,
+            Sand
+        }
+        public static EnumField<IdolExplosionType> idolExplodionType;
+        public static FloatField idolExplosionSizeMultiplier;
+        public static FloatField idolExplosionDamageMultiplier;
+        public static FloatSliderField idolExplosionEnemyDamagePercent;
 
         /////////// ADD MEEEE
         // GABRIEL SECOND
@@ -532,6 +630,18 @@ namespace Ultrapain
             {
                 dirtyField = true;
             };
+            fleshObamiumToggle = new BoolField(memePanel, "FLESH OBAMIUM", "fleshObamiumToggle", false);
+            fleshObamiumToggle.onValueChange += (BoolField.BoolValueChangeEvent e) =>
+            {
+                dirtyField = true;
+            };
+            fleshObamiumName = new StringField(memePanel, "FLESH OBAMIUM name", "fleshObamiumName", "FLESH OBAMIUM");
+            obamapticonToggle = new BoolField(memePanel, "OBAMAPTICON", "obamapticonToggle", false);
+            obamapticonToggle.onValueChange += (BoolField.BoolValueChangeEvent e) =>
+            {
+                dirtyField = true;
+            };
+            obamapticonName = new StringField(memePanel, "OBAMAPTICON name", "obamapticonName", "OBAMAPTICON");
 
             // PLAYER PANEL
             new ConfigHeader(playerPanel, "Rocket Boosting");
@@ -749,6 +859,7 @@ namespace Ultrapain
             schismPanel = new ConfigPanel(enemyPanel, "Schism", "schismPanel");
             soliderPanel = new ConfigPanel(enemyPanel, "Soldier", "soliderPanel");
             dronePanel = new ConfigPanel(enemyPanel, "Drone", "dronePanel");
+            idolPanel = new ConfigPanel(enemyPanel, "Idol", "idolPanel");
             streetCleanerPanel = new ConfigPanel(enemyPanel, "Streetcleaner", "streetCleanerPanel");
             virtuePanel = new ConfigPanel(enemyPanel, "Virtue", "virtuePanel");
             stalkerPanel = new ConfigPanel(enemyPanel, "Stalker", "stalkerPanel");
@@ -768,13 +879,14 @@ namespace Ultrapain
             new ConfigHeader(enemyPanel, "Prime Bosses");
             fleshPrisonPanel = new ConfigPanel(enemyPanel, "Flesh Prison", "fleshPrisonPanel");
             minosPrimePanel = new ConfigPanel(enemyPanel, "Minos Prime", "minosPrimePanel");
+            panopticonPanel = new ConfigPanel(enemyPanel, "Flesh Panopticon", "panopticonPanel");
 
             // GLOBAL ENEMY TWEAKS
             eidStatEditorPanel = new ConfigPanel(globalEnemyPanel, "Enemy stat editor", "eidStatEditorPanel");
 
-            eidStatEditorSelector = new EnumField<EnemyType>(eidStatEditorPanel, "Enemy", "eidStatEditorSelector", EnemyType.Filth);
+            eidStatEditorSelector = new EnumField<EnemyType>(eidStatEditorPanel, "Selected enemy", "eidStatEditorSelector", EnemyType.Filth);
             eidStatEditorSelector.SetEnumDisplayName(EnemyType.V2Second, "V2 Second");
-            eidStatEditorSelector.SetEnumDisplayName(EnemyType.Sisyphus, "Sisyphean Insurrectionist");
+            eidStatEditorSelector.SetEnumDisplayName(EnemyType.Sisyphus, "Sisyphean Ins.");
             eidStatEditorSelector.SetEnumDisplayName(EnemyType.SisyphusPrime, "Sisyphus Prime");
             eidStatEditorSelector.SetEnumDisplayName(EnemyType.CancerousRodent, "Cancerous Rodent");
             eidStatEditorSelector.SetEnumDisplayName(EnemyType.FleshPanopticon, "Flesh Panopticon");
@@ -783,29 +895,180 @@ namespace Ultrapain
             eidStatEditorSelector.SetEnumDisplayName(EnemyType.HideousMass, "Hideous Mass");
             eidStatEditorSelector.SetEnumDisplayName(EnemyType.MaliciousFace, "Malicious Face");
             eidStatEditorSelector.SetEnumDisplayName(EnemyType.Mandalore, "Druid Knight");
+            eidStatEditorSelector.SetEnumDisplayName(EnemyType.Minos, "Minos Corpse");
             eidStatEditorSelector.SetEnumDisplayName(EnemyType.MinosPrime, "Minos Prime");
             eidStatEditorSelector.SetEnumDisplayName(EnemyType.VeryCancerousRodent, "Very Cancerous Rodent");
             eidStatEditorSelector.SetEnumDisplayName(EnemyType.Wicked, "Something Wicked");
+            eidStatEditorSelector.SetEnumDisplayName(EnemyType.Turret, "Sentry");
+            
+            new ConfigHeader(eidStatEditorPanel, "Base Stat Editor");
+            
             foreach(EnemyType eid in Enum.GetValues(typeof(EnemyType)))
             {
                 EidStatContainer container = new EidStatContainer();
                 container.health = new FloatField(eidStatEditorPanel, "Health multiplier", $"eid_{eid}_health", 1f, 0.01f, float.MaxValue);
                 container.damage = new FloatField(eidStatEditorPanel, "Damage multiplier", $"eid_{eid}_damage", 1f, 0.01f, float.MaxValue);
                 container.speed = new FloatField(eidStatEditorPanel, "Speed multiplier", $"eid_{eid}_speed", 1f, 0.01f, float.MaxValue);
+                container.resistanceStr = new StringField(eidStatEditorPanel, "Resistance string", $"eid_{eid}_resistance", "", true);
+                container.resistanceStr.interactable = false;
+                container.resistanceStr.hidden = true;
+                container.resistanceDict = new Dictionary<string, float>();
+
+                string[] resistanceArr = container.resistanceStr.value.Split(resistanceSeparator);
+                if(resistanceArr.Length > 0 && !string.IsNullOrEmpty(resistanceArr[0]))
+                for(int i = 0; i < resistanceArr.Length; i++)
+                {
+                    string resistance = resistanceArr[i];
+                    i += 1;
+                    if(i >= resistanceArr.Length)
+                    {
+                        Debug.LogWarning($"Missing value for resistance {resistance} for enemy {eid}");
+                        break;
+                    }
+                    float resistanceCoefficiance = 1f;
+                    if (!float.TryParse(resistanceArr[i], out resistanceCoefficiance))
+                    {
+                        Debug.LogWarning($"Invalid value for resistance {resistance} for enemy {eid}");
+                        continue;
+                    }
+
+                    container.resistanceDict[resistance] = resistanceCoefficiance;
+                }
+
                 enemyStats.Add(eid, container);
             }
 
-            eidStatEditorSelector.onValueChange += (EnumField<EnemyType>.EnumValueChangeEvent e) =>
+            new ConfigHeader(eidStatEditorPanel, "Resistance Editor");
+            eidResistanceSelector = new EnumField<HitterType>(eidStatEditorPanel, "Damage type", "eidResistanceSelector", HitterType.revolver);
+            foreach(KeyValuePair<HitterType, string> pair in hitterDisplayNames)
             {
-                foreach (KeyValuePair<EnemyType, EidStatContainer> stats in enemyStats)
-                    stats.Value.SetHidden(stats.Key != e.value);
-            };
-            eidStatEditorSelector.TriggerValueChangeEvent();
+                eidResistanceSelector.SetEnumDisplayName(pair.Key, pair.Value);
+            }
+            eidResistanceEnabled = new BoolField(eidStatEditorPanel, "Enable resistance", "eidResistanceEnabler", false);
+            eidResistanceField = new FloatField(eidStatEditorPanel, "Resistance multiplier", "eidResistanceMultiplier", 1f, 0.1f, float.MaxValue);
+            eidResistanceInfo = new ConfigHeader(eidStatEditorPanel, "Current resistance:", 24, TextAnchor.UpperLeft);
+            
             ButtonField statResetButton = new ButtonField(eidStatEditorPanel, "Reset All Stats", "statResetButton");
             statResetButton.onClick += () =>
             {
                 foreach (EidStatContainer stat in enemyStats.Values)
+                {
                     stat.health.value = stat.damage.value = stat.speed.value = 1f;
+                    stat.resistanceDict.Clear();
+                    stat.resistanceStr.value = "";
+                }
+                eidResistanceEnabled.value = false;
+                eidResistanceField.interactable = false;
+                eidResistanceField.value = 1f;
+                SetResistanceInfoText(enemyStats[eidStatEditorSelector.value]);
+            };
+
+            void SetResistanceInfoText(EidStatContainer container)
+            {
+                string header = "Current resistance:";
+                foreach (KeyValuePair<string, float> pair in container.resistanceDict)
+                {
+                    if (Enum.TryParse(pair.Key.Replace(' ', '_'), out HitterType type))
+                    {
+                        header += $"\n{hitterDisplayNames[type]}: {pair.Value}";
+                    }
+                    else
+                    {
+                        header += $"\n{pair.Key}: {pair.Value}";
+                    }
+                }
+                eidResistanceInfo.text = header;
+            }
+
+            void SetResistanceString(EidStatContainer container)
+            {
+                StringBuilder str = new StringBuilder();
+                foreach(KeyValuePair<string, float> pair in container.resistanceDict)
+                {
+                    if (str.Length != 0)
+                        str.Append(resistanceSeparator);
+                    str.Append(pair.Key);
+                    str.Append(resistanceSeparator);
+                    str.Append(pair.Value.ToString());
+                }
+                container.resistanceStr.value = str.ToString();
+            }
+
+            eidStatEditorSelector.presetLoadPriority = 3;
+            eidStatEditorSelector.onValueChange += (EnumField<EnemyType>.EnumValueChangeEvent e) =>
+            {
+                foreach (KeyValuePair<EnemyType, EidStatContainer> stats in enemyStats)
+                    stats.Value.SetHidden(stats.Key != e.value);
+                EidStatContainer container = enemyStats[e.value];
+
+                if (container.resistanceDict.TryGetValue(eidResistanceSelector.value.ToString().Replace('_', ' '), out float val))
+                {
+                    eidResistanceEnabled.value = true;
+                    eidResistanceField.interactable = true;
+                    eidResistanceField.value = val;
+                }
+                else
+                {
+                    eidResistanceEnabled.value = false;
+                    eidResistanceField.value = 1f;
+                    eidResistanceField.interactable = false;
+                }
+
+                SetResistanceInfoText(container);
+            };
+            eidStatEditorSelector.TriggerValueChangeEvent();
+            eidResistanceSelector.presetLoadPriority = 2;
+            eidResistanceSelector.onValueChange += (EnumField<HitterType>.EnumValueChangeEvent e) =>
+            {
+                EidStatContainer container = enemyStats[eidStatEditorSelector.value];
+                if (container.resistanceDict.TryGetValue(e.value.ToString().Replace('_', ' '), out float val))
+                {
+                    eidResistanceEnabled.value = true;
+                    eidResistanceField.interactable = true;
+                    eidResistanceField.value = val;
+                }
+                else
+                {
+                    eidResistanceEnabled.value = false;
+                    eidResistanceField.interactable = false;
+                    eidResistanceField.value = 1f;
+                }
+            };
+            eidResistanceSelector.TriggerValueChangeEvent();
+            eidResistanceEnabled.presetLoadPriority = 1;
+            eidResistanceEnabled.onValueChange += (BoolField.BoolValueChangeEvent e) =>
+            {
+                EidStatContainer container = enemyStats[eidStatEditorSelector.value];
+                string currentHitter = eidResistanceSelector.value.ToString().Replace('_', ' ');
+
+                if (e.value)
+                {
+                    container.resistanceDict[currentHitter] = 1f;
+                    eidResistanceField.interactable = true;
+                    eidResistanceField.value = 1f;
+                }
+                else
+                {
+                    if (container.resistanceDict.ContainsKey(currentHitter))
+                        container.resistanceDict.Remove(currentHitter);
+                    eidResistanceField.interactable = false;
+                    eidResistanceField.value = 1f;
+                }
+
+                SetResistanceInfoText(container);
+                SetResistanceString(container);
+            };
+            eidResistanceField.onValueChange += (FloatField.FloatValueChangeEvent e) =>
+            {
+                if (!eidResistanceEnabled.value)
+                    return;
+
+                EidStatContainer container = enemyStats[eidStatEditorSelector.value];
+                string currentHitter = eidResistanceSelector.value.ToString().Replace('_', ' ');
+
+                container.resistanceDict[currentHitter] = e.value;
+                SetResistanceInfoText(container);
+                SetResistanceString(container);
             };
 
             new ConfigHeader(globalEnemyPanel, "Friendly Fire Damage Override");
@@ -893,7 +1156,17 @@ namespace Ultrapain
             droneSentryBeamLineNormalColor = new ColorField(droneSentryBeamLineDiv, "Normal color", "droneSentryBeamLineNormalColor", Drone_PlaySound_Patch.defaultLineColor);
             droneSentryBeamLineWarningColor = new ColorField(droneSentryBeamLineDiv, "Warning color", "droneSentryBeamLineWarningColor", new Color(1, 1, 1));
             droneSentryBeamLineIndicatorDelay = new FloatField(droneSentryBeamLineDiv, "Sentry beam warning delay", "droneSentryBeamLineIndicatorDelay", 0.5f, 0f, float.MaxValue);
-
+            
+            new ConfigHeader(dronePanel, "Homing Drone After Death");
+            droneHomeToggle = new BoolField(dronePanel, "Enabled", "droneHomeToggle", true);
+            droneHomeToggle.onValueChange += (BoolField.BoolValueChangeEvent e) =>
+            {
+                droneHomeTurnSpeed.interactable = e.value;
+                dirtyField = true;
+            };
+            droneHomeTurnSpeed = new FloatField(dronePanel, "Turn speed", "droneHomeTurnSpeed", 360f, 0f, float.MaxValue);
+            droneHomeToggle.TriggerValueChangeEvent();
+            
             // FILTH
             new ConfigHeader(filthPanel, "Explode On Hit");
             ConfigDivision filthExplosionDiv = new ConfigDivision(filthPanel, "filthExplosionDiv");
@@ -1560,6 +1833,88 @@ namespace Ultrapain
             leviathanChargeHauntRocketRiding = new BoolField(leviathanChargedDiv, "Target ridden rockets", "leviathanChargeHauntRocketRiding", true);
             new ConfigHeader(leviathanPanel, "Tail Swing Combo");
             leviathanTailComboCount = new IntField(leviathanPanel, "Tail swing count", "leviathanTailComboCount", 3, 1, int.MaxValue);
+
+            // PANOPTICON
+            panopticonFullPhase = new BoolField(panopticonPanel, "Full fight", "panopticonFullPhase", true);
+            panopticonFullPhase.onValueChange += (BoolField.BoolValueChangeEvent e) =>
+            {
+                dirtyField = true;
+            };
+            panopticonBalanceEyes = new BoolField(panopticonPanel, "Balance eyes", "panopticonBalanceEyes", true);
+            panopticonBalanceEyes.onValueChange += (BoolField.BoolValueChangeEvent e) =>
+            {
+                dirtyField = true;
+            };
+            panopticonBlackholeProj = new BoolField(panopticonPanel, "Throw projectile after blackhole", "panopticonBlackholeProj", true);
+            panopticonBlackholeProj.onValueChange += (BoolField.BoolValueChangeEvent e) =>
+            {
+                dirtyField = true;
+            };
+            panopticonAxisBeam = new BoolField(panopticonPanel, "3 axis insignia", "panopticonAxisBeam", true);
+            panopticonAxisBeam.onValueChange += (BoolField.BoolValueChangeEvent e) =>
+            {
+                dirtyField = true;
+                panopticonAxisBeamSizeMulti.interactable = e.value;
+            };
+            panopticonAxisBeamSizeMulti = new FloatField(panopticonPanel, "Axis beam size multiplier", "panopticonAxisBeamSizeMulti", 0.5f, 0.1f, float.MaxValue);
+            panopticonAxisBeam.TriggerValueChangeEvent();
+
+            new ConfigHeader(panopticonPanel, "Spin Insignia");
+            ConfigDivision panopticonSpinInsigniaDiv = new ConfigDivision(panopticonPanel, "panopticonSpinInsigniaDiv");
+            panopticonSpinAttackToggle = new BoolField(panopticonPanel, "Enabled", "panopticonSpinAttackToggle", true);
+            panopticonSpinAttackToggle.presetLoadPriority = 1;
+            panopticonSpinAttackToggle.onValueChange += (BoolField.BoolValueChangeEvent e) =>
+            {
+                panopticonSpinInsigniaDiv.interactable = e.value;
+                dirtyField = true;
+            };
+            panopticonSpinAttackToggle.TriggerValueChangeEvent();
+            panopticonSpinAttackCount = new IntField(panopticonSpinInsigniaDiv, "Insignia count", "panopticonSpinAttackCount", 5, 1, int.MaxValue);
+            panopticonSpinAttackDamage = new IntField(panopticonSpinInsigniaDiv, "Insignia damage", "panopticonSpinAttackDamage", 10, 0, int.MaxValue);
+            panopticonSpinAttackSize = new FloatField(panopticonSpinInsigniaDiv, "Insignia size", "panopticonSpinAttackSize", 5f, 0f, float.MaxValue);
+            panopticonSpinAttackDistance = new FloatField(panopticonSpinInsigniaDiv, "Circle radius", "panopticonSpinAttackDistance", 60f, 0f, float.MaxValue);
+            panopticonSpinAttackTurnSpeed = new FloatField(panopticonSpinInsigniaDiv, "Turn speed", "panopticonSpinAttackTurnSpeed", 60f, 0f, float.MaxValue);
+            panopticonSpinAttackActivateSpeed = new FloatField(panopticonSpinInsigniaDiv, "Activasion speed", "panopticonSpinAttackActivateSpeed", 0.5f, 0f, float.MaxValue);
+
+            new ConfigHeader(panopticonPanel, "Blue Orb Attack");
+            ConfigDivision panopticonBlueProjDiv = new ConfigDivision(panopticonPanel, "panopticonBlueProjDiv");
+            panopticonBlueProjToggle = new BoolField(panopticonPanel, "Enabled", "panopticonBlueProjToggle", true);
+            panopticonBlueProjToggle.onValueChange += (BoolField.BoolValueChangeEvent e) =>
+            {
+                panopticonBlueProjDiv.interactable = e.value;
+                dirtyField = true;
+            };
+            panopticonBlueProjToggle.TriggerValueChangeEvent();
+            panopticonBlueProjCount = new IntField(panopticonBlueProjDiv, "Projectile count", "panopticonBlueProjCount", 3, 1, int.MaxValue);
+            panopticonBlueProjDamage = new FloatField(panopticonBlueProjDiv, "Projectile damage", "panopticonBlueProjDiv", 5, 0, float.MaxValue);
+            panopticonBlueProjTurnSpeed = new FloatField(panopticonBlueProjDiv, "Projectile turn speed multiplier", "panopticonBlueProjTurnSpeed", 1f, 0f, float.MaxValue);
+            panopticonBlueProjInitialSpeed = new FloatField(panopticonBlueProjDiv, "Projectile initial speed", "panopticonBlueProjInitialSpeed", 0f, 0f, float.MaxValue);
+
+            // IDOL
+            new ConfigHeader(idolPanel, "Explode on break");
+            ConfigDivision idolExplosionDiv = new ConfigDivision(idolPanel, "idolExplosionDiv");
+            idolExplosionToggle = new BoolField(idolPanel, "Enabled", "idolExplosionToggle", true);
+            idolExplosionToggle.onValueChange += (BoolField.BoolValueChangeEvent e) =>
+            {
+                idolExplosionDiv.interactable = e.value;
+                dirtyField = true;
+            };
+            idolExplosionToggle.TriggerValueChangeEvent();
+            idolExplodionType = new EnumField<IdolExplosionType>(idolExplosionDiv, "Explosion type", "idolExplosionType", IdolExplosionType.Ligthning);
+            idolExplodionType.SetEnumDisplayName(IdolExplosionType.Normal, "Normal explosion");
+            idolExplodionType.SetEnumDisplayName(IdolExplosionType.Big, "Big explosion");
+            idolExplodionType.SetEnumDisplayName(IdolExplosionType.Ligthning, "Lightning bolt");
+            idolExplodionType.SetEnumDisplayName(IdolExplosionType.Sisyphean, "Sisyphus prime explosion");
+            idolExplodionType.SetEnumDisplayName(IdolExplosionType.Sand, "Sand explosion");
+            idolExplosionSizeMultiplier = new FloatField(idolExplosionDiv, "Explosion size multiplier", "idolExplosionSizeMultiplier", 1f, 0f, float.MaxValue);
+            idolExplosionDamageMultiplier = new FloatField(idolExplosionDiv, "Explosion damage multiplier", "idolExplosionDamageMultiplier", 1f, 0f, float.MaxValue);
+            idolExplodionType.onValueChange += (EnumField<IdolExplosionType>.EnumValueChangeEvent e) =>
+            {
+                idolExplosionSizeMultiplier.interactable = e.value != IdolExplosionType.Sand;
+                idolExplosionDamageMultiplier.interactable = e.value != IdolExplosionType.Sand;
+            };
+            idolExplodionType.TriggerValueChangeEvent();
+            idolExplosionEnemyDamagePercent = new FloatSliderField(idolExplosionDiv, "Enemy damage percent", "idolExplosionEnemyDamagePercent", new Tuple<float, float>(0f, 100f), 0f, 1);
 
             config.Flush();
             //config.LogDuplicateGUID();

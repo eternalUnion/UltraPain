@@ -41,6 +41,16 @@ namespace Ultrapain.Patches
             targetAud.pitch += deltaPitch;
         }
     }
+    
+    public class RotateOnSpawn : MonoBehaviour
+    {
+        public Quaternion targetRotation;
+
+        private void Awake()
+        {
+            transform.rotation = targetRotation;
+        }
+    }
 
     public class CommonActivator : MonoBehaviour
     {
