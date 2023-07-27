@@ -1533,7 +1533,7 @@ namespace Ultrapain
             virtueEnragedAttackType = new EnumField<VirtueAttackType>(virtueTweakEnragedAttackDiv, "Attack type", "virtueEnragedAttackType", VirtueAttackType.Insignia);
 
             ConfigDivision virtueEnragedInsigniaDiv = new ConfigDivision(virtueTweakEnragedAttackDiv, "virtueEnragedInsigniaDiv");
-            virtueEnragedInsigniaLastMulti = virtueNormalInsigniaLastMulti = new FloatField(virtueEnragedInsigniaDiv, "Insignia last multiplier", "virtueEnragedInsigniaLastMulti", 1f, 0.1f, float.MaxValue);
+            virtueEnragedInsigniaLastMulti = new FloatField(virtueEnragedInsigniaDiv, "Insignia last multiplier", "virtueEnragedInsigniaLastMulti", 1f, 0.1f, float.MaxValue);
             ConfigHeader virtueEnragedYInsigniaHeader = new ConfigHeader(virtueEnragedInsigniaDiv, "Vertical Insignia", 12);
             ConfigDivision virtueEnragedYInsigniaDiv = new ConfigDivision(virtueEnragedInsigniaDiv, "virtueEnragedYInsigniaDiv");
             virtueEnragedInsigniaYtoggle = new BoolField(virtueEnragedInsigniaDiv, "Enabled", "virtueEnragedInsigniaYtoggle", true);
