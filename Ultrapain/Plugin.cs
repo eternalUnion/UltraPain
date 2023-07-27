@@ -31,30 +31,16 @@ namespace Ultrapain
 
         public static Plugin instance;
 
-        public static ResourceLocationMap resourceMap = null;
+        private static bool addressableInit = false;
         public static T LoadObject<T>(string path)
         {
-            if (resourceMap == null)
+            if (!addressableInit)
             {
                 Addressables.InitializeAsync().WaitForCompletion();
-                resourceMap = Addressables.ResourceLocators.First() as ResourceLocationMap;
-            }
+                addressableInit = true;
 
-            Debug.Log($"Loading {path}");
-            KeyValuePair<object, IList<IResourceLocation>> obj;
-
-            try
-            {
-                obj = resourceMap.Locations.Where(
-                    (KeyValuePair<object, IList<IResourceLocation>> pair) =>
-                    {
-                        return (pair.Key as string) == path;
-                        //return (pair.Key as string).Equals(path, StringComparison.OrdinalIgnoreCase);
-                    }).First();
-            }
-            catch (Exception) { return default(T); }
-            
-            return Addressables.LoadAsset<T>(obj.Value.First()).WaitForCompletion();
+			}
+            return Addressables.LoadAssetAsync<T>(path).WaitForCompletion();
         }
 
         public static Vector3 PredictPlayerPosition(Collider safeCollider, float speedMod)
@@ -200,7 +186,7 @@ namespace Ultrapain
             // Assets/Prefabs/Attacks and Projectiles/Rocket.prefab
             rocket = LoadObject<GameObject>("Assets/Prefabs/Attacks and Projectiles/Rocket.prefab");
             // Assets/Prefabs/Attacks and Projectiles/RevolverBullet.prefab
-            revolverBullet = LoadObject<GameObject>("assets/prefabs/revolverbullet.prefab");
+            revolverBullet = LoadObject<GameObject>("Assets/Prefabs/Attacks and Projectiles/RevolverBullet.prefab");
             // Assets/Prefabs/Attacks and Projectiles/Hitscan Beams/Railcannon Beam Malicious.prefab
             maliciousCannonBeam = LoadObject<GameObject>("Assets/Prefabs/Attacks and Projectiles/Hitscan Beams/Railcannon Beam Malicious.prefab");
             // Assets/Prefabs/Attacks and Projectiles/Hitscan Beams/Revolver Beam.prefab
