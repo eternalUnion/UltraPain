@@ -26,6 +26,35 @@ namespace Ultrapain.Patches
             __instance.totalHealthModifier *= container.health.value;
             __instance.totalDamageModifier *= container.damage.value;
             __instance.totalSpeedModifier *= container.speed.value;
+
+            List<string> weakness = new List<string>();
+            List<float> weaknessMulti = new List<float>();
+            foreach(KeyValuePair<string, float> weaknessPair in container.resistanceDict)
+            {
+                weakness.Add(weaknessPair.Key);
+
+                int index = Array.IndexOf(__instance.weaknesses, weaknessPair.Key);
+                if(index >= 0)
+                {
+                    float defaultResistance = 1f / __instance.weaknessMultipliers[index];
+                    if (defaultResistance > weaknessPair.Value)
+                        weaknessMulti.Add(1f / defaultResistance);
+                    else
+                        weaknessMulti.Add(1f / weaknessPair.Value);
+                }
+                else
+                    weaknessMulti.Add(1f / weaknessPair.Value);
+            }
+            for(int i = 0; i < __instance.weaknessMultipliers.Length; i++)
+            {
+                if (container.resistanceDict.ContainsKey(__instance.weaknesses[i]))
+                    continue;
+                weakness.Add(__instance.weaknesses[i]);
+                weaknessMulti.Add(__instance.weaknessMultipliers[i]);
+            }
+
+            __instance.weaknesses = weakness.ToArray();
+            __instance.weaknessMultipliers = weaknessMulti.ToArray();
         }
     }
 
