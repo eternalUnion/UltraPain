@@ -10,6 +10,7 @@ using System;
 using BepInEx.Configuration;
 using System.IO;
 using PluginConfig.API.Functionals;
+using static Ultrapain.ConfigManager;
 
 namespace Ultrapain
 {
@@ -147,6 +148,7 @@ namespace Ultrapain
         public static ConfigPanel sisyInstPanel;
         public static ConfigPanel leviathanPanel;
         public static ConfigPanel panopticonPanel;
+        public static ConfigPanel idolPanel;
 
         // GLOBAL ENEMY CONFIG
         public static BoolField friendlyFireDamageOverrideToggle;
@@ -183,6 +185,8 @@ namespace Ultrapain
         public static BoolField droneExplosionBeamToggle;
         public static BoolField droneSentryBeamToggle;
         public static FloatField droneSentryBeamDamage;
+        public static BoolField droneHomeToggle;
+        public static FloatField droneHomeTurnSpeed;
 
         // FILTH
         public static BoolField filthExplodeToggle;
@@ -431,6 +435,21 @@ namespace Ultrapain
         public static FloatField panopticonBlueProjDamage;
         public static FloatField panopticonBlueProjTurnSpeed;
         public static FloatField panopticonBlueProjInitialSpeed;
+      
+        // IDOL
+        public static BoolField idolExplosionToggle;
+        public enum IdolExplosionType
+        {
+            Normal,
+            Big,
+            Ligthning,
+            Sisyphean,
+            Sand
+        }
+        public static EnumField<IdolExplosionType> idolExplodionType;
+        public static FloatField idolExplosionSizeMultiplier;
+        public static FloatField idolExplosionDamageMultiplier;
+        public static FloatSliderField idolExplosionEnemyDamagePercent;
 
         /////////// ADD MEEEE
         // GABRIEL SECOND
@@ -775,6 +794,7 @@ namespace Ultrapain
             schismPanel = new ConfigPanel(enemyPanel, "Schism", "schismPanel");
             soliderPanel = new ConfigPanel(enemyPanel, "Soldier", "soliderPanel");
             dronePanel = new ConfigPanel(enemyPanel, "Drone", "dronePanel");
+            idolPanel = new ConfigPanel(enemyPanel, "Idol", "idolPanel");
             streetCleanerPanel = new ConfigPanel(enemyPanel, "Streetcleaner", "streetCleanerPanel");
             virtuePanel = new ConfigPanel(enemyPanel, "Virtue", "virtuePanel");
             stalkerPanel = new ConfigPanel(enemyPanel, "Stalker", "stalkerPanel");
@@ -801,7 +821,7 @@ namespace Ultrapain
 
             eidStatEditorSelector = new EnumField<EnemyType>(eidStatEditorPanel, "Enemy", "eidStatEditorSelector", EnemyType.Filth);
             eidStatEditorSelector.SetEnumDisplayName(EnemyType.V2Second, "V2 Second");
-            eidStatEditorSelector.SetEnumDisplayName(EnemyType.Sisyphus, "Sisyphean Insurrectionist");
+            eidStatEditorSelector.SetEnumDisplayName(EnemyType.Sisyphus, "Sisyphean Ins.");
             eidStatEditorSelector.SetEnumDisplayName(EnemyType.SisyphusPrime, "Sisyphus Prime");
             eidStatEditorSelector.SetEnumDisplayName(EnemyType.CancerousRodent, "Cancerous Rodent");
             eidStatEditorSelector.SetEnumDisplayName(EnemyType.FleshPanopticon, "Flesh Panopticon");
@@ -810,9 +830,11 @@ namespace Ultrapain
             eidStatEditorSelector.SetEnumDisplayName(EnemyType.HideousMass, "Hideous Mass");
             eidStatEditorSelector.SetEnumDisplayName(EnemyType.MaliciousFace, "Malicious Face");
             eidStatEditorSelector.SetEnumDisplayName(EnemyType.Mandalore, "Druid Knight");
+            eidStatEditorSelector.SetEnumDisplayName(EnemyType.Minos, "Minos Corpse");
             eidStatEditorSelector.SetEnumDisplayName(EnemyType.MinosPrime, "Minos Prime");
             eidStatEditorSelector.SetEnumDisplayName(EnemyType.VeryCancerousRodent, "Very Cancerous Rodent");
             eidStatEditorSelector.SetEnumDisplayName(EnemyType.Wicked, "Something Wicked");
+            eidStatEditorSelector.SetEnumDisplayName(EnemyType.Turret, "Sentry");
             foreach(EnemyType eid in Enum.GetValues(typeof(EnemyType)))
             {
                 EidStatContainer container = new EidStatContainer();
@@ -890,6 +912,15 @@ namespace Ultrapain
             };
             droneSentryBeamToggle.TriggerValueChangeEvent();
             droneSentryBeamDamage = new FloatField(droneSentryBeamDiv, "Sentry beam damage", "droneSentryBeamDamage", 2f, 0f, float.MaxValue);
+            new ConfigHeader(dronePanel, "Homing Drone After Death");
+            droneHomeToggle = new BoolField(dronePanel, "Enabled", "droneHomeToggle", true);
+            droneHomeToggle.onValueChange += (BoolField.BoolValueChangeEvent e) =>
+            {
+                droneHomeTurnSpeed.interactable = e.value;
+                dirtyField = true;
+            };
+            droneHomeTurnSpeed = new FloatField(dronePanel, "Turn speed", "droneHomeTurnSpeed", 360f, 0f, float.MaxValue);
+            droneHomeToggle.TriggerValueChangeEvent();
 
             // FILTH
             new ConfigHeader(filthPanel, "Explode On Hit");
@@ -1613,6 +1644,32 @@ namespace Ultrapain
             panopticonBlueProjDamage = new FloatField(panopticonBlueProjDiv, "Projectile damage", "panopticonBlueProjDiv", 5, 0, float.MaxValue);
             panopticonBlueProjTurnSpeed = new FloatField(panopticonBlueProjDiv, "Projectile turn speed multiplier", "panopticonBlueProjTurnSpeed", 1f, 0f, float.MaxValue);
             panopticonBlueProjInitialSpeed = new FloatField(panopticonBlueProjDiv, "Projectile initial speed", "panopticonBlueProjInitialSpeed", 0f, 0f, float.MaxValue);
+
+            // IDOL
+            new ConfigHeader(idolPanel, "Explode on break");
+            ConfigDivision idolExplosionDiv = new ConfigDivision(idolPanel, "idolExplosionDiv");
+            idolExplosionToggle = new BoolField(idolPanel, "Enabled", "idolExplosionToggle", true);
+            idolExplosionToggle.onValueChange += (BoolField.BoolValueChangeEvent e) =>
+            {
+                idolExplosionDiv.interactable = e.value;
+                dirtyField = true;
+            };
+            idolExplosionToggle.TriggerValueChangeEvent();
+            idolExplodionType = new EnumField<IdolExplosionType>(idolExplosionDiv, "Explosion type", "idolExplosionType", IdolExplosionType.Ligthning);
+            idolExplodionType.SetEnumDisplayName(IdolExplosionType.Normal, "Normal explosion");
+            idolExplodionType.SetEnumDisplayName(IdolExplosionType.Big, "Big explosion");
+            idolExplodionType.SetEnumDisplayName(IdolExplosionType.Ligthning, "Lightning bolt");
+            idolExplodionType.SetEnumDisplayName(IdolExplosionType.Sisyphean, "Sisyphus prime explosion");
+            idolExplodionType.SetEnumDisplayName(IdolExplosionType.Sand, "Sand explosion");
+            idolExplosionSizeMultiplier = new FloatField(idolExplosionDiv, "Explosion size multiplier", "idolExplosionSizeMultiplier", 1f, 0f, float.MaxValue);
+            idolExplosionDamageMultiplier = new FloatField(idolExplosionDiv, "Explosion damage multiplier", "idolExplosionDamageMultiplier", 1f, 0f, float.MaxValue);
+            idolExplodionType.onValueChange += (EnumField<IdolExplosionType>.EnumValueChangeEvent e) =>
+            {
+                idolExplosionSizeMultiplier.interactable = e.value != IdolExplosionType.Sand;
+                idolExplosionDamageMultiplier.interactable = e.value != IdolExplosionType.Sand;
+            };
+            idolExplodionType.TriggerValueChangeEvent();
+            idolExplosionEnemyDamagePercent = new FloatSliderField(idolExplosionDiv, "Enemy damage percent", "idolExplosionEnemyDamagePercent", new Tuple<float, float>(0f, 100f), 0f, 1);
 
             config.Flush();
             //config.LogDuplicateGUID();

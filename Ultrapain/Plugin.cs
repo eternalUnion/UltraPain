@@ -26,7 +26,7 @@ namespace Ultrapain
     {
         public const string PLUGIN_GUID = "com.eternalUnion.ultraPain";
         public const string PLUGIN_NAME = "Ultra Pain";
-        public const string PLUGIN_VERSION = "1.0.2";
+        public const string PLUGIN_VERSION = "1.0.3";
 
         public static Plugin instance;
 
@@ -85,6 +85,8 @@ namespace Ultrapain
         public static GameObject lightningStrikeExplosive;
         public static GameObject lighningStrikeWindup;
         public static GameObject explosion;
+        public static GameObject bigExplosion;
+        public static GameObject sandExplosion;
         public static GameObject virtueInsignia;
         public static GameObject rocket;
         public static GameObject revolverBullet;
@@ -166,6 +168,10 @@ namespace Ultrapain
             ferryman = LoadObject<GameObject>("Assets/Prefabs/Enemies/Ferryman.prefab");
             // Assets/Prefabs/Attacks and Projectiles/Explosions/Explosion.prefab
             explosion = LoadObject<GameObject>("Assets/Prefabs/Attacks and Projectiles/Explosions/Explosion.prefab");
+            //Assets/Prefabs/Attacks and Projectiles/Explosions/Explosion Super.prefab
+            bigExplosion = LoadObject<GameObject>("Assets/Prefabs/Attacks and Projectiles/Explosions/Explosion Super.prefab");
+            //Assets/Prefabs/Attacks and Projectiles/Explosions/Explosion Sand.prefab
+            sandExplosion = LoadObject<GameObject>("Assets/Prefabs/Attacks and Projectiles/Explosions/Explosion Sand.prefab");
             // Assets/Prefabs/Attacks and Projectiles/Virtue Insignia.prefab
             virtueInsignia = LoadObject<GameObject>("Assets/Prefabs/Attacks and Projectiles/Virtue Insignia.prefab");
             // Assets/Prefabs/Attacks and Projectiles/Projectile Explosive HH.prefab
@@ -422,6 +428,11 @@ namespace Ultrapain
 
             harmonyTweaks.Patch(GetMethod<Drone>("Start"), postfix: GetHarmonyMethod(GetMethod<Drone_Start_Patch>("Postfix")));
             harmonyTweaks.Patch(GetMethod<Drone>("Shoot"), prefix: GetHarmonyMethod(GetMethod<Drone_Shoot_Patch>("Prefix")));
+            if(ConfigManager.droneHomeToggle.value)
+            {
+                harmonyTweaks.Patch(GetMethod<Drone>("Death"), prefix: GetHarmonyMethod(GetMethod<Drone_Death_Patch>("Prefix")));
+                harmonyTweaks.Patch(GetMethod<Drone>("GetHurt"), prefix: GetHarmonyMethod(GetMethod<Drone_GetHurt_Patch>("Prefix")));
+            }
 
             harmonyTweaks.Patch(GetMethod<Ferryman>("Start"), postfix: GetHarmonyMethod(GetMethod<FerrymanStart>("Postfix")));
             if(ConfigManager.ferrymanComboToggle.value)
@@ -577,6 +588,9 @@ namespace Ultrapain
                 harmonyTweaks.Patch(GetMethod<FleshPrison>("SpawnFleshDrones"), prefix: GetHarmonyMethod(GetMethod<Panopticon_SpawnFleshDrones>("Prefix")), postfix: GetHarmonyMethod(GetMethod<Panopticon_SpawnFleshDrones>("Postfix")));
             if (ConfigManager.panopticonBlueProjToggle.value)
                 harmonyTweaks.Patch(GetMethod<FleshPrison>("Update"), transpiler: GetHarmonyMethod(GetMethod<Panopticon_BlueProjectile>("Transpiler")));
+
+            if (ConfigManager.idolExplosionToggle.value)
+                harmonyTweaks.Patch(GetMethod<Idol>("Death"), postfix: GetHarmonyMethod(GetMethod<Idol_Death_Patch>("Postfix")));
 
             // ADDME
             /*
