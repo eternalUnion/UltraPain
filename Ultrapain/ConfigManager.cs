@@ -185,7 +185,20 @@ namespace Ultrapain
                 health.hidden = damage.hidden = speed.hidden = hidden;
             }
         }
+        
+        public static Dictionary<EnemyType, float> defaultEnemyHealth = new Dictionary<EnemyType, float>()
+        {
+            { EnemyType.MinosPrime, 2f }
+        };
+        public static Dictionary<EnemyType, float> defaultEnemySpeed = new Dictionary<EnemyType, float>()
+        {
+            { EnemyType.MinosPrime, 1.2f }
+        };
+        public static Dictionary<EnemyType, float> defaultEnemyDamage = new Dictionary<EnemyType, float>()
+        {
 
+        };
+        
         public enum HitterType
         {
             revolver,
@@ -404,11 +417,29 @@ namespace Ultrapain
         public static FloatField fleshPrisonSpinAttackDistance;
 
         // MINOS PRIME
+        public static BoolField minosPrimeEarlyPhaseToggle;
+        public static BoolField minosPrimeComboToggle;
         public static BoolField minosPrimeRandomTeleportToggle;
         public static FloatField minosPrimeRandomTeleportMinDistance;
         public static FloatField minosPrimeRandomTeleportMaxDistance;
         public static BoolField minosPrimeTeleportTrail;
         public static FloatField minosPrimeTeleportTrailDuration;
+
+        public static BoolField minosPrimeExplosionToggle;
+        public static FloatSliderField minosPrimeExplosionChance;
+        public static FloatField minosPrimeExplosionWindupSpeed;
+        public static FloatField minosPrimeExplosionSize;
+        public static FloatField minosPrimeExplosionDamage;
+
+        public static BoolField minosPrimeCrushAttackToggle;
+        public static FloatSliderField minosPrimeCrushAttackChance;
+
+        public static BoolField minosPrimeComboExplosiveEndToggle;
+        public static FloatSliderField minosPrimeComboExplosiveEndChance;
+
+        public static BoolField minosPrimeComboExplosionToggle;
+        public static FloatField minosPrimeComboExplosionSize;
+        public static FloatField minosPrimeComboExplosionDamage;
 
         // V2 - FIRST
         public static BoolField v2FirstKnuckleBlasterToggle;
@@ -957,9 +988,11 @@ namespace Ultrapain
             foreach(EnemyType eid in Enum.GetValues(typeof(EnemyType)))
             {
                 EidStatContainer container = new EidStatContainer();
-                container.health = new FloatField(eidStatEditorPanel, "Health multiplier", $"eid_{eid}_health", 1f, 0.01f, float.MaxValue);
-                container.damage = new FloatField(eidStatEditorPanel, "Damage multiplier", $"eid_{eid}_damage", 1f, 0.01f, float.MaxValue);
-                container.speed = new FloatField(eidStatEditorPanel, "Speed multiplier", $"eid_{eid}_speed", 1f, 0.01f, float.MaxValue);
+                
+                container.health = new FloatField(eidStatEditorPanel, "Health multiplier", $"eid_{eid}_health", defaultEnemyHealth.ContainsKey(eid) ? defaultEnemyHealth[eid] : 1f , 0.01f, float.MaxValue);
+                container.damage = new FloatField(eidStatEditorPanel, "Damage multiplier", $"eid_{eid}_damage", defaultEnemyDamage.ContainsKey(eid) ? defaultEnemyDamage[eid] : 1f, 0.01f, float.MaxValue);
+                container.speed = new FloatField(eidStatEditorPanel, "Speed multiplier", $"eid_{eid}_speed", defaultEnemySpeed.ContainsKey(eid) ? defaultEnemySpeed[eid] : 1f, 0.01f, float.MaxValue);
+                
                 container.resistanceStr = new StringField(eidStatEditorPanel, "Resistance string", $"eid_{eid}_resistance", "", true);
                 container.resistanceStr.interactable = false;
                 container.resistanceStr.hidden = true;
@@ -985,7 +1018,7 @@ namespace Ultrapain
 
                     container.resistanceDict[resistance] = resistanceCoefficiance;
                 }
-
+                
                 enemyStats.Add(eid, container);
             }
 
@@ -1641,6 +1674,8 @@ namespace Ultrapain
             fleshPrisonSpinAttackActivateSpeed = new FloatField(fleshPrionSpinAttackDiv, "Activasion speed", "fleshPrisonSpinAttackActivateSpeed", 0.5f, 0f, float.MaxValue);
 
             // MINOS PRIME
+            minosPrimeEarlyPhaseToggle = new BoolField(minosPrimePanel, "Start with phase 2", "minosPrimeEarlyPhaseToggle", true);
+            minosPrimeComboToggle = new BoolField(minosPrimePanel, "Faster combos", "minosPrimeComboToggle", true);
             new ConfigHeader(minosPrimePanel, "Random Teleport Before Shoot");
             ConfigDivision minosPrimeRandomTeleportDiv = new ConfigDivision(minosPrimePanel, "minosPrimeRandomTeleportDiv");
             minosPrimeRandomTeleportToggle = new BoolField(minosPrimePanel, "Enabled", "minosPrimeRandomTeleportToggle", true);
@@ -1660,7 +1695,52 @@ namespace Ultrapain
                 minosPrimeTeleportTrailDuration.hidden = e.value;
                 dirtyField = true;
             };
-            minosPrimeTeleportTrailDuration = new FloatField(minosPrimePanel, "Duration", "minosPrimeTeleportTrailDuration", 0.5f, 0, float.PositiveInfinity);
+            minosPrimeTeleportTrailDuration = new FloatField(minosPrimePanel, "Duration", "minosPrimeTeleportTrailDuration", 1f, 0, float.PositiveInfinity);
+
+            new ConfigHeader(minosPrimePanel, "Combo Explosive Finish");
+            minosPrimeComboExplosionToggle = new BoolField(minosPrimePanel, "Enabled", "minosPrimeComboExplosionToggle", true);
+            minosPrimeComboExplosionSize = new FloatField(minosPrimePanel, "Explosion size multiplier", "minosPrimeComboExplosionSize", 1f, 0f, float.MaxValue);
+            minosPrimeComboExplosionDamage = new FloatField(minosPrimePanel, "Explosion damage multiplier", "minosPrimeComboExplosionDamage", 1f, 0f, float.MaxValue);
+            minosPrimeComboExplosionToggle.onValueChange += (BoolField.BoolValueChangeEvent e) =>
+            {
+                minosPrimeComboExplosionSize.interactable = e.value;
+                minosPrimeComboExplosionDamage.interactable = e.value;
+            };
+            minosPrimeComboExplosionToggle.TriggerValueChangeEvent();
+
+            new ConfigHeader(minosPrimePanel, "Big Explosion Attack");
+            minosPrimeExplosionToggle = new BoolField(minosPrimePanel, "Enabled", "minosPrimeExplosionToggle", true);
+            minosPrimeExplosionChance = new FloatSliderField(minosPrimePanel, "Percent chance", "minosPrimeExplosionChance", new Tuple<float, float>(0, 100), 50, 1);
+            minosPrimeExplosionWindupSpeed = new FloatField(minosPrimePanel, "Windup speed", "minosPrimeExplosionWindupSpeed", 5f, 1f, float.MaxValue);
+            minosPrimeExplosionSize = new FloatField(minosPrimePanel, "Explosion size multiplier", "minosPrimeExplosionSize", 2f, 0f, float.MaxValue);
+            minosPrimeExplosionDamage = new FloatField(minosPrimePanel, "Explosion damage multiplier", "minosPrimeExplosionDamage", 1f, 0f, float.MaxValue);
+            minosPrimeExplosionToggle.onValueChange += (BoolField.BoolValueChangeEvent e) =>
+            {
+                minosPrimeExplosionChance.interactable = e.value;
+                minosPrimeExplosionSize.interactable = e.value;
+                minosPrimeExplosionDamage.interactable = e.value;
+            };
+            minosPrimeExplosionToggle.TriggerValueChangeEvent();
+
+            new ConfigHeader(minosPrimePanel, "Crush Attack");
+            minosPrimeCrushAttackToggle = new BoolField(minosPrimePanel, "Enabled", "minosPrimeCrushAttackToggle", true);
+            minosPrimeCrushAttackToggle.onValueChange += (BoolField.BoolValueChangeEvent e) =>
+            {
+                dirtyField = true;
+                minosPrimeCrushAttackChance.interactable = e.value;
+            };
+            minosPrimeCrushAttackChance = new FloatSliderField(minosPrimePanel, "Chance", "minosPrimeCrushAttackChance", new Tuple<float, float>(0, 100), 50);
+            minosPrimeCrushAttackToggle.TriggerValueChangeEvent();
+
+            new ConfigHeader(minosPrimePanel, "End Combo With Dropkick");
+            minosPrimeComboExplosiveEndToggle = new BoolField(minosPrimePanel, "Enabled", "minosPrimeComboExplosiveEndToggle", true);
+            minosPrimeComboExplosiveEndToggle.onValueChange += (BoolField.BoolValueChangeEvent e) =>
+            {
+                dirtyField = true;
+                minosPrimeComboExplosiveEndChance.interactable = e.value;
+            };
+            minosPrimeComboExplosiveEndChance = new FloatSliderField(minosPrimePanel, "Chance", "minosPrimeComboExplosiveEndChance", new Tuple<float, float>(0, 100), 50);
+            minosPrimeComboExplosiveEndToggle.TriggerValueChangeEvent();
 
             // V2 - FIRST
             new ConfigHeader(v2FirstPanel, "Knuckleblaster");
