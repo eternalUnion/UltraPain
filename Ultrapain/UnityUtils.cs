@@ -133,5 +133,37 @@ namespace Ultrapain
 
             return targetEnemies;
         }
+        
+        public static T GetRandomIntWeightedItem<T>(IEnumerable<T> itemsEnumerable, Func<T, int> weightKey)
+        {
+            var items = itemsEnumerable.ToList();
+
+            var totalWeight = items.Sum(x => weightKey(x));
+            var randomWeightedIndex = UnityEngine.Random.RandomRangeInt(0, totalWeight);
+            var itemWeightedIndex = 0;
+            foreach (var item in items)
+            {
+                itemWeightedIndex += weightKey(item);
+                if (randomWeightedIndex < itemWeightedIndex)
+                    return item;
+            }
+            throw new ArgumentException("Collection count and weights must be greater than 0");
+        }
+
+        public static T GetRandomFloatWeightedItem<T>(IEnumerable<T> itemsEnumerable, Func<T, float> weightKey)
+        {
+            var items = itemsEnumerable.ToList();
+
+            var totalWeight = items.Sum(x => weightKey(x));
+            var randomWeightedIndex = UnityEngine.Random.Range(0, totalWeight);
+            var itemWeightedIndex = 0f;
+            foreach (var item in items)
+            {
+                itemWeightedIndex += weightKey(item);
+                if (randomWeightedIndex < itemWeightedIndex)
+                    return item;
+            }
+            throw new ArgumentException("Collection count and weights must be greater than 0");
+        }
     }
 }

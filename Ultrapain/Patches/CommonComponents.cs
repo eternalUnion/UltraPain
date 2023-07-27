@@ -18,6 +18,40 @@ namespace Ultrapain.Patches
         }
     }*/
 
+    public class CommonLinearScaler : MonoBehaviour
+    {
+        public Transform targetTransform;
+        public float scaleSpeed = 1f;
+
+        void Update()
+        {
+            float deltaSize = Time.deltaTime * scaleSpeed;
+            targetTransform.localScale = new Vector3(targetTransform.localScale.x + deltaSize, targetTransform.localScale.y + deltaSize, targetTransform.localScale.y + deltaSize);
+        }
+    }
+
+    public class CommonAudioPitchScaler : MonoBehaviour
+    {
+        public AudioSource targetAud;
+        public float scaleSpeed = 1f;
+
+        void Update()
+        {
+            float deltaPitch = Time.deltaTime * scaleSpeed;
+            targetAud.pitch += deltaPitch;
+        }
+    }
+    
+    public class RotateOnSpawn : MonoBehaviour
+    {
+        public Quaternion targetRotation;
+
+        private void Awake()
+        {
+            transform.rotation = targetRotation;
+        }
+    }
+
     public class CommonActivator : MonoBehaviour
     {
         public int originalId;
