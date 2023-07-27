@@ -253,6 +253,15 @@ namespace Ultrapain
         public static FloatField eidResistanceField;
         public static ConfigHeader eidResistanceInfo;
 
+        // SCREWDRIVER
+        public static BoolField screwDriverSplitToggle;
+        public static IntField screwDriverCoinSplitCount;
+        public static IntField screwDriverGrenadeSplitCount;
+
+        public static BoolField screwDriverHomeToggle;
+        public static BoolField screwDriverHomeDestroyMagnets;
+        public static FloatField screwDriverHomePierceDamage;
+
         // CERBERUS
         public static BoolField cerberusDashToggle;
         public static IntField cerberusTotalDashCount;
@@ -751,6 +760,31 @@ namespace Ultrapain
             };
             grenadeBoostStylePoints = new IntField(grenadeBoostDiv, "Style points", "grenadeBoostStylePoints", 10, 0, int.MaxValue);
 
+            // SCREWDRIVER
+            new ConfigHeader(playerPanel, "Screw Driver Splitting");
+            ConfigDivision screwDriverSplitDiv = new ConfigDivision(playerPanel, "screwDriverSplitDiv");
+            screwDriverSplitToggle = new BoolField(playerPanel, "Enabled", "screwDriverSplitToggle", true);
+            screwDriverSplitToggle.onValueChange += (BoolField.BoolValueChangeEvent e) =>
+            {
+                screwDriverSplitDiv.interactable = e.value;
+                dirtyField = true;
+            };
+            screwDriverSplitToggle.TriggerValueChangeEvent();
+            screwDriverCoinSplitCount = new IntField(screwDriverSplitDiv, "Coin split count", "screwDriverCoinSplitCount", 5, 2, int.MaxValue);
+            screwDriverGrenadeSplitCount = new IntField(screwDriverSplitDiv, "Grenade split count", "screwDriverGrenadeSplitCount", 5);
+
+            new ConfigHeader(playerPanel, "Screw Driver Home To Magnet Enemies");
+            ConfigDivision screwDriverHomeDiv = new ConfigDivision(playerPanel, "screwDriverHomeDiv");
+            screwDriverHomeToggle = new BoolField(playerPanel, "Enabled", "screwDriverHomeToggle", true);
+            screwDriverHomeToggle.onValueChange += (BoolField.BoolValueChangeEvent e) =>
+            {
+                screwDriverHomeDiv.interactable = e.value;
+                dirtyField = true;
+            };
+            screwDriverHomeToggle.TriggerValueChangeEvent();
+            screwDriverHomeDestroyMagnets = new BoolField(screwDriverHomeDiv, "Destroy magnets on attach", "screwDriverHomeDestroyMagnets", true);
+            screwDriverHomePierceDamage = new FloatField(screwDriverHomeDiv, "Pierce damage", "screwDriverHomePierceDamage", 2f, 0f, float.MaxValue);
+                                                  
             new ConfigHeader(playerPanel, "Orbital Strike", 26);
             new ConfigHeader(playerPanel, "(Tweaks for coin-knuckleblaster)", 16);
             ConfigDivision orbStrikeDiv = new ConfigDivision(playerPanel, "orbStrikeDiv");
@@ -904,7 +938,7 @@ namespace Ultrapain
             orbStrikeMaliciousCannonExplosion.TriggerValueChangeEvent();
             orbStrikeMaliciousCannonExplosionSizeMultiplier = new FloatField(orbStrikeMaliciousCannonExplosionDiv, "Size multiplier", "orbStrikeMaliciousCannonExplosionSizeMultiplier", 1.3f, 0f, float.MaxValue);
             orbStrikeMaliciousCannonExplosionDamageMultiplier = new FloatField(orbStrikeMaliciousCannonExplosionDiv, "Damage multiplier", "orbStrikeMaliciousCannonExplosionDamageMultiplier", 1f, 0f, float.MaxValue);
-
+            
             new ConfigHeader(orbStrikeDiv, "Malicious Beam Chargeback");
             FormattedStringBuilder maliciousChargebackBuilder = new FormattedStringBuilder();
             maliciousChargebackBuilder.currentFormat.color = new Color(0xff / 255f, 0xa5 / 255f, 0);
@@ -938,7 +972,7 @@ namespace Ultrapain
             };
             sentryChargebackStylePoint = new IntField(orbStrikeDiv, "Style point", "sentryChargebackStylePoint", 100, 0, int.MaxValue);
             sentryChargebackExtraBeamCount = new IntField(orbStrikeDiv, "Beam split count", "sentryChargebackExtraBeamCount", 5, 0, int.MaxValue);
-
+            
             // ENEMY PANEL
             globalEnemyPanel = new ConfigPanel(enemyPanel, "Global enemy tweaks", "globalEnemyPanel");
             new ConfigHeader(enemyPanel, "Common Enemies");

@@ -96,7 +96,7 @@ namespace Ultrapain
             return null;
         }
 
-        public static List<Tuple<EnemyIdentifier, float>> GetClosestEnemies(Vector3 sourcePosition, int enemyCount, bool doNoCollideWithPlayer)
+        public static List<Tuple<EnemyIdentifier, float>> GetClosestEnemies(Vector3 sourcePosition, int enemyCount, Func<EnemyIdentifier, bool> validator)
         {
             List<Tuple<EnemyIdentifier, float>> targetEnemies = new List<Tuple<EnemyIdentifier, float>>();
 
@@ -112,7 +112,7 @@ namespace Ultrapain
                     if (Physics.Raycast(sourcePosition, enemy.transform.position - sourcePosition, out RaycastHit hit, Vector3.Distance(sourcePosition, enemy.transform.position) - 0.5f, envLayer))
                         continue;
 
-                    if (doNoCollideWithPlayer && NewMovement.Instance.playerCollider.Raycast(new Ray(sourcePosition, enemy.transform.position - sourcePosition), out RaycastHit hit2, float.MaxValue))
+                    if (!validator(eid))
                         continue;
 
                     if (targetEnemies.Count == 0)

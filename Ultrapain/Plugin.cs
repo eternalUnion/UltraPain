@@ -101,6 +101,7 @@ namespace Ultrapain
         public static GameObject explosionWaveKnuckleblaster;
         public static GameObject chargeEffect;
         public static GameObject maliciousFaceProjectile;
+        public static GameObject coin;
         public static GameObject sisyphusDestroyExplosion;
 
         //public static GameObject idol;
@@ -217,6 +218,8 @@ namespace Ultrapain
             ricochetSfx = LoadObject<GameObject>("Assets/Particles/SoundBubbles/Ricochet.prefab");
             //Assets/Particles/Flashes/Flash.prefab
             parryableFlash = LoadObject<GameObject>("Assets/Particles/Flashes/Flash.prefab");
+            //Assets/Prefabs/Attacks and Projectiles/Coin.prefab
+            coin = LoadObject<GameObject>("Assets/Prefabs/Attacks and Projectiles/Coin.prefab");
             //Assets/Materials/GabrielFake.mat
             gabrielFakeMat = LoadObject<Material>("Assets/Materials/GabrielFake.mat");
             //Assets/Prefabs/Enemies/Turret.prefab
@@ -657,6 +660,12 @@ namespace Ultrapain
 
                 harmonyTweaks.Patch(GetMethod<Explosion>("Collide"), prefix: GetHarmonyMethod(GetMethod<Explosion_CollideOrbital>("Prefix")));
             }
+
+            harmonyTweaks.Patch(GetMethod<Harpoon>("Start"), postfix: GetHarmonyMethod(GetMethod<Harpoon_Start>("Postfix")));
+            if(ConfigManager.screwDriverHomeToggle.value)
+                harmonyTweaks.Patch(GetMethod<Harpoon>("Punched"), postfix: GetHarmonyMethod(GetMethod<Harpoon_Punched>("Postfix")));
+            if(ConfigManager.screwDriverSplitToggle.value)
+                harmonyTweaks.Patch(GetMethod<Harpoon>("OnTriggerEnter"), prefix: GetHarmonyMethod(GetMethod<Harpoon_OnTriggerEnter_Patch>("Prefix")));
         }
 
         private static void PatchAllMemes()
