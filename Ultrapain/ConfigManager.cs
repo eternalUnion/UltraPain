@@ -388,6 +388,7 @@ namespace Ultrapain
         public static ConfigPanel v2SecondPanel;
         public static ConfigPanel sisyInstPanel;
         public static ConfigPanel leviathanPanel;
+        public static ConfigPanel somethingWickedPanel;
         public static ConfigPanel panopticonPanel;
         public static ConfigPanel idolPanel;
 
@@ -770,6 +771,10 @@ namespace Ultrapain
         public static BoolField leviathanChargeHauntRocketRiding;
 
         public static IntField leviathanTailComboCount;
+
+        // SOMETHING WICKED
+        public static BoolField somethingWickedSpear;
+        public static BoolField somethingWickedSpawnOn43;
 
         // PANOPTICON
         public static BoolField panopticonFullPhase;
@@ -1490,6 +1495,7 @@ namespace Ultrapain
             globalEnemyPanel = new ConfigPanel(enemyPanel, "Global enemy tweaks", "globalEnemyPanel");
             new ConfigHeader(enemyPanel, "Common Enemies");
             filthPanel = new ConfigPanel(enemyPanel, "Filth", "filthPanel");
+            somethingWickedPanel = new ConfigPanel(enemyPanel, "Something Wicked", "somethingWickedPanel");
             strayPanel = new ConfigPanel(enemyPanel, "Stray", "strayPanel");
             schismPanel = new ConfigPanel(enemyPanel, "Schism", "schismPanel");
             soliderPanel = new ConfigPanel(enemyPanel, "Soldier", "soliderPanel");
@@ -2525,6 +2531,20 @@ namespace Ultrapain
             leviathanChargeHauntRocketRiding = new BoolField(leviathanChargedDiv, "Target ridden rockets", "leviathanChargeHauntRocketRiding", true);
             new ConfigHeader(leviathanPanel, "Tail Swing Combo");
             leviathanTailComboCount = new IntField(leviathanPanel, "Tail swing count", "leviathanTailComboCount", 3, 1, int.MaxValue);
+
+            // SOMETHING WICKED
+            somethingWickedSpear = new BoolField(somethingWickedPanel, "Throw hook", "somethingWickedSpear", true);
+            somethingWickedSpear.onValueChange += (BoolField.BoolValueChangeEvent e) =>
+            {
+                dirtyField = true;
+            };
+            somethingWickedSpawnOn43 = new BoolField(somethingWickedPanel, "Spawn on 4-3", "somethingWickedSpawnOn43", true);
+            somethingWickedSpawnOn43.onValueChange += (BoolField.BoolValueChangeEvent e) =>
+            {
+                dirtyField = true;
+            };
+            // hehe
+            somethingWickedSpawnOn43.hidden = true;
 
             // PANOPTICON
             panopticonFullPhase = new BoolField(panopticonPanel, "Full fight", "panopticonFullPhase", true);

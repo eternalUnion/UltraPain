@@ -102,6 +102,7 @@ namespace Ultrapain
         public static GameObject explosionWaveKnuckleblaster;
         public static GameObject chargeEffect;
         public static GameObject maliciousFaceProjectile;
+        public static GameObject hideousMassSpear;
         public static GameObject coin;
         public static GameObject sisyphusDestroyExplosion;
 
@@ -109,6 +110,7 @@ namespace Ultrapain
         public static GameObject ferryman;
         public static GameObject minosPrime;
         //public static GameObject maliciousFace;
+        public static GameObject somethingWicked;
         public static Turret turret;
 
         public static GameObject turretFinalFlash;
@@ -229,6 +231,10 @@ namespace Ultrapain
             ricochetSfx = LoadObject<GameObject>("Assets/Particles/SoundBubbles/Ricochet.prefab");
             //Assets/Particles/Flashes/Flash.prefab
             parryableFlash = LoadObject<GameObject>("Assets/Particles/Flashes/Flash.prefab");
+            //Assets/Prefabs/Attacks and Projectiles/Spear.prefab
+            hideousMassSpear = LoadObject<GameObject>("Assets/Prefabs/Attacks and Projectiles/Spear.prefab");
+            //Assets/Prefabs/Enemies/Wicked.prefab
+            somethingWicked = LoadObject<GameObject>("Assets/Prefabs/Enemies/Wicked.prefab");
             //Assets/Textures/UI/SingleRevolver.png
             blueRevolverSprite = LoadObject<Sprite>("Assets/Textures/UI/SingleRevolver.png");
             //Assets/Textures/UI/RevolverSpecial.png
@@ -632,6 +638,17 @@ namespace Ultrapain
             harmonyTweaks.Patch(GetMethod<LeviathanHead>("ProjectileBurst"), prefix: GetHarmonyMethod(GetMethod<Leviathan_ProjectileBurst>("Prefix")));
             harmonyTweaks.Patch(GetMethod<LeviathanHead>("ProjectileBurstStart"), prefix: GetHarmonyMethod(GetMethod<Leviathan_ProjectileBurstStart>("Prefix")));
             harmonyTweaks.Patch(GetMethod<LeviathanHead>("FixedUpdate"), prefix: GetHarmonyMethod(GetMethod<Leviathan_FixedUpdate>("Prefix")));
+
+            if (ConfigManager.somethingWickedSpear.value)
+            {
+                harmonyTweaks.Patch(GetMethod<Wicked>("Start"), postfix: GetHarmonyMethod(GetMethod<SomethingWicked_Start>("Postfix")));
+                harmonyTweaks.Patch(GetMethod<Wicked>("GetHit"), postfix: GetHarmonyMethod(GetMethod<SomethingWicked_GetHit>("Postfix")));
+            }
+            if(ConfigManager.somethingWickedSpawnOn43.value)
+            {
+                harmonyTweaks.Patch(GetMethod<ObjectActivator>("Activate"), prefix: GetHarmonyMethod(GetMethod<ObjectActivator_Activate>("Prefix")));
+                harmonyTweaks.Patch(GetMethod<Wicked>("GetHit"), postfix: GetHarmonyMethod(GetMethod<JokeWicked_GetHit>("Postfix")));
+            }
 
             if (ConfigManager.panopticonFullPhase.value)
                 harmonyTweaks.Patch(GetMethod<FleshPrison>("Start"), postfix: GetHarmonyMethod(GetMethod<Panopticon_Start>("Postfix")));
