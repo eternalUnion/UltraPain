@@ -22,12 +22,12 @@ using PluginConfig.API;
 namespace Ultrapain
 {
     [BepInPlugin(PLUGIN_GUID, PLUGIN_NAME, PLUGIN_VERSION)]
-    [BepInDependency("com.eternalUnion.pluginConfigurator", "1.3.0")]
+    [BepInDependency("com.eternalUnion.pluginConfigurator", "1.6.0")]
     public class Plugin : BaseUnityPlugin
     {
         public const string PLUGIN_GUID = "com.eternalUnion.ultraPain";
         public const string PLUGIN_NAME = "Ultra Pain";
-        public const string PLUGIN_VERSION = "1.0.3";
+        public const string PLUGIN_VERSION = "1.1.0";
 
         public static Plugin instance;
 
