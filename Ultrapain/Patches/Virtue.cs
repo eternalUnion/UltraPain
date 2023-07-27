@@ -65,7 +65,7 @@ namespace Ultrapain.Patches
             if (___eid.enemyType != EnemyType.Virtue)
                 return true;
 
-            GameObject createInsignia(Drone __instance, ref EnemyIdentifier ___eid, ref int ___difficulty, ref Transform ___target, int damage)
+            GameObject createInsignia(Drone __instance, ref EnemyIdentifier ___eid, ref int ___difficulty, ref Transform ___target, int damage, float lastMultiplier)
             {
                 GameObject gameObject = GameObject.Instantiate<GameObject>(__instance.projectile, ___target.transform.position, Quaternion.identity);
                 VirtueInsignia component = gameObject.GetComponent<VirtueInsignia>();
@@ -73,6 +73,7 @@ namespace Ultrapain.Patches
                 component.parentDrone = __instance;
                 component.hadParent = true;
                 component.damage = damage;
+                component.explosionLength *= lastMultiplier;
                 __instance.chargeParticle.Stop(false, ParticleSystemStopBehavior.StopEmittingAndClear);
                 if (__instance.enraged)
                 {
@@ -116,7 +117,8 @@ namespace Ultrapain.Patches
                 if (xAxis)
                 {
                     GameObject obj = createInsignia(__instance, ref ___eid, ref ___difficulty, ref ___target,
-                        (__instance.enraged) ? ConfigManager.virtueEnragedInsigniaXdamage.value : ConfigManager.virtueNormalInsigniaXdamage.value);
+                        (__instance.enraged) ? ConfigManager.virtueEnragedInsigniaXdamage.value : ConfigManager.virtueNormalInsigniaXdamage.value,
+                        (__instance.enraged) ? ConfigManager.virtueEnragedInsigniaLastMulti.value : ConfigManager.virtueNormalInsigniaLastMulti.value);
                     float size = (__instance.enraged) ? ConfigManager.virtueEnragedInsigniaXsize.value : ConfigManager.virtueNormalInsigniaXsize.value;
                     obj.transform.localScale = new Vector3(size, obj.transform.localScale.y, size);
                     obj.transform.Rotate(new Vector3(90f, 0, 0));
@@ -124,14 +126,16 @@ namespace Ultrapain.Patches
                 if (yAxis)
                 {
                     GameObject obj = createInsignia(__instance, ref ___eid, ref ___difficulty, ref ___target,
-                        (__instance.enraged) ? ConfigManager.virtueEnragedInsigniaYdamage.value : ConfigManager.virtueNormalInsigniaYdamage.value);
+                        (__instance.enraged) ? ConfigManager.virtueEnragedInsigniaYdamage.value : ConfigManager.virtueNormalInsigniaYdamage.value,
+                        (__instance.enraged) ? ConfigManager.virtueEnragedInsigniaLastMulti.value : ConfigManager.virtueNormalInsigniaLastMulti.value);
                     float size = (__instance.enraged) ? ConfigManager.virtueEnragedInsigniaYsize.value : ConfigManager.virtueNormalInsigniaYsize.value;
                     obj.transform.localScale = new Vector3(size, obj.transform.localScale.y, size);
                 }
                 if (zAxis)
                 {
                     GameObject obj = createInsignia(__instance, ref ___eid, ref ___difficulty, ref ___target,
-                        (__instance.enraged) ? ConfigManager.virtueEnragedInsigniaZdamage.value : ConfigManager.virtueNormalInsigniaZdamage.value);
+                        (__instance.enraged) ? ConfigManager.virtueEnragedInsigniaZdamage.value : ConfigManager.virtueNormalInsigniaZdamage.value,
+                        (__instance.enraged) ? ConfigManager.virtueEnragedInsigniaLastMulti.value : ConfigManager.virtueNormalInsigniaLastMulti.value);
                     float size = (__instance.enraged) ? ConfigManager.virtueEnragedInsigniaZsize.value : ConfigManager.virtueNormalInsigniaZsize.value;
                     obj.transform.localScale = new Vector3(size, obj.transform.localScale.y, size);
                     obj.transform.Rotate(new Vector3(0, 0, 90f));
