@@ -10,6 +10,7 @@ using System;
 using BepInEx.Configuration;
 using System.IO;
 using PluginConfig.API.Functionals;
+using System.Text;
 using static Ultrapain.ConfigManager;
 
 namespace Ultrapain
@@ -158,11 +159,14 @@ namespace Ultrapain
         public static FloatSliderField friendlyFireDamageOverrideMelee;
 
         // ENEMY STAT CONFIG
+        public static char resistanceSeparator = (char)1;
         public struct EidStatContainer
         {
             public FloatField health;
             public FloatField damage;
             public FloatField speed;
+            public StringField resistanceStr;
+            public Dictionary<string, float> resistanceDict;
 
             public void SetHidden(bool hidden)
             {
@@ -170,9 +174,59 @@ namespace Ultrapain
             }
         }
 
+        public enum HitterType
+        {
+            revolver,
+            coin,
+            shotgun,
+            shotgunzone,
+            nail,
+            harpoon,
+            sawblade,
+            railcannon,
+            drill,
+            cannonball,
+            punch,
+            heavypunch,
+            hook,
+            ground_slam,
+
+            explosion,
+            fire,
+            acid,
+            environment,
+            projectile
+        }
+        public static Dictionary<HitterType, string> hitterDisplayNames = new Dictionary<HitterType, string>()
+        {
+            { HitterType.revolver, "Revolver" },
+            { HitterType.coin, "Fistful of dollar" },
+            { HitterType.shotgun, "Shotgun pellet" },
+            { HitterType.shotgunzone, "Shotgun close" },
+            { HitterType.nail, "Nail" },
+            { HitterType.harpoon, "Magnet" },
+            { HitterType.sawblade, "Sawblade" },
+            { HitterType.railcannon, "Electric railcannon" },
+            { HitterType.drill, "Drill" },
+            { HitterType.cannonball, "Cannonball" },
+            { HitterType.punch, "Feedbacker" },
+            { HitterType.heavypunch, "Knuckleblaster" },
+            { HitterType.hook, "Whiplash hook" },
+            { HitterType.ground_slam, "Ground slam" },
+            { HitterType.explosion, "Explosion" },
+            { HitterType.fire, "Fire" },
+            { HitterType.acid, "Acid" },
+            { HitterType.environment, "Environment" },
+            { HitterType.projectile, "Projectile" },
+        };
+
         public static ConfigPanel eidStatEditorPanel;
         public static EnumField<EnemyType> eidStatEditorSelector;
         public static Dictionary<EnemyType, EidStatContainer> enemyStats = new Dictionary<EnemyType, EidStatContainer>();
+        public static EnumField<HitterType> eidResistanceSelector;
+        public static BoolField eidResistanceEnabled;
+        public static FloatField eidResistanceField;
+        public static ConfigHeader eidResistanceInfo;
 
         // CERBERUS
         public static BoolField cerberusDashToggle;
@@ -819,7 +873,7 @@ namespace Ultrapain
             // GLOBAL ENEMY TWEAKS
             eidStatEditorPanel = new ConfigPanel(globalEnemyPanel, "Enemy stat editor", "eidStatEditorPanel");
 
-            eidStatEditorSelector = new EnumField<EnemyType>(eidStatEditorPanel, "Enemy", "eidStatEditorSelector", EnemyType.Filth);
+            eidStatEditorSelector = new EnumField<EnemyType>(eidStatEditorPanel, "Selected enemy", "eidStatEditorSelector", EnemyType.Filth);
             eidStatEditorSelector.SetEnumDisplayName(EnemyType.V2Second, "V2 Second");
             eidStatEditorSelector.SetEnumDisplayName(EnemyType.Sisyphus, "Sisyphean Ins.");
             eidStatEditorSelector.SetEnumDisplayName(EnemyType.SisyphusPrime, "Sisyphus Prime");
@@ -835,26 +889,175 @@ namespace Ultrapain
             eidStatEditorSelector.SetEnumDisplayName(EnemyType.VeryCancerousRodent, "Very Cancerous Rodent");
             eidStatEditorSelector.SetEnumDisplayName(EnemyType.Wicked, "Something Wicked");
             eidStatEditorSelector.SetEnumDisplayName(EnemyType.Turret, "Sentry");
+            
+            new ConfigHeader(eidStatEditorPanel, "Base Stat Editor");
+            
             foreach(EnemyType eid in Enum.GetValues(typeof(EnemyType)))
             {
                 EidStatContainer container = new EidStatContainer();
                 container.health = new FloatField(eidStatEditorPanel, "Health multiplier", $"eid_{eid}_health", 1f, 0.01f, float.MaxValue);
                 container.damage = new FloatField(eidStatEditorPanel, "Damage multiplier", $"eid_{eid}_damage", 1f, 0.01f, float.MaxValue);
                 container.speed = new FloatField(eidStatEditorPanel, "Speed multiplier", $"eid_{eid}_speed", 1f, 0.01f, float.MaxValue);
+                container.resistanceStr = new StringField(eidStatEditorPanel, "Resistance string", $"eid_{eid}_resistance", "", true);
+                container.resistanceStr.interactable = false;
+                container.resistanceStr.hidden = true;
+                container.resistanceDict = new Dictionary<string, float>();
+
+                string[] resistanceArr = container.resistanceStr.value.Split(resistanceSeparator);
+                if(resistanceArr.Length > 0 && !string.IsNullOrEmpty(resistanceArr[0]))
+                for(int i = 0; i < resistanceArr.Length; i++)
+                {
+                    string resistance = resistanceArr[i];
+                    i += 1;
+                    if(i >= resistanceArr.Length)
+                    {
+                        Debug.LogWarning($"Missing value for resistance {resistance} for enemy {eid}");
+                        break;
+                    }
+                    float resistanceCoefficiance = 1f;
+                    if (!float.TryParse(resistanceArr[i], out resistanceCoefficiance))
+                    {
+                        Debug.LogWarning($"Invalid value for resistance {resistance} for enemy {eid}");
+                        continue;
+                    }
+
+                    container.resistanceDict[resistance] = resistanceCoefficiance;
+                }
+
                 enemyStats.Add(eid, container);
             }
 
-            eidStatEditorSelector.onValueChange += (EnumField<EnemyType>.EnumValueChangeEvent e) =>
+            new ConfigHeader(eidStatEditorPanel, "Resistance Editor");
+            eidResistanceSelector = new EnumField<HitterType>(eidStatEditorPanel, "Damage type", "eidResistanceSelector", HitterType.revolver);
+            foreach(KeyValuePair<HitterType, string> pair in hitterDisplayNames)
             {
-                foreach (KeyValuePair<EnemyType, EidStatContainer> stats in enemyStats)
-                    stats.Value.SetHidden(stats.Key != e.value);
-            };
-            eidStatEditorSelector.TriggerValueChangeEvent();
+                eidResistanceSelector.SetEnumDisplayName(pair.Key, pair.Value);
+            }
+            eidResistanceEnabled = new BoolField(eidStatEditorPanel, "Enable resistance", "eidResistanceEnabler", false);
+            eidResistanceField = new FloatField(eidStatEditorPanel, "Resistance multiplier", "eidResistanceMultiplier", 1f, 0.1f, float.MaxValue);
+            eidResistanceInfo = new ConfigHeader(eidStatEditorPanel, "Current resistance:", 24, TextAnchor.UpperLeft);
+            
             ButtonField statResetButton = new ButtonField(eidStatEditorPanel, "Reset All Stats", "statResetButton");
             statResetButton.onClick += () =>
             {
                 foreach (EidStatContainer stat in enemyStats.Values)
+                {
                     stat.health.value = stat.damage.value = stat.speed.value = 1f;
+                    stat.resistanceDict.Clear();
+                    stat.resistanceStr.value = "";
+                }
+                eidResistanceEnabled.value = false;
+                eidResistanceField.interactable = false;
+                eidResistanceField.value = 1f;
+                SetResistanceInfoText(enemyStats[eidStatEditorSelector.value]);
+            };
+
+            void SetResistanceInfoText(EidStatContainer container)
+            {
+                string header = "Current resistance:";
+                foreach (KeyValuePair<string, float> pair in container.resistanceDict)
+                {
+                    if (Enum.TryParse(pair.Key.Replace(' ', '_'), out HitterType type))
+                    {
+                        header += $"\n{hitterDisplayNames[type]}: {pair.Value}";
+                    }
+                    else
+                    {
+                        header += $"\n{pair.Key}: {pair.Value}";
+                    }
+                }
+                eidResistanceInfo.text = header;
+            }
+
+            void SetResistanceString(EidStatContainer container)
+            {
+                StringBuilder str = new StringBuilder();
+                foreach(KeyValuePair<string, float> pair in container.resistanceDict)
+                {
+                    if (str.Length != 0)
+                        str.Append(resistanceSeparator);
+                    str.Append(pair.Key);
+                    str.Append(resistanceSeparator);
+                    str.Append(pair.Value.ToString());
+                }
+                container.resistanceStr.value = str.ToString();
+            }
+
+            eidStatEditorSelector.presetLoadPriority = 3;
+            eidStatEditorSelector.onValueChange += (EnumField<EnemyType>.EnumValueChangeEvent e) =>
+            {
+                foreach (KeyValuePair<EnemyType, EidStatContainer> stats in enemyStats)
+                    stats.Value.SetHidden(stats.Key != e.value);
+                EidStatContainer container = enemyStats[e.value];
+
+                if (container.resistanceDict.TryGetValue(eidResistanceSelector.value.ToString().Replace('_', ' '), out float val))
+                {
+                    eidResistanceEnabled.value = true;
+                    eidResistanceField.interactable = true;
+                    eidResistanceField.value = val;
+                }
+                else
+                {
+                    eidResistanceEnabled.value = false;
+                    eidResistanceField.value = 1f;
+                    eidResistanceField.interactable = false;
+                }
+
+                SetResistanceInfoText(container);
+            };
+            eidStatEditorSelector.TriggerValueChangeEvent();
+            eidResistanceSelector.presetLoadPriority = 2;
+            eidResistanceSelector.onValueChange += (EnumField<HitterType>.EnumValueChangeEvent e) =>
+            {
+                EidStatContainer container = enemyStats[eidStatEditorSelector.value];
+                if (container.resistanceDict.TryGetValue(e.value.ToString().Replace('_', ' '), out float val))
+                {
+                    eidResistanceEnabled.value = true;
+                    eidResistanceField.interactable = true;
+                    eidResistanceField.value = val;
+                }
+                else
+                {
+                    eidResistanceEnabled.value = false;
+                    eidResistanceField.interactable = false;
+                    eidResistanceField.value = 1f;
+                }
+            };
+            eidResistanceSelector.TriggerValueChangeEvent();
+            eidResistanceEnabled.presetLoadPriority = 1;
+            eidResistanceEnabled.onValueChange += (BoolField.BoolValueChangeEvent e) =>
+            {
+                EidStatContainer container = enemyStats[eidStatEditorSelector.value];
+                string currentHitter = eidResistanceSelector.value.ToString().Replace('_', ' ');
+
+                if (e.value)
+                {
+                    container.resistanceDict[currentHitter] = 1f;
+                    eidResistanceField.interactable = true;
+                    eidResistanceField.value = 1f;
+                }
+                else
+                {
+                    if (container.resistanceDict.ContainsKey(currentHitter))
+                        container.resistanceDict.Remove(currentHitter);
+                    eidResistanceField.interactable = false;
+                    eidResistanceField.value = 1f;
+                }
+
+                SetResistanceInfoText(container);
+                SetResistanceString(container);
+            };
+            eidResistanceField.onValueChange += (FloatField.FloatValueChangeEvent e) =>
+            {
+                if (!eidResistanceEnabled.value)
+                    return;
+
+                EidStatContainer container = enemyStats[eidStatEditorSelector.value];
+                string currentHitter = eidResistanceSelector.value.ToString().Replace('_', ' ');
+
+                container.resistanceDict[currentHitter] = e.value;
+                SetResistanceInfoText(container);
+                SetResistanceString(container);
             };
 
             new ConfigHeader(globalEnemyPanel, "Friendly Fire Damage Override");
