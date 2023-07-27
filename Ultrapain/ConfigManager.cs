@@ -310,6 +310,7 @@ namespace Ultrapain
         public static IntField grenadeBoostStylePoints;
 
         public static BoolField orbStrikeToggle;
+        public static FloatField orbStrikeMinDistance;
 
         // REVOLVER BEAM ORBITAL
         public static FormattedStringField orbStrikeRevolverStyleText;
@@ -1307,7 +1308,8 @@ namespace Ultrapain
                 dirtyField = true;
             };
             orbStrikeToggle.TriggerValueChangeEvent();
-
+            orbStrikeMinDistance = new FloatField(orbStrikeDiv, "Min trigger distance", "orbStrikeMinDistance", 50f, 0f, float.MaxValue);
+            
             new ConfigHeader(orbStrikeDiv, "Revolver Beam", 22);
             FormattedStringBuilder orbStrikeRevolverBuilder = new FormattedStringBuilder();
             orbStrikeRevolverBuilder.currentFormat = new PluginConfig.API.Fields.CharacterInfo() { color = Color.red };
