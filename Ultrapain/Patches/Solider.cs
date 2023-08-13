@@ -52,7 +52,7 @@ namespace Ultrapain.Patches
 
                 if (counter.remainingShots != 0)
                 {
-                    ___anim.Play("Shoot", 0, Plugin.SoliderShootAnimationStart / 2f);
+                    ___anim.Play("Shoot", 0, 1.2f / 2f);
                     ___anim.fireEvents = true;
                     __instance.DamageStart();
 
@@ -63,18 +63,14 @@ namespace Ultrapain.Patches
                     counter.remainingShots = ConfigManager.soliderShootCount.value;
                     if (ConfigManager.soliderShootGrenadeToggle.value)
                     {
-                        GameObject grenade = GameObject.Instantiate(Plugin.shotgunGrenade.gameObject, ___currentProjectile.transform.position, ___currentProjectile.transform.rotation);
+                        GameObject grenade = GameObject.Instantiate(Plugin.shotgunGrenade.obj.gameObject, ___currentProjectile.transform.position, ___currentProjectile.transform.rotation);
                         grenade.transform.Translate(Vector3.forward * 0.5f);
 
                         Vector3 targetPos = Plugin.PredictPlayerPosition(__instance.GetComponent<Collider>(), ___eid.totalSpeedModifier);
                         grenade.transform.LookAt(targetPos);
 
                         Rigidbody rb = grenade.GetComponent<Rigidbody>();
-                        //rb.maxAngularVelocity = 10000;
-                        //foreach (Rigidbody r in grenade.GetComponentsInChildren<Rigidbody>())
-                        //    r.maxAngularVelocity = 10000;
-                        rb.AddForce(grenade.transform.forward * Plugin.SoliderGrenadeForce);
-                        //rb.velocity = ___currentProjectile.transform.forward * Plugin.instance.SoliderGrenadeForce;
+                        rb.AddForce(grenade.transform.forward * 1000f);
                         rb.useGravity = false;
 
                         grenade.GetComponent<Grenade>().enemy = true;

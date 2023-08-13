@@ -1,93 +1,136 @@
-﻿using System;
+﻿using HarmonyLib;
+using System;
 using System.Collections.Generic;
 using System.Text;
+using UltrapainExtensions;
 using UnityEngine;
 using UnityEngine.Audio;
 
 namespace Ultrapain.Patches
 {
-    class DruidKnight_FullBurst
+    [UltrapainPatch]
+    [HarmonyPatch(typeof(Mandalore))]
+    public static class DruidKnightMemePatch
     {
-        public static AudioMixer mixer;
-        public static float offset = 0.205f;
+		public class FullBurstStateInfo
+		{
+			public GameObject oldProj;
+			public GameObject tempProj;
+		}
 
-        class StateInfo
+        [HarmonyPatch(nameof(Mandalore.FullBurst))]
+        [HarmonyPrefix]
+        [UltrapainPatch]
+		public static bool CreateFullBurstSound(Mandalore __instance, out FullBurstStateInfo __state)
+		{
+			__state = new FullBurstStateInfo() { oldProj = __instance.fullAutoProjectile };
+
+			if (__instance.GetComponent<NonUltrapainEnemy>() != null)
+				return true;
+
+			GameObject obj = new GameObject();
+			obj.transform.position = __instance.transform.position;
+			AudioSource aud = obj.AddComponent<AudioSource>();
+			aud.playOnAwake = false;
+			aud.clip = Plugin.druidKnightFullAutoAud;
+			aud.time = 0.205f;
+			aud.Play();
+
+			GameObject proj = GameObject.Instantiate(__instance.fullAutoProjectile, new Vector3(1000000, 1000000, 1000000), Quaternion.identity);
+			proj.GetComponent<AudioSource>().enabled = false;
+			__state.tempProj = __instance.fullAutoProjectile = proj;
+
+			return true;
+		}
+
+        public static bool CreateFullBurstSoundCheck()
         {
-            public GameObject oldProj;
-            public GameObject tempProj;
+            return ConfigManager.funnyDruidKnightSFXToggle.value;
         }
 
-        static bool Prefix(Mandalore __instance, out StateInfo __state)
-        {
-            __state = new StateInfo() { oldProj = __instance.fullAutoProjectile };
+		[HarmonyPatch(nameof(Mandalore.FullBurst))]
+		[HarmonyPostfix]
+		[UltrapainPatch]
+		public static void ClearFullBurstSound(Mandalore __instance, FullBurstStateInfo __state)
+		{
+			__instance.fullAutoProjectile = __state.oldProj;
+			if (__state.tempProj != null)
+				GameObject.Destroy(__state.tempProj);
+		}
 
-            GameObject obj = new GameObject();
-            obj.transform.position = __instance.transform.position;
-            AudioSource aud = obj.AddComponent<AudioSource>();
-            aud.playOnAwake = false;
-            aud.clip = Plugin.druidKnightFullAutoAud;
-            aud.time = offset;
-            aud.Play();
+		public static bool ClearFullBurstSoundCheck()
+		{
+			return ConfigManager.funnyDruidKnightSFXToggle.value;
+		}
 
-            GameObject proj = GameObject.Instantiate(__instance.fullAutoProjectile, new Vector3(1000000, 1000000, 1000000), Quaternion.identity);
-            proj.GetComponent<AudioSource>().enabled = false;
-            __state.tempProj = __instance.fullAutoProjectile = proj;
+		[HarmonyPatch(nameof(Mandalore.FullerBurst))]
+		[HarmonyPrefix]
+		[UltrapainPatch]
+		public static bool FullerBurstSound(Mandalore __instance)
+		{
+			if (__instance.GetComponent<NonUltrapainEnemy>() != null)
+				return true;
 
-            return true;
-        }
+			if (__instance.shotsLeft != 40)
+				return true;
 
-        static void Postfix(Mandalore __instance, StateInfo __state)
-        {
-            __instance.fullAutoProjectile = __state.oldProj;
-            if (__state.tempProj != null)
-                GameObject.Destroy(__state.tempProj);
-        }
-    }
+			GameObject obj = new GameObject();
+			obj.transform.position = __instance.transform.position;
+			AudioSource aud = obj.AddComponent<AudioSource>();
+			aud.playOnAwake = false;
+			aud.clip = Plugin.druidKnightFullerAutoAud;
+			aud.time = 0.5f;
+			aud.Play();
+			return true;
+		}
 
-    class DruidKnight_FullerBurst
-    {
-        public static float offset = 0.5f;
+		public static bool FullerBurstSoundCheck()
+		{
+			return ConfigManager.funnyDruidKnightSFXToggle.value;
+		}
+	}
 
-        static bool Prefix(Mandalore __instance, int ___shotsLeft)
-        {
-            if (___shotsLeft != 40)
-                return true;
+	[UltrapainPatch]
+	[HarmonyPatch(typeof(Drone))]
+	public static class DruidKnightMemeDronePatch
+	{
+		[HarmonyPatch(nameof(Drone.Explode))]
+		[HarmonyPrefix]
+		[UltrapainPatch]
+		public static bool ExplosionSound(Drone __instance, out bool __state)
+		{
+			__state = __instance.exploded;
+			return true;
+		}
 
-            GameObject obj = new GameObject();
-            obj.transform.position = __instance.transform.position;
-            AudioSource aud = obj.AddComponent<AudioSource>();
-            aud.playOnAwake = false;
-            aud.clip = Plugin.druidKnightFullerAutoAud;
-            aud.time = offset;
-            aud.Play();
-            return true;
-        }
-    }
+		public static bool ExplosionSoundCheck()
+		{
+			return ConfigManager.funnyDruidKnightSFXToggle.value;
+		}
 
-    class Drone_Explode
-    {
-        static bool Prefix(bool ___exploded, out bool __state)
-        {
-            __state = ___exploded;
-            return true;
-        }
+		[HarmonyPatch(nameof(Drone.Explode))]
+		[HarmonyPostfix]
+		[UltrapainPatch]
+		public static void ExplosionSoundClear(Drone __instance, bool __state)
+		{
+			if (__state)
+				return;
 
-        public static float offset = 0.2f;
-        static void Postfix(Drone __instance, bool ___exploded, bool __state)
-        {
-            if (__state)
-                return;
+			if (!__instance.exploded || __instance.gameObject.GetComponent<Mandalore>() == null || __instance.gameObject.GetComponent<NonUltrapainEnemy>() != null)
+				return;
 
-            if (!___exploded || __instance.gameObject.GetComponent<Mandalore>() == null)
-                return;
+			GameObject obj = new GameObject();
+			obj.transform.position = __instance.transform.position;
+			AudioSource aud = obj.AddComponent<AudioSource>();
+			aud.playOnAwake = false;
+			aud.clip = Plugin.druidKnightDeathAud;
+			aud.time = 0.2f;
+			aud.Play();
+		}
 
-            GameObject obj = new GameObject();
-            obj.transform.position = __instance.transform.position;
-            AudioSource aud = obj.AddComponent<AudioSource>();
-            aud.playOnAwake = false;
-            aud.clip = Plugin.druidKnightDeathAud;
-            aud.time = offset;
-            aud.Play();
-        }
-    }
+		public static bool ExplosionSoundClearCheck()
+		{
+			return ConfigManager.funnyDruidKnightSFXToggle.value;
+		}
+	}
 }

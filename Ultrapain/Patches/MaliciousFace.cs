@@ -1,99 +1,122 @@
 ﻿using HarmonyLib;
 using System;
 using System.ComponentModel;
+using UltrapainExtensions;
 using UnityEngine;
 
 namespace Ultrapain.Patches
 {
-    class MaliciousFaceFlag : MonoBehaviour
+    public class MaliciousFaceFlag : MonoBehaviour
     {
         public bool charging = false;
     }
 
-    class MaliciousFace_Start_Patch
+    [UltrapainPatch]
+    [HarmonyPatch(typeof(SpiderBody))]
+    public static class MaliciousFacePatch
     {
-        static void Postfix(SpiderBody __instance, ref GameObject ___proj, ref int ___maxBurst)
-        {
-            __instance.gameObject.AddComponent<MaliciousFaceFlag>();
+        [HarmonyPatch(nameof(SpiderBody.ChargeBeam))]
+        [HarmonyPostfix]
+        [UltrapainPatch]
+        public static void DetectCharge(SpiderBody __instance)
+		{
+			if (__instance.TryGetComponent(out MaliciousFaceFlag flag))
+				flag.charging = true;
+		}
 
-            if (ConfigManager.maliciousFaceHomingProjectileToggle.value)
-            {
-                ___proj = Plugin.homingProjectile;
-                ___maxBurst = Math.Max(0, ConfigManager.maliciousFaceHomingProjectileCount.value - 1);
-            }
+        public static bool DetectChargeCheck()
+        {
+            return ConfigManager.enemyTweakToggle.value;
         }
-    }
 
-    class MaliciousFace_ChargeBeam
-    {
-        static void Postfix(SpiderBody __instance)
+		[HarmonyPatch(nameof(SpiderBody.BeamChargeEnd))]
+		[HarmonyPrefix]
+		[UltrapainPatch]
+		public static bool ChangeBeamCount(SpiderBody __instance)
+		{
+			if (__instance.TryGetComponent(out MaliciousFaceFlag flag) && flag.charging)
+			{
+				if (__instance.health < __instance.maxHealth / 2)
+					__instance.beamsAmount = ConfigManager.maliciousFaceBeamCountEnraged.value;
+				else
+					__instance.beamsAmount = ConfigManager.maliciousFaceBeamCountNormal.value;
+
+				flag.charging = false;
+			}
+
+			return true;
+		}
+	
+        public static bool ChangeBeamCountCheck()
         {
-            if (__instance.TryGetComponent<MaliciousFaceFlag>(out MaliciousFaceFlag flag))
-                flag.charging = true;
+            return ConfigManager.enemyTweakToggle.value;
         }
-    }
 
-    class MaliciousFace_BeamChargeEnd
-    {
-        static bool Prefix(SpiderBody __instance, float ___maxHealth, ref int ___beamsAmount)
+		[HarmonyPatch(nameof(SpiderBody.ShootProj))]
+		[HarmonyPostfix]
+		[UltrapainPatch]
+		public static void ConfigureProjectile(SpiderBody __instance)
+		{
+			if (__instance.gameObject.GetComponent<MaliciousFaceFlag>() == null)
+				return;
+
+			Projectile proj = __instance.currentProj.GetComponent<Projectile>();
+			proj.target = MonoSingleton<PlayerTracker>.Instance.GetTarget();
+			proj.speed = ConfigManager.maliciousFaceHomingProjectileSpeed.value;
+			proj.turningSpeedMultiplier = ConfigManager.maliciousFaceHomingProjectileTurnSpeed.value;
+			proj.damage = ConfigManager.maliciousFaceHomingProjectileDamage.value;
+			proj.safeEnemyType = EnemyType.MaliciousFace;
+			proj.speed *= __instance.eid.totalSpeedModifier;
+			proj.damage *= __instance.eid.totalDamageModifier;
+			__instance.currentProj.SetActive(true);
+		}
+
+        public static bool ConfigureProjectileCheck()
         {
-            if (__instance.TryGetComponent<MaliciousFaceFlag>(out MaliciousFaceFlag flag) && flag.charging)
-            {
-                if (__instance.health < ___maxHealth / 2)
-                    ___beamsAmount = ConfigManager.maliciousFaceBeamCountEnraged.value;
-                else
-                    ___beamsAmount = ConfigManager.maliciousFaceBeamCountNormal.value;
-                
-                flag.charging = false;
-            }
-
-            return true;
+            return ConfigManager.enemyTweakToggle.value && ConfigManager.maliciousFaceHomingProjectileToggle.value;
         }
-    }
 
-    class MaliciousFace_ShootProj_Patch
-    {
-        /*static bool Prefix(SpiderBody __instance, ref GameObject ___proj, out bool __state)
+		[HarmonyPatch(nameof(SpiderBody.Enrage))]
+		[HarmonyPostfix]
+		[UltrapainPatch]
+		public static void BuffOnEnrage(SpiderBody __instance)
+		{
+            if (__instance.gameObject.GetComponent<MaliciousFaceFlag>() == null)
+                return;
+
+			EnemyIdentifier comp = __instance.GetComponent<EnemyIdentifier>();
+			for (int i = 0; i < ConfigManager.maliciousFaceRadianceAmount.value; i++)
+				comp.BuffAll();
+			comp.UpdateBuffs(false);
+		}
+
+        public static bool BuffOnEnrageCheck()
         {
-            __state = false;
-            if (!Plugin.ultrapainDifficulty || !ConfigManager.enemyTweakToggle.value || !ConfigManager.maliciousFaceHomingProjectileToggle.value)
-                return true;
-
-            ___proj = Plugin.homingProjectile;
-            __state = true;
-
-            return true;
-        }*/
-
-        static void Postfix(SpiderBody __instance, ref GameObject ___currentProj, EnemyIdentifier ___eid/*, bool __state*/)
-        {
-            /*if (!__state)
-                return;*/
-
-            Projectile proj = ___currentProj.GetComponent<Projectile>();
-            proj.target = MonoSingleton<PlayerTracker>.Instance.GetTarget();
-            proj.speed = ConfigManager.maliciousFaceHomingProjectileSpeed.value;
-            proj.turningSpeedMultiplier = ConfigManager.maliciousFaceHomingProjectileTurnSpeed.value;
-            proj.damage = ConfigManager.maliciousFaceHomingProjectileDamage.value;
-            proj.safeEnemyType = EnemyType.MaliciousFace;
-            proj.speed *= ___eid.totalSpeedModifier;
-            proj.damage *= ___eid.totalDamageModifier;
-            ___currentProj.SetActive(true);
+            return ConfigManager.enemyTweakToggle.value && ConfigManager.maliciousFaceRadianceOnEnrage.value;
         }
-    }
 
-    class MaliciousFace_Enrage_Patch
-    {
-        static void Postfix(SpiderBody __instance)
-        {
-            EnemyIdentifier comp = __instance.GetComponent<EnemyIdentifier>();
-            for(int i = 0; i < ConfigManager.maliciousFaceRadianceAmount.value; i++)
-                comp.BuffAll();
-            comp.UpdateBuffs(false);
+		[HarmonyPatch(nameof(SpiderBody.Start))]
+		[HarmonyPostfix]
+		[UltrapainPatch]
+		public static void AddFlag(SpiderBody __instance)
+		{
+			if (__instance.gameObject.GetComponent<NonUltrapainEnemy>() != null)
+				return;
 
-            //__instance.spark = new GameObject();
-        }
-    }
+			__instance.gameObject.AddComponent<MaliciousFaceFlag>();
+
+			if (ConfigManager.maliciousFaceHomingProjectileToggle.value)
+			{
+				__instance.proj = Plugin.homingProjectile.obj;
+				__instance.maxBurst = Math.Max(0, ConfigManager.maliciousFaceHomingProjectileCount.value - 1);
+			}
+		}
+
+		public static bool AddFlagCheck()
+		{
+			return ConfigManager.enemyTweakToggle.value;
+		}
+	}
 
     /*[HarmonyPatch(typeof(SpiderBody))]
     [HarmonyPatch("BeamChargeEnd")]

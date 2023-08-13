@@ -2,189 +2,319 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
+using UltrapainExtensions;
 using UnityEngine;
-using static Ultrapain.ConfigManager;
 
 namespace Ultrapain.Patches
 {
-    // EID
-    class EnemyIdentifier_UpdateModifiers
+    [UltrapainPatch]
+    [HarmonyPatch(typeof(EnemyIdentifier))]
+    public static class EnemyIdentifierPatch
     {
-        static void Postfix(EnemyIdentifier __instance)
+        [HarmonyPatch(nameof(EnemyIdentifier.UpdateModifiers))]
+        [HarmonyPostfix]
+        [UltrapainPatch]
+        public static void AddBuffs(EnemyIdentifier __instance)
         {
-            EidStatContainer container = ConfigManager.enemyStats[__instance.enemyType];
-            
-            if(__instance.enemyType == EnemyType.V2)
+            NonUltrapainEnemy customFlag = __instance.GetComponent<NonUltrapainEnemy>();
+
+            ConfigManager.EidStatContainer container = ConfigManager.enemyStats[__instance.enemyType];
+
+            if (__instance.enemyType == EnemyType.V2)
             {
                 V2 comp = __instance.GetComponent<V2>();
-                if(comp != null && comp.secondEncounter)
+                if (comp != null && comp.secondEncounter)
                 {
                     container = ConfigManager.enemyStats[EnemyType.V2Second];
                 }
             }
-
-            __instance.totalHealthModifier *= container.health.value;
-            __instance.totalDamageModifier *= container.damage.value;
-            __instance.totalSpeedModifier *= container.speed.value;
-
-            List<string> weakness = new List<string>();
-            List<float> weaknessMulti = new List<float>();
-            foreach(KeyValuePair<string, float> weaknessPair in container.resistanceDict)
+            else if (__instance.enemyType == EnemyType.Filth)
             {
-                weakness.Add(weaknessPair.Key);
-
-                int index = Array.IndexOf(__instance.weaknesses, weaknessPair.Key);
-                if(index >= 0)
+                if (__instance.gameObject.GetComponent<CancerousRodent>() != null)
                 {
-                    float defaultResistance = 1f / __instance.weaknessMultipliers[index];
-                    if (defaultResistance > weaknessPair.Value)
-                        weaknessMulti.Add(1f / defaultResistance);
+					container = ConfigManager.enemyStats[EnemyType.CancerousRodent];
+				}
+            }
+			else if (__instance.enemyType == EnemyType.Cerberus)
+			{
+				if (__instance.gameObject.GetComponent<CancerousRodent>() != null)
+				{
+					container = ConfigManager.enemyStats[EnemyType.VeryCancerousRodent];
+				}
+			}
+
+			if (customFlag == null || !customFlag.disableStatEditor)
+            {
+                __instance.totalHealthModifier *= container.health.value;
+                __instance.totalDamageModifier *= container.damage.value;
+                __instance.totalSpeedModifier *= container.speed.value;
+            }
+
+            if (customFlag == null || !customFlag.disableResistanceEditor)
+            {
+                List<string> weakness = new List<string>();
+                List<float> weaknessMulti = new List<float>();
+                foreach (KeyValuePair<string, float> weaknessPair in container.resistanceDict)
+                {
+                    weakness.Add(weaknessPair.Key);
+
+                    int index = Array.IndexOf(__instance.weaknesses, weaknessPair.Key);
+                    if (index >= 0)
+                    {
+                        float defaultResistance = 1f / __instance.weaknessMultipliers[index];
+                        if (defaultResistance > weaknessPair.Value)
+                            weaknessMulti.Add(1f / defaultResistance);
+                        else
+                            weaknessMulti.Add(1f / weaknessPair.Value);
+                    }
                     else
                         weaknessMulti.Add(1f / weaknessPair.Value);
                 }
-                else
-                    weaknessMulti.Add(1f / weaknessPair.Value);
+                for (int i = 0; i < __instance.weaknessMultipliers.Length; i++)
+                {
+                    if (container.resistanceDict.ContainsKey(__instance.weaknesses[i]))
+                        continue;
+                    weakness.Add(__instance.weaknesses[i]);
+                    weaknessMulti.Add(__instance.weaknessMultipliers[i]);
+                }
+
+                __instance.weaknesses = weakness.ToArray();
+                __instance.weaknessMultipliers = weaknessMulti.ToArray();
             }
-            for(int i = 0; i < __instance.weaknessMultipliers.Length; i++)
-            {
-                if (container.resistanceDict.ContainsKey(__instance.weaknesses[i]))
-                    continue;
-                weakness.Add(__instance.weaknesses[i]);
-                weaknessMulti.Add(__instance.weaknessMultipliers[i]);
-            }
-
-            __instance.weaknesses = weakness.ToArray();
-            __instance.weaknessMultipliers = weaknessMulti.ToArray();
         }
-    }
+    
+        public static bool AddBuffsCheck()
+        {
+            return ConfigManager.enemyTweakToggle.value;
+        }
+	
+        public enum DamageCause
+		{
+			Explosion,
+			Projectile,
+			Fire,
+			Melee,
+			Unknown
+		}
 
-    // DETECT DAMAGE TYPE
-    class Explosion_Collide_FF
+		public static DamageCause currentCause = DamageCause.Unknown;
+		public static bool friendlyBurn = false;
+
+        [HarmonyPatch(nameof(EnemyIdentifier.DeliverDamage))]
+        [HarmonyPrefix]
+		[HarmonyBefore]
+        [UltrapainPatch]
+		public static bool FriendlyFireDamageReduction(EnemyIdentifier __instance, ref float __3)
+		{
+			if (currentCause != DamageCause.Unknown && (__instance.hitter == "enemy" || __instance.hitter == "ffexplosion"))
+			{
+				switch (currentCause)
+				{
+					case DamageCause.Projectile:
+						//if (ConfigManager.friendlyFireDamageOverrideProjectile.normalizedValue == 0)
+						//    return false;
+						__3 *= ConfigManager.friendlyFireDamageOverrideProjectile.normalizedValue;
+						break;
+					case DamageCause.Explosion:
+						//if (ConfigManager.friendlyFireDamageOverrideProjectile.normalizedValue == 0)
+						//    return false;
+						__3 *= ConfigManager.friendlyFireDamageOverrideExplosion.normalizedValue;
+						break;
+					case DamageCause.Melee:
+						//if (ConfigManager.friendlyFireDamageOverrideProjectile.normalizedValue == 0)
+						//    return false;
+						__3 *= ConfigManager.friendlyFireDamageOverrideMelee.normalizedValue;
+						break;
+				}
+			}
+
+			return true;
+		}
+	
+        public static bool FriendlyFireDamageReductionCheck()
+        {
+            return ConfigManager.enemyTweakToggle.value && ConfigManager.friendlyFireDamageOverrideToggle.value;
+        }
+	}
+
+	[UltrapainPatch]
+	[HarmonyPatch(typeof(Explosion))]
+	public static class ExplosionFriendlyFirePatch
     {
-        static bool Prefix(Explosion __instance)
+        [HarmonyPatch(nameof(Explosion.Collide))]
+        [HarmonyPrefix]
+        [UltrapainPatch]
+		public static bool DetectFriendlyFire(Explosion __instance)
+		{
+			EnemyIdentifierPatch.currentCause = EnemyIdentifierPatch.DamageCause.Explosion;
+			if ((__instance.enemy || __instance.friendlyFire) && __instance.canHit != AffectedSubjects.PlayerOnly)
+				EnemyIdentifierPatch.friendlyBurn = true;
+			return true;
+		}
+
+        public static bool DetectFriendlyFireCheck()
         {
-            EnemyIdentifier_DeliverDamage_FF.currentCause = EnemyIdentifier_DeliverDamage_FF.DamageCause.Explosion;
-            if ((__instance.enemy || __instance.friendlyFire) && __instance.canHit != AffectedSubjects.PlayerOnly)
-                EnemyIdentifier_DeliverDamage_FF.friendlyBurn = true;
-            return true;
+            return ConfigManager.friendlyFireDamageOverrideToggle.value;
         }
 
-        static void Postfix()
-        {
-            EnemyIdentifier_DeliverDamage_FF.currentCause = EnemyIdentifier_DeliverDamage_FF.DamageCause.Unknown;
-            EnemyIdentifier_DeliverDamage_FF.friendlyBurn = false;
-        }
-    }
+		[HarmonyPatch(nameof(Explosion.Collide))]
+		[HarmonyPostfix]
+		[UltrapainPatch]
+		public static void ResetFriendlyFire()
+		{
+			EnemyIdentifierPatch.currentCause = EnemyIdentifierPatch.DamageCause.Unknown;
+			EnemyIdentifierPatch.friendlyBurn = false;
+		}
 
-    class PhysicalShockwave_CheckCollision_FF
+		public static bool ResetFriendlyFireCheck()
+		{
+			return ConfigManager.friendlyFireDamageOverrideToggle.value;
+		}
+	}
+
+    [UltrapainPatch]
+    [HarmonyPatch(typeof(PhysicalShockwave))]
+    public static class PhysicalShockwaveFriendlyFirePatch
     {
-        static bool Prefix()
+		[HarmonyPatch(nameof(PhysicalShockwave.CheckCollision))]
+		[HarmonyPrefix]
+		[UltrapainPatch]
+		public static bool DetectCause()
+		{
+			EnemyIdentifierPatch.currentCause = EnemyIdentifierPatch.DamageCause.Explosion;
+			return true;
+		}
+
+        public static bool DetectCauseCheck()
         {
-            EnemyIdentifier_DeliverDamage_FF.currentCause = EnemyIdentifier_DeliverDamage_FF.DamageCause.Explosion;
-            return true;
+            return ConfigManager.friendlyFireDamageOverrideToggle.value;
         }
 
-        static void Postfix()
-        {
-            EnemyIdentifier_DeliverDamage_FF.currentCause = EnemyIdentifier_DeliverDamage_FF.DamageCause.Unknown;
-        }
-    }
+		[HarmonyPatch(nameof(PhysicalShockwave.CheckCollision))]
+		[HarmonyPostfix]
+		[UltrapainPatch]
+		public static void ResetCause()
+		{
+			EnemyIdentifierPatch.currentCause = EnemyIdentifierPatch.DamageCause.Unknown;
+		}
 
-    class VirtueInsignia_OnTriggerEnter_FF
+		public static bool ResetCauseCheck()
+		{
+			return ConfigManager.friendlyFireDamageOverrideToggle.value;
+		}
+	}
+
+	[UltrapainPatch]
+	[HarmonyPatch(typeof(VirtueInsignia))]
+	public static class VirtueInsigniaFriendlyFirePatch
     {
-        static bool Prefix(VirtueInsignia __instance)
+		[HarmonyPatch(nameof(VirtueInsignia.OnTriggerEnter))]
+		[HarmonyPrefix]
+		[UltrapainPatch]
+		public static bool DetectCause(VirtueInsignia __instance)
         {
             if (__instance.gameObject.name == "PlayerSpawned")
                 return true;
 
-            EnemyIdentifier_DeliverDamage_FF.currentCause = EnemyIdentifier_DeliverDamage_FF.DamageCause.Fire;
-            EnemyIdentifier_DeliverDamage_FF.friendlyBurn = true;
+            EnemyIdentifierPatch.currentCause = EnemyIdentifierPatch.DamageCause.Fire;
+            EnemyIdentifierPatch.friendlyBurn = true;
             return true;
         }
 
-        static void Postfix()
-        {
-            EnemyIdentifier_DeliverDamage_FF.currentCause = EnemyIdentifier_DeliverDamage_FF.DamageCause.Unknown;
-            EnemyIdentifier_DeliverDamage_FF.friendlyBurn = false;
-        }
-    }
+		public static bool DetectCauseCheck()
+		{
+			return ConfigManager.friendlyFireDamageOverrideToggle.value;
+		}
 
-    class SwingCheck2_CheckCollision_FF
-    {
-        static bool Prefix()
+		[HarmonyPatch(nameof(VirtueInsignia.OnTriggerEnter))]
+		[HarmonyPostfix]
+		[UltrapainPatch]
+		public static void ResetCause()
         {
-            EnemyIdentifier_DeliverDamage_FF.currentCause = EnemyIdentifier_DeliverDamage_FF.DamageCause.Melee;
+            EnemyIdentifierPatch.currentCause = EnemyIdentifierPatch.DamageCause.Unknown;
+            EnemyIdentifierPatch.friendlyBurn = false;
+        }
+
+		public static bool ResetCauseCheck()
+		{
+			return ConfigManager.friendlyFireDamageOverrideToggle.value;
+		}
+	}
+
+	[UltrapainPatch]
+	[HarmonyPatch(typeof(SwingCheck2))]
+	public static class SwingCheck2FriendlyFirePatch
+    {
+		[HarmonyPatch(nameof(SwingCheck2.CheckCollision))]
+		[HarmonyPrefix]
+		[UltrapainPatch]
+		public static bool DetectCause()
+        {
+            EnemyIdentifierPatch.currentCause = EnemyIdentifierPatch.DamageCause.Melee;
             return true;
         }
 
-        static void Postfix()
-        {
-            EnemyIdentifier_DeliverDamage_FF.currentCause = EnemyIdentifier_DeliverDamage_FF.DamageCause.Unknown;
-        }
-    }
+		public static bool DetectCauseCheck()
+		{
+			return ConfigManager.friendlyFireDamageOverrideToggle.value;
+		}
 
-    class Projectile_Collided_FF
-    {
-        static bool Prefix()
+		[HarmonyPatch(nameof(SwingCheck2.CheckCollision))]
+		[HarmonyPostfix]
+		[UltrapainPatch]
+		public static void ResetCause()
         {
-            EnemyIdentifier_DeliverDamage_FF.currentCause = EnemyIdentifier_DeliverDamage_FF.DamageCause.Projectile;
+            EnemyIdentifierPatch.currentCause = EnemyIdentifierPatch.DamageCause.Unknown;
+        }
+
+		public static bool ResetCauseCheck()
+		{
+			return ConfigManager.friendlyFireDamageOverrideToggle.value;
+		}
+	}
+
+	[UltrapainPatch]
+	[HarmonyPatch(typeof(Projectile))]
+	public static class ProjectileFriendlyFirePatch
+    {
+		[HarmonyPatch(nameof(Projectile.Collided))]
+		[HarmonyPrefix]
+		[UltrapainPatch]
+		public static bool DetectCause()
+        {
+            EnemyIdentifierPatch.currentCause = EnemyIdentifierPatch.DamageCause.Projectile;
             return true;
         }
 
-        static void Postfix()
-        {
-            EnemyIdentifier_DeliverDamage_FF.currentCause = EnemyIdentifier_DeliverDamage_FF.DamageCause.Unknown;
-        }
-    }
+		public static bool DetectCauseCheck()
+		{
+			return ConfigManager.friendlyFireDamageOverrideToggle.value;
+		}
 
-    class EnemyIdentifier_DeliverDamage_FF
+		[HarmonyPatch(nameof(Projectile.Collided))]
+		[HarmonyPostfix]
+		[UltrapainPatch]
+		public static void ResetCause()
+        {
+            EnemyIdentifierPatch.currentCause = EnemyIdentifierPatch.DamageCause.Unknown;
+        }
+
+		public static bool ResetCauseCheck()
+		{
+			return ConfigManager.friendlyFireDamageOverrideToggle.value;
+		}
+	}
+
+	[UltrapainPatch]
+	[HarmonyPatch(typeof(Flammable))]
+	public static class FlammableFriendlyFirePatch
     {
-        public enum DamageCause
+		[HarmonyPatch(nameof(Flammable.Burn))]
+		[HarmonyPrefix]
+		[UltrapainPatch]
+		public static bool DetectCause(Flammable __instance, ref float __0)
         {
-            Explosion,
-            Projectile,
-            Fire,
-            Melee,
-            Unknown
-        }
-
-        public static DamageCause currentCause = DamageCause.Unknown;
-        public static bool friendlyBurn = false;
-
-        [HarmonyBefore]
-        static bool Prefix(EnemyIdentifier __instance, ref float __3)
-        {
-            if (currentCause != DamageCause.Unknown && (__instance.hitter == "enemy" || __instance.hitter == "ffexplosion"))
-            {
-                switch(currentCause)
-                {
-                    case DamageCause.Projectile:
-                        //if (ConfigManager.friendlyFireDamageOverrideProjectile.normalizedValue == 0)
-                        //    return false;
-                        __3 *= ConfigManager.friendlyFireDamageOverrideProjectile.normalizedValue;
-                        break;
-                    case DamageCause.Explosion:
-                        //if (ConfigManager.friendlyFireDamageOverrideProjectile.normalizedValue == 0)
-                        //    return false;
-                        __3 *= ConfigManager.friendlyFireDamageOverrideExplosion.normalizedValue;
-                        break;
-                    case DamageCause.Melee:
-                        //if (ConfigManager.friendlyFireDamageOverrideProjectile.normalizedValue == 0)
-                        //    return false;
-                        __3 *= ConfigManager.friendlyFireDamageOverrideMelee.normalizedValue;
-                        break;
-                }
-            }
-
-            return true;
-        }
-    }
-
-    class Flammable_Burn_FF
-    {
-        static bool Prefix(Flammable __instance, ref float __0)
-        {
-            if (EnemyIdentifier_DeliverDamage_FF.friendlyBurn)
+            if (EnemyIdentifierPatch.friendlyBurn)
             {
                 if (ConfigManager.friendlyFireDamageOverrideFire.normalizedValue == 0)
                     return false;
@@ -192,23 +322,46 @@ namespace Ultrapain.Patches
             }
             return true;
         }
-    }
 
-    class StreetCleaner_Fire_FF
-    {
-        static bool Prefix(FireZone __instance)
+		public static bool DetectCauseCheck()
+		{
+			return ConfigManager.friendlyFireDamageOverrideToggle.value;
+		}
+	}
+
+	[UltrapainPatch]
+	[HarmonyPatch(typeof(FireZone))]
+	public static class StreetCleanerFriendlyFirePatch
+	{
+		[HarmonyPatch(nameof(FireZone.OnTriggerStay))]
+		[HarmonyPrefix]
+		[UltrapainPatch]
+		public static bool DetectCause(FireZone __instance)
         {
             if (__instance.source != FlameSource.Streetcleaner)
                 return true;
 
-            EnemyIdentifier_DeliverDamage_FF.friendlyBurn = true;
+            EnemyIdentifierPatch.friendlyBurn = true;
             return true;
         }
 
-        static void Postfix(FireZone __instance)
+		public static bool DetectCauseCheck()
+		{
+			return ConfigManager.friendlyFireDamageOverrideToggle.value;
+		}
+
+		[HarmonyPatch(nameof(FireZone.OnTriggerStay))]
+		[HarmonyPostfix]
+		[UltrapainPatch]
+		public static void ResetCause(FireZone __instance)
         {
             if (__instance.source == FlameSource.Streetcleaner)
-                EnemyIdentifier_DeliverDamage_FF.friendlyBurn = false;
+                EnemyIdentifierPatch.friendlyBurn = false;
         }
-    }
+
+		public static bool ResetCauseCheck()
+		{
+			return ConfigManager.friendlyFireDamageOverrideToggle.value;
+		}
+	}
 }

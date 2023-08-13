@@ -36,7 +36,7 @@ namespace Ultrapain.Patches
         [HarmonyBefore(new string[] { "tempy.fastpunch" })]
         static bool Prefix(Punch __instance)
         {
-            __instance.blastWave = GameObject.Instantiate(Plugin.explosionWaveKnuckleblaster, new Vector3(1000000, 1000000, 1000000), Quaternion.identity);
+            __instance.blastWave = GameObject.Instantiate(Plugin.explosion.objWaveKnuckleblaster, new Vector3(1000000, 1000000, 1000000), Quaternion.identity);
             __instance.blastWave.AddComponent<OrbitalStrikeFlag>();
             return true;
         }
@@ -45,7 +45,7 @@ namespace Ultrapain.Patches
         static void Postfix(Punch __instance)
         {
             GameObject.Destroy(__instance.blastWave);
-            __instance.blastWave = Plugin.explosionWaveKnuckleblaster;
+            __instance.blastWave = Plugin.explosion.objWaveKnuckleblaster;
         }
     }
 
@@ -364,7 +364,7 @@ namespace Ultrapain.Patches
                 {
                     float damageMulti = 1f;
                     float sizeMulti = 1f;
-                    GameObject explosion = GameObject.Instantiate<GameObject>(___interruptionExplosion, __instance.transform.position, Quaternion.identity);
+                    GameObject explosion = GameObject.Instantiate(___interruptionExplosion, __instance.transform.position, Quaternion.identity);
                     OrbitalExplosionInfo info = explosion.AddComponent<OrbitalExplosionInfo>();
                     info.id = "";
 
@@ -531,7 +531,7 @@ namespace Ultrapain.Patches
                 {
                     if(ConfigManager.orbStrikeRevolverExplosion.value)
                     {
-                        GameObject explosion = GameObject.Instantiate(Plugin.explosion, /*__instance.gameObject.transform.position*/__2, Quaternion.identity);
+                        GameObject explosion = GameObject.Instantiate(Plugin.explosion.obj, /*__instance.gameObject.transform.position*/__2, Quaternion.identity);
                         foreach (Explosion exp in explosion.GetComponentsInChildren<Explosion>())
                         {
                             exp.enemy = false;
@@ -556,7 +556,7 @@ namespace Ultrapain.Patches
                         {
                             if(ConfigManager.orbStrikeRevolverChargedInsignia.value)
                             {
-                                GameObject insignia = GameObject.Instantiate(Plugin.virtueInsignia, /*__instance.transform.position*/__2, Quaternion.identity);
+                                GameObject insignia = GameObject.Instantiate(Plugin.virtueInsignia.obj, /*__instance.transform.position*/__2, Quaternion.identity);
                                 // This is required for ff override to detect this insignia as non ff attack
                                 insignia.gameObject.name = "PlayerSpawned";
                                 float horizontalSize = ConfigManager.orbStrikeRevolverChargedInsigniaSize.value;
@@ -577,7 +577,7 @@ namespace Ultrapain.Patches
                         {
                             if (ConfigManager.orbStrikeRevolverExplosion.value)
                             {
-                                GameObject explosion = GameObject.Instantiate(Plugin.explosion, /*__instance.gameObject.transform.position*/__2, Quaternion.identity);
+                                GameObject explosion = GameObject.Instantiate(Plugin.explosion.obj, /*__instance.gameObject.transform.position*/__2, Quaternion.identity);
                                 foreach (Explosion exp in explosion.GetComponentsInChildren<Explosion>())
                                 {
                                     exp.enemy = false;
@@ -599,7 +599,7 @@ namespace Ultrapain.Patches
                     {
                         if(ConfigManager.orbStrikeElectricCannonExplosion.value)
                         {
-                            GameObject lighning = GameObject.Instantiate(Plugin.lightningStrikeExplosive, /*__instance.gameObject.transform.position*/ __2, Quaternion.identity);
+                            GameObject lighning = GameObject.Instantiate(Plugin.lightningStrikeExplosive.obj, /*__instance.gameObject.transform.position*/ __2, Quaternion.identity);
                             foreach (Explosion exp in lighning.GetComponentsInChildren<Explosion>())
                             {
                                 exp.enemy = false;

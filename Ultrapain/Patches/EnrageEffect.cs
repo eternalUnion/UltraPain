@@ -1,14 +1,21 @@
-﻿using System;
+﻿using HarmonyLib;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using UltrapainExtensions;
 using UnityEngine;
 
 namespace Ultrapain.Patches
 {
-    class EnrageEffect_Start
+    [UltrapainPatch]
+    [HarmonyPatch(typeof(EnrageEffect))]
+    public static class EnrageEffectPatch
     {
-        static void Postfix(EnrageEffect __instance)
+        [HarmonyPatch(nameof(EnrageEffect.Start))]
+        [HarmonyPostfix]
+        [UltrapainPatch]
+        public static void CreateEnrageSFX(EnrageEffect __instance)
         {
             AudioSource enrageAud = __instance.gameObject.GetComponents<AudioSource>().Where(src => src.loop).First();
             if (enrageAud.isPlaying)
@@ -16,5 +23,10 @@ namespace Ultrapain.Patches
             enrageAud.clip = Plugin.enrageAudioCustom;
             enrageAud.Play();
         }
-    }
+
+        public static bool CreateEnrageSFXCheck()
+        {
+            return ConfigManager.enrageSfxToggle.value;
+        }
+	}
 }

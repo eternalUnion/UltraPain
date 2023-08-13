@@ -73,7 +73,7 @@ namespace Ultrapain.Patches
             if (___eid.enemyType != EnemyType.Schism)
                 return;
 
-            __instance.projectile = Plugin.homingProjectile;
+            __instance.projectile = Plugin.homingProjectile.obj;
             __instance.decProjectile = Plugin.decorativeProjectile2;
         }
     }*/

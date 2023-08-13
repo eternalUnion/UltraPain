@@ -3,21 +3,22 @@ using Sandbox;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using UltrapainExtensions;
 using UnityEngine;
 using UnityEngine.AI;
 
 namespace Ultrapain.Patches
 {
-    class MinosPrimeCharge
+    public static class MinosPrimeCharge
     {
-        static GameObject decoy;
+        private static GameObject decoy;
 
         public static void CreateDecoy()
         {
             if (decoy != null || Plugin.minosPrime == null)
                 return;
 
-            decoy = GameObject.Instantiate(Plugin.minosPrime, Vector3.zero, Quaternion.identity);
+            decoy = GameObject.Instantiate(Plugin.minosPrime.obj, Vector3.zero, Quaternion.identity);
             decoy.SetActive(false);
 
             GameObject.Destroy(decoy.GetComponent<MinosPrime>());
@@ -50,7 +51,7 @@ namespace Ultrapain.Patches
                 GameObject.Destroy(eii);
         }
 
-        static void DrawTrail(MinosPrime instance, Animator anim, Vector3 startPosition, Vector3 targetPosition)
+        public static void DrawTrail(MinosPrime instance, Animator anim, Vector3 startPosition, Vector3 targetPosition)
         {
             if(decoy == null)
             {
@@ -86,48 +87,9 @@ namespace Ultrapain.Patches
                 currentPosition = Vector3.MoveTowards(currentPosition, targetPosition, deltaDistance);
             }
         }
-
-        static void Postfix(MinosPrime __instance, Animator ___anim)
-        {
-            string stateName = ___anim.GetCurrentAnimatorClipInfo(0)[0].clip.name;
-            MinosPrimeFlag flag = __instance.GetComponent<MinosPrimeFlag>();
-            if (stateName == "Combo" || (flag != null && flag.throwingProjectile))
-                return;
-
-            Transform player = MonoSingleton<PlayerTracker>.Instance.GetPlayer();
-
-            float min = ConfigManager.minosPrimeRandomTeleportMinDistance.value;
-            float max = ConfigManager.minosPrimeRandomTeleportMaxDistance.value;
-
-            Vector3 unitSphere = UnityEngine.Random.onUnitSphere;
-            unitSphere.y = Mathf.Abs(unitSphere.y);
-            float distance = UnityEngine.Random.Range(min, max);
-
-            Ray ray = new Ray(player.position, unitSphere);
-
-            LayerMask mask = new LayerMask();
-            mask.value |= 256 | 16777216;
-            if (Physics.Raycast(ray, out RaycastHit hit, max, mask, QueryTriggerInteraction.Ignore))
-            {
-                if (hit.distance < min)
-                    return;
-                Vector3 point = ray.GetPoint(hit.distance - 5);
-                __instance.Teleport(point, __instance.transform.position);
-            }
-            else
-            {
-                Vector3 point = ray.GetPoint(distance);
-                __instance.Teleport(point, __instance.transform.position);
-            }
-        }
-
-        static void TeleportPostfix(MinosPrime __instance, Animator ___anim, Vector3 __0, Vector3 __1)
-        {
-            DrawTrail(__instance, ___anim, __1, __0);
-        }
     }
 
-    class MinosPrimeFlag : MonoBehaviour
+    public class MinosPrimeFlag : MonoBehaviour
     {
         void Start()
         {
@@ -136,7 +98,7 @@ namespace Ultrapain.Patches
 
         public void ComboExplosion()
         {
-            GameObject explosion = Instantiate(Plugin.lightningStrikeExplosive, transform.position, Quaternion.identity);
+            GameObject explosion = Instantiate(Plugin.lightningStrikeExplosive.obj.obj, transform.position, Quaternion.identity);
             foreach(Explosion e in explosion.GetComponentsInChildren<Explosion>())
             {
                 e.toIgnore.Add(EnemyType.MinosPrime);
@@ -148,7 +110,7 @@ namespace Ultrapain.Patches
 
         public void BigExplosion()
         {
-            GameObject explosion = Instantiate(Plugin.lightningStrikeExplosive, transform.position, Quaternion.identity);
+            GameObject explosion = Instantiate(Plugin.lightningStrikeExplosive.obj.obj, transform.position, Quaternion.identity);
             foreach (Explosion e in explosion.GetComponentsInChildren<Explosion>())
             {
                 e.toIgnore.Add(EnemyType.MinosPrime);
@@ -164,181 +126,289 @@ namespace Ultrapain.Patches
         public bool explosionAttack = false;
     }
 
-    class MinosPrime_Start
+    [UltrapainPatch]
+    [HarmonyPatch(typeof(MinosPrime))]
+    public static class MinosPrimePatch
     {
-        static void Postfix(MinosPrime __instance, Animator ___anim, ref bool ___enraged)
-        {
-            if (ConfigManager.minosPrimeEarlyPhaseToggle.value)
-                ___enraged = true;
-            __instance.gameObject.AddComponent<MinosPrimeFlag>();
+		[HarmonyPatch(nameof(MinosPrime.ProjectileCharge))]
+		[HarmonyPostfix]
+		[UltrapainPatch]
+		public static void PunchTeleport(MinosPrime __instance)
+		{
+			MinosPrimeFlag flag = __instance.GetComponent<MinosPrimeFlag>();
+			if (flag == null)
+				return;
+			string stateName = __instance.anim.GetCurrentAnimatorClipInfo(0)[0].clip.name;
+			if (stateName == "Combo" || flag.throwingProjectile)
+				return;
 
-            if (ConfigManager.minosPrimeComboExplosionToggle.value)
-            {
-                AnimationClip boxing = ___anim.runtimeAnimatorController.animationClips.Where(item => item.name == "Boxing").First();
-                List<UnityEngine.AnimationEvent> boxingEvents = boxing.events.ToList();
-                boxingEvents.Insert(15, new UnityEngine.AnimationEvent() { time = 2.4f, functionName = "ComboExplosion", messageOptions = SendMessageOptions.RequireReceiver });
-                boxing.events = boxingEvents.ToArray();
-            }
+			Transform player = MonoSingleton<PlayerTracker>.Instance.GetPlayer();
+
+			float min = ConfigManager.minosPrimeRandomTeleportMinDistance.value;
+			float max = ConfigManager.minosPrimeRandomTeleportMaxDistance.value;
+
+			Vector3 unitSphere = UnityEngine.Random.onUnitSphere;
+			unitSphere.y = Mathf.Abs(unitSphere.y);
+			float distance = UnityEngine.Random.Range(min, max);
+
+			Ray ray = new Ray(player.position, unitSphere);
+
+			LayerMask mask = new LayerMask();
+			mask.value |= 256 | 16777216;
+			if (Physics.Raycast(ray, out RaycastHit hit, max, mask, QueryTriggerInteraction.Ignore))
+			{
+				if (hit.distance < min)
+					return;
+				Vector3 point = ray.GetPoint(hit.distance - 5);
+				__instance.Teleport(point, __instance.transform.position);
+			}
+			else
+			{
+				Vector3 point = ray.GetPoint(distance);
+				__instance.Teleport(point, __instance.transform.position);
+			}
+		}
+
+		public static bool PunchTeleportCheck()
+		{
+			return ConfigManager.enemyTweakToggle.value && ConfigManager.minosPrimeTeleportTrail.value;
+		}
+
+		[HarmonyPatch(nameof(MinosPrime.Teleport))]
+		[HarmonyPostfix]
+		[UltrapainPatch]
+		public static void TeleportTrail(MinosPrime __instance, Vector3 __0, Vector3 __1)
+		{
+			if (__instance.gameObject.GetComponent<MinosPrimeFlag>() == null)
+				return;
+
+			MinosPrimeCharge.DrawTrail(__instance, __instance.anim, __1, __0);
+		}
+
+		public static bool TeleportTrailCheck()
+		{
+			return ConfigManager.enemyTweakToggle.value && ConfigManager.minosPrimeTeleportTrail.value;
+		}
+
+		[HarmonyPatch(nameof(MinosPrime.StopAction))]
+        [HarmonyPostfix]
+        [UltrapainPatch]
+        public static void ApplyCombo(MinosPrime __instance)
+		{
+			MinosPrimeFlag flag = __instance.GetComponent<MinosPrimeFlag>();
+			if (flag == null)
+				return;
+
+			if (flag.plannedAttack != "")
+			{
+				__instance.SendMessage(flag.plannedAttack);
+				flag.plannedAttack = "";
+			}
+		}
+
+		public static bool ApplyComboCheck()
+        {
+            return ConfigManager.enemyTweakToggle.value && ConfigManager.minosPrimeComboToggle.value;
         }
-    }
 
-    class MinosPrime_StopAction
-    {
-        static void Postfix(MinosPrime __instance, EnemyIdentifier ___eid)
+		[HarmonyPatch(nameof(MinosPrime.Dropkick))]
+		[HarmonyPrefix]
+		[UltrapainPatch]
+		public static bool JudgementModification(MinosPrime __instance)
+		{
+			MinosPrimeFlag flag = __instance.GetComponent<MinosPrimeFlag>();
+			if (flag == null)
+				return true;
+
+			if (!flag.throwingProjectile)
+			{
+				if (ConfigManager.minosPrimeExplosionToggle.value
+					&& UnityEngine.Random.Range(0, 99.9f) < ConfigManager.minosPrimeExplosionChance.value)
+				{
+					__instance.TeleportAnywhere();
+					__instance.inAction = true;
+					flag.explosionAttack = true;
+					__instance.anim.speed = __instance.eid.totalSpeedModifier * ConfigManager.minosPrimeExplosionWindupSpeed.value;
+					__instance.anim.Play("Outro", 0, 0.5f);
+					__instance.PlayVoice(new AudioClip[] { __instance.phaseChangeVoice });
+
+					return false;
+				}
+
+				if (ConfigManager.minosPrimeComboToggle.value)
+				{
+					flag.throwingProjectile = true;
+					flag.plannedAttack = "Dropkick";
+					__instance.SendMessage("ProjectilePunch");
+				}
+
+				return false;
+			}
+			else
+			{
+				if (ConfigManager.minosPrimeComboToggle.value)
+				{
+					flag.plannedAttack = "ProjectilePunch";
+					flag.throwingProjectile = false;
+				}
+			}
+
+			return true;
+		}
+
+		public static bool JudgementModificationCheck()
         {
-            MinosPrimeFlag flag = __instance.GetComponent<MinosPrimeFlag>();
-            if (flag == null)
+            return ConfigManager.enemyTweakToggle.value;
+        }
+
+		[HarmonyPatch(nameof(MinosPrime.Combo))]
+		[HarmonyPostfix]
+		[UltrapainPatch]
+		public static void PrepareThyselfModification(MinosPrime __instance)
+		{
+			MinosPrimeFlag flag = __instance.GetComponent<MinosPrimeFlag>();
+			if (flag == null)
+				return;
+
+			flag.plannedAttack = "Uppercut";
+		}
+
+		public static bool PrepareThyselfModification()
+        {
+            return ConfigManager.enemyTweakToggle.value && ConfigManager.minosPrimeComboToggle.value;
+
+		}
+
+		[HarmonyPatch(nameof(MinosPrime.RiderKick))]
+		[HarmonyPrefix]
+		[UltrapainPatch]
+		public static bool DieModification(MinosPrime __instance)
+		{
+			MinosPrimeFlag flag = __instance.GetComponent<MinosPrimeFlag>();
+			if (flag == null)
+				return true;
+
+			if (UnityEngine.Random.Range(0, 99.9f) > ConfigManager.minosPrimeCrushAttackChance.value)
+				return true;
+
+			__instance.previouslyRiderKicked = true;
+
+			Vector3 vector = MonoSingleton<PlayerTracker>.Instance.PredictPlayerPosition(0.5f);
+			Transform target = MonoSingleton<PlayerTracker>.Instance.GetPlayer();
+			if (vector.y < target.position.y)
+			{
+				vector.y = target.position.y;
+			}
+
+			__instance.Teleport(vector + Vector3.up * 25f, __instance.transform.position);
+			__instance.SendMessage("DropAttack");
+			return false;
+		}
+
+		public static bool DieModificationCheck()
+        {
+            return ConfigManager.enemyTweakToggle.value && ConfigManager.minosPrimeCrushAttackToggle.value;
+        }
+
+		[HarmonyPatch(nameof(MinosPrime.ProjectileCharge))]
+		[HarmonyPrefix]
+		[UltrapainPatch]
+		public static bool PrepareThyselfExplosiveKick(MinosPrime __instance)
+		{
+			MinosPrimeFlag flag = __instance.GetComponent<MinosPrimeFlag>();
+			if (flag == null)
+				return true;
+            
+			string clipname = __instance.anim.GetCurrentAnimatorClipInfo(0)[0].clip.name;
+			if (clipname != "Combo" || UnityEngine.Random.Range(0, 99.9f) > ConfigManager.minosPrimeComboExplosiveEndChance.value)
+				return true;
+
+			__instance.anim.Play("Dropkick", 0, (1.0815f - 0.4279f) / 2.65f);
+			return false;
+		}
+
+		public static bool PrepareThyselfExplosiveKickCheck()
+        {
+            return ConfigManager.enemyTweakToggle.value && ConfigManager.minosPrimeComboExplosiveEndToggle.value;
+        }
+
+		[HarmonyPatch(nameof(MinosPrime.Ascend))]
+		[HarmonyPrefix]
+		[UltrapainPatch]
+		public static bool WeakAttack(MinosPrime __instance)
+		{
+			if (__instance.eid.health <= 0)
+				return true;
+
+			MinosPrimeFlag flag = __instance.GetComponent<MinosPrimeFlag>();
+			if (flag == null)
+				return true;
+
+			if (!flag.explosionAttack)
+				return true;
+
+			__instance.anim.speed = __instance.eid.totalSpeedModifier;
+			__instance.vibrating = false;
+			flag.explosionAttack = false;
+			flag.BigExplosion();
+			__instance.Invoke("Uppercut", 0.5f);
+			return false;
+		}
+
+		public static bool WeakAttackCheck()
+        {
+            return ConfigManager.enemyTweakToggle.value && ConfigManager.minosPrimeExplosionToggle.value; ;
+        }
+
+		[HarmonyPatch(nameof(MinosPrime.Death))]
+		[HarmonyPrefix]
+		[UltrapainPatch]
+		public static bool OnDeath(MinosPrime __instance)
+		{
+			MinosPrimeFlag flag = __instance.GetComponent<MinosPrimeFlag>();
+			if (flag == null)
+				return true;
+
+			if (!flag.explosionAttack)
+				return true;
+
+			flag.explosionAttack = false;
+			__instance.vibrating = false;
+			__instance.anim.speed = 1f;
+			__instance.anim.Play("Walk", 0, 0f);
+
+			return true;
+		}
+
+		public static bool OnDeathCheck()
+        {
+            return ConfigManager.enemyTweakToggle.value;
+        }
+
+		[HarmonyPatch(nameof(MinosPrime.Start))]
+		[HarmonyPostfix]
+		[UltrapainPatch]
+		public static void AddFlag(MinosPrime __instance)
+		{
+            if (__instance.gameObject.GetComponent<NonUltrapainEnemy>() != null)
                 return;
 
-            if (flag.plannedAttack != "")
-            {
-                __instance.SendMessage(flag.plannedAttack);
-                flag.plannedAttack = "";
-            }
-        }
-    }
+			__instance.gameObject.AddComponent<MinosPrimeFlag>(); 
+			if (ConfigManager.minosPrimeEarlyPhaseToggle.value)
+				__instance.enraged = true;
 
-    // aka JUDGEMENT
-    class MinosPrime_Dropkick
-    {
-        static bool Prefix(MinosPrime __instance, EnemyIdentifier ___eid, ref bool ___inAction, Animator ___anim)
-        {
-            MinosPrimeFlag flag = __instance.GetComponent<MinosPrimeFlag>();
-            if (flag == null)
-                return true;
+			if (ConfigManager.minosPrimeComboExplosionToggle.value)
+			{
+				AnimationClip boxing = __instance.anim.runtimeAnimatorController.animationClips.Where(item => item.name == "Boxing").First();
+				List<UnityEngine.AnimationEvent> boxingEvents = boxing.events.ToList();
+				boxingEvents.Insert(15, new UnityEngine.AnimationEvent() { time = 2.4f, functionName = "ComboExplosion", messageOptions = SendMessageOptions.RequireReceiver });
+				boxing.events = boxingEvents.ToArray();
+			}
+		}
 
-            if (!flag.throwingProjectile)
-            {
-                if (ConfigManager.minosPrimeExplosionToggle.value
-                    && UnityEngine.Random.Range(0, 99.9f) < ConfigManager.minosPrimeExplosionChance.value)
-                {
-                    __instance.TeleportAnywhere();
-                    ___inAction = true;
-                    flag.explosionAttack = true;
-                    ___anim.speed = ___eid.totalSpeedModifier * ConfigManager.minosPrimeExplosionWindupSpeed.value;
-                    ___anim.Play("Outro", 0, 0.5f);
-                    __instance.PlayVoice(new AudioClip[] { __instance.phaseChangeVoice });
-
-                    return false;
-                }
-
-                if (ConfigManager.minosPrimeComboToggle.value)
-                {
-                    flag.throwingProjectile = true;
-                    flag.plannedAttack = "Dropkick";
-                    __instance.SendMessage("ProjectilePunch");
-                }
-
-                return false;
-            }
-            else
-            {
-                if (ConfigManager.minosPrimeComboToggle.value)
-                {
-                    flag.plannedAttack = "ProjectilePunch";
-                    flag.throwingProjectile = false;
-                }
-            }
-
-            return true;
-        }
-    }
-
-    // aka PREPARE THYSELF
-    class MinosPrime_Combo
-    {
-        static float timing = 3f;
-
-        static void Postfix(MinosPrime __instance, EnemyIdentifier ___eid)
-        {
-            if (!ConfigManager.minosPrimeComboToggle.value)
-                return;
-
-            MinosPrimeFlag flag = __instance.GetComponent<MinosPrimeFlag>();
-            if (flag == null)
-                return;
-
-            flag.plannedAttack = "Uppercut";
-        }
-    }
-
-    // aka DIE
-    class MinosPrime_RiderKick
-    {
-        static bool Prefix(MinosPrime __instance, ref bool ___previouslyRiderKicked)
-        {
-            if (UnityEngine.Random.Range(0, 99.9f) > ConfigManager.minosPrimeCrushAttackChance.value)
-                return true;
-
-            ___previouslyRiderKicked = true;
-
-            Vector3 vector = MonoSingleton<PlayerTracker>.Instance.PredictPlayerPosition(0.5f);
-            Transform target = MonoSingleton<PlayerTracker>.Instance.GetPlayer();
-            if (vector.y < target.position.y)
-            {
-                vector.y = target.position.y;
-            }
-
-            __instance.Teleport(vector + Vector3.up * 25f, __instance.transform.position);
-            __instance.SendMessage("DropAttack");
-            return false;
-        }
-    }
-
-    // End of PREPARE THYSELF
-    class MinosPrime_ProjectileCharge
-    {
-        static bool Prefix(MinosPrime __instance, Animator ___anim)
-        {
-            string clipname = ___anim.GetCurrentAnimatorClipInfo(0)[0].clip.name;
-            if (clipname != "Combo" || UnityEngine.Random.Range(0, 99.9f) > ConfigManager.minosPrimeComboExplosiveEndChance.value)
-                return true;
-
-            ___anim.Play("Dropkick", 0, (1.0815f - 0.4279f) / 2.65f);
-            return false;
-        }
-    }
-
-    class MinosPrime_Ascend
-    {
-        static bool Prefix(MinosPrime __instance, EnemyIdentifier ___eid, Animator ___anim, ref bool ___vibrating)
-        {
-            if (___eid.health <= 0)
-                return true;
-
-            MinosPrimeFlag flag = __instance.GetComponent<MinosPrimeFlag>();
-            if (flag == null)
-                return true;
-
-            if (!flag.explosionAttack)
-                return true;
-
-            ___anim.speed = ___eid.totalSpeedModifier;
-            ___vibrating = false;
-            flag.explosionAttack = false;
-            flag.BigExplosion();
-            __instance.Invoke("Uppercut", 0.5f);
-            return false;
-        }
-    }
-
-    class MinosPrime_Death
-    {
-        static bool Prefix(MinosPrime __instance, Animator ___anim, ref bool ___vibrating)
-        {
-            MinosPrimeFlag flag = __instance.GetComponent<MinosPrimeFlag>();
-            if (flag == null)
-                return true;
-
-            if (!flag.explosionAttack)
-                return true;
-
-            flag.explosionAttack = false;
-            ___vibrating = false;
-            ___anim.speed = 1f;
-            ___anim.Play("Walk", 0, 0f);
-
-            return true;
-        }
-    }
+		public static bool AddFlagCheck()
+		{
+			return ConfigManager.enemyTweakToggle.value;
+		}
+	}
 }

@@ -836,7 +836,7 @@ namespace Ultrapain
             {
                 if (dirtyField)
                 {
-                    Plugin.PatchAll();
+                    PatchManager.Reload();
                     dirtyField = false;
                 }
             };
@@ -1252,7 +1252,7 @@ namespace Ultrapain
             rocketBoostStyleText = new FormattedStringField(rocketBoostDiv, "Style text", "rocketBoostStyleText", rocketBoostStyleBuilder.Build());
             rocketBoostStyleText.onValueChange += (FormattedStringField.FormattedStringValueChangeEvent e) =>
             {
-                Plugin.StyleIDs.UpdateID(rocketBoostStyleText.guid, e.formattedString.formattedString);
+                StyleManager.UpdateID(rocketBoostStyleText.guid, e.formattedString.formattedString);
             };
             rocketBoostStylePoints = new IntField(rocketBoostDiv, "Style points", "rocketBoostStylePoints", 10, 0, int.MaxValue);
 
@@ -1281,7 +1281,7 @@ namespace Ultrapain
             grenadeBoostStyleText = new FormattedStringField(grenadeBoostDiv, "Style text", "grenadeBoostStyleText", grenadeBoostStyleBuilder.Build());
             grenadeBoostStyleText.onValueChange += (FormattedStringField.FormattedStringValueChangeEvent e) =>
             {
-                Plugin.StyleIDs.UpdateID(grenadeBoostStyleText.guid, e.formattedString.formattedString);
+                StyleManager.UpdateID(grenadeBoostStyleText.guid, e.formattedString.formattedString);
             };
             grenadeBoostStylePoints = new IntField(grenadeBoostDiv, "Style points", "grenadeBoostStylePoints", 10, 0, int.MaxValue);
 
@@ -1330,7 +1330,7 @@ namespace Ultrapain
             orbStrikeRevolverStyleText = new FormattedStringField(orbStrikeDiv, "Style text", "orbStrikeRevolverStyleText", orbStrikeRevolverBuilder.Build());
             orbStrikeRevolverStyleText.onValueChange += (FormattedStringField.FormattedStringValueChangeEvent e) =>
             {
-                Plugin.StyleIDs.UpdateID(orbStrikeRevolverStyleText.guid, e.formattedString.formattedString);
+                StyleManager.UpdateID(orbStrikeRevolverStyleText.guid, e.formattedString.formattedString);
             };
             orbStrikeRevolverStylePoint = new IntField(orbStrikeDiv, "Style point", "orbStrikeRevolverStylePoint", 20, 0, int.MaxValue);
             new ConfigHeader(orbStrikeDiv, "--Grenade Explosion Boost--", 12);
@@ -1365,7 +1365,7 @@ namespace Ultrapain
             orbStrikeRevolverChargedStyleText = new FormattedStringField(orbStrikeDiv, "Style text", "orbStrikeRevolverChargedStyleText", orbStrikeRevolverChargedBuilder.Build());
             orbStrikeRevolverChargedStyleText.onValueChange += (FormattedStringField.FormattedStringValueChangeEvent e) =>
             {
-                Plugin.StyleIDs.UpdateID(orbStrikeRevolverChargedStyleText.guid, e.formattedString.formattedString);
+                StyleManager.UpdateID(orbStrikeRevolverChargedStyleText.guid, e.formattedString.formattedString);
             };
             orbStrikeRevolverChargedStylePoint = new IntField(orbStrikeDiv, "Style point", "orbStrikeRevolverChargedStylePoint", 30, 0, int.MaxValue);
             new ConfigHeader(orbStrikeDiv, "--Grenade Explosion Boost--", 12);
@@ -1403,7 +1403,7 @@ namespace Ultrapain
             orbStrikeElectricCannonStyleText = new FormattedStringField(orbStrikeDiv, "Style text", "orbStrikeElectricCannonStyleText", orbStrikeElectricCannonBuilder.Build());
             orbStrikeElectricCannonStyleText.onValueChange += (FormattedStringField.FormattedStringValueChangeEvent e) =>
             {
-                Plugin.StyleIDs.UpdateID(orbStrikeElectricCannonStyleText.guid, e.formattedString.formattedString);
+                StyleManager.UpdateID(orbStrikeElectricCannonStyleText.guid, e.formattedString.formattedString);
             };
             orbStrikeElectricCannonStylePoint = new IntField(orbStrikeDiv, "Style point", "orbStrikeElectricCannonStylePoint", 50, 0, int.MaxValue);
             new ConfigHeader(orbStrikeDiv, "--Grenade Explosion Boost--", 12);
@@ -1439,7 +1439,7 @@ namespace Ultrapain
             orbStrikeMaliciousCannonStyleText = new FormattedStringField(orbStrikeDiv, "Style text", "orbStrikeMaliciousCannonStyleText", orbStrikeMaliciousBuilder.Build());
             orbStrikeMaliciousCannonStyleText.onValueChange += (FormattedStringField.FormattedStringValueChangeEvent e) =>
             {
-                Plugin.StyleIDs.UpdateID(orbStrikeMaliciousCannonStyleText.guid, e.formattedString.formattedString);
+                StyleManager.UpdateID(orbStrikeMaliciousCannonStyleText.guid, e.formattedString.formattedString);
             };
             orbStrikeMaliciousCannonStylePoint = new IntField(orbStrikeDiv, "Style point", "orbStrikeMaliciousCannonStylePoint", 70, 0, int.MaxValue);
             new ConfigHeader(orbStrikeDiv, "--Grenade Explosion Boost--", 12);
@@ -1476,7 +1476,7 @@ namespace Ultrapain
             maliciousChargebackStyleText = new FormattedStringField(orbStrikeDiv, "Style text", "maliciousChargebackStyleText", maliciousChargebackBuilder.Build());
             maliciousChargebackStyleText.onValueChange += (FormattedStringField.FormattedStringValueChangeEvent e) =>
             {
-                Plugin.StyleIDs.UpdateID(maliciousChargebackStyleText.guid, e.formattedString.formattedString);
+                StyleManager.UpdateID(maliciousChargebackStyleText.guid, e.formattedString.formattedString);
             };
             maliciousChargebackStylePoint = new IntField(orbStrikeDiv, "Style point", "maliciousChargebackStylePoint", 100, 0, int.MaxValue);
             maliciousChargebackExplosionToggle = new BoolField(orbStrikeDiv, "Explosion on hit", "maliciousChargebackExplosionToggle", true);
@@ -1494,7 +1494,7 @@ namespace Ultrapain
             sentryChargebackStyleText = new FormattedStringField(orbStrikeDiv, "Style text", "sentryChargebackStyleText", maliciousChargebackBuilder.Build());
             sentryChargebackStyleText.onValueChange += (FormattedStringField.FormattedStringValueChangeEvent e) =>
             {
-                Plugin.StyleIDs.UpdateID(sentryChargebackStyleText.guid, e.formattedString.formattedString);
+                StyleManager.UpdateID(sentryChargebackStyleText.guid, e.formattedString.formattedString);
             };
             sentryChargebackStylePoint = new IntField(orbStrikeDiv, "Style point", "sentryChargebackStylePoint", 100, 0, int.MaxValue);
             sentryChargebackExtraBeamCount = new IntField(orbStrikeDiv, "Beam split count", "sentryChargebackExtraBeamCount", 5, 0, int.MaxValue);
@@ -1503,56 +1503,56 @@ namespace Ultrapain
             globalEnemyPanel = new ConfigPanel(enemyPanel, "Global enemy tweaks", "globalEnemyPanel");
             new ConfigHeader(enemyPanel, "Common Enemies");
             filthPanel = new ConfigPanel(enemyPanel, "Filth", "filthPanel", ConfigPanel.PanelFieldType.StandardWithIcon);
-            filthPanel.icon = Plugin.LoadObject<Sprite>("Assets/Textures/UI/Spawn Menu/Filth.png");
+            Plugin.LoadObject<Sprite>("Assets/Textures/UI/Spawn Menu/Filth.png").Completed += (e) => { filthPanel.icon = e.Result; };
 			somethingWickedPanel = new ConfigPanel(enemyPanel, "Something Wicked", "somethingWickedPanel", ConfigPanel.PanelFieldType.StandardWithIcon);
-			somethingWickedPanel.icon = Plugin.LoadObject<Sprite>("Assets/Textures/UI/Spawn Menu/Something_Wicked.png");
+			Plugin.LoadObject<Sprite>("Assets/Textures/UI/Spawn Menu/Something_Wicked.png").Completed += (e) => { somethingWickedPanel.icon = e.Result; };
 			strayPanel = new ConfigPanel(enemyPanel, "Stray", "strayPanel", ConfigPanel.PanelFieldType.StandardWithIcon);
-            strayPanel.icon = Plugin.LoadObject<Sprite>("Assets/Textures/UI/Spawn Menu/Tall_Husk.png");
+            Plugin.LoadObject<Sprite>("Assets/Textures/UI/Spawn Menu/Tall_Husk.png").Completed += (e) => { strayPanel.icon = e.Result; };
 			schismPanel = new ConfigPanel(enemyPanel, "Schism", "schismPanel", ConfigPanel.PanelFieldType.StandardWithIcon);
-            schismPanel.icon = Plugin.LoadObject<Sprite>("Assets/Textures/UI/Spawn Menu/Schism.png");
+            Plugin.LoadObject<Sprite>("Assets/Textures/UI/Spawn Menu/Schism.png").Completed += (e) => { schismPanel.icon = e.Result; };
 			soliderPanel = new ConfigPanel(enemyPanel, "Soldier", "soliderPanel", ConfigPanel.PanelFieldType.StandardWithIcon);
-            soliderPanel.icon = Plugin.LoadObject<Sprite>("Assets/Textures/UI/Spawn Menu/Shotgun_Husk.png");
+            Plugin.LoadObject<Sprite>("Assets/Textures/UI/Spawn Menu/Shotgun_Husk.png").Completed += (e) => { soliderPanel.icon = e.Result; };
 			dronePanel = new ConfigPanel(enemyPanel, "Drone", "dronePanel", ConfigPanel.PanelFieldType.StandardWithIcon);
-            dronePanel.icon = Plugin.LoadObject<Sprite>("Assets/Textures/UI/Spawn Menu/Drone.png");
+            Plugin.LoadObject<Sprite>("Assets/Textures/UI/Spawn Menu/Drone.png").Completed += (e) => { dronePanel.icon = e.Result; };
 			idolPanel = new ConfigPanel(enemyPanel, "Idol", "idolPanel", ConfigPanel.PanelFieldType.StandardWithIcon);
-            idolPanel.icon = Plugin.LoadObject<Sprite>("Assets/Textures/UI/Spawn Menu/Idol.png");
+            Plugin.LoadObject<Sprite>("Assets/Textures/UI/Spawn Menu/Idol.png").Completed += (e) => { idolPanel.icon = e.Result; };
 			streetCleanerPanel = new ConfigPanel(enemyPanel, "Streetcleaner", "streetCleanerPanel", ConfigPanel.PanelFieldType.StandardWithIcon);
-            streetCleanerPanel.icon = Plugin.LoadObject<Sprite>("Assets/Textures/UI/Spawn Menu/Streetcleaner.png");
+            Plugin.LoadObject<Sprite>("Assets/Textures/UI/Spawn Menu/Streetcleaner.png").Completed += (e) => { streetCleanerPanel.icon = e.Result; };
 			virtuePanel = new ConfigPanel(enemyPanel, "Virtue", "virtuePanel", ConfigPanel.PanelFieldType.StandardWithIcon);
-            virtuePanel.icon = Plugin.LoadObject<Sprite>("Assets/Textures/UI/Spawn Menu/Virtue.png");
+            Plugin.LoadObject<Sprite>("Assets/Textures/UI/Spawn Menu/Virtue.png").Completed += (e) => { virtuePanel.icon = e.Result; };
 			stalkerPanel = new ConfigPanel(enemyPanel, "Stalker", "stalkerPanel", ConfigPanel.PanelFieldType.StandardWithIcon);
-            stalkerPanel.icon = Plugin.LoadObject<Sprite>("Assets/Textures/UI/Spawn Menu/Stalker.png");
+            Plugin.LoadObject<Sprite>("Assets/Textures/UI/Spawn Menu/Stalker.png").Completed += (e) => { stalkerPanel.icon = e.Result; };
 			new ConfigHeader(enemyPanel, "Mini Bosses");
             cerberusPanel = new ConfigPanel(enemyPanel, "Cerberus", "cerberusPanel", ConfigPanel.PanelFieldType.StandardWithIcon);
-            cerberusPanel.icon = Plugin.LoadObject<Sprite>("Assets/Textures/UI/Spawn Menu/Cerberus.png");
+            Plugin.LoadObject<Sprite>("Assets/Textures/UI/Spawn Menu/Cerberus.png").Completed += (e) => { cerberusPanel.icon = e.Result; };
 			ferrymanPanel = new ConfigPanel(enemyPanel, "Ferryman", "ferrymanPanel", ConfigPanel.PanelFieldType.StandardWithIcon);
-            ferrymanPanel.icon = Plugin.LoadObject<Sprite>("Assets/Textures/UI/Spawn Menu/Ferryman.png");
+            Plugin.LoadObject<Sprite>("Assets/Textures/UI/Spawn Menu/Ferryman.png").Completed += (e) => { ferrymanPanel.icon = e.Result; };
 			hideousMassPanel = new ConfigPanel(enemyPanel, "Hideous Mass", "hideousMassPanel", ConfigPanel.PanelFieldType.StandardWithIcon);
-            hideousMassPanel.icon = Plugin.LoadObject<Sprite>("Assets/Textures/UI/Spawn Menu/Hideous_Mass.png");
+            Plugin.LoadObject<Sprite>("Assets/Textures/UI/Spawn Menu/Hideous_Mass.png").Completed += (e) => { hideousMassPanel.icon = e.Result; };
 			maliciousFacePanel = new ConfigPanel(enemyPanel, "Malicious Face", "maliciousFacePanel", ConfigPanel.PanelFieldType.StandardWithIcon);
-            maliciousFacePanel.icon = Plugin.LoadObject<Sprite>("Assets/Textures/UI/Spawn Menu/Malicious_Face.png");
+            Plugin.LoadObject<Sprite>("Assets/Textures/UI/Spawn Menu/Malicious_Face.png").Completed += (e) => { maliciousFacePanel.icon = e.Result; };
 			mindflayerPanel = new ConfigPanel(enemyPanel, "Mindflayer", "mindflayerPanel", ConfigPanel.PanelFieldType.StandardWithIcon);
-            mindflayerPanel.icon = Plugin.LoadObject<Sprite>("Assets/Textures/UI/Spawn Menu/Mindflayer.png");
+            Plugin.LoadObject<Sprite>("Assets/Textures/UI/Spawn Menu/Mindflayer.png").Completed += (e) => { mindflayerPanel.icon = e.Result; };
 			turretPanel = new ConfigPanel(enemyPanel, "Sentry", "turretPanel", ConfigPanel.PanelFieldType.StandardWithIcon);
-            turretPanel.icon = Plugin.LoadObject<Sprite>("Assets/Textures/UI/Spawn Menu/Turret.png");
+            Plugin.LoadObject<Sprite>("Assets/Textures/UI/Spawn Menu/Turret.png").Completed += (e) => { turretPanel.icon = e.Result; };
 			sisyInstPanel = new ConfigPanel(enemyPanel, "Sisyphean Insurrectionist", "sisyInstPanel", ConfigPanel.PanelFieldType.StandardWithIcon);
-            sisyInstPanel.icon = Plugin.LoadObject<Sprite>("Assets/Textures/UI/Spawn Menu/Sisyphus.png");
+            Plugin.LoadObject<Sprite>("Assets/Textures/UI/Spawn Menu/Sisyphus.png").Completed += (e) => { sisyInstPanel.icon = e.Result; };
 			swordsMachinePanel = new ConfigPanel(enemyPanel, "Swordsmachine", "swordsMachinePanel", ConfigPanel.PanelFieldType.StandardWithIcon);
-            swordsMachinePanel.icon = Plugin.LoadObject<Sprite>("Assets/Textures/UI/Spawn Menu/Swordsmachine.png");
+            Plugin.LoadObject<Sprite>("Assets/Textures/UI/Spawn Menu/Swordsmachine.png").Completed += (e) => { swordsMachinePanel.icon = e.Result; };
 			new ConfigHeader(enemyPanel, "Bosses");
             v2FirstPanel = new ConfigPanel(enemyPanel, "V2 - First", "v2FirstPanel", ConfigPanel.PanelFieldType.StandardWithIcon);
-            v2FirstPanel.icon = Plugin.LoadObject<Sprite>("Assets/Textures/UI/Spawn Menu/V2.png");
+            Plugin.LoadObject<Sprite>("Assets/Textures/UI/Spawn Menu/V2.png").Completed += (e) => { v2FirstPanel.icon = e.Result; };
 			v2SecondPanel = new ConfigPanel(enemyPanel, "V2 - Second", "v2SecondPanel", ConfigPanel.PanelFieldType.StandardWithIcon);
-            v2SecondPanel.icon = Plugin.LoadObject<Sprite>("Assets/Textures/UI/Spawn Menu/V2 2nd.png");
+            Plugin.LoadObject<Sprite>("Assets/Textures/UI/Spawn Menu/V2 2nd.png").Completed += (e) => { v2SecondPanel.icon = e.Result; };
 			leviathanPanel = new ConfigPanel(enemyPanel, "Leviathan", "leviathanPanel", ConfigPanel.PanelFieldType.StandardWithIcon);
-            leviathanPanel.icon = Plugin.LoadObject<Sprite>("Assets/Textures/UI/Spawn Menu/Leviathan.png");
+            Plugin.LoadObject<Sprite>("Assets/Textures/UI/Spawn Menu/Leviathan.png").Completed += (e) => { leviathanPanel.icon = e.Result; };
 			new ConfigHeader(enemyPanel, "Prime Bosses");
             fleshPrisonPanel = new ConfigPanel(enemyPanel, "Flesh Prison", "fleshPrisonPanel", ConfigPanel.PanelFieldType.StandardWithIcon);
-            fleshPrisonPanel.icon = Plugin.LoadObject<Sprite>("Assets/Textures/UI/Spawn Menu/FleshPrison.png");
+            Plugin.LoadObject<Sprite>("Assets/Textures/UI/Spawn Menu/FleshPrison.png").Completed += (e) => { fleshPrisonPanel.icon = e.Result; };
 			minosPrimePanel = new ConfigPanel(enemyPanel, "Minos Prime", "minosPrimePanel", ConfigPanel.PanelFieldType.StandardWithIcon);
-            minosPrimePanel.icon = Plugin.LoadObject<Sprite>("Assets/Textures/UI/Spawn Menu/MinosPrime.png");
+            Plugin.LoadObject<Sprite>("Assets/Textures/UI/Spawn Menu/MinosPrime.png").Completed += (e) => { minosPrimePanel.icon = e.Result; };
 			panopticonPanel = new ConfigPanel(enemyPanel, "Flesh Panopticon", "panopticonPanel", ConfigPanel.PanelFieldType.StandardWithIcon);
-            panopticonPanel.icon = Plugin.LoadObject<Sprite>("Assets/Textures/UI/Spawn Menu/FleshPanopticon.png");
+            Plugin.LoadObject<Sprite>("Assets/Textures/UI/Spawn Menu/FleshPanopticon.png").Completed += (e) => { panopticonPanel.icon = e.Result; };
 
 			// GLOBAL ENEMY TWEAKS
 			eidStatEditorPanel = new ConfigPanel(globalEnemyPanel, "Enemy stat editor", "eidStatEditorPanel");
@@ -1828,7 +1828,7 @@ namespace Ultrapain
             {
                 droneSentryBeamLineDiv.interactable = e.value;
             };
-            droneSentryBeamLineNormalColor = new ColorField(droneSentryBeamLineDiv, "Normal color", "droneSentryBeamLineNormalColor", Drone_PlaySound_Patch.defaultLineColor);
+            droneSentryBeamLineNormalColor = new ColorField(droneSentryBeamLineDiv, "Normal color", "droneSentryBeamLineNormalColor", new Color(1f, 0.44f, 0.74f));
             droneSentryBeamLineWarningColor = new ColorField(droneSentryBeamLineDiv, "Warning color", "droneSentryBeamLineWarningColor", new Color(1, 1, 1));
             droneSentryBeamLineIndicatorDelay = new FloatField(droneSentryBeamLineDiv, "Sentry beam warning delay", "droneSentryBeamLineIndicatorDelay", 0.5f, 0f, float.MaxValue);
             
@@ -2662,7 +2662,7 @@ namespace Ultrapain
 
             config.Flush();
             //config.LogDuplicateGUID();
-            Plugin.PatchAll();
+            PatchManager.Reload();
             dirtyField = false;
 
             if (config.firstTime)

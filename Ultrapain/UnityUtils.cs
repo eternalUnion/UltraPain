@@ -101,8 +101,8 @@ namespace Ultrapain
         public const BindingFlags instanceFlag = BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Instance;
         public const BindingFlags staticFlag = BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Static;
 
-        public static readonly Func<Vector3, EnemyIdentifier, bool> doNotCollideWithPlayerValidator = (sourcePosition, enemy) => NewMovement.Instance.playerCollider.Raycast(new Ray(sourcePosition, enemy.transform.position - sourcePosition), out RaycastHit hit2, float.MaxValue);
-		    public static List<Tuple<EnemyIdentifier, float>> GetClosestEnemies(Vector3 sourcePosition, int enemyCount, Func<Vector3, EnemyIdentifier, bool> validator)
+        public static readonly Func<Vector3, EnemyIdentifier, bool> doNotCollideWithPlayerValidator = (sourcePosition, enemy) => !NewMovement.Instance.playerCollider.Raycast(new Ray(sourcePosition, enemy.transform.position - sourcePosition), out RaycastHit hit2, float.MaxValue);
+		public static List<Tuple<EnemyIdentifier, float>> GetClosestEnemies(Vector3 sourcePosition, int enemyCount, Func<Vector3, EnemyIdentifier, bool> validator)
         {
             List<Tuple<EnemyIdentifier, float>> targetEnemies = new List<Tuple<EnemyIdentifier, float>>();
 

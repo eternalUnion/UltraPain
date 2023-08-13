@@ -4,285 +4,321 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.ConstrainedExecution;
+using UltrapainExtensions;
 using UnityEngine;
 
 namespace Ultrapain.Patches
 {
-    class Drone_Start_Patch
+	public class DroneFlag : MonoBehaviour
+	{
+		public enum Firemode : int
+		{
+			Projectile = 0,
+			Explosive,
+			TurretBeam
+		}
+
+		public ParticleSystem particleSystem;
+		public LineRenderer lr;
+		public Firemode currentMode = Firemode.Projectile;
+		private static Firemode[] allModes = Enum.GetValues(typeof(Firemode)) as Firemode[];
+
+		static Material whiteMat;
+		public void Awake()
+		{
+			lr = gameObject.AddComponent<LineRenderer>();
+			lr.enabled = false;
+			lr.receiveShadows = false;
+			lr.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
+			lr.startWidth = lr.endWidth = lr.widthMultiplier = 0.025f;
+
+			if (whiteMat == null)
+				whiteMat = Plugin.turretComp.aimLine.material;
+
+			lr.material = whiteMat;
+		}
+
+		public void SetLineColor(Color c)
+		{
+			Gradient gradient = new Gradient();
+			GradientColorKey[] array = new GradientColorKey[1];
+			array[0].color = c;
+			GradientAlphaKey[] array2 = new GradientAlphaKey[1];
+			array2[0].alpha = 1f;
+			gradient.SetKeys(array, array2);
+			lr.colorGradient = gradient;
+		}
+
+		public void LineRendererColorToWarning()
+		{
+			SetLineColor(ConfigManager.droneSentryBeamLineWarningColor.value);
+		}
+
+		public float attackDelay = -1;
+		public bool homingTowardsPlayer = false;
+
+		Transform target;
+		Rigidbody rb;
+
+		private void Update()
+		{
+			if (homingTowardsPlayer)
+			{
+				if (target == null)
+					target = PlayerTracker.Instance.GetTarget();
+				if (rb == null)
+					rb = GetComponent<Rigidbody>();
+
+				Quaternion to = Quaternion.LookRotation(target.position/* + MonoSingleton<PlayerTracker>.Instance.GetPlayerVelocity()*/ - transform.position);
+				transform.rotation = Quaternion.RotateTowards(transform.rotation, to, Time.deltaTime * ConfigManager.droneHomeTurnSpeed.value);
+				rb.velocity = transform.forward * rb.velocity.magnitude;
+			}
+
+			if (lr.enabled)
+			{
+				lr.SetPosition(0, transform.position);
+				lr.SetPosition(1, transform.position + transform.forward * 1000);
+			}
+		}
+	}
+
+    [UltrapainPatch]
+    [HarmonyPatch(typeof(Drone))]
+    public static class DronePatch
     {
-        static void Postfix(Drone __instance, ref EnemyIdentifier ___eid)
-        {
-            if (___eid.enemyType != EnemyType.Drone)
-                return;
+		public static ParticleSystem antennaFlash;
+		
+		[HarmonyPatch(nameof(Drone.PlaySound))]
+		[HarmonyPrefix]
+		[UltrapainPatch]
+		public static bool SelectAndDisplayAttack(Drone __instance, ref AudioClip __0)
+		{
+			if (__instance.eid.enemyType != EnemyType.Drone)
+				return true;
 
-            __instance.gameObject.AddComponent<DroneFlag>();
-        }
-    }
+			if (__0 == __instance.windUpSound)
+			{
+				DroneFlag flag = __instance.GetComponent<DroneFlag>();
+				if (flag == null)
+					return true;
 
-    class Drone_PlaySound_Patch
-    {
-        static FieldInfo antennaFlashField = typeof(Turret).GetField("antennaFlash", BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Instance);
-        static ParticleSystem antennaFlash;
-        public static Color defaultLineColor = new Color(1f, 0.44f, 0.74f);
+				List<Tuple<DroneFlag.Firemode, float>> chances = new List<Tuple<DroneFlag.Firemode, float>>();
+				if (ConfigManager.droneProjectileToggle.value)
+					chances.Add(new Tuple<DroneFlag.Firemode, float>(DroneFlag.Firemode.Projectile, ConfigManager.droneProjectileChance.value));
+				if (ConfigManager.droneExplosionBeamToggle.value)
+					chances.Add(new Tuple<DroneFlag.Firemode, float>(DroneFlag.Firemode.Explosive, ConfigManager.droneExplosionBeamChance.value));
+				if (ConfigManager.droneSentryBeamToggle.value)
+					chances.Add(new Tuple<DroneFlag.Firemode, float>(DroneFlag.Firemode.TurretBeam, ConfigManager.droneSentryBeamChance.value));
 
-        static bool Prefix(Drone __instance, EnemyIdentifier ___eid, AudioClip __0)
-        {
-            if (___eid.enemyType != EnemyType.Drone)
-                return true;
+				if (chances.Count == 0 || chances.Sum(item => item.Item2) <= 0)
+					flag.currentMode = DroneFlag.Firemode.Projectile;
+				else
+					flag.currentMode = UnityUtils.GetRandomFloatWeightedItem(chances, item => item.Item2).Item1;
 
-            if(__0 == __instance.windUpSound)
-            {
-                DroneFlag flag = __instance.GetComponent<DroneFlag>();
-                if (flag == null)
-                    return true;
+				if (flag.currentMode == DroneFlag.Firemode.Projectile)
+				{
+					flag.attackDelay = ConfigManager.droneProjectileDelay.value;
+					return true;
+				}
+				else if (flag.currentMode == DroneFlag.Firemode.Explosive)
+				{
+					flag.attackDelay = ConfigManager.droneExplosionBeamDelay.value;
 
-                List<Tuple<DroneFlag.Firemode, float>> chances = new List<Tuple<DroneFlag.Firemode, float>>();
-                if (ConfigManager.droneProjectileToggle.value)
-                    chances.Add(new Tuple<DroneFlag.Firemode, float>(DroneFlag.Firemode.Projectile, ConfigManager.droneProjectileChance.value));
-                if (ConfigManager.droneExplosionBeamToggle.value)
-                    chances.Add(new Tuple<DroneFlag.Firemode, float>(DroneFlag.Firemode.Explosive, ConfigManager.droneExplosionBeamChance.value));
-                if (ConfigManager.droneSentryBeamToggle.value)
-                    chances.Add(new Tuple<DroneFlag.Firemode, float>(DroneFlag.Firemode.TurretBeam, ConfigManager.droneSentryBeamChance.value));
+					GameObject chargeEffect = GameObject.Instantiate(Plugin.chargeEffect.obj.obj, __instance.transform);
+					chargeEffect.transform.localPosition = new Vector3(0, 0, 0.8f);
+					chargeEffect.transform.localScale = Vector3.zero;
 
-                if (chances.Count == 0 || chances.Sum(item => item.Item2) <= 0)
-                    flag.currentMode = DroneFlag.Firemode.Projectile;
-                else
-                    flag.currentMode = UnityUtils.GetRandomFloatWeightedItem(chances, item => item.Item2).Item1;
+					float duration = ConfigManager.droneExplosionBeamDelay.value / __instance.eid.totalSpeedModifier;
+					RemoveOnTime remover = chargeEffect.AddComponent<RemoveOnTime>();
+					remover.time = duration;
+					CommonLinearScaler scaler = chargeEffect.AddComponent<CommonLinearScaler>();
+					scaler.targetTransform = scaler.transform;
+					scaler.scaleSpeed = 1f / duration;
+					CommonAudioPitchScaler pitchScaler = chargeEffect.AddComponent<CommonAudioPitchScaler>();
+					pitchScaler.targetAud = chargeEffect.GetComponent<AudioSource>();
+					pitchScaler.scaleSpeed = 1f / duration;
 
-                if (flag.currentMode == DroneFlag.Firemode.Projectile)
-                {
-                    flag.attackDelay = ConfigManager.droneProjectileDelay.value;
-                    return true;
-                }
-                else if (flag.currentMode == DroneFlag.Firemode.Explosive)
-                {
-                    flag.attackDelay = ConfigManager.droneExplosionBeamDelay.value;
+					return false;
+				}
+				else if (flag.currentMode == DroneFlag.Firemode.TurretBeam)
+				{
+					flag.attackDelay = ConfigManager.droneSentryBeamDelay.value;
+					if (ConfigManager.droneDrawSentryBeamLine.value)
+					{
+						flag.lr.enabled = true;
+						flag.SetLineColor(ConfigManager.droneSentryBeamLineNormalColor.value);
+						flag.Invoke("LineRendererColorToWarning", Mathf.Max(0.01f, (flag.attackDelay / __instance.eid.totalSpeedModifier) - ConfigManager.droneSentryBeamLineIndicatorDelay.value));
+					}
 
-                    GameObject chargeEffect = GameObject.Instantiate(Plugin.chargeEffect, __instance.transform);
-                    chargeEffect.transform.localPosition = new Vector3(0, 0, 0.8f);
-                    chargeEffect.transform.localScale = Vector3.zero;
+					if (flag.particleSystem == null)
+					{
+						if (antennaFlash == null)
+							antennaFlash = Plugin.turretComp.antennaFlash;
+						flag.particleSystem = GameObject.Instantiate(antennaFlash, __instance.transform);
+						flag.particleSystem.transform.localPosition = new Vector3(0, 0, 2);
+					}
 
-                    float duration = ConfigManager.droneExplosionBeamDelay.value / ___eid.totalSpeedModifier;
-                    RemoveOnTime remover = chargeEffect.AddComponent<RemoveOnTime>();
-                    remover.time = duration;
-                    CommonLinearScaler scaler = chargeEffect.AddComponent<CommonLinearScaler>();
-                    scaler.targetTransform = scaler.transform;
-                    scaler.scaleSpeed = 1f / duration;
-                    CommonAudioPitchScaler pitchScaler = chargeEffect.AddComponent<CommonAudioPitchScaler>();
-                    pitchScaler.targetAud = chargeEffect.GetComponent<AudioSource>();
-                    pitchScaler.scaleSpeed = 1f / duration;
+					flag.particleSystem.Play();
+					GameObject flash = GameObject.Instantiate(Plugin.turretFinalFlash.obj, __instance.transform);
+					GameObject.Destroy(flash.transform.Find("MuzzleFlash/muzzleflash").gameObject);
+					return false;
+				}
+			}
 
-                    return false;
-                }
-                else if (flag.currentMode == DroneFlag.Firemode.TurretBeam)
-                {
-                    flag.attackDelay = ConfigManager.droneSentryBeamDelay.value;
-                    if(ConfigManager.droneDrawSentryBeamLine.value)
-                    {
-                        flag.lr.enabled = true;
-                        flag.SetLineColor(ConfigManager.droneSentryBeamLineNormalColor.value);
-                        flag.Invoke("LineRendererColorToWarning", Mathf.Max(0.01f, (flag.attackDelay / ___eid.totalSpeedModifier) - ConfigManager.droneSentryBeamLineIndicatorDelay.value));
-                    }
+			return true;
+		}
+		
+		public static bool SelectAndDisplayAttackCheck()
+		{
+			return ConfigManager.enemyTweakToggle.value;
+		}
 
-                    if (flag.particleSystem == null)
-                    {
-                        if (antennaFlash == null)
-                            antennaFlash = (ParticleSystem)antennaFlashField.GetValue(Plugin.turret);
-                        flag.particleSystem = GameObject.Instantiate(antennaFlash, __instance.transform);
-                        flag.particleSystem.transform.localPosition = new Vector3(0, 0, 2);
-                    }
+		[HarmonyPatch(nameof(Drone.Shoot))]
+		[HarmonyPrefix]
+		[UltrapainPatch]
+		public static bool CustomAttack(Drone __instance)
+		{
+			DroneFlag flag = __instance.GetComponent<DroneFlag>();
+			if (flag == null || __instance.crashing)
+				return true;
 
-                    flag.particleSystem.Play();
-                    GameObject flash = GameObject.Instantiate(Plugin.turretFinalFlash, __instance.transform);
-                    GameObject.Destroy(flash.transform.Find("MuzzleFlash/muzzleflash").gameObject);
-                    return false;
-                }
-            }
+			DroneFlag.Firemode mode = flag.currentMode;
 
-            return true;
-        }
-    }
+			if (mode == DroneFlag.Firemode.Projectile)
+				return true;
+			if (mode == DroneFlag.Firemode.Explosive)
+			{
+				GameObject beam = GameObject.Instantiate(Plugin.beam.obj.gameObject, __instance.transform.position + __instance.transform.forward, __instance.transform.rotation);
 
-    class Drone_Shoot_Patch
-    {
-        static bool Prefix(Drone __instance, ref EnemyIdentifier ___eid)
-        {
-            DroneFlag flag = __instance.GetComponent<DroneFlag>();
-            if(flag == null || __instance.crashing)
-                return true;
+				RevolverBeam revBeam = beam.GetComponent<RevolverBeam>();
+				revBeam.hitParticle = Plugin.shotgunGrenade.obj.gameObject.GetComponent<Grenade>().explosion;
+				revBeam.damage /= 2;
+				revBeam.damage *= __instance.eid.totalDamageModifier;
 
-            DroneFlag.Firemode mode = flag.currentMode;
+				return false;
+			}
+			if (mode == DroneFlag.Firemode.TurretBeam)
+			{
+				GameObject turretBeam = GameObject.Instantiate(Plugin.turretBeam.obj.gameObject, __instance.transform.position + __instance.transform.forward * 2f, __instance.transform.rotation);
+				if (turretBeam.TryGetComponent<RevolverBeam>(out RevolverBeam revBeam))
+				{
+					revBeam.damage = ConfigManager.droneSentryBeamDamage.value;
+					revBeam.damage *= __instance.eid.totalDamageModifier;
+					revBeam.alternateStartPoint = __instance.transform.position + __instance.transform.forward;
+					revBeam.ignoreEnemyType = EnemyType.Drone;
+				}
 
-            if (mode == DroneFlag.Firemode.Projectile)
-                return true;
-            if (mode == DroneFlag.Firemode.Explosive)
-            {
-                GameObject beam = GameObject.Instantiate(Plugin.beam.gameObject, __instance.transform.position + __instance.transform.forward, __instance.transform.rotation);
+				flag.lr.enabled = false;
 
-                RevolverBeam revBeam = beam.GetComponent<RevolverBeam>();
-                revBeam.hitParticle = Plugin.shotgunGrenade.gameObject.GetComponent<Grenade>().explosion;
-                revBeam.damage /= 2;
-                revBeam.damage *= ___eid.totalDamageModifier;
+				return false;
+			}
 
-                return false;
-            }
-            if(mode == DroneFlag.Firemode.TurretBeam)
-            {
-                GameObject turretBeam = GameObject.Instantiate(Plugin.turretBeam.gameObject, __instance.transform.position + __instance.transform.forward * 2f, __instance.transform.rotation);
-                if (turretBeam.TryGetComponent<RevolverBeam>(out RevolverBeam revBeam))
-                {
-                    revBeam.damage = ConfigManager.droneSentryBeamDamage.value;
-                    revBeam.damage *= ___eid.totalDamageModifier;
-                    revBeam.alternateStartPoint = __instance.transform.position + __instance.transform.forward;
-                    revBeam.ignoreEnemyType = EnemyType.Drone;
-                }
+			Debug.LogError($"Drone fire mode in impossible state. Current value: {mode} : {(int)mode}");
+			return true;
+		}
+	
+		public static bool CustomAttackCheck()
+		{
+			return ConfigManager.enemyTweakToggle.value;
+		}
 
-                flag.lr.enabled = false;
+		[HarmonyPatch(nameof(Drone.Update))]
+		[HarmonyPostfix]
+		[UltrapainPatch]
+		public static void SetAttackDelay(Drone __instance)
+		{
+			if (__instance.eid.enemyType != EnemyType.Drone)
+				return;
 
-                return false;
-            }
+			DroneFlag flag = __instance.GetComponent<DroneFlag>();
+			if (flag == null || flag.attackDelay < 0)
+				return;
 
-            Debug.LogError($"Drone fire mode in impossible state. Current value: {mode} : {(int)mode}");
-            return true;
-        }
-    }
+			float attackSpeedDecay = (float)(__instance.difficulty / 2);
+			if (__instance.difficulty == 1)
+			{
+				attackSpeedDecay = 0.75f;
+			}
+			else if (__instance.difficulty == 0)
+			{
+				attackSpeedDecay = 0.5f;
+			}
+			attackSpeedDecay *= __instance.eid.totalSpeedModifier;
 
-    class Drone_Update
-    {
-        static void Postfix(Drone __instance, EnemyIdentifier ___eid, ref float ___attackCooldown, int ___difficulty)
-        {
-            if (___eid.enemyType != EnemyType.Drone)
-                return;
+			float delay = flag.attackDelay / __instance.eid.totalSpeedModifier;
+			__instance.CancelInvoke("Shoot");
+			__instance.Invoke("Shoot", delay);
+			__instance.attackCooldown = UnityEngine.Random.Range(2f, 4f) + (flag.attackDelay - 0.75f) * attackSpeedDecay;
+			flag.attackDelay = -1;
+		}
 
-            DroneFlag flag = __instance.GetComponent<DroneFlag>();
-            if (flag == null || flag.attackDelay < 0)
-                return;
+		public static bool SetAttackDelayCheck()
+		{
+			return ConfigManager.enemyTweakToggle.value;
+		}
 
-            float attackSpeedDecay = (float)(___difficulty / 2);
-            if (___difficulty == 1)
-            {
-                attackSpeedDecay = 0.75f;
-            }
-            else if (___difficulty == 0)
-            {
-                attackSpeedDecay = 0.5f;
-            }
-            attackSpeedDecay *= ___eid.totalSpeedModifier;
+		[HarmonyPatch(nameof(Drone.Death))]
+		[HarmonyPrefix]
+		[UltrapainPatch]
+		public static bool DroneHome(Drone __instance)
+		{
+			if (__instance.eid.enemyType != EnemyType.Drone || __instance.crashing)
+				return true;
 
-            float delay = flag.attackDelay / ___eid.totalSpeedModifier;
-            __instance.CancelInvoke("Shoot");
-            __instance.Invoke("Shoot", delay);
-            ___attackCooldown = UnityEngine.Random.Range(2f, 4f) + (flag.attackDelay - 0.75f) * attackSpeedDecay;
-            flag.attackDelay = -1;
-        }
-    }
+			DroneFlag flag = __instance.GetComponent<DroneFlag>();
+			if (flag == null)
+				return true;
 
-    class DroneFlag : MonoBehaviour
-    {
-        public enum Firemode : int
-        {
-            Projectile = 0,
-            Explosive,
-            TurretBeam
-        }
+			if (__instance.eid.hitter == "heavypunch" || __instance.eid.hitter == "punch")
+				return true;
 
-        public ParticleSystem particleSystem;
-        public LineRenderer lr;
-        public Firemode currentMode = Firemode.Projectile;
-        private static Firemode[] allModes = Enum.GetValues(typeof(Firemode)) as Firemode[];
+			flag.homingTowardsPlayer = true;
+			return true;
+		}
 
-        static FieldInfo turretAimLine = typeof(Turret).GetField("aimLine", BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Instance);
-        static Material whiteMat;
-        public void Awake()
-        {
-            lr = gameObject.AddComponent<LineRenderer>();
-            lr.enabled = false;
-            lr.receiveShadows = false;
-            lr.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
-            lr.startWidth = lr.endWidth = lr.widthMultiplier = 0.025f;
+		public static bool DroneHomeCheck()
+		{
+			return ConfigManager.enemyTweakToggle.value && ConfigManager.droneHomeToggle.value;
+		}
 
-            if (whiteMat == null)
-                whiteMat = ((LineRenderer)turretAimLine.GetValue(Plugin.turret)).material;
+		[HarmonyPatch(nameof(Drone.GetHurt))]
+		[HarmonyPrefix]
+		[UltrapainPatch]
+		public static bool StopHomingOnPunch(Drone __instance)
+		{
+			if ((__instance.eid.hitter == "shotgunzone" || __instance.eid.hitter == "punch") && !__instance.parried)
+			{
+				DroneFlag flag = __instance.GetComponent<DroneFlag>();
+				if (flag == null)
+					return true;
+				flag.homingTowardsPlayer = false;
+			}
 
-            lr.material = whiteMat;
-        }
+			return true;
+		}
+		
+		public static bool StopHomingOnPunchCheck()
+		{
+			return ConfigManager.enemyTweakToggle.value && ConfigManager.droneHomeToggle.value;
+		}
 
-        public void SetLineColor(Color c)
-        {
-            Gradient gradient = new Gradient();
-            GradientColorKey[] array = new GradientColorKey[1];
-            array[0].color = c;
-            GradientAlphaKey[] array2 = new GradientAlphaKey[1];
-            array2[0].alpha = 1f;
-            gradient.SetKeys(array, array2);
-            lr.colorGradient = gradient;
-        }
+		[HarmonyPatch(nameof(Drone.Start))]
+		[HarmonyPostfix]
+		[UltrapainPatch]
+		public static void AddFlag(Drone __instance)
+		{
+			if (__instance.eid.enemyType != EnemyType.Drone)
+				return;
 
-        public void LineRendererColorToWarning()
-        {
-            SetLineColor(ConfigManager.droneSentryBeamLineWarningColor.value);
-        }
+			if (__instance.GetComponent<NonUltrapainEnemy>() != null)
+				return;
 
-        public float attackDelay = -1;
-        public bool homingTowardsPlayer = false;
+			__instance.gameObject.AddComponent<DroneFlag>();
+		}
 
-        Transform target;
-        Rigidbody rb;
-
-        private void Update()
-        {
-            if(homingTowardsPlayer)
-            {
-                if(target == null)
-                    target = PlayerTracker.Instance.GetTarget();
-                if (rb == null)
-                    rb = GetComponent<Rigidbody>();
-
-                Quaternion to = Quaternion.LookRotation(target.position/* + MonoSingleton<PlayerTracker>.Instance.GetPlayerVelocity()*/ - transform.position);
-                transform.rotation = Quaternion.RotateTowards(transform.rotation, to, Time.deltaTime * ConfigManager.droneHomeTurnSpeed.value);
-                rb.velocity = transform.forward * rb.velocity.magnitude;
-            }
-            
-            if(lr.enabled)
-            {
-                lr.SetPosition(0, transform.position);
-                lr.SetPosition(1, transform.position + transform.forward * 1000);
-            }
-        }
-    }
-
-    class Drone_Death_Patch
-    {
-        static bool Prefix(Drone __instance, EnemyIdentifier ___eid)
-        {
-            if (___eid.enemyType != EnemyType.Drone || __instance.crashing)
-                return true;
-
-            DroneFlag flag = __instance.GetComponent<DroneFlag>();
-            if (flag == null)
-                return true;
-
-            if (___eid.hitter == "heavypunch" || ___eid.hitter == "punch")
-                return true;
-
-            flag.homingTowardsPlayer = true;
-            return true;
-        }
-    }
-
-    class Drone_GetHurt_Patch
-    {
-        static bool Prefix(Drone __instance, EnemyIdentifier ___eid, bool ___parried)
-        {
-            if((___eid.hitter == "shotgunzone" || ___eid.hitter == "punch") && !___parried)
-            {
-                DroneFlag flag = __instance.GetComponent<DroneFlag>();
-                if (flag == null)
-                    return true;
-                flag.homingTowardsPlayer = false;
-            }
-
-            return true;
-        }
-    }
+		public static bool AddFlagCheck()
+		{
+			return ConfigManager.enemyTweakToggle.value;
+		}
+	}
 }

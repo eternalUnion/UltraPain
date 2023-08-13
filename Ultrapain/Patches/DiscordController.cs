@@ -1,28 +1,41 @@
 ﻿using Discord;
 using HarmonyLib;
 using System.Text.RegularExpressions;
-
+using UltrapainExtensions;
 
 namespace Ultrapain.Patches
 {
-    class DiscordController_SendActivity_Patch
+    [UltrapainPatch]
+    [HarmonyPatch(typeof(DiscordController))]
+    public static class DiscordControllerPatch
     {
-        static bool Prefix(DiscordController __instance, ref Activity ___cachedActivity)
+        [HarmonyPatch(nameof(DiscordController.SendActivity))]
+        [HarmonyPrefix]
+        [UltrapainPatch]
+        public static bool ChangeRichPresenceDifficulty(DiscordController __instance)
         {
-            if (___cachedActivity.State != null && ___cachedActivity.State == "DIFFICULTY: UKMD")
+            if (!Plugin.realUltrapainDifficulty)
+                return true;
+
+            if (__instance.cachedActivity.State != null && __instance.cachedActivity.State == "DIFFICULTY: UKMD")
             {
                 Regex rich = new Regex(@"<[^>]*>");
                 string text = $"DIFFICULTY: {ConfigManager.pluginName.value}";
                 if (rich.IsMatch(text))
                 {
-                    ___cachedActivity.State = rich.Replace(text, string.Empty);
+					__instance.cachedActivity.State = rich.Replace(text, string.Empty);
                 }
                 else
                 {
-                    ___cachedActivity.State = text;
+					__instance.cachedActivity.State = text;
                 }
             }
             return true;
         }
-    }
+    
+        public static bool ChangeRichPresenceDifficultyCheck()
+        {
+            return ConfigManager.discordRichPresenceToggle.value;
+        }
+	}
 }

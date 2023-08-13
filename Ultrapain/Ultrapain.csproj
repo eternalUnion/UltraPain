@@ -38,6 +38,10 @@
   </ItemGroup>
   
   <ItemGroup>
+    <ProjectReference Include="..\UltrapainExtensions\UltrapainExtensions.csproj" />
+  </ItemGroup>
+  
+  <ItemGroup>
     <Reference Include="Assembly-CSharp">
       <HintPath>Libs\Assembly-CSharp.dll</HintPath>
     </Reference>

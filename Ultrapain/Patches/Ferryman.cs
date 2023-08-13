@@ -2,18 +2,19 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using UltrapainExtensions;
 using UnityEngine;
 using UnityEngine.AI;
 
 namespace Ultrapain.Patches
 {
-    class FerrymanFlag : MonoBehaviour
+    public class FerrymanFlag : MonoBehaviour
     {
         private int currentCombo = 0;
         public List<int> randomComboPattern = new List<int>();
         public int remainingCombo = ConfigManager.ferrymanComboCount.value;
 
-        void Start()
+        private void Start()
         {
             int attackCount = 3;
             int allocationPerAttack = 1;
@@ -28,117 +29,134 @@ namespace Ultrapain.Patches
 
         public int GetNextCombo()
         {
-            currentCombo++;
+            /*currentCombo++;
             if (currentCombo >= randomComboPattern.Count)
                 currentCombo = 0;
-            return randomComboPattern[currentCombo];
+            return randomComboPattern[currentCombo];*/
+
+            return randomComboPattern[UnityEngine.Random.RandomRangeInt(0, randomComboPattern.Count)];
         }
     }
 
-    class FerrymanStart
+    [UltrapainPatch]
+    [HarmonyPatch(typeof(Ferryman))]
+    public static class FerrymanPatch
     {
-        static void Postfix(Ferryman __instance)
-        {
-            __instance.gameObject.AddComponent<FerrymanFlag>();
-        }
-    }
+		[HarmonyPatch(nameof(Ferryman.StopMoving))]
+		[HarmonyPostfix]
+		[UltrapainPatch]
+		public static void Combo(Ferryman __instance)
+		{
+			FerrymanFlag flag = __instance.gameObject.GetComponent<FerrymanFlag>();
+			if (flag == null)
+				return;
 
-    class FerrymanStopMoving
-    {
-        public static MethodInfo SnapToGround = typeof(Ferryman).GetMethod("SnapToGround", BindingFlags.Instance | BindingFlags.NonPublic);
+			if (__instance.bossVersion && __instance.inPhaseChange)
+			{
+				flag.remainingCombo = ConfigManager.ferrymanComboCount.value;
+				return;
+			}
 
-        static void Postfix(Ferryman __instance, ref Animator ___anim, ref bool ___inAction, ref bool ___tracking, ref NavMeshAgent ___nma,
-            ref bool ___useMain, ref bool ___useOar, ref bool ___useKick, ref bool ___backTrailActive,
-            bool ___bossVersion, bool ___inPhaseChange)
-        {
-            FerrymanFlag flag = __instance.gameObject.GetComponent<FerrymanFlag>();
-            if (flag == null)
-                return;
+			string clipName = __instance.anim.GetCurrentAnimatorClipInfo(0)[0].clip.name;
+			if (clipName != "OarCombo" && clipName != "KickCombo" && clipName != "Stinger" && clipName != "BackstepAttack")
+				return;
 
-            if (___bossVersion && ___inPhaseChange)
-            {
-                flag.remainingCombo = ConfigManager.ferrymanComboCount.value;
-                return;
-            }
+			AnimationClip clip = __instance.anim.GetCurrentAnimatorClipInfo(0)[0].clip;
+			float time = clip.events.Where(obj => obj.functionName == "StopMoving").Last().time;
+			if (__instance.anim.GetCurrentAnimatorStateInfo(0).normalizedTime < time / clip.length)
+				return;
 
-            string clipName = ___anim.GetCurrentAnimatorClipInfo(0)[0].clip.name;
-            if (clipName != "OarCombo" && clipName != "KickCombo" && clipName != "Stinger" && clipName != "BackstepAttack")
-                return;
+			//if (flag.remainingCombo == ConfigManager.ferrymanComboCount.value && clipName == "KickCombo")
+			//    flag.remainingCombo -= 1;
 
-            AnimationClip clip = ___anim.GetCurrentAnimatorClipInfo(0)[0].clip;
-            float time = clip.events.Where(obj => obj.functionName == "StopMoving").Last().time;
-            if (___anim.GetCurrentAnimatorStateInfo(0).normalizedTime < time / clip.length)
-                return;
+			flag.remainingCombo -= 1;
+			if (flag.remainingCombo <= 0)
+			{
+				flag.remainingCombo = ConfigManager.ferrymanComboCount.value;
+				return;
+			}
 
-            //if (flag.remainingCombo == ConfigManager.ferrymanComboCount.value && clipName == "KickCombo")
-            //    flag.remainingCombo -= 1;
+			int attackType = flag.GetNextCombo();
 
-            flag.remainingCombo -= 1;
-            if(flag.remainingCombo <= 0)
-            {
-                flag.remainingCombo = ConfigManager.ferrymanComboCount.value;
-                return;
-            }
+			if (attackType == 0)
+			{
+				// time = 0.8347
+				// total = 2.4667
+				__instance.anim.Play("OarCombo", 0, (0.8347f * (1f - ConfigManager.ferrymanAttackDelay.value)) / 2.4667f);
 
-            int attackType = flag.GetNextCombo();
-            
-            if (attackType == 0)
-            {
-                // time = 0.8347
-                // total = 2.4667
-                ___anim.Play("OarCombo", 0, (0.8347f * (1f - ConfigManager.ferrymanAttackDelay.value)) / 2.4667f);
+				__instance.SnapToGround();
+				__instance.inAction = true;
+				__instance.tracking = true;
+				if (__instance.nma.isOnNavMesh)
+				{
+					__instance.nma.SetDestination(__instance.transform.position);
+				}
+				//__instance.anim.SetTrigger("OarCombo");
+				__instance.backTrailActive = true;
+				__instance.useMain = true;
+				__instance.useOar = true;
+				__instance.useKick = false;
+			}
+			else if (attackType == 1)
+			{
+				// time = 0.8347
+				// total = 2.4667
+				__instance.anim.Play("KickCombo", 0, (0.8347f * (1f - ConfigManager.ferrymanAttackDelay.value)) / 2.4667f);
 
-                SnapToGround.Invoke(__instance, new object[0]);
-                ___inAction = true;
-                ___tracking = true;
-                if (___nma.isOnNavMesh)
-                {
-                    ___nma.SetDestination(__instance.transform.position);
-                }
-                //__instance.anim.SetTrigger("OarCombo");
-                ___backTrailActive = true;
-                ___useMain = true;
-                ___useOar = true;
-                ___useKick = false;
-            }
-            else if(attackType == 1)
-            {
-                // time = 0.8347
-                // total = 2.4667
-                ___anim.Play("KickCombo", 0, (0.8347f * (1f - ConfigManager.ferrymanAttackDelay.value)) / 2.4667f);
+				__instance.SnapToGround();
+				__instance.inAction = true;
+				__instance.tracking = true;
+				if (__instance.nma.isOnNavMesh)
+				{
+					__instance.nma.SetDestination(__instance.transform.position);
+				}
+				//__instance.anim.SetTrigger("KickCombo");
+				__instance.backTrailActive = true;
+				__instance.useMain = true;
+				__instance.useOar = false;
+				__instance.useKick = true;
+			}
+			else
+			{
+				// time = 0.4129
+				// total = 1.3
+				__instance.anim.Play("Stinger", 0, 0);
 
-                SnapToGround.Invoke(__instance, new object[0]);
-                ___inAction = true;
-                ___tracking = true;
-                if (___nma.isOnNavMesh)
-                {
-                    ___nma.SetDestination(__instance.transform.position);
-                }
-                //__instance.anim.SetTrigger("KickCombo");
-                ___backTrailActive = true;
-                ___useMain = true;
-                ___useOar = false;
-                ___useKick = true;
-            }
-            else
-            {
-                // time = 0.4129
-                // total = 1.3
-                ___anim.Play("Stinger", 0, 0);
+				__instance.SnapToGround();
+				__instance.inAction = true;
+				__instance.tracking = true;
+				if (__instance.nma.isOnNavMesh)
+				{
+					__instance.nma.SetDestination(__instance.transform.position);
+				}
+				//__instance.anim.SetTrigger("KickCombo");
+				__instance.backTrailActive = true;
+				__instance.useMain = true;
+				__instance.useOar = true;
+				__instance.useKick = false;
+			}
+		}
 
-                SnapToGround.Invoke(__instance, new object[0]);
-                ___inAction = true;
-                ___tracking = true;
-                if (___nma.isOnNavMesh)
-                {
-                    ___nma.SetDestination(__instance.transform.position);
-                }
-                //__instance.anim.SetTrigger("KickCombo");
-                ___backTrailActive = true;
-                ___useMain = true;
-                ___useOar = true;
-                ___useKick = false;
-            }
-        }
-    }
+		public static bool ComboCheck()
+		{
+			return ConfigManager.enemyTweakToggle.value && ConfigManager.ferrymanComboToggle.value;
+		}
+
+		[HarmonyPatch(nameof(Ferryman.Start))]
+		[HarmonyPostfix]
+		[UltrapainPatch]
+		public static void AddFlag(Ferryman __instance)
+		{
+			if (__instance.GetComponent<NonUltrapainEnemy>() != null)
+				return;
+
+			__instance.gameObject.AddComponent<FerrymanFlag>();
+		}
+
+		public static bool AddFlagCheck()
+		{
+			return ConfigManager.enemyTweakToggle.value;
+		}
+
+	}
 }

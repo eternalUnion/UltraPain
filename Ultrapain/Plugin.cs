@@ -18,6 +18,8 @@ using UnityEngine.AddressableAssets.ResourceLocators;
 using UnityEngine.ResourceManagement.ResourceLocations;
 using UnityEngine.UIElements;
 using PluginConfig.API;
+using UnityEngine.ResourceManagement.AsyncOperations;
+using static Ultrapain.Plugin;
 
 namespace Ultrapain
 {
@@ -26,21 +28,23 @@ namespace Ultrapain
     public class Plugin : BaseUnityPlugin
     {
         public const string PLUGIN_GUID = "com.eternalUnion.ultraPain";
-        public const string PLUGIN_NAME = "Ultra Pain";
+        public const string PLUGIN_NAME = "UltraPain";
         public const string PLUGIN_VERSION = "1.1.0";
 
-        public static Plugin instance;
+		public static Plugin instance;
+
+		public static bool ultrapainDifficulty = false;
+		public static bool realUltrapainDifficulty = false;
 
         private static bool addressableInit = false;
-        public static T LoadObject<T>(string path)
+        public static AsyncOperationHandle<T> LoadObject<T>(string path)
         {
             if (!addressableInit)
             {
                 Addressables.InitializeAsync().WaitForCompletion();
                 addressableInit = true;
-
 			}
-            return Addressables.LoadAssetAsync<T>(path).WaitForCompletion();
+            return Addressables.LoadAssetAsync<T>(path);
         }
 
         public static Vector3 PredictPlayerPosition(Collider safeCollider, float speedMod)
@@ -61,74 +65,109 @@ namespace Ultrapain
             }
         }
 
-        public static GameObject projectileSpread;
-        public static GameObject homingProjectile;
-        public static GameObject hideousMassProjectile;
-        public static GameObject decorativeProjectile2;
-        public static GameObject shotgunGrenade;
-        public static GameObject beam;
-        public static GameObject turretBeam;
-        public static GameObject lightningStrikeExplosiveSetup;
-        public static GameObject lightningStrikeExplosive;
-        public static GameObject lighningStrikeWindup;
-        public static GameObject explosion;
-        public static GameObject bigExplosion;
-        public static GameObject sandExplosion;
-        public static GameObject virtueInsignia;
-        public static GameObject rocket;
-        public static GameObject revolverBullet;
-        public static GameObject maliciousCannonBeam;
-        public static GameObject lightningBoltSFX;
-        public static GameObject revolverBeam;
-        public static GameObject blastwave;
-        public static GameObject cannonBall;
-        public static GameObject shockwave;
-        public static GameObject sisyphiusExplosion;
-        public static GameObject sisyphiusPrimeExplosion;
-        public static GameObject explosionWaveKnuckleblaster;
-        public static GameObject chargeEffect;
-        public static GameObject maliciousFaceProjectile;
-        public static GameObject hideousMassSpear;
-        public static GameObject coin;
-        public static GameObject sisyphusDestroyExplosion;
+        public class AsyncObject<T> where T : UnityEngine.Object
+        {
+            public AsyncOperationHandle<T> internalHandle;
+            private T _obj;
+            public T obj
+            {
+                get
+                {
+                    if (_obj == null)
+                        _obj = internalHandle.WaitForCompletion();
+                    return _obj;
+                }
+            }
+
+            public static implicit operator T(AsyncObject<T> other)
+            {
+                return other.obj;
+            }
+
+            public AsyncObject(AsyncOperationHandle<T> handle)
+            {
+                internalHandle = handle;
+            }
+        }
+
+        public static AsyncObject<GameObject> projectileSpread;
+        public static AsyncObject<GameObject> homingProjectile;
+        public static AsyncObject<GameObject> hideousMassProjectile;
+        public static AsyncObject<GameObject> decorativeProjectile2;
+        public static AsyncObject<GameObject> shotgunGrenade;
+        public static AsyncObject<GameObject> beam;
+        public static AsyncObject<GameObject> turretBeam;
+        public static AsyncObject<GameObject> lightningStrikeExplosiveSetup;
+        public static AsyncObject<GameObject> lightningStrikeExplosive;
+        public static AsyncObject<GameObject> lighningStrikeWindup;
+        public static AsyncObject<GameObject> explosion;
+        public static AsyncObject<GameObject> bigExplosion;
+        public static AsyncObject<GameObject> sandExplosion;
+        public static AsyncObject<GameObject> virtueInsignia;
+        public static AsyncObject<GameObject> rocket;
+        public static AsyncObject<GameObject> revolverBullet;
+        public static AsyncObject<GameObject> maliciousCannonBeam;
+        public static AsyncObject<GameObject> lightningBoltSFX;
+        public static AsyncObject<GameObject> revolverBeam;
+        public static AsyncObject<GameObject> blastwave;
+        public static AsyncObject<GameObject> cannonBall;
+        public static AsyncObject<GameObject> shockwave;
+        public static AsyncObject<GameObject> sisyphiusExplosion;
+        public static AsyncObject<GameObject> sisyphiusPrimeExplosion;
+        public static AsyncObject<GameObject> explosionWaveKnuckleblaster;
+        public static AsyncObject<GameObject> chargeEffect;
+        public static AsyncObject<GameObject> maliciousFaceProjectile;
+        public static AsyncObject<GameObject> hideousMassSpear;
+        public static AsyncObject<GameObject> coin;
+        public static AsyncObject<GameObject> sisyphusDestroyExplosion;
 
         //public static GameObject idol;
-        public static GameObject ferryman;
-        public static GameObject minosPrime;
+        public static AsyncObject<GameObject> ferryman;
+        public static AsyncObject<GameObject> minosPrime;
         //public static GameObject maliciousFace;
-        public static GameObject somethingWicked;
-        public static Turret turret;
+        public static AsyncObject<GameObject> somethingWicked;
+        public static AsyncObject<GameObject> turret;
+        private static Turret _turretComp = null;
+        public static Turret turretComp
+        {
+            get
+            {
+                if (_turretComp == null)
+                    _turretComp = turret.obj.GetComponent<Turret>();
+                return _turretComp;
+            }
+        }
 
-        public static GameObject turretFinalFlash;
-        public static GameObject enrageEffect;
-        public static GameObject v2flashUnparryable;
-        public static GameObject ricochetSfx;
-        public static GameObject parryableFlash;
+        public static AsyncObject<GameObject> turretFinalFlash;
+        public static AsyncObject<GameObject> enrageEffect;
+        public static AsyncObject<GameObject> v2flashUnparryable;
+        public static AsyncObject<GameObject> ricochetSfx;
+        public static AsyncObject<GameObject> parryableFlash;
 
-        public static AudioClip cannonBallChargeAudio;
-        public static Material gabrielFakeMat;
+        private static AudioClip _cannonBallChargeAudio = null;
+        public static AudioClip cannonBallChargeAudio
+        {
+            get
+            {
+                if (_cannonBallChargeAudio == null)
+                    _cannonBallChargeAudio = rocketLauncherAlt.obj.transform.Find("RocketLauncher/Armature/Body_Bone/HologramDisplay").GetComponent<AudioSource>().clip;
+                return _cannonBallChargeAudio;
+            }
+        }
+        public static AsyncObject<Material> gabrielFakeMat;
 
-        public static Sprite blueRevolverSprite;
-        public static Sprite greenRevolverSprite;
-        public static Sprite redRevolverSprite;
-        public static Sprite blueShotgunSprite;
-        public static Sprite greenShotgunSprite;
-        public static Sprite blueNailgunSprite;
-        public static Sprite greenNailgunSprite;
-        public static Sprite blueSawLauncherSprite;
-        public static Sprite greenSawLauncherSprite;
+        public static AsyncObject<Sprite> blueRevolverSprite;
+        public static AsyncObject<Sprite> greenRevolverSprite;
+        public static AsyncObject<Sprite> redRevolverSprite;
+        public static AsyncObject<Sprite> blueShotgunSprite;
+        public static AsyncObject<Sprite> greenShotgunSprite;
+        public static AsyncObject<Sprite> blueNailgunSprite;
+        public static AsyncObject<Sprite> greenNailgunSprite;
+        public static AsyncObject<Sprite> blueSawLauncherSprite;
+        public static AsyncObject<Sprite> greenSawLauncherSprite;
 
-        public static GameObject rocketLauncherAlt;
-        public static GameObject maliciousRailcannon;
-
-        // Variables
-        public static float SoliderShootAnimationStart = 1.2f;
-        public static float SoliderGrenadeForce = 10000f;
-
-        public static float SwordsMachineKnockdownTimeNormalized = 0.8f;
-        public static float SwordsMachineCoreSpeed = 80f;
-
-        public static float MinGrenadeParryVelocity = 40f;
+        public static AsyncObject<GameObject> rocketLauncherAlt;
+        public static AsyncObject<GameObject> maliciousRailcannon;
 
         public static GameObject _lighningBoltSFX;
         public static GameObject lighningBoltSFX
@@ -136,7 +175,7 @@ namespace Ultrapain
             get
             {
                 if (_lighningBoltSFX == null)
-                    _lighningBoltSFX = ferryman.gameObject.transform.Find("LightningBoltChimes").gameObject;
+                    _lighningBoltSFX = ferryman.obj.gameObject.transform.Find("LightningBoltChimes").gameObject;
 
                 return _lighningBoltSFX;
             }
@@ -150,130 +189,124 @@ namespace Ultrapain
             loadedPrefabs = true;
 
             // Assets/Prefabs/Attacks and Projectiles/Projectile Spread.prefab
-            projectileSpread = LoadObject<GameObject>("Assets/Prefabs/Attacks and Projectiles/Projectile Spread.prefab");
+            projectileSpread = new(LoadObject<GameObject>("Assets/Prefabs/Attacks and Projectiles/Projectile Spread.prefab"));
             // Assets/Prefabs/Attacks and Projectiles/Projectile Homing.prefab
-            homingProjectile = LoadObject<GameObject>("Assets/Prefabs/Attacks and Projectiles/Projectile Homing.prefab");
+            homingProjectile = new(LoadObject<GameObject>("Assets/Prefabs/Attacks and Projectiles/Projectile Homing.prefab"));
             // Assets/Prefabs/Attacks and Projectiles/Projectile Decorative 2.prefab
-            decorativeProjectile2 = LoadObject<GameObject>("Assets/Prefabs/Attacks and Projectiles/Projectile Decorative 2.prefab");
+            decorativeProjectile2 = new(LoadObject<GameObject>("Assets/Prefabs/Attacks and Projectiles/Projectile Decorative 2.prefab"));
             // Assets/Prefabs/Attacks and Projectiles/Grenade.prefab
-            shotgunGrenade = LoadObject<GameObject>("Assets/Prefabs/Attacks and Projectiles/Grenade.prefab");
+            shotgunGrenade = new(LoadObject<GameObject>("Assets/Prefabs/Attacks and Projectiles/Grenade.prefab"));
             // Assets/Prefabs/Attacks and Projectiles/Hitscan Beams/Turret Beam.prefab
-            turretBeam = LoadObject<GameObject>("Assets/Prefabs/Attacks and Projectiles/Hitscan Beams/Turret Beam.prefab");
+            turretBeam = new(LoadObject<GameObject>("Assets/Prefabs/Attacks and Projectiles/Hitscan Beams/Turret Beam.prefab"));
             // Assets/Prefabs/Attacks and Projectiles/Hitscan Beams/Malicious Beam.prefab
-            beam = LoadObject<GameObject>("Assets/Prefabs/Attacks and Projectiles/Hitscan Beams/Malicious Beam.prefab");
+            beam = new(LoadObject<GameObject>("Assets/Prefabs/Attacks and Projectiles/Hitscan Beams/Malicious Beam.prefab"));
             // Assets/Prefabs/Attacks and Projectiles/Explosions/Lightning Strike Explosive.prefab
-            lightningStrikeExplosiveSetup = LoadObject<GameObject>("Assets/Prefabs/Attacks and Projectiles/Explosions/Lightning Strike Explosive.prefab");
+            lightningStrikeExplosiveSetup = new(LoadObject<GameObject>("Assets/Prefabs/Attacks and Projectiles/Explosions/Lightning Strike Explosive.prefab"));
             // Assets/Particles/Environment/LightningBoltWindupFollow Variant.prefab
-            lighningStrikeWindup = LoadObject<GameObject>("Assets/Particles/Environment/LightningBoltWindupFollow Variant.prefab");
+            lighningStrikeWindup = new(LoadObject<GameObject>("Assets/Particles/Environment/LightningBoltWindupFollow Variant.prefab"));
             //[bundle-0][assets/prefabs/enemies/idol.prefab]
-            //idol = LoadObject<GameObject>("assets/prefabs/enemies/idol.prefab");
+            //idol = new(LoadObject<GameObject>("assets/prefabs/enemies/idol.prefab"));
             // Assets/Prefabs/Enemies/Ferryman.prefab
-            ferryman = LoadObject<GameObject>("Assets/Prefabs/Enemies/Ferryman.prefab");
+            ferryman = new(LoadObject<GameObject>("Assets/Prefabs/Enemies/Ferryman.prefab"));
             // Assets/Prefabs/Attacks and Projectiles/Explosions/Explosion.prefab
-            explosion = LoadObject<GameObject>("Assets/Prefabs/Attacks and Projectiles/Explosions/Explosion.prefab");
+            explosion = new(LoadObject<GameObject>("Assets/Prefabs/Attacks and Projectiles/Explosions/Explosion.prefab"));
             //Assets/Prefabs/Attacks and Projectiles/Explosions/Explosion Super.prefab
-            bigExplosion = LoadObject<GameObject>("Assets/Prefabs/Attacks and Projectiles/Explosions/Explosion Super.prefab");
+            bigExplosion = new(LoadObject<GameObject>("Assets/Prefabs/Attacks and Projectiles/Explosions/Explosion Super.prefab"));
             //Assets/Prefabs/Attacks and Projectiles/Explosions/Explosion Sand.prefab
-            sandExplosion = LoadObject<GameObject>("Assets/Prefabs/Attacks and Projectiles/Explosions/Explosion Sand.prefab");
+            sandExplosion = new(LoadObject<GameObject>("Assets/Prefabs/Attacks and Projectiles/Explosions/Explosion Sand.prefab"));
             // Assets/Prefabs/Attacks and Projectiles/Virtue Insignia.prefab
-            virtueInsignia = LoadObject<GameObject>("Assets/Prefabs/Attacks and Projectiles/Virtue Insignia.prefab");
+            virtueInsignia = new(LoadObject<GameObject>("Assets/Prefabs/Attacks and Projectiles/Virtue Insignia.prefab"));
             // Assets/Prefabs/Attacks and Projectiles/Projectile Explosive HH.prefab
-            hideousMassProjectile = LoadObject<GameObject>("Assets/Prefabs/Attacks and Projectiles/Projectile Explosive HH.prefab");
+            hideousMassProjectile = new(LoadObject<GameObject>("Assets/Prefabs/Attacks and Projectiles/Projectile Explosive HH.prefab"));
             // Assets/Particles/Enemies/RageEffect.prefab
-            enrageEffect = LoadObject<GameObject>("Assets/Particles/Enemies/RageEffect.prefab");
+            enrageEffect = new(LoadObject<GameObject>("Assets/Particles/Enemies/RageEffect.prefab"));
             // Assets/Particles/Flashes/V2FlashUnparriable.prefab
-            v2flashUnparryable = LoadObject<GameObject>("Assets/Particles/Flashes/V2FlashUnparriable.prefab");
+            v2flashUnparryable = new(LoadObject<GameObject>("Assets/Particles/Flashes/V2FlashUnparriable.prefab"));
             // Assets/Prefabs/Attacks and Projectiles/Rocket.prefab
-            rocket = LoadObject<GameObject>("Assets/Prefabs/Attacks and Projectiles/Rocket.prefab");
+            rocket = new(LoadObject<GameObject>("Assets/Prefabs/Attacks and Projectiles/Rocket.prefab"));
             // Assets/Prefabs/Attacks and Projectiles/RevolverBullet.prefab
-            revolverBullet = LoadObject<GameObject>("Assets/Prefabs/Attacks and Projectiles/RevolverBullet.prefab");
+            revolverBullet = new(LoadObject<GameObject>("Assets/Prefabs/Attacks and Projectiles/RevolverBullet.prefab"));
             // Assets/Prefabs/Attacks and Projectiles/Hitscan Beams/Railcannon Beam Malicious.prefab
-            maliciousCannonBeam = LoadObject<GameObject>("Assets/Prefabs/Attacks and Projectiles/Hitscan Beams/Railcannon Beam Malicious.prefab");
+            maliciousCannonBeam = new(LoadObject<GameObject>("Assets/Prefabs/Attacks and Projectiles/Hitscan Beams/Railcannon Beam Malicious.prefab"));
             // Assets/Prefabs/Attacks and Projectiles/Hitscan Beams/Revolver Beam.prefab
-            revolverBeam = LoadObject<GameObject>("Assets/Prefabs/Attacks and Projectiles/Hitscan Beams/Revolver Beam.prefab");
+            revolverBeam = new(LoadObject<GameObject>("Assets/Prefabs/Attacks and Projectiles/Hitscan Beams/Revolver Beam.prefab"));
             // Assets/Prefabs/Attacks and Projectiles/Explosions/Explosion Wave Enemy.prefab
-            blastwave = LoadObject<GameObject>("Assets/Prefabs/Attacks and Projectiles/Explosions/Explosion Wave Enemy.prefab");
+            blastwave = new(LoadObject<GameObject>("Assets/Prefabs/Attacks and Projectiles/Explosions/Explosion Wave Enemy.prefab"));
             // Assets/Prefabs/Enemies/MinosPrime.prefab
-            minosPrime = LoadObject<GameObject>("Assets/Prefabs/Enemies/MinosPrime.prefab");
+            minosPrime = new(LoadObject<GameObject>("Assets/Prefabs/Enemies/MinosPrime.prefab"));
             // Assets/Prefabs/Attacks and Projectiles/Cannonball.prefab
-            cannonBall = LoadObject<GameObject>("Assets/Prefabs/Attacks and Projectiles/Cannonball.prefab");
-            // get from Assets/Prefabs/Weapons/Rocket Launcher Cannonball.prefab
-            cannonBallChargeAudio = LoadObject<GameObject>("Assets/Prefabs/Weapons/Rocket Launcher Cannonball.prefab").transform.Find("RocketLauncher/Armature/Body_Bone/HologramDisplay").GetComponent<AudioSource>().clip;
+            cannonBall = new(LoadObject<GameObject>("Assets/Prefabs/Attacks and Projectiles/Cannonball.prefab"));
             // Assets/Prefabs/Attacks and Projectiles/PhysicalShockwave.prefab
-            shockwave = LoadObject<GameObject>("Assets/Prefabs/Attacks and Projectiles/PhysicalShockwave.prefab");
+            shockwave = new(LoadObject<GameObject>("Assets/Prefabs/Attacks and Projectiles/PhysicalShockwave.prefab"));
             // Assets/Prefabs/Attacks and Projectiles/Explosions/Explosion Wave Sisyphus.prefab
-            sisyphiusExplosion = LoadObject<GameObject>("Assets/Prefabs/Attacks and Projectiles/Explosions/Explosion Wave Sisyphus.prefab");
+            sisyphiusExplosion = new(LoadObject<GameObject>("Assets/Prefabs/Attacks and Projectiles/Explosions/Explosion Wave Sisyphus.prefab"));
             // Assets/Prefabs/Attacks and Projectiles/Explosions/Explosion Sisyphus Prime.prefab
-            sisyphiusPrimeExplosion = LoadObject<GameObject>("Assets/Prefabs/Attacks and Projectiles/Explosions/Explosion Sisyphus Prime.prefab");
+            sisyphiusPrimeExplosion = new(LoadObject<GameObject>("Assets/Prefabs/Attacks and Projectiles/Explosions/Explosion Sisyphus Prime.prefab"));
             // Assets/Prefabs/Attacks and Projectiles/Explosions/Explosion Wave.prefab
-            explosionWaveKnuckleblaster = LoadObject<GameObject>("Assets/Prefabs/Attacks and Projectiles/Explosions/Explosion Wave.prefab");
+            explosionWaveKnuckleblaster = new(LoadObject<GameObject>("Assets/Prefabs/Attacks and Projectiles/Explosions/Explosion Wave.prefab"));
             // Assets/Prefabs/Attacks and Projectiles/Explosions/Explosion Lightning.prefab - [bundle-0][assets/prefabs/explosionlightning variant.prefab]
-            lightningStrikeExplosive = LoadObject<GameObject>("Assets/Prefabs/Attacks and Projectiles/Explosions/Explosion Lightning.prefab");
+            lightningStrikeExplosive = new(LoadObject<GameObject>("Assets/Prefabs/Attacks and Projectiles/Explosions/Explosion Lightning.prefab"));
             // Assets/Prefabs/Weapons/Rocket Launcher Cannonball.prefab
-            rocketLauncherAlt = LoadObject<GameObject>("Assets/Prefabs/Weapons/Rocket Launcher Cannonball.prefab");
+            rocketLauncherAlt = new(LoadObject<GameObject>("Assets/Prefabs/Weapons/Rocket Launcher Cannonball.prefab"));
             // Assets/Prefabs/Weapons/Railcannon Malicious.prefab
-            maliciousRailcannon = LoadObject<GameObject>("Assets/Prefabs/Weapons/Railcannon Malicious.prefab");
+            maliciousRailcannon = new(LoadObject<GameObject>("Assets/Prefabs/Weapons/Railcannon Malicious.prefab"));
             //Assets/Particles/SoundBubbles/Ricochet.prefab
-            ricochetSfx = LoadObject<GameObject>("Assets/Particles/SoundBubbles/Ricochet.prefab");
+            ricochetSfx = new(LoadObject<GameObject>("Assets/Particles/SoundBubbles/Ricochet.prefab"));
             //Assets/Particles/Flashes/Flash.prefab
-            parryableFlash = LoadObject<GameObject>("Assets/Particles/Flashes/Flash.prefab");
+            parryableFlash = new(LoadObject<GameObject>("Assets/Particles/Flashes/Flash.prefab"));
             //Assets/Prefabs/Attacks and Projectiles/Spear.prefab
-            hideousMassSpear = LoadObject<GameObject>("Assets/Prefabs/Attacks and Projectiles/Spear.prefab");
+            hideousMassSpear = new(LoadObject<GameObject>("Assets/Prefabs/Attacks and Projectiles/Spear.prefab"));
             //Assets/Prefabs/Enemies/Wicked.prefab
-            somethingWicked = LoadObject<GameObject>("Assets/Prefabs/Enemies/Wicked.prefab");
+            somethingWicked = new(LoadObject<GameObject>("Assets/Prefabs/Enemies/Wicked.prefab"));
             //Assets/Textures/UI/SingleRevolver.png
-            blueRevolverSprite = LoadObject<Sprite>("Assets/Textures/UI/SingleRevolver.png");
+            blueRevolverSprite = new(LoadObject<Sprite>("Assets/Textures/UI/SingleRevolver.png"));
             //Assets/Textures/UI/RevolverSpecial.png
-            greenRevolverSprite = LoadObject<Sprite>("Assets/Textures/UI/RevolverSpecial.png");
+            greenRevolverSprite = new(LoadObject<Sprite>("Assets/Textures/UI/RevolverSpecial.png"));
             //Assets/Textures/UI/RevolverSharp.png
-            redRevolverSprite = LoadObject<Sprite>("Assets/Textures/UI/RevolverSharp.png");
+            redRevolverSprite = new(LoadObject<Sprite>("Assets/Textures/UI/RevolverSharp.png"));
             //Assets/Textures/UI/Shotgun.png
-            blueShotgunSprite = LoadObject<Sprite>("Assets/Textures/UI/Shotgun.png");
+            blueShotgunSprite = new(LoadObject<Sprite>("Assets/Textures/UI/Shotgun.png"));
             //Assets/Textures/UI/Shotgun1.png
-            greenShotgunSprite = LoadObject<Sprite>("Assets/Textures/UI/Shotgun1.png");
+            greenShotgunSprite = new(LoadObject<Sprite>("Assets/Textures/UI/Shotgun1.png"));
             //Assets/Textures/UI/Nailgun2.png
-            blueNailgunSprite = LoadObject<Sprite>("Assets/Textures/UI/Nailgun2.png");
+            blueNailgunSprite = new(LoadObject<Sprite>("Assets/Textures/UI/Nailgun2.png"));
             //Assets/Textures/UI/NailgunOverheat.png
-            greenNailgunSprite = LoadObject<Sprite>("Assets/Textures/UI/NailgunOverheat.png");
+            greenNailgunSprite = new(LoadObject<Sprite>("Assets/Textures/UI/NailgunOverheat.png"));
             //Assets/Textures/UI/SawbladeLauncher.png
-            blueSawLauncherSprite = LoadObject<Sprite>("Assets/Textures/UI/SawbladeLauncher.png");
+            blueSawLauncherSprite = new(LoadObject<Sprite>("Assets/Textures/UI/SawbladeLauncher.png"));
             //Assets/Textures/UI/SawbladeLauncherOverheat.png
-            greenSawLauncherSprite = LoadObject<Sprite>("Assets/Textures/UI/SawbladeLauncherOverheat.png");
+            greenSawLauncherSprite = new(LoadObject<Sprite>("Assets/Textures/UI/SawbladeLauncherOverheat.png"));
             //Assets/Prefabs/Attacks and Projectiles/Coin.prefab
-            coin = LoadObject<GameObject>("Assets/Prefabs/Attacks and Projectiles/Coin.prefab");
+            coin = new(LoadObject<GameObject>("Assets/Prefabs/Attacks and Projectiles/Coin.prefab"));
             //Assets/Materials/GabrielFake.mat
-            gabrielFakeMat = LoadObject<Material>("Assets/Materials/GabrielFake.mat");
-            //Assets/Prefabs/Enemies/Turret.prefab
-            turret = LoadObject<GameObject>("Assets/Prefabs/Enemies/Turret.prefab").GetComponent<Turret>();
+            gabrielFakeMat = new(LoadObject<Material>("Assets/Materials/GabrielFake.mat"));
             //Assets/Particles/Flashes/GunFlashDistant.prefab
-            turretFinalFlash = LoadObject<GameObject>("Assets/Particles/Flashes/GunFlashDistant.prefab");
+            turretFinalFlash = new(LoadObject<GameObject>("Assets/Particles/Flashes/GunFlashDistant.prefab"));
             //Assets/Prefabs/Attacks and Projectiles/Explosions/Explosion Sisyphus Prime Charged.prefab
-            sisyphusDestroyExplosion = LoadObject<GameObject>("Assets/Prefabs/Attacks and Projectiles/Explosions/Explosion Sisyphus Prime Charged.prefab");
+            sisyphusDestroyExplosion = new(LoadObject<GameObject>("Assets/Prefabs/Attacks and Projectiles/Explosions/Explosion Sisyphus Prime Charged.prefab"));
             //Assets/Prefabs/Effects/Charge Effect.prefab
-            chargeEffect = LoadObject<GameObject>("Assets/Prefabs/Effects/Charge Effect.prefab");
+            chargeEffect = new(LoadObject<GameObject>("Assets/Prefabs/Effects/Charge Effect.prefab"));
             //Assets/Prefabs/Attacks and Projectiles/Hitscan Beams/Malicious Beam.prefab
-            maliciousFaceProjectile = LoadObject<GameObject>("Assets/Prefabs/Attacks and Projectiles/Hitscan Beams/Malicious Beam.prefab");
+            maliciousFaceProjectile = new(LoadObject<GameObject>("Assets/Prefabs/Attacks and Projectiles/Hitscan Beams/Malicious Beam.prefab"));
         }
 
-        public static bool ultrapainDifficulty = false;
-        public static bool realUltrapainDifficulty = false;
         public static GameObject currentDifficultyButton;
         public static GameObject currentDifficultyPanel;
         public static Text currentDifficultyInfoText;
         public void OnSceneChange(Scene before, Scene after)
         {
-            StyleIDs.RegisterIDs();
-            ScenePatchCheck();
+            StyleManager.RegisterIDs();
+            PatchManager.Reload();
 
-            string mainMenuSceneName = "b3e7f2f8052488a45b35549efb98d902";
-            string bootSequenceSceneName = "4f8ecffaa98c2614f89922daf31fa22d";
-            string currentSceneName = SceneManager.GetActiveScene().name;
-            if (currentSceneName == mainMenuSceneName)
+			string mainMenuSceneName = "Main Menu";
+            string bootSequenceSceneName = "Tutorial";
+            string currentSceneName = SceneHelper.CurrentScene;
+            if (currentSceneName == mainMenuSceneName || currentSceneName == bootSequenceSceneName)
             {
                 LoadPrefabs();
 
                 //Canvas/Difficulty Select (1)/Violent
-                Transform difficultySelect = SceneManager.GetActiveScene().GetRootGameObjects().Where(obj => obj.name == "Canvas").First().transform.Find("Difficulty Select (1)");
+                Transform difficultySelect = SceneManager.GetActiveScene().GetRootGameObjects().Where(obj => obj.name == "Canvas").First().transform.Find(currentSceneName == bootSequenceSceneName ? "Intro/Difficulty Select" : "Difficulty Select (1)");
                 GameObject ultrapainButton = GameObject.Instantiate(difficultySelect.Find("Violent").gameObject, difficultySelect);
                 currentDifficultyButton = ultrapainButton;
 
@@ -296,11 +329,6 @@ namespace Ultrapain
 
                 EventTrigger evt = ultrapainButton.GetComponent<EventTrigger>();
                 evt.triggers.Clear();
-
-                /*EventTrigger.TriggerEvent activate = new EventTrigger.TriggerEvent();
-                activate.AddListener((BaseEventData data) => info.SetActive(true));
-                EventTrigger.TriggerEvent deactivate = new EventTrigger.TriggerEvent();
-                activate.AddListener((BaseEventData data) => info.SetActive(false));*/
 
                 EventTrigger.Entry trigger1 = new EventTrigger.Entry() { eventID = EventTriggerType.PointerEnter };
                 trigger1.callback.AddListener((BaseEventData data) => info.SetActive(true));
@@ -320,121 +348,21 @@ namespace Ultrapain
                     trigger.triggers.Add(closeTrigger);
                 }
             }
-            else if(currentSceneName == bootSequenceSceneName)
-            {
-                LoadPrefabs();
-
-                //Canvas/Difficulty Select (1)/Violent
-                Transform difficultySelect = SceneManager.GetActiveScene().GetRootGameObjects().Where(obj => obj.name == "Canvas").First().transform.Find("Intro/Difficulty Select");
-                GameObject ultrapainButton = GameObject.Instantiate(difficultySelect.Find("Violent").gameObject, difficultySelect);
-                currentDifficultyButton = ultrapainButton;
-
-                ultrapainButton.transform.Find("Name").GetComponent<Text>().text = ConfigManager.pluginName.value;
-                ultrapainButton.GetComponent<DifficultySelectButton>().difficulty = 5;
-                RectTransform ultrapainTrans = ultrapainButton.GetComponent<RectTransform>();
-                ultrapainTrans.anchoredPosition = new Vector2(20f, -104f);
-
-                //Canvas/Difficulty Select (1)/Violent Info
-                GameObject info = GameObject.Instantiate(difficultySelect.Find("Violent Info").gameObject, difficultySelect);
-                currentDifficultyPanel = info;
-                currentDifficultyInfoText = info.transform.Find("Text").GetComponent<Text>();
-                currentDifficultyInfoText.text = ConfigManager.pluginInfo.value;
-                Text currentDifficultyHeaderText = info.transform.Find("Title (1)").GetComponent<Text>();
-                currentDifficultyHeaderText.text = $"--{ConfigManager.pluginName.value}--";
-                currentDifficultyHeaderText.resizeTextForBestFit = true;
-                currentDifficultyHeaderText.horizontalOverflow = HorizontalWrapMode.Wrap;
-                currentDifficultyHeaderText.verticalOverflow = VerticalWrapMode.Truncate;
-                info.SetActive(false);
-
-                EventTrigger evt = ultrapainButton.GetComponent<EventTrigger>();
-                evt.triggers.Clear();
-
-                /*EventTrigger.TriggerEvent activate = new EventTrigger.TriggerEvent();
-                activate.AddListener((BaseEventData data) => info.SetActive(true));
-                EventTrigger.TriggerEvent deactivate = new EventTrigger.TriggerEvent();
-                activate.AddListener((BaseEventData data) => info.SetActive(false));*/
-
-                EventTrigger.Entry trigger1 = new EventTrigger.Entry() { eventID = EventTriggerType.PointerEnter };
-                trigger1.callback.AddListener((BaseEventData data) => info.SetActive(true));
-                EventTrigger.Entry trigger2 = new EventTrigger.Entry() { eventID = EventTriggerType.PointerExit };
-                trigger2.callback.AddListener((BaseEventData data) => info.SetActive(false));
-
-                evt.triggers.Add(trigger1);
-                evt.triggers.Add(trigger2);
-
-                foreach (EventTrigger trigger in difficultySelect.GetComponentsInChildren<EventTrigger>())
-                {
-                    if (trigger.gameObject == ultrapainButton)
-                        continue;
-
-                    EventTrigger.Entry closeTrigger = new EventTrigger.Entry() { eventID = EventTriggerType.PointerEnter };
-                    closeTrigger.callback.AddListener((BaseEventData data) => info.SetActive(false));
-                    trigger.triggers.Add(closeTrigger);
-                }
-            }
 
             // LOAD CUSTOM PREFABS HERE TO AVOID MID GAME LAG
             MinosPrimeCharge.CreateDecoy();
             GameObject shockwaveSisyphus = SisyphusInstructionist_Start.shockwave;
         }
 
-        public static class StyleIDs
-        {
-            private static bool registered = false;
-            public static void RegisterIDs()
-            {
-                registered = false;
-                if (MonoSingleton<StyleHUD>.Instance == null)
-                    return;
-
-                MonoSingleton<StyleHUD>.Instance.RegisterStyleItem(ConfigManager.grenadeBoostStyleText.guid, ConfigManager.grenadeBoostStyleText.formattedString);
-                MonoSingleton<StyleHUD>.Instance.RegisterStyleItem(ConfigManager.rocketBoostStyleText.guid, ConfigManager.rocketBoostStyleText.formattedString);
-
-                MonoSingleton<StyleHUD>.Instance.RegisterStyleItem(ConfigManager.orbStrikeRevolverStyleText.guid, ConfigManager.orbStrikeRevolverStyleText.formattedString);
-                MonoSingleton<StyleHUD>.Instance.RegisterStyleItem(ConfigManager.orbStrikeRevolverChargedStyleText.guid, ConfigManager.orbStrikeRevolverChargedStyleText.formattedString);
-                MonoSingleton<StyleHUD>.Instance.RegisterStyleItem(ConfigManager.orbStrikeElectricCannonStyleText.guid, ConfigManager.orbStrikeElectricCannonStyleText.formattedString);
-                MonoSingleton<StyleHUD>.Instance.RegisterStyleItem(ConfigManager.orbStrikeMaliciousCannonStyleText.guid, ConfigManager.orbStrikeMaliciousCannonStyleText.formattedString);
-                MonoSingleton<StyleHUD>.Instance.RegisterStyleItem(ConfigManager.maliciousChargebackStyleText.guid, ConfigManager.maliciousChargebackStyleText.formattedString);
-                MonoSingleton<StyleHUD>.Instance.RegisterStyleItem(ConfigManager.sentryChargebackStyleText.guid, ConfigManager.sentryChargebackStyleText.formattedString);
-
-                registered = true;
-                Debug.Log("Registered all style ids");
-            }
-
-            private static FieldInfo idNameDict = typeof(StyleHUD).GetField("idNameDict", BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Instance);
-            public static void UpdateID(string id, string newName)
-            {
-                if (!registered || StyleHUD.Instance == null)
-                    return;
-                (idNameDict.GetValue(StyleHUD.Instance) as Dictionary<string, string>)[id] = newName;
-            }
-        }
-
-        public static Harmony harmonyTweaks;
         public static Harmony harmonyBase;
-        private static MethodInfo GetMethod<T>(string name)
-        {
-            return typeof(T).GetMethod(name, BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic);
-        }
-
-        private static Dictionary<MethodInfo, HarmonyMethod> methodCache = new Dictionary<MethodInfo, HarmonyMethod>();
-        private static HarmonyMethod GetHarmonyMethod(MethodInfo method)
-        {
-            if (methodCache.TryGetValue(method, out HarmonyMethod harmonyMethod))
-                return harmonyMethod;
-            else
-            {
-                harmonyMethod = new HarmonyMethod(method);
-                methodCache.Add(method, harmonyMethod);
-                return harmonyMethod;
-            }
-        }
-
+        
+        /*
         private static void PatchAllEnemies()
         {
             if (!ConfigManager.enemyTweakToggle.value)
                 return;
 
+            // DONE
             if (ConfigManager.friendlyFireDamageOverrideToggle.value)
             {
                 harmonyTweaks.Patch(GetMethod<Explosion>("Collide"), prefix: GetHarmonyMethod(GetMethod<Explosion_Collide_FF>("Prefix")), postfix: GetHarmonyMethod(GetMethod<Explosion_Collide_FF>("Postfix")));
@@ -450,7 +378,6 @@ namespace Ultrapain
 
             harmonyTweaks.Patch(GetMethod<EnemyIdentifier>("UpdateModifiers"), postfix: GetHarmonyMethod(GetMethod<EnemyIdentifier_UpdateModifiers>("Postfix")));
 
-            harmonyTweaks.Patch(GetMethod<StatueBoss>("Start"), postfix: GetHarmonyMethod(GetMethod<StatueBoss_Start_Patch>("Postfix")));
             if (ConfigManager.cerberusDashToggle.value)
                 harmonyTweaks.Patch(GetMethod<StatueBoss>("StopDash"), postfix: GetHarmonyMethod(GetMethod<StatueBoss_StopDash_Patch>("Postfix")));
             if(ConfigManager.cerberusParryable.value)
@@ -460,7 +387,6 @@ namespace Ultrapain
                 harmonyTweaks.Patch(GetMethod<Statue>("GetHurt"), prefix: GetHarmonyMethod(GetMethod<Statue_GetHurt_Patch>("Prefix")));
             }
 
-            harmonyTweaks.Patch(GetMethod<Drone>("Start"), postfix: GetHarmonyMethod(GetMethod<Drone_Start_Patch>("Postfix")));
             harmonyTweaks.Patch(GetMethod<Drone>("Shoot"), prefix: GetHarmonyMethod(GetMethod<Drone_Shoot_Patch>("Prefix")));
             harmonyTweaks.Patch(GetMethod<Drone>("PlaySound"), prefix: GetHarmonyMethod(GetMethod<Drone_PlaySound_Patch>("Prefix")));
             harmonyTweaks.Patch(GetMethod<Drone>("Update"), postfix: GetHarmonyMethod(GetMethod<Drone_Update>("Postfix")));
@@ -470,7 +396,6 @@ namespace Ultrapain
                 harmonyTweaks.Patch(GetMethod<Drone>("GetHurt"), prefix: GetHarmonyMethod(GetMethod<Drone_GetHurt_Patch>("Prefix")));
             }
 
-            harmonyTweaks.Patch(GetMethod<Ferryman>("Start"), postfix: GetHarmonyMethod(GetMethod<FerrymanStart>("Postfix")));
             if(ConfigManager.ferrymanComboToggle.value)
                 harmonyTweaks.Patch(GetMethod<Ferryman>("StopMoving"), postfix: GetHarmonyMethod(GetMethod<FerrymanStopMoving>("Postfix")));
 
@@ -486,7 +411,6 @@ namespace Ultrapain
                 harmonyTweaks.Patch(GetMethod<Mass>("ShootExplosive"), postfix: GetHarmonyMethod(GetMethod<HideousMassHoming>("Postfix")), prefix: GetHarmonyMethod(GetMethod<HideousMassHoming>("Prefix")));
             }
 
-            harmonyTweaks.Patch(GetMethod<SpiderBody>("Start"), postfix: GetHarmonyMethod(GetMethod<MaliciousFace_Start_Patch>("Postfix")));
             harmonyTweaks.Patch(GetMethod<SpiderBody>("ChargeBeam"), postfix: GetHarmonyMethod(GetMethod<MaliciousFace_ChargeBeam>("Postfix")));
             harmonyTweaks.Patch(GetMethod<SpiderBody>("BeamChargeEnd"), prefix: GetHarmonyMethod(GetMethod<MaliciousFace_BeamChargeEnd>("Prefix")));
             if (ConfigManager.maliciousFaceHomingProjectileToggle.value)
@@ -496,7 +420,6 @@ namespace Ultrapain
             if (ConfigManager.maliciousFaceRadianceOnEnrage.value)
                 harmonyTweaks.Patch(GetMethod<SpiderBody>("Enrage"), postfix: GetHarmonyMethod(GetMethod<MaliciousFace_Enrage_Patch>("Postfix")));
 
-            harmonyTweaks.Patch(GetMethod<Mindflayer>("Start"), postfix: GetHarmonyMethod(GetMethod<Mindflayer_Start_Patch>("Postfix")));
             if (ConfigManager.mindflayerShootTweakToggle.value)
             {
                 harmonyTweaks.Patch(GetMethod<Mindflayer>("ShootProjectiles"), prefix: GetHarmonyMethod(GetMethod<Mindflayer_ShootProjectiles_Patch>("Prefix")));
@@ -513,7 +436,6 @@ namespace Ultrapain
                 harmonyTweaks.Patch(GetMethod<MinosPrime>("ProjectileCharge"), postfix: GetHarmonyMethod(GetMethod<MinosPrimeCharge>("Postfix")));
             if (ConfigManager.minosPrimeTeleportTrail.value)
                 harmonyTweaks.Patch(GetMethod<MinosPrime>("Teleport"), postfix: GetHarmonyMethod(GetMethod<MinosPrimeCharge>("TeleportPostfix")));
-            harmonyTweaks.Patch(GetMethod<MinosPrime>("Start"), postfix: GetHarmonyMethod(GetMethod<MinosPrime_Start>("Postfix")));
             harmonyTweaks.Patch(GetMethod<MinosPrime>("Dropkick"), prefix: GetHarmonyMethod(GetMethod<MinosPrime_Dropkick>("Prefix")));
             harmonyTweaks.Patch(GetMethod<MinosPrime>("Combo"), postfix: GetHarmonyMethod(GetMethod<MinosPrime_Combo>("Postfix")));
             harmonyTweaks.Patch(GetMethod<MinosPrime>("StopAction"), postfix: GetHarmonyMethod(GetMethod<MinosPrime_StopAction>("Postfix")));
@@ -557,7 +479,7 @@ namespace Ultrapain
             if(ConfigManager.streetCleanerPredictiveDodgeToggle.value)
                 harmonyTweaks.Patch(GetMethod<BulletCheck>("OnTriggerEnter"), postfix: GetHarmonyMethod(GetMethod<BulletCheck_OnTriggerEnter_Patch>("Postfix")));
 
-            harmonyTweaks.Patch(GetMethod<SwordsMachine>("Start"), postfix: GetHarmonyMethod(GetMethod<SwordsMachine_Start>("Postfix")));
+            // harmonyTweaks.Patch(GetMethod<SwordsMachine>("Start"), postfix: GetHarmonyMethod(GetMethod<SwordsMachine_Start>("Postfix")));
             if (ConfigManager.swordsMachineNoLightKnockbackToggle.value || ConfigManager.swordsMachineSecondPhaseMode.value != ConfigManager.SwordsMachineSecondPhase.None)
             {
                 harmonyTweaks.Patch(GetMethod<SwordsMachine>("Knockdown"), prefix: GetHarmonyMethod(GetMethod<SwordsMachine_Knockdown_Patch>("Prefix")));
@@ -571,7 +493,7 @@ namespace Ultrapain
                 harmonyTweaks.Patch(GetMethod<ThrownSword>("OnTriggerEnter"), postfix: GetHarmonyMethod(GetMethod<ThrownSword_OnTriggerEnter_Patch>("Postfix")));
             }
 
-            harmonyTweaks.Patch(GetMethod<Turret>("Start"), postfix: GetHarmonyMethod(GetMethod<TurretStart>("Postfix")));
+            // harmonyTweaks.Patch(GetMethod<Turret>("Start"), postfix: GetHarmonyMethod(GetMethod<TurretStart>("Postfix")));
             if(ConfigManager.turretBurstFireToggle.value)
             {
                 harmonyTweaks.Patch(GetMethod<Turret>("Shoot"), prefix: GetHarmonyMethod(GetMethod<TurretShoot>("Prefix")));
@@ -580,11 +502,11 @@ namespace Ultrapain
 
             harmonyTweaks.Patch(GetMethod<Explosion>("Start"), postfix: GetHarmonyMethod(GetMethod<V2CommonExplosion>("Postfix")));
 
-            harmonyTweaks.Patch(GetMethod<V2>("Start"), postfix: GetHarmonyMethod(GetMethod<V2FirstStart>("Postfix")));
+            //harmonyTweaks.Patch(GetMethod<V2>("Start"), postfix: GetHarmonyMethod(GetMethod<V2FirstStart>("Postfix")));
             harmonyTweaks.Patch(GetMethod<V2>("Update"), prefix: GetHarmonyMethod(GetMethod<V2FirstUpdate>("Prefix")));
             harmonyTweaks.Patch(GetMethod<V2>("ShootWeapon"), prefix: GetHarmonyMethod(GetMethod<V2FirstShootWeapon>("Prefix")));
 
-            harmonyTweaks.Patch(GetMethod<V2>("Start"), postfix: GetHarmonyMethod(GetMethod<V2SecondStart>("Postfix")));
+            //harmonyTweaks.Patch(GetMethod<V2>("Start"), postfix: GetHarmonyMethod(GetMethod<V2SecondStart>("Postfix")));
             //if(ConfigManager.v2SecondStartEnraged.value)
             //    harmonyTweaks.Patch(GetMethod<BossHealthBar>("OnEnable"), postfix: GetHarmonyMethod(GetMethod<V2SecondEnrage>("Postfix")));
             harmonyTweaks.Patch(GetMethod<V2>("Update"), prefix: GetHarmonyMethod(GetMethod<V2SecondUpdate>("Prefix")));
@@ -602,7 +524,7 @@ namespace Ultrapain
                 harmonyTweaks.Patch(GetMethod<EnemyRevolver>("AltFire"), prefix: GetHarmonyMethod(GetMethod<V2CommonRevolverAltShoot>("Prefix")));
             }
 
-            harmonyTweaks.Patch(GetMethod<Drone>("Start"), postfix: GetHarmonyMethod(GetMethod<Virtue_Start_Patch>("Postfix")));
+            //harmonyTweaks.Patch(GetMethod<Drone>("Start"), postfix: GetHarmonyMethod(GetMethod<Virtue_Start_Patch>("Postfix")));
             harmonyTweaks.Patch(GetMethod<Drone>("SpawnInsignia"), prefix: GetHarmonyMethod(GetMethod<Virtue_SpawnInsignia_Patch>("Prefix")));
             harmonyTweaks.Patch(GetMethod<Drone>("Death"), prefix: GetHarmonyMethod(GetMethod<Virtue_Death_Patch>("Prefix")));
 
@@ -616,11 +538,11 @@ namespace Ultrapain
             if(ConfigManager.sisyInstStrongerExplosion.value)
                 harmonyTweaks.Patch(GetMethod<Sisyphus>("StompExplosion"), prefix: GetHarmonyMethod(GetMethod<SisyphusInstructionist_StompExplosion>("Prefix")));
 
-            harmonyTweaks.Patch(GetMethod<LeviathanTail>("Awake"), postfix: GetHarmonyMethod(GetMethod<LeviathanTail_Start>("Postfix")));
+            //harmonyTweaks.Patch(GetMethod<LeviathanTail>("Awake"), postfix: GetHarmonyMethod(GetMethod<LeviathanTail_Start>("Postfix")));
             harmonyTweaks.Patch(GetMethod<LeviathanTail>("BigSplash"), prefix: GetHarmonyMethod(GetMethod<LeviathanTail_BigSplash>("Prefix")));
             harmonyTweaks.Patch(GetMethod<LeviathanTail>("SwingEnd"), prefix: GetHarmonyMethod(GetMethod<LeviathanTail_SwingEnd>("Prefix")));
 
-            harmonyTweaks.Patch(GetMethod<LeviathanHead>("Start"), postfix: GetHarmonyMethod(GetMethod<Leviathan_Start>("Postfix")));
+            //harmonyTweaks.Patch(GetMethod<LeviathanHead>("Start"), postfix: GetHarmonyMethod(GetMethod<Leviathan_Start>("Postfix")));
             harmonyTweaks.Patch(GetMethod<LeviathanHead>("ProjectileBurst"), prefix: GetHarmonyMethod(GetMethod<Leviathan_ProjectileBurst>("Prefix")));
             harmonyTweaks.Patch(GetMethod<LeviathanHead>("ProjectileBurstStart"), prefix: GetHarmonyMethod(GetMethod<Leviathan_ProjectileBurstStart>("Prefix")));
             harmonyTweaks.Patch(GetMethod<LeviathanHead>("FixedUpdate"), prefix: GetHarmonyMethod(GetMethod<Leviathan_FixedUpdate>("Prefix")));
@@ -651,15 +573,6 @@ namespace Ultrapain
 
             if (ConfigManager.idolExplosionToggle.value)
                 harmonyTweaks.Patch(GetMethod<Idol>("Death"), postfix: GetHarmonyMethod(GetMethod<Idol_Death_Patch>("Postfix")));
-
-            // ADDME
-            /*
-            harmonyTweaks.Patch(GetMethod<GabrielSecond>("Start"), postfix: GetHarmonyMethod(GetMethod<GabrielSecond_Start>("Postfix")));
-            harmonyTweaks.Patch(GetMethod<GabrielSecond>("BasicCombo"), postfix: GetHarmonyMethod(GetMethod<GabrielSecond_BasicCombo>("Postfix")));
-            harmonyTweaks.Patch(GetMethod<GabrielSecond>("FastCombo"), postfix: GetHarmonyMethod(GetMethod<GabrielSecond_FastCombo>("Postfix")));
-            harmonyTweaks.Patch(GetMethod<GabrielSecond>("CombineSwords"), postfix: GetHarmonyMethod(GetMethod<GabrielSecond_CombineSwords>("Postfix")));
-            harmonyTweaks.Patch(GetMethod<GabrielSecond>("ThrowCombo"), postfix: GetHarmonyMethod(GetMethod<GabrielSecond_ThrowCombo>("Postfix")));
-            */
         }
 
         private static void PatchAllPlayers()
@@ -759,41 +672,8 @@ namespace Ultrapain
             if (ConfigManager.obamapticonToggle.value)
                 harmonyTweaks.Patch(GetMethod<FleshPrison>("Start"), postfix: GetHarmonyMethod(GetMethod<Obamapticon_Start>("Postfix")), prefix: GetHarmonyMethod(GetMethod<Obamapticon_Start>("Prefix")));
         }
-
-        public static bool methodsPatched = false;
+        */
         
-        public static void ScenePatchCheck()
-        {
-            if(methodsPatched && !ultrapainDifficulty)
-            {
-                harmonyTweaks.UnpatchSelf();
-                methodsPatched = false;
-            }
-            else if(!methodsPatched && ultrapainDifficulty)
-            {
-                PatchAll();
-            }
-        }
-        
-        public static void PatchAll()
-        {
-            harmonyTweaks.UnpatchSelf();
-            methodsPatched = false;
-
-            if (!ultrapainDifficulty)
-                return;
-
-            if(realUltrapainDifficulty && ConfigManager.discordRichPresenceToggle.value)
-                harmonyTweaks.Patch(GetMethod<DiscordController>("SendActivity"), prefix: GetHarmonyMethod(GetMethod<DiscordController_SendActivity_Patch>("Prefix")));
-            if (realUltrapainDifficulty && ConfigManager.steamRichPresenceToggle.value)
-                harmonyTweaks.Patch(GetMethod<SteamFriends>("SetRichPresence"), prefix: GetHarmonyMethod(GetMethod<SteamFriends_SetRichPresence_Patch>("Prefix")));
-
-            PatchAllEnemies();
-            PatchAllPlayers();
-            PatchAllMemes();
-            methodsPatched = true;
-        }
-
         public static string workingPath;
         public static string workingDir;
 
@@ -827,56 +707,21 @@ namespace Ultrapain
                 Logger.LogError($"Could not load the asset bundle:\n{e}");
             }
 
-            // DEBUG
-            /*string logPath = Path.Combine(Environment.CurrentDirectory, "log.txt");
-            Logger.LogInfo($"Saving to {logPath}");
-            List<string> assetPaths = new List<string>()
-            {
-                "fonts.bundle",
-                "videos.bundle",
-                "shaders.bundle",
-                "particles.bundle",
-                "materials.bundle",
-                "animations.bundle",
-                "prefabs.bundle",
-                "physicsmaterials.bundle",
-                "models.bundle",
-                "textures.bundle",
-            };
+			LoadPrefabs();
+			ConfigManager.Initialize();
+            PatchManager.Init();
 
-            //using (FileStream log = File.Open(logPath, FileMode.OpenOrCreate, FileAccess.Write))
-            //{
-                foreach(string assetPath in assetPaths)
-                {
-                    Logger.LogInfo($"Attempting to load {assetPath}");
-                    AssetBundle bundle = AssetBundle.LoadFromFile(Path.Combine(bundlePath, assetPath));
-                    bundles.Add(bundle);
-                    //foreach (string name in bundle.GetAllAssetNames())
-                    //{
-                    //    string line = $"[{bundle.name}][{name}]\n";
-                    //    log.Write(Encoding.ASCII.GetBytes(line), 0, line.Length);
-                    //}
-                    bundle.LoadAllAssets();
-                }
-            //}
-            */
-
-            // Plugin startup logic 
-            Logger.LogInfo($"Plugin {PluginInfo.PLUGIN_GUID} is loaded!");
-
-            harmonyTweaks = new Harmony(PLUGIN_GUID + "_tweaks");
-            harmonyBase = new Harmony(PLUGIN_GUID + "_base");
-            harmonyBase.Patch(GetMethod<DifficultySelectButton>("SetDifficulty"), postfix: GetHarmonyMethod(GetMethod<DifficultySelectPatch>("Postfix")));
-            harmonyBase.Patch(GetMethod<DifficultyTitle>("Check"), postfix: GetHarmonyMethod(GetMethod<DifficultyTitle_Check_Patch>("Postfix")));
-            harmonyBase.Patch(typeof(PrefsManager).GetConstructor(new Type[0]), postfix: GetHarmonyMethod(GetMethod<PrefsManager_Ctor>("Postfix")));
-            harmonyBase.Patch(GetMethod<PrefsManager>("EnsureValid"), prefix: GetHarmonyMethod(GetMethod<PrefsManager_EnsureValid>("Prefix")));
-            harmonyBase.Patch(GetMethod<Grenade>("Explode"), prefix: new HarmonyMethod(GetMethod<GrenadeExplosionOverride>("Prefix")), postfix: new HarmonyMethod(GetMethod<GrenadeExplosionOverride>("Postfix")));
-            LoadPrefabs();
-            ConfigManager.Initialize();
+			harmonyBase = new Harmony(PLUGIN_GUID + "_base");
+            harmonyBase.PatchAll(typeof(DifficultySelectPatch));
+            harmonyBase.PatchAll(typeof(DifficultyTitlePatch));
+            harmonyBase.PatchAll(typeof(PrefsManagerPatch));
+            harmonyBase.PatchAll(typeof(GrenadePatch));
 
             SceneManager.activeSceneChanged += OnSceneChange;
-        }
-    }
+
+			Logger.LogInfo($"Plugin {PluginInfo.PLUGIN_GUID} is loaded!");
+		}
+	}
 
     public static class Tools
     {
@@ -922,7 +767,7 @@ namespace Ultrapain
     {
         static void Postfix(UnityEngine.Object __0)
         {
-            if (__0 != null && __0 == Plugin.homingProjectile)
+            if (__0 != null && __0 == Plugin.homingProjectile.obj)
             {
                 System.Diagnostics.StackTrace t = new System.Diagnostics.StackTrace();
                 Debug.LogError("Projectile destroyed");
@@ -937,7 +782,7 @@ namespace Ultrapain
     {
         static void Postfix(UnityEngine.Object __0)
         {
-            if (__0 != null && __0 == Plugin.homingProjectile)
+            if (__0 != null && __0 == Plugin.homingProjectile.obj)
             {
                 System.Diagnostics.StackTrace t = new System.Diagnostics.StackTrace();
                 Debug.LogError("Projectile destroyed");
@@ -952,7 +797,7 @@ namespace Ultrapain
     {
         static void Postfix(UnityEngine.Object __0)
         {
-            if (__0 != null && __0 == Plugin.homingProjectile)
+            if (__0 != null && __0 == Plugin.homingProjectile.obj)
             {
                 System.Diagnostics.StackTrace t = new System.Diagnostics.StackTrace();
                 Debug.LogError("Projectile destroyed");
@@ -967,7 +812,7 @@ namespace Ultrapain
     {
         static void Postfix(UnityEngine.Object __0)
         {
-            if (__0 != null && __0 == Plugin.homingProjectile)
+            if (__0 != null && __0 == Plugin.homingProjectile.obj)
             {
                 System.Diagnostics.StackTrace t = new System.Diagnostics.StackTrace();
                 Debug.LogError("Projectile destroyed");

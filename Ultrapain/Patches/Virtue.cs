@@ -41,7 +41,7 @@ namespace Ultrapain.Patches
 
         public void SpawnLightningBolt()
         {
-            LightningStrikeExplosive lightningStrikeExplosive = Instantiate(Plugin.lightningStrikeExplosiveSetup.gameObject, windupObj.transform.position, Quaternion.identity).GetComponent<LightningStrikeExplosive>();
+            LightningStrikeExplosive lightningStrikeExplosive = Instantiate(Plugin.lightningStrikeExplosive.objSetup.gameObject, windupObj.transform.position, Quaternion.identity).GetComponent<LightningStrikeExplosive>();
             lightningStrikeExplosive.safeForPlayer = false;
             lightningStrikeExplosive.damageMultiplier = eid.totalDamageModifier * ((virtue.enraged)? ConfigManager.virtueEnragedLightningDamage.value : ConfigManager.virtueNormalLightningDamage.value);
             

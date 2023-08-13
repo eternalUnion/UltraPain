@@ -1,134 +1,199 @@
 ﻿using HarmonyLib;
 using System.Reflection;
+using UltrapainExtensions;
 using UnityEngine;
 
 namespace Ultrapain.Patches
 {
-    class Mindflayer_Start_Patch
-    {
-        static void Postfix(Mindflayer __instance, ref EnemyIdentifier ___eid)
+	public class MindflayerFlag : MonoBehaviour
+	{
+		public int shotsLeft = ConfigManager.mindflayerShootAmount.value;
+		public int swingComboLeft = 2;
+	}
+
+	[UltrapainPatch]
+	[HarmonyPatch(typeof(Mindflayer))]
+	public static class MindflayerPatch
+	{
+        [HarmonyPatch(nameof(Mindflayer.ShootProjectiles))]
+        [HarmonyPrefix]
+        [UltrapainPatch]
+        public static bool CustomProjectileAttack(Mindflayer __instance)
+		{
+			MindflayerFlag counter = __instance.GetComponent<MindflayerFlag>();
+			if (counter == null)
+				return true;
+
+			if (counter.shotsLeft == 0)
+			{
+				counter.shotsLeft = ConfigManager.mindflayerShootAmount.value;
+				__instance.chargeParticle.Stop(false, ParticleSystemStopBehavior.StopEmittingAndClear);
+				__instance.cooldown = (float)UnityEngine.Random.Range(4, 5);
+				return false;
+			}
+
+			Quaternion randomRotation = Quaternion.LookRotation(MonoSingleton<PlayerTracker>.Instance.GetTarget().position - __instance.transform.position);
+			randomRotation.eulerAngles += new Vector3(UnityEngine.Random.Range(-10.0f, 10.0f), UnityEngine.Random.Range(-10.0f, 10.0f), UnityEngine.Random.Range(-10.0f, 10.0f));
+			Projectile componentInChildren = GameObject.Instantiate(Plugin.homingProjectile.obj.obj, __instance.transform.position + __instance.transform.forward, randomRotation).GetComponentInChildren<Projectile>();
+
+			Vector3 randomPos = __instance.tentacles[UnityEngine.Random.RandomRangeInt(0, __instance.tentacles.Length)].position;
+			if (!Physics.Raycast(__instance.transform.position, randomPos - __instance.transform.position, Vector3.Distance(randomPos, __instance.transform.position), __instance.environmentMask))
+				componentInChildren.transform.position = randomPos;
+
+			int shotCount = ConfigManager.mindflayerShootAmount.value - counter.shotsLeft;
+			componentInChildren.transform.position += componentInChildren.transform.forward * Mathf.Clamp(-1 + shotCount * 0.4f, 0, 5);
+
+			componentInChildren.speed = ConfigManager.mindflayerShootInitialSpeed.value * __instance.eid.totalSpeedModifier;
+			componentInChildren.turningSpeedMultiplier = ConfigManager.mindflayerShootTurnSpeed.value;
+			componentInChildren.target = MonoSingleton<PlayerTracker>.Instance.GetTarget();
+			componentInChildren.safeEnemyType = EnemyType.Mindflayer;
+			componentInChildren.damage *= __instance.eid.totalDamageModifier;
+			componentInChildren.sourceWeapon = __instance.gameObject;
+			counter.shotsLeft -= 1;
+			__instance.Invoke("ShootProjectiles", ConfigManager.mindflayerShootDelay.value / __instance.eid.totalSpeedModifier);
+
+			return false;
+		}
+
+		public static bool CustomProjectileAttackCheck()
         {
-            __instance.gameObject.AddComponent<MindflayerPatch>();
-            //___eid.SpeedBuff();
-        }
-    }
-
-    class Mindflayer_ShootProjectiles_Patch
-    {
-        public static float maxProjDistance = 5;
-        public static float initialProjectileDistance = -1f;
-        public static float distancePerProjShot = 0.2f;
-
-        static bool Prefix(Mindflayer __instance, ref EnemyIdentifier ___eid, ref LayerMask ___environmentMask, ref bool ___enraged)
-        {
-            /*for(int i = 0; i < 20; i++)
-            {
-                Quaternion randomRotation = Quaternion.LookRotation(MonoSingleton<PlayerTracker>.Instance.GetTarget().position - __instance.transform.position);
-                randomRotation.eulerAngles += new Vector3(UnityEngine.Random.Range(-15.0f, 15.0f), UnityEngine.Random.Range(-15.0f, 15.0f), UnityEngine.Random.Range(-15.0f, 15.0f));
-                Projectile componentInChildren = GameObject.Instantiate(Plugin.homingProjectile.gameObject, __instance.transform.position + __instance.transform.forward, randomRotation).GetComponentInChildren<Projectile>();
-
-                Vector3 randomPos = __instance.tentacles[UnityEngine.Random.RandomRangeInt(0, __instance.tentacles.Length)].position;
-                if (!Physics.Raycast(__instance.transform.position, randomPos - __instance.transform.position, Vector3.Distance(randomPos, __instance.transform.position), ___environmentMask))
-                    componentInChildren.transform.position = randomPos;
-
-                componentInChildren.speed = 10f * ___eid.totalSpeedModifier * UnityEngine.Random.Range(0.5f, 1.5f);
-                componentInChildren.turnSpeed *= UnityEngine.Random.Range(0.5f, 1.5f);
-                componentInChildren.target = MonoSingleton<PlayerTracker>.Instance.GetTarget();
-                componentInChildren.safeEnemyType = EnemyType.Mindflayer;
-                componentInChildren.damage *= ___eid.totalDamageModifier;
-            }
-            
-            __instance.chargeParticle.Stop(false, ParticleSystemStopBehavior.StopEmittingAndClear);
-            __instance.cooldown = (float)UnityEngine.Random.Range(4, 5);
-
-            return false;*/
-
-            MindflayerPatch counter = __instance.GetComponent<MindflayerPatch>();
-            if (counter == null)
-                return true;
-
-            if (counter.shotsLeft == 0)
-            {
-                counter.shotsLeft = ConfigManager.mindflayerShootAmount.value;
-                __instance.chargeParticle.Stop(false, ParticleSystemStopBehavior.StopEmittingAndClear);
-                __instance.cooldown = (float)UnityEngine.Random.Range(4, 5);
-                return false;
-            }
-
-            Quaternion randomRotation = Quaternion.LookRotation(MonoSingleton<PlayerTracker>.Instance.GetTarget().position - __instance.transform.position);
-            randomRotation.eulerAngles += new Vector3(UnityEngine.Random.Range(-10.0f, 10.0f), UnityEngine.Random.Range(-10.0f, 10.0f), UnityEngine.Random.Range(-10.0f, 10.0f));
-            Projectile componentInChildren = GameObject.Instantiate(Plugin.homingProjectile, __instance.transform.position + __instance.transform.forward, randomRotation).GetComponentInChildren<Projectile>();
-
-            Vector3 randomPos = __instance.tentacles[UnityEngine.Random.RandomRangeInt(0, __instance.tentacles.Length)].position;
-            if (!Physics.Raycast(__instance.transform.position, randomPos - __instance.transform.position, Vector3.Distance(randomPos, __instance.transform.position), ___environmentMask))
-                componentInChildren.transform.position = randomPos;
-
-            int shotCount = ConfigManager.mindflayerShootAmount.value - counter.shotsLeft;
-            componentInChildren.transform.position += componentInChildren.transform.forward * Mathf.Clamp(initialProjectileDistance + shotCount * distancePerProjShot, 0, maxProjDistance);
-
-            componentInChildren.speed = ConfigManager.mindflayerShootInitialSpeed.value * ___eid.totalSpeedModifier;
-            componentInChildren.turningSpeedMultiplier = ConfigManager.mindflayerShootTurnSpeed.value;
-            componentInChildren.target = MonoSingleton<PlayerTracker>.Instance.GetTarget();
-            componentInChildren.safeEnemyType = EnemyType.Mindflayer;
-            componentInChildren.damage *= ___eid.totalDamageModifier;
-            componentInChildren.sourceWeapon = __instance.gameObject;
-            counter.shotsLeft -= 1;
-            __instance.Invoke("ShootProjectiles", ConfigManager.mindflayerShootDelay.value / ___eid.totalSpeedModifier);
-
-            return false;
-        }
-    }
-
-    class EnemyIdentifier_DeliverDamage_MF
-    {
-        static bool Prefix(EnemyIdentifier __instance, ref float __3, GameObject __6)
-        {
-            if (__instance.enemyType != EnemyType.Mindflayer)
-                return true;
-
-            if (__6 == null || __6.GetComponent<Mindflayer>() == null)
-                return true;
-
-            __3 *= ConfigManager.mindflayerProjectileSelfDamageMultiplier.value / 100f;
-            return true;
-        }
-    }
-
-    class SwingCheck2_CheckCollision_Patch
-    {
-        static FieldInfo goForward = typeof(Mindflayer).GetField("goForward", BindingFlags.NonPublic | BindingFlags.Instance);
-        static MethodInfo meleeAttack = typeof(Mindflayer).GetMethod("MeleeAttack", BindingFlags.NonPublic | BindingFlags.Instance);
-
-        static bool Prefix(Collider __0, out int __state)
-        {
-            __state = __0.gameObject.layer;
-            return true;
+            return ConfigManager.enemyTweakToggle.value && ConfigManager.mindflayerShootTweakToggle.value;
         }
 
-        static void Postfix(SwingCheck2 __instance, Collider __0, int __state)
+		[HarmonyPatch(nameof(Mindflayer.MeleeTeleport))]
+		[HarmonyPrefix]
+		[UltrapainPatch]
+		public static bool Teleport(Mindflayer __instance)
+		{
+			if (__instance.gameObject.GetComponent<MindflayerFlag>() == null)
+				return true;
+
+			if (__instance.eid.drillers.Count > 0)
+				return false;
+
+			Vector3 targetPosition = MonoSingleton<PlayerTracker>.Instance.PredictPlayerPosition(0.9f) + new Vector3(0, -10, 0);
+			float distance = Vector3.Distance(__instance.transform.position, targetPosition);
+
+			Ray targetRay = new Ray(__instance.transform.position, targetPosition - __instance.transform.position);
+			RaycastHit hit;
+			if (Physics.Raycast(targetRay, out hit, distance, __instance.environmentMask, QueryTriggerInteraction.Ignore))
+			{
+				targetPosition = targetRay.GetPoint(Mathf.Max(0.0f, hit.distance - 1.0f));
+			}
+
+			MonoSingleton<HookArm>.Instance.StopThrow(1f, true);
+			__instance.transform.position = targetPosition;
+			__instance.goingLeft = !__instance.goingLeft;
+
+			GameObject.Instantiate(__instance.teleportSound, __instance.transform.position, Quaternion.identity);
+			GameObject gameObject = GameObject.Instantiate(__instance.decoy, __instance.transform.GetChild(0).position, __instance.transform.GetChild(0).rotation);
+			Animator componentInChildren = gameObject.GetComponentInChildren<Animator>();
+			AnimatorStateInfo currentAnimatorStateInfo = __instance.anim.GetCurrentAnimatorStateInfo(0);
+			componentInChildren.Play(currentAnimatorStateInfo.shortNameHash, 0, currentAnimatorStateInfo.normalizedTime);
+			componentInChildren.speed = 0f;
+			if (__instance.enraged)
+			{
+				gameObject.GetComponent<MindflayerDecoy>().enraged = true;
+			}
+
+			__instance.anim.speed = 0f;
+			__instance.CancelInvoke("ResetAnimSpeed");
+			__instance.Invoke("ResetAnimSpeed", 0.25f / __instance.eid.totalSpeedModifier);
+
+			return false;
+		}
+
+		public static bool TeleportCheck()
+		{
+			return ConfigManager.enemyTweakToggle.value && ConfigManager.mindflayerTeleportComboToggle.value;
+		}
+
+		[HarmonyPatch(nameof(Mindflayer.Start))]
+		[HarmonyPostfix]
+		[UltrapainPatch]
+		public static void AddFlag(Mindflayer __instance)
+		{
+			if (__instance.gameObject.GetComponent<NonUltrapainEnemy>() != null)
+				return;
+
+			__instance.gameObject.AddComponent<MindflayerFlag>();
+		}
+
+		public static bool AddFlagCheck()
+		{
+			return ConfigManager.enemyTweakToggle.value;
+		}
+	}
+
+	[UltrapainPatch]
+	[HarmonyPatch(typeof(EnemyIdentifier))]
+	public static class MindflayerFriendlyFirePatch
+    {
+		[HarmonyPatch(nameof(EnemyIdentifier.DeliverDamage))]
+		[HarmonyPrefix]
+		[UltrapainPatch]
+		public static bool ReduceSelfDamage(EnemyIdentifier __instance, ref float __3, GameObject __6)
+		{
+			if (__instance.enemyType != EnemyType.Mindflayer)
+				return true;
+
+			if (__6 == null || __6.GetComponent<Mindflayer>() == null)
+				return true;
+
+			__3 *= ConfigManager.mindflayerProjectileSelfDamageMultiplier.value / 100f;
+			return true;
+		}
+
+		public static bool ReduceSelfDamageCheck()
         {
-            if (__0.tag == "Player")
-                Debug.Log($"Collision with {__0.name} with tag {__0.tag} and layer {__state}");
-            if (__0.gameObject.tag != "Player" || __state == 15)
-                return;
+            return ConfigManager.enemyTweakToggle.value && ConfigManager.mindflayerProjectileSelfDamageMultiplier.normalizedValue != 1;
+        }
+	}
 
-            if (__instance.transform.parent == null)
-                return;
+	[UltrapainPatch]
+	[HarmonyPatch(typeof(SwingCheck2))]
+	public static class MindflayerMeleePatch
+    {
+		[HarmonyPatch(nameof(SwingCheck2.CheckCollision))]
+		[HarmonyPrefix]
+		[UltrapainPatch]
+		public static bool PrepareCombo(Collider __0, out int __state)
+		{
+			__state = __0.gameObject.layer;
+			return true;
+		}
 
-            Debug.Log("Parent check");
-            Mindflayer mf = __instance.transform.parent.gameObject.GetComponent<Mindflayer>();
+		public static bool PrepareComboCheck()
+		{
+			return ConfigManager.enemyTweakToggle.value && ConfigManager.mindflayerTeleportComboToggle.value;
+		}
 
-            if (mf == null)
-                return;
+		[HarmonyPatch(nameof(SwingCheck2.CheckCollision))]
+		[HarmonyPostfix]
+		[UltrapainPatch]
+		public static void DoCombo(SwingCheck2 __instance, Collider __0, int __state)
+		{
+			// if (__0.tag == "Player")
+			// 	Debug.Log($"Collision with {__0.name} with tag {__0.tag} and layer {__state}");
+			if (__0.gameObject.tag != "Player" || __state == 15)
+				return;
 
-            //MindflayerPatch patch = mf.gameObject.GetComponent<MindflayerPatch>();
+			if (__instance.transform.parent == null)
+				return;
 
-            Debug.Log("Attempting melee combo");
-            __instance.DamageStop();
-            goForward.SetValue(mf, false);
-            meleeAttack.Invoke(mf, new object[] { });
+			Mindflayer mf = __instance.transform.parent.gameObject.GetComponent<Mindflayer>();
 
-            /*if (patch.swingComboLeft > 0)
+			if (mf == null)
+				return;
+
+			if (mf.gameObject.GetComponent<MindflayerFlag>() == null)
+				return;
+
+			__instance.DamageStop();
+			mf.goForward = false;
+			mf.MeleeAttack();
+
+			/*if (patch.swingComboLeft > 0)
             {
                 patch.swingComboLeft -= 1;
                 __instance.DamageStop();
@@ -137,52 +202,15 @@ namespace Ultrapain.Patches
             }
             else
                 patch.swingComboLeft = 2;*/
-        }
-    }
+		}
 
-    class Mindflayer_MeleeTeleport_Patch
-    {
-        public static Vector3 deltaPosition = new Vector3(0, -10, 0);
+		public static bool DoComboCheck()
+		{
+			return ConfigManager.enemyTweakToggle.value && ConfigManager.mindflayerTeleportComboToggle.value;
+		}
+	}
 
-        static bool Prefix(Mindflayer __instance, ref EnemyIdentifier ___eid, ref LayerMask ___environmentMask, ref bool ___goingLeft, ref Animator ___anim, ref bool ___enraged)
-        {
-            if (___eid.drillers.Count > 0)
-                return false;
-
-            Vector3 targetPosition = MonoSingleton<PlayerTracker>.Instance.PredictPlayerPosition(0.9f) + deltaPosition;
-            float distance = Vector3.Distance(__instance.transform.position, targetPosition);
-
-            Ray targetRay = new Ray(__instance.transform.position, targetPosition - __instance.transform.position);
-            RaycastHit hit;
-            if (Physics.Raycast(targetRay, out hit, distance, ___environmentMask, QueryTriggerInteraction.Ignore))
-            {
-                targetPosition = targetRay.GetPoint(Mathf.Max(0.0f, hit.distance - 1.0f));
-            }
-
-            MonoSingleton<HookArm>.Instance.StopThrow(1f, true);
-            __instance.transform.position = targetPosition;
-            ___goingLeft = !___goingLeft;
-
-            GameObject.Instantiate<GameObject>(__instance.teleportSound, __instance.transform.position, Quaternion.identity);
-            GameObject gameObject = GameObject.Instantiate<GameObject>(__instance.decoy, __instance.transform.GetChild(0).position, __instance.transform.GetChild(0).rotation);
-            Animator componentInChildren = gameObject.GetComponentInChildren<Animator>();
-            AnimatorStateInfo currentAnimatorStateInfo = ___anim.GetCurrentAnimatorStateInfo(0);
-            componentInChildren.Play(currentAnimatorStateInfo.shortNameHash, 0, currentAnimatorStateInfo.normalizedTime);
-            componentInChildren.speed = 0f;
-            if (___enraged)
-            {
-                gameObject.GetComponent<MindflayerDecoy>().enraged = true;
-            }
-
-            ___anim.speed = 0f;
-            __instance.CancelInvoke("ResetAnimSpeed");
-            __instance.Invoke("ResetAnimSpeed", 0.25f / ___eid.totalSpeedModifier);
-
-            return false;
-        }
-    }
-
-    class SwingCheck2_DamageStop_Patch
+    /*class SwingCheck2_DamageStop_Patch
     {
         static void Postfix(SwingCheck2 __instance)
         {
@@ -193,14 +221,8 @@ namespace Ultrapain.Patches
             if (mf == null)
                 return;
 
-            MindflayerPatch patch = parent.GetComponent<MindflayerPatch>();
+            MindflayerFlag patch = parent.GetComponent<MindflayerFlag>();
             patch.swingComboLeft = 2;
         }
-    }
-
-    class MindflayerPatch : MonoBehaviour
-    {
-        public int shotsLeft = ConfigManager.mindflayerShootAmount.value;
-        public int swingComboLeft = 2;
-    }
+    }*/
 }

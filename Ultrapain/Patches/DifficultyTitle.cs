@@ -3,15 +3,15 @@ using UnityEngine.UI;
 
 namespace Ultrapain.Patches
 {
-    public class DifficultyTitle_Check_Patch
+    [HarmonyPatch(typeof(DifficultyTitle))]
+    public class DifficultyTitlePatch
     {
-        static void Postfix(DifficultyTitle __instance, ref Text ___txt)
+        [HarmonyPatch(nameof(DifficultyTitle.Check))]
+        [HarmonyPostfix]
+        static void Postfix(DifficultyTitle __instance)
         {
-            if (___txt.text.Contains("ULTRAKILL MUST DIE") && Plugin.realUltrapainDifficulty)
-                ___txt.text = ___txt.text.Replace("ULTRAKILL MUST DIE", ConfigManager.pluginName.value);
-
-            //else if (___txt.text == "-- VIOLENT --" && Plugin.ultrapainDifficulty)
-            //    ___txt.text = "-- ULTRAPAIN --";
+            if (__instance.txt.text.Contains("ULTRAKILL MUST DIE") && Plugin.realUltrapainDifficulty)
+                __instance.txt.text = __instance.txt.text.Replace("ULTRAKILL MUST DIE", ConfigManager.pluginName.value);
         }
     }
 }

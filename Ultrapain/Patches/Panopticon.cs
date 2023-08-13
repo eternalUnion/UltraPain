@@ -261,7 +261,7 @@ namespace Ultrapain.Patches
 
             for (int i = 0; i < count; i++)
             {
-                GameObject proj = GameObject.Instantiate(Plugin.homingProjectile, instance.rotationBone.position + instance.rotationBone.up * 16f, instance.rotationBone.rotation);
+                GameObject proj = GameObject.Instantiate(Plugin.homingProjectile.obj, instance.rotationBone.position + instance.rotationBone.up * 16f, instance.rotationBone.rotation);
                 proj.transform.position += proj.transform.forward * 5f;
                 proj.transform.RotateAround(instance.transform.position, Vector3.up, currentAngle);
                 currentAngle += deltaAngle;

@@ -59,7 +59,7 @@ namespace Ultrapain.Patches
             flag.standardProjectile = __instance.projectile;
             flag.standardDecorativeProjectile = __instance.decProjectile;
             flag.currentMode = StrayFlag.AttackMode.ProjectileCombo;
-            /*__instance.projectile = Plugin.homingProjectile;
+            /*__instance.projectile = Plugin.homingProjectile.obj;
             __instance.decProjectile = Plugin.decorativeProjectile2;*/
         }
     }
@@ -113,7 +113,7 @@ namespace Ultrapain.Patches
                     flag.inCombo = false;
                     ___anim.speed = flag.lastSpeed;
                     ___anim.SetFloat("Speed", flag.lastSpeed);
-                    //__instance.projectile = Plugin.homingProjectile;
+                    //__instance.projectile = Plugin.homingProjectile.obj;
                     //__instance.decProjectile = Plugin.decorativeProjectile2;
                 }
                 else
