@@ -7,6 +7,10 @@ assignees: eternalUnion
 
 ---
 
+==============
+NOTE: It may take a long time for me to update this mod due to its sheer size and the amount of workload I have
+=============
+
 # Description
 What went wrong and what was expected
 
