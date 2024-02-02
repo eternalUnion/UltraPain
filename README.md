@@ -1,3 +1,6 @@
+# NOTICE ⚠
+UltraPain will not be updated until further notice.
+
 # ULTRAPAIN - Configurable Difficulty Mod
 ULTRAPAIN is a mod that adds several unique mechanics to the game in order to allow the player to fine tune their difficulty as well as adding some brand new shiny tech. You can make the game as lenient- or as difficult- as you so desire.
 ## Enemy Tweaks
